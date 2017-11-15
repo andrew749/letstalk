@@ -13,4 +13,9 @@ export default class MessageData {
     return this._id;
   }
 
+  // TODO REMOVE
+  onPress(action: () => {}) {
+    action();
+  }
+
 }

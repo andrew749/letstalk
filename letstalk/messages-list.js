@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import { AppRegistry, Text, View, FlatList, StyleSheet } from 'react-native';
-import DefaultListElement from './ListElement';
-import MessageData from './messagedata';
 
-export default class MessagesUI extends Component {
+import DefaultListElement from './list-element';
+import MessageData from './message-data';
+
+export default class MessagesList extends Component {
   render() {
     return(
       <View style={styles.container}>
         <FlatList
-          data={[
-            new MessageData(1, "Andrew")
-          ]}
+          data={this.props.data}
           keyExtractor={ (item) => item.getId() }
+
           renderItem={(
             {item}) =>
               <DefaultListElement
-                data={item}
+                onPress={ item.onPress }
+                data={ item }
                 style={styles.item}>
               </DefaultListElement>
           }
