@@ -13,9 +13,12 @@ export default class MessageData {
     return this._id;
   }
 
-  // TODO REMOVE
-  onPress(action: () => {}) {
-    action();
+  setOnClickAction(action) {
+    this._onClickAction = action;
+  }
+
+  onPress() {
+    this._onClickAction();
   }
 
 }

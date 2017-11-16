@@ -15,9 +15,9 @@ export default class MessagesList extends Component {
           renderItem={(
             {item}) =>
               <DefaultListElement
-                onPress={ item.onPress }
+                onPress={() => { this.props.navigation.navigate('MessageThread', {'name': item.getUserName()}); } }
                 data={ item }
-                style={styles.item}>
+                style={ styles.item }>
               </DefaultListElement>
           }
         />

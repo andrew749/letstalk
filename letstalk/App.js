@@ -8,30 +8,33 @@ import MessageView from './message-view';
 import { StackNavigator } from 'react-navigation';
 
 
-const data = [
+var data = [
   new MessageData(1, "Andrew"),
   new MessageData(2, "Adam")
 ];
 
-export default class MainView extends React.Component {
-  render() {
-    return (
-      <MessagesList data={data}/>
-    );
-  }
-}
+const ConversationsScene = ({ navigation }) => (
+  <MessagesList data={data} navigation={navigation}/>
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f1f',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 });
 
 const App = StackNavigator({
-  Home: { screen: MainView },
+  Home: {
+    screen: ConversationsScene,
+    navigationOptions: {
+      headerTitle: 'Conversations'
+    }
+  },
   MessageThread: {screen: MessageView}
 });
+
+export default App;
 
