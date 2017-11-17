@@ -1,17 +1,21 @@
 package com.lightbend.akka.http.sample
 
 import akka.actor.{Actor, ActorRef}
+import akka.event.Logging
 import com.lightbend.akka.http.sample.data_models.Message
 
-import scala.collection.immutable.HashMap
 import scala.collection.mutable
 
 trait ChatManagement { this: Actor =>
 
   val sessions: mutable.HashMap[String, ActorRef]
 
+  lazy val log = Logging(context.system, this)
+
   protected def chatManagement: Receive = {
     case msg @ Message(sender, recipient, payload) =>
+      log.debug("Got Message!")
+      print ("test")
 
       // send this message to the sessions if they exists
       getSession(recipient.id).foreach(_ ! msg)

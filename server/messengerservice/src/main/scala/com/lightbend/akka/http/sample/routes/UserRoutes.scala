@@ -14,7 +14,7 @@ trait UserRoutes {
   // we leave these abstract, since they will be provided by the App
   implicit def system: ActorSystem
 
-  lazy val log = Logging(system, classOf[UserRoutes])
+  private lazy val log = Logging(system, classOf[UserRoutes])
 
   // other dependencies that UserRoutes use
   def userRegistryActor: ActorRef
@@ -26,6 +26,7 @@ trait UserRoutes {
 
   lazy val createUserRoute: Route = pathPrefix("create") {
     post {
+      log.debug("Got user create route")
       // TODO: send a message to the user registry actor to create a new user
       ???
     }
@@ -33,6 +34,7 @@ trait UserRoutes {
 
   lazy val getUserRoute: Route = pathPrefix("get") {
     get {
+      log.debug("Got user get route")
       // TODO: get a users info
       ???
     }
