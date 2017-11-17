@@ -10,5 +10,5 @@ package com.lightbend.akka.http.sample.data_models
  * @param recipient
  * @param payload
  */
-final case class Message(sender: UserModel, recipient: UserModel, payload: MessagePayload)
+final case class Message(sender: UserModel, recipient: UserModel, payload: Option[MessagePayload])
 

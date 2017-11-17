@@ -1,4 +1,4 @@
-package com.lightbend.akka.http.sample
+package com.lightbend.akka.http.sample.data_layer
 
 import akka.actor.Actor
 
