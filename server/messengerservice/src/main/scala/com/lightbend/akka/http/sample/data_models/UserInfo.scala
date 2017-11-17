@@ -1,17 +1,19 @@
-package com.lightbend.akka.http.sample
+package com.lightbend.akka.http.sample.data_models
 
 /**
  * Created by andrewcodispoti on 2017-11-14.
  */
 
+sealed trait Info
+
 /**
  * Encapsulate personal information of a user.
  * @param name name of a user
  */
-case class PersonalInfo(name: String)
+final case class PersonalInfo(name: String) extends Info {}
 
 /**
  * Encapsulate contact information for a user.
  * @param email email address of a user
  */
-case class ContactInfo(email: String, phone: String)
+final case class ContactInfo(email: String, phone: String) extends Info {}

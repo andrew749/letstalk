@@ -10,10 +10,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.io.StdIn
 
 //#main-class
-object QuickstartServer extends App with UserRoutes {
+object MainService extends App with UserRoutes {
 
   // set up ActorSystem and other dependencies here
   //#main-class
+
   //#server-bootstrapping
   implicit val system: ActorSystem = ActorSystem("helloAkkaHttpServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
