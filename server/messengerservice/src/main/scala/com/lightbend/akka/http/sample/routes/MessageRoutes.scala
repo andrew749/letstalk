@@ -46,32 +46,35 @@ trait MessageRoutes extends JsonSupport {
           complete(response)
         }
       }
+
       get {
         entity(as[MessageData]) { data: MessageData =>
           log.debug("Got message")
 
           val fromUser: Future[UserModel] = (userRegistryActor ? GetUser(data.from)).mapTo[UserModel]
-          val toUser: Future[UserModel] =  (userRegistryActor ? GetUser (data.to)).mapTo[UserModel]
+          val toUser: Future[UserModel] = (userRegistryActor ? GetUser(data.to)).mapTo[UserModel]
 
-          fromUser foreach  {
-            from => {
-              toUser foreach  {
-                to =>
-                  chatServerActor ! Message(from, to, Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
+          fromUser foreach {
+            from =>
+              {
+                toUser foreach {
+                  to =>
+                    chatServerActor ! Message(from, to, Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
+                }
               }
-            }
           }
 
           complete("OK")
         }
       }
+
     }
 
   lazy val getMessagesRoute: Route =
     pathPrefix("get") {
       path(Segment) { userId =>
         log.debug("Got message get route")
-       // TODO: get messages for this user
+        // TODO: get messages for this user
         ???
       }
     }

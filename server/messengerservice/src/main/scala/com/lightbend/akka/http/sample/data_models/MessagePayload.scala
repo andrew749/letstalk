@@ -14,9 +14,9 @@ trait MessagePayload
 case class IncomingMessagePayload(messageContent: String, time: Long) extends MessagePayload {}
 
 /**
-  * Encapsulate outgoing message payload
-  * @param id id of the message
-  * @param messageContent payload
-  * @param time that the message was acked by the server
-  */
+ * Encapsulate outgoing message payload
+ * @param id id of the message
+ * @param messageContent payload
+ * @param time that the message was acked by the server
+ */
 case class OutgoingMessagePayload(id: String, messageContent: String, time: Long) extends MessagePayload {}

@@ -1,6 +1,6 @@
 package com.lightbend.akka.http.sample
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ Actor, ActorRef }
 
 trait ChatServer extends Actor {
   val storage: ActorRef
@@ -12,6 +12,7 @@ trait ChatServer extends Actor {
   protected def sessionManagement: Receive
   protected def chatManagement: Receive
   protected def shutdownSessions: Unit
+
 
   override def postStop(): Unit = {
     // delete all sessions

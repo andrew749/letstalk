@@ -8,7 +8,10 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
+import com.lightbend.akka.http.sample.UserRegistryActor.CreateUser
+import com.lightbend.akka.http.sample.data_models.{ContactInfo, NormalUser, PersonalInfo}
 import com.lightbend.akka.http.sample.routes.{MessageRoutes, UserRoutes}
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,8 +19,8 @@ import scala.io.StdIn
 
 //#main-class
 object MainService extends App
-  with UserRoutes
-  with MessageRoutes {
+    with UserRoutes
+    with MessageRoutes {
 
   // set up ActorSystem and other dependencies here
   //#main-class
@@ -36,6 +39,22 @@ object MainService extends App
   val timeout = Timeout(5 seconds)
 
   val userRegistryActor: ActorRef = system.actorOf(UserRegistryActor.props, "userRegistryActor")
+
+  /**
+    * FIXME: Remove this. just here to create fake data
+    */
+  def createUsers() = {
+    val pinfo = PersonalInfo("Andrew")
+    val pinfo2 = PersonalInfo("Andrew 2")
+    val cinfo = ContactInfo("test@gmail.com", "5555555555")
+    userRegistryActor ! CreateUser(NormalUser("acod", pinfo, cinfo))
+    userRegistryActor ! CreateUser(NormalUser("andrew", pinfo2, cinfo))
+    log.debug("Created fake users")
+  }
+
+  // create fake users
+  createUsers()
+
 
   //#main-class
   // from the UserRoutes trait

@@ -24,10 +24,12 @@ class UserRegistryActor extends Actor with ActorLogging {
     case CreateUser(user) =>
       // add user to set
       // TODO: Save to storage with db logic
+      log.debug(s"Creating user with id=${user.id}")
       users += user
       sender() ! ActionPerformed(s"User ${user.id} created.")
 
     case GetUser(id) =>
+      log.debug(s"Checking for user with id=$id")
       sender() ! users.find(_.id == id)
   }
 }

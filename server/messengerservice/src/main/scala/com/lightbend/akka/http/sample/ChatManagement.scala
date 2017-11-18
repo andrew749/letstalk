@@ -1,6 +1,6 @@
 package com.lightbend.akka.http.sample
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ Actor, ActorRef }
 import akka.event.Logging
 import com.lightbend.akka.http.sample.data_models.Message
 
