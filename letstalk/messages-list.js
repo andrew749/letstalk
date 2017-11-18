@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import { AppRegistry, Text, View, FlatList, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
 
 import DefaultListElement from './list-element';
 import MessageData from './message-data';
 
-export default class MessagesList extends Component {
+class MessagesList extends Component {
   render() {
     return(
       <View style={styles.container}>
         <FlatList
-          data={this.props.data}
+          data={this.props.threads}
           keyExtractor={ (item) => item.getId() }
 
           renderItem={(
@@ -25,6 +26,8 @@ export default class MessagesList extends Component {
     );
   }
 }
+
+export default connect(({conversationsReducer}) => conversationsReducer, {})(MessagesList);
 
 const styles = StyleSheet.create({
   container: {

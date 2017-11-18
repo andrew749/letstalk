@@ -1,20 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Provider } from 'react-redux';
 
+import store from './store';
 import MessagesList from './messages-list';
-import MessageData from './message-data';
 import MessageView from './message-view';
 
 import { StackNavigator } from 'react-navigation';
 
-
-var data = [
-  new MessageData(1, "Andrew"),
-  new MessageData(2, "Adam")
-];
-
 const ConversationsScene = ({ navigation }) => (
-  <MessagesList data={data} navigation={navigation}/>
+  <MessagesList navigation={navigation}/>
 );
 
 const styles = StyleSheet.create({
@@ -26,7 +21,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const App = StackNavigator({
+const AppNavigation = StackNavigator({
   Home: {
     screen: ConversationsScene,
     navigationOptions: {
@@ -35,6 +30,16 @@ const App = StackNavigator({
   },
   MessageThread: {screen: MessageView}
 });
+
+class App extends React.Component {
+  render() {
+    return (
+      <Provider store={store}>
+        <AppNavigation />
+      </Provider>
+    );
+  }
+}
 
 export default App;
 
