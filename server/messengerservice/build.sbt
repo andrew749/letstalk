@@ -13,10 +13,20 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-xml"        % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-stream"          % akkaVersion,
+      "com.typesafe.akka" %% "akka-slf4j"          % akkaVersion,
+      "com.typesafe.akka" %% "akka-cluster"          % akkaVersion,
 
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,
       "com.typesafe.akka" %% "akka-stream-testkit"  % akkaVersion     % Test,
-      "org.scalatest"     %% "scalatest"            % "3.0.1"         % Test
+      "org.scalatest"     %% "scalatest"            % "3.0.1"         % Test,
+
+      // log4j
+      "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
+      "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
+      "org.apache.logging.log4j" % "log4j-core" % "2.8.2" % Runtime,
+
+      // sl4j so we can get async logging with akka
+      "ch.qos.logback" % "logback-classic" % "1.2.3"
     )
   )

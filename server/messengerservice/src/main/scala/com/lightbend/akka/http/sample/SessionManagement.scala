@@ -2,7 +2,6 @@ package com.lightbend.akka.http.sample
 
 import akka.actor.{ Actor, ActorRef, Props }
 import com.lightbend.akka.http.sample.data_models.UserModel
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 import scala.collection.mutable
 

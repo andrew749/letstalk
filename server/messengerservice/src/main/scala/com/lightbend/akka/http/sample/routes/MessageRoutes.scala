@@ -4,31 +4,29 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.lightbend.akka.http.sample.{ChatServer, ChatService, JsonSupport, UserRegistryActor}
-import com.lightbend.akka.http.sample.data_models.{IncomingMessagePayload, Message, NormalUser, UserModel}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.lightbend.akka.http.sample.UserRegistryActor.GetUser
+import com.lightbend.akka.http.sample.data_models.{IncomingMessagePayload, Message, UserModel}
+import com.lightbend.akka.http.sample.{ChatService, JsonSupport}
+
 import scala.concurrent.ExecutionContext.Implicits.global
-
-
 import scala.concurrent.Future
 
 case class MessageData(from: String, to: String, payload: String)
 
-trait MessageRoutes extends JsonSupport  {
-
+trait MessageRoutes extends JsonSupport {
 
   implicit val system: ActorSystem
   implicit val timeout: Timeout
 
   // reference to the actor for the chat server
-  lazy val chatServerActor: ActorRef = system.actorOf( Props[ChatService] )
+  lazy val chatServerActor: ActorRef = system.actorOf(Props[ChatService])
 
   // TODO: make this a public service
   val userRegistryActor: ActorRef
 
-  private lazy val log = Logging(system, classOf[MessageRoutes])
+  private lazy val log = Logging.getLogger(system, this)
 
   lazy val messageRoute: Route =
     pathPrefix("messages") {
@@ -37,6 +35,7 @@ trait MessageRoutes extends JsonSupport  {
 
   lazy val sendMessageRoute: Route =
     pathPrefix("send") {
+
       post {
         log.debug("Got message send route")
         entity(as[IncomingMessagePayload]) { payload =>

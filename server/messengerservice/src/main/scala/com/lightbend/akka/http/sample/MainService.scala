@@ -21,14 +21,14 @@ object MainService extends App
 
   // set up ActorSystem and other dependencies here
   //#main-class
-
+  val config = ConfigFactory.load()
 
   //#server-bootstrapping
-  implicit val system: ActorSystem = ActorSystem("helloAkkaHttpServer")
+  implicit val system: ActorSystem = ActorSystem("LetsTalk", config)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   //#server-bootstrapping
 
-  private val log = Logging(system, "Main")
+  private val log = Logging.getLogger(system, this)
 
   // Needed for the Future and its methods flatMap/onComplete in the end
   implicit val executionContext: ExecutionContext = system.dispatcher
@@ -44,12 +44,13 @@ object MainService extends App
     messageRoute
   )
 
+
   //#main-class
 
   //#http-server
   val serverBindingFuture: Future[ServerBinding] = Http().bindAndHandle(routes, "localhost", 8080)
 
-  println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+  log.info(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
 
   StdIn.readLine()
 

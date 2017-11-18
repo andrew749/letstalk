@@ -1,20 +1,25 @@
 package com.lightbend.akka.http.sample.routes
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.pattern.ask
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MethodDirectives.{get, post}
+import com.lightbend.akka.http.sample.UserRegistryActor.GetUser
+import com.lightbend.akka.http.sample.data_models.{NormalUser, UserModel}
+
+import scala.concurrent.{Await, Future}
 
 /**
-  * Routes which have to do with user actions
-  */
+ * Routes which have to do with user actions
+ */
 trait UserRoutes {
 
   // we leave these abstract, since they will be provided by the App
   implicit def system: ActorSystem
 
-  private lazy val log = Logging(system, classOf[UserRoutes])
+  private lazy val log = Logging.getLogger(system, this)
 
   // other dependencies that UserRoutes use
   def userRegistryActor: ActorRef

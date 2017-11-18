@@ -10,16 +10,15 @@ trait ChatManagement { this: Actor =>
 
   val sessions: mutable.HashMap[String, ActorRef]
 
-  lazy val log = Logging(context.system, this)
+  lazy val log = Logging.getLogger(context.system, this)
 
   protected def chatManagement: Receive = {
     case msg @ Message(sender, recipient, payload) =>
       log.debug("Got Message!")
-      print ("test")
 
       // send this message to the sessions if they exists
-      getSession(recipient.id).foreach(_ ! msg)
-      getSession(sender.id).foreach(_ ! msg)
+      getSession(recipient.id) foreach {_ ! msg}
+      getSession(sender.id) foreach {_ ! msg}
 
   }
 
@@ -32,7 +31,7 @@ trait ChatManagement { this: Actor =>
     if (sessions.contains(userId)) {
       Some(sessions(userId))
     } else {
-      print(s"Message going to $userId")
+      log.debug(s"Message going to $userId")
       None
     }
   }
