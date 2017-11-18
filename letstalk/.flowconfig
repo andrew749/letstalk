@@ -37,6 +37,12 @@
 .*/node_modules/expo/src/.*
 .*/node_modules/react-native-gesture-handler/.*
 
+# We vendor our src directory, which is not needed for type-checking
+.*/styled-components/src/.*
+
+# Ignore react navigation library
+.*/node_modules/react-navigation/.*
+
 [include]
 
 [libs]
@@ -68,3 +74,5 @@ unsafe.enable_getters_and_setters=true
 
 [version]
 ^0.53.0
+
+
