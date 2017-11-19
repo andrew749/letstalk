@@ -1,6 +1,6 @@
-package com.lightbend.akka.http.sample.data_layer
+package com.letstalk.data_layer
 
-import com.lightbend.akka.http.sample.data_models.{ Message, UserModel }
+import com.letstalk.sample.data_models.{ Message, UserModel }
 
 import scala.collection.mutable.ArrayBuffer
 

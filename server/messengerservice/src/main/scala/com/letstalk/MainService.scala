@@ -1,21 +1,4 @@
-package com.lightbend.akka.http.sample
-
-import akka.actor.{ActorRef, ActorSystem}
-import akka.event.Logging
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Directives._
-import akka.util.Timeout
-import com.lightbend.akka.http.sample.UserRegistryActor.CreateUser
-import com.lightbend.akka.http.sample.data_models.{ContactInfo, NormalUser, PersonalInfo}
-import com.lightbend.akka.http.sample.routes.{MessageRoutes, UserRoutes}
-import com.typesafe.config.ConfigFactory
-
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
-import scala.io.StdIn
+package com.letstalk
 
 //#main-class
 object MainService extends App
@@ -82,4 +65,3 @@ object MainService extends App
   //#http-server
   //#main-class
 }
-//#main-class

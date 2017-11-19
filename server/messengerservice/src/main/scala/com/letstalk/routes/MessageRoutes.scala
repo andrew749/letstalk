@@ -1,4 +1,4 @@
-package com.lightbend.akka.http.sample.routes
+package com.letstalk.routes
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
@@ -6,9 +6,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.lightbend.akka.http.sample.UserRegistryActor.GetUser
-import com.lightbend.akka.http.sample.data_models.{IncomingMessagePayload, Message, UserModel}
-import com.lightbend.akka.http.sample.{ChatService, JsonSupport}
+import com.letstalk.sample.UserRegistryActor.GetUser
+import com.letstalk.sample.data_models.{IncomingMessagePayload, Message, UserModel}
+import com.letstalk.sample.{ChatService, JsonSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -1,4 +1,4 @@
-package com.lightbend.akka.http.sample.data_layer
+package com.letstalk.sample.data_layer
 
 import akka.actor.{ Actor, Props }
 

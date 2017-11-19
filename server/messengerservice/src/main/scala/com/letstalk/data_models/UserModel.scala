@@ -1,4 +1,4 @@
-package com.lightbend.akka.http.sample.data_models
+package com.letstalk.sample.data_models
 
 /**
  * Created by andrewcodispoti on 2017-11-14.

@@ -1,10 +1,4 @@
-package com.lightbend.akka.http.sample
-
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.lightbend.akka.http.sample.UserRegistryActor.ActionPerformed
-import com.lightbend.akka.http.sample.data_models._
-import com.lightbend.akka.http.sample.routes.MessageData
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+package com.letstalk
 
 /**
  * Unmarshall json into the data models

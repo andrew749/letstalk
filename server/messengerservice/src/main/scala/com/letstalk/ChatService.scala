@@ -1,6 +1,6 @@
-package com.lightbend.akka.http.sample
+package com.letstalk
 
-import com.lightbend.akka.http.sample.data_layer.MemoryChatStorageFactory
+import com.letstalk.sample.data_layer.MemoryChatStorageFactory
 
 class ChatService
     extends ChatServer

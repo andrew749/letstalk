@@ -1,4 +1,4 @@
-package com.lightbend.akka.http.sample.routes
+package com.letstalk.sample.routes
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.event.Logging
@@ -7,9 +7,9 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MethodDirectives.{get, post}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.lightbend.akka.http.sample.JsonSupport
-import com.lightbend.akka.http.sample.UserRegistryActor.GetUser
-import com.lightbend.akka.http.sample.{AdministratorUser, NormalUser}
+import com.letstalk.sample.JsonSupport
+import com.letstalk.sample.UserRegistryActor.GetUser
+import com.letstalk.sample.{AdministratorUser, NormalUser}
 
 import scala.concurrent.duration._
 
@@ -53,9 +53,9 @@ trait UserRoutes extends JsonSupport {
             // FIXME: this is always going to default case.
             print (x.getClass)
             x match {
-              case user: com.lightbend.akka.http.sample.NormalUser =>
+              case user: com.letstalk.sample.NormalUser =>
                 complete(user)
-              case user: com.lightbend.akka.http.sample.AdministratorUser =>
+              case user: com.letstalk.sample.AdministratorUser =>
                 complete(user)
               case _ =>
                 complete("Invalid response from actor")

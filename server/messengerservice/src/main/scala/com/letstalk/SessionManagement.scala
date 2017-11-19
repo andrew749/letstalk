@@ -1,7 +1,7 @@
-package com.lightbend.akka.http.sample
+package com.letstalk
 
 import akka.actor.{ Actor, ActorRef, Props }
-import com.lightbend.akka.http.sample.data_models.UserModel
+import com.letstalk.sample.data_models.UserModel
 
 import scala.collection.mutable
 

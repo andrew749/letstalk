@@ -1,6 +1,4 @@
-package com.lightbend.akka.http.sample
-
-import akka.actor.{ Actor, ActorRef }
+package com.letstalk
 
 trait ChatServer extends Actor {
   val storage: ActorRef
