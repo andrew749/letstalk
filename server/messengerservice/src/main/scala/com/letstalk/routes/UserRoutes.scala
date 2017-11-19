@@ -50,8 +50,6 @@ trait UserRoutes extends JsonSupport {
         val future = userRegistryActor ? GetUser(id)
         onSuccess(future) {
           case Some(x) =>
-            // FIXME: this is always going to default case.
-            print (x.getClass)
             x match {
               case user: NormalUser =>
                 complete(user)
