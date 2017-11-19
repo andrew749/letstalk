@@ -1,5 +1,7 @@
 package com.letstalk.data_models
 
+import slick.model.Table
+
 /**
  * Created by andrewcodispoti on 2017-11-14.
  */

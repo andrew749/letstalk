@@ -17,6 +17,7 @@ import com.typesafe.config.ConfigFactory
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.io.StdIn
+import slick.jdbc.PostgresProfile.api._
 
 //#main-class
 object MainService extends App
@@ -33,6 +34,8 @@ object MainService extends App
   //#server-bootstrapping
 
   private val log = Logging.getLogger(system, this)
+
+  implicit val db = Database.forConfig("h2mem1")
 
   // Needed for the Future and its methods flatMap/onComplete in the end
   implicit val executionContext: ExecutionContext = system.dispatcher
