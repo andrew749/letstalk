@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -58,7 +58,6 @@ object MainService extends App
 
   // create fake users
   createUsers()
-
 
   //#main-class
   // from the UserRoutes trait

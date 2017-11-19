@@ -9,7 +9,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.JsonSupport
 import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models._
+import com.letstalk.data_models.{AdministratorUser, NormalUser}
 
 import scala.concurrent.duration._
 

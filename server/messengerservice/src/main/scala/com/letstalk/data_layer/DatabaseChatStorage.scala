@@ -1,17 +1,15 @@
 package com.letstalk.data_layer
 
-import com.letstalk.data_models.UserModel
-
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
-trait MemoryChatStorage extends ChatStorage { this: DataManager =>
-  private var log = ArrayBuffer[UserModel]()
+trait DatabaseChatStorage extends ChatStorage { this: DataManager =>
 
   implicit var dataLayers: mutable.Buffer[ChatStorage]
+
   dataLayers += this
 
-  override def storeMessage(): Unit = {}
+
+  override def storeMessage(): Unit = ???
 
   override def storeMessagePayload(): Unit = ???
 

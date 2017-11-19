@@ -9,6 +9,7 @@ import akka.util.Timeout
 import com.letstalk.{ChatService, JsonSupport}
 import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
+import com.letstalk.data_models.{IncomingMessagePayload, UserModel}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

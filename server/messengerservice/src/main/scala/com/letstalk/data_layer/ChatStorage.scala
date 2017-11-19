@@ -1,5 +1,9 @@
 package com.letstalk.data_layer
 
-import akka.actor.Actor
-
-trait ChatStorage extends Actor
+trait ChatStorage  {
+  def storeMessage()
+  def storeMessagePayload()
+  def storeUser()
+  def storeUserInfo()
+  def storeContactInfo()
+}

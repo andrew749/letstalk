@@ -1,5 +1,7 @@
 package com.letstalk.data_models
 
+import slick.jdbc.PostgresProfile.api._
+
 /**
  * Created by andrewcodispoti on 2017-11-14.
  */
@@ -20,3 +22,11 @@ case class IncomingMessagePayload(messageContent: String, time: Long) extends Me
  * @param time that the message was acked by the server
  */
 case class OutgoingMessagePayload(id: String, messageContent: String, time: Long) extends MessagePayload {}
+
+class MessagePayloadTable(tag: Tag) extends Table[(Int, String, Long)](tag, "MESSAGES") {
+  def id = column[Int]("ID", O.PrimaryKey)
+  def messageContent = column[String]("DATA")
+  def time = column[Long]("DATE_SENT")
+
+  def * = (id, messageContent, time)
+}
