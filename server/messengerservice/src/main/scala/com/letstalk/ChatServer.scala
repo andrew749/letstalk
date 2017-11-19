@@ -1,5 +1,7 @@
 package com.letstalk
 
+import akka.actor.{Actor, ActorRef}
+
 trait ChatServer extends Actor {
   val storage: ActorRef
 

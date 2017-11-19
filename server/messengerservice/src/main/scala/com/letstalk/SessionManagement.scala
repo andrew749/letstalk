@@ -1,7 +1,7 @@
 package com.letstalk
 
-import akka.actor.{ Actor, ActorRef, Props }
-import com.letstalk.sample.data_models.UserModel
+import akka.actor.{Actor, ActorRef, Props}
+import com.letstalk.data_models.UserModel
 
 import scala.collection.mutable
 

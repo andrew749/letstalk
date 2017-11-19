@@ -6,9 +6,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.letstalk.sample.UserRegistryActor.GetUser
-import com.letstalk.sample.data_models.{IncomingMessagePayload, Message, UserModel}
-import com.letstalk.sample.{ChatService, JsonSupport}
+import com.letstalk.{ChatService, JsonSupport}
+import com.letstalk.UserRegistryActor.GetUser
+import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -1,7 +1,7 @@
 package com.letstalk
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.letstalk.sample.data_models.UserModel
+import com.letstalk.data_models.UserModel
 
 //#user-case-classes
 

@@ -7,9 +7,9 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MethodDirectives.{get, post}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.letstalk.sample.JsonSupport
-import com.letstalk.sample.UserRegistryActor.GetUser
-import com.letstalk.sample.{AdministratorUser, NormalUser}
+import com.letstalk.JsonSupport
+import com.letstalk.UserRegistryActor.GetUser
+import com.letstalk.data_models._
 
 import scala.concurrent.duration._
 
@@ -53,9 +53,9 @@ trait UserRoutes extends JsonSupport {
             // FIXME: this is always going to default case.
             print (x.getClass)
             x match {
-              case user: com.letstalk.sample.NormalUser =>
+              case user: NormalUser =>
                 complete(user)
-              case user: com.letstalk.sample.AdministratorUser =>
+              case user: AdministratorUser =>
                 complete(user)
               case _ =>
                 complete("Invalid response from actor")

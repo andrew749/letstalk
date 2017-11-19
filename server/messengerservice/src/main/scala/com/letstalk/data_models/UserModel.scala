@@ -1,4 +1,4 @@
-package com.letstalk.sample.data_models
+package com.letstalk.data_models
 
 /**
  * Created by andrewcodispoti on 2017-11-14.

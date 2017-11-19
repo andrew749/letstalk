@@ -1,5 +1,11 @@
 package com.letstalk
 
+import akka.actor.{Actor, ActorRef}
+import akka.event.Logging
+import com.letstalk.data_models.Message
+
+import scala.collection.mutable
+
 trait ChatManagement { this: Actor =>
 
   val sessions: mutable.HashMap[String, ActorRef]

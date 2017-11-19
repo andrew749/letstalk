@@ -1,5 +1,23 @@
 package com.letstalk
 
+import akka.actor.{ActorRef, ActorSystem}
+import akka.event.Logging
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.Http.ServerBinding
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
+import akka.util.Timeout
+import com.letstalk.UserRegistryActor.CreateUser
+import com.letstalk.data_models.{ContactInfo, NormalUser, PersonalInfo}
+import com.letstalk.routes.MessageRoutes
+import com.letstalk.sample.routes.UserRoutes
+import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.io.StdIn
+
 //#main-class
 object MainService extends App
     with UserRoutes

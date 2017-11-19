@@ -1,6 +1,6 @@
 package com.letstalk.data_layer
 
-import com.letstalk.sample.data_models.{ Message, UserModel }
+import com.letstalk.data_models.{Message, UserModel}
 
 import scala.collection.mutable.ArrayBuffer
 
