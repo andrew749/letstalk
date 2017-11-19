@@ -9,9 +9,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.lightbend.akka.http.sample.JsonSupport
 import com.lightbend.akka.http.sample.UserRegistryActor.GetUser
-import com.lightbend.akka.http.sample.data_models.{AdministratorUser, NormalUser, UserModel}
+import com.lightbend.akka.http.sample.{AdministratorUser, NormalUser}
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 /**
@@ -52,13 +51,14 @@ trait UserRoutes extends JsonSupport {
         onSuccess(future) {
           case Some(x) =>
             // FIXME: this is always going to default case.
+            print (x.getClass)
             x match {
-              case user: NormalUser =>
-                complete("normal user")
-              case user: AdministratorUser =>
-                complete("admin user")
+              case user: com.lightbend.akka.http.sample.NormalUser =>
+                complete(user)
+              case user: com.lightbend.akka.http.sample.AdministratorUser =>
+                complete(user)
               case _ =>
-                complete("what")
+                complete("Invalid response from actor")
             }
           case None => complete("Not found")
         }
