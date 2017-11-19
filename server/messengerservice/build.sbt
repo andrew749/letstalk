@@ -26,9 +26,11 @@ lazy val root = (project in file(".")).
       "org.apache.logging.log4j" % "log4j-api" % "2.8.2",
       "org.apache.logging.log4j" % "log4j-core" % "2.8.2" % Runtime,
 
+      // slf4j so we can get async logging with akka
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+
       // database orm
       "com.typesafe.slick" %% "slick" % "3.2.1",
-      "org.slf4j" % "slf4j-nop" % "1.6.4", // needed by slick for it's logging
       "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" // connection pool support
 
 

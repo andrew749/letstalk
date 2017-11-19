@@ -9,7 +9,6 @@ trait MemoryChatStorage extends ChatStorage { this: DataManager =>
   private var log = ArrayBuffer[UserModel]()
 
   implicit var dataLayers: mutable.Buffer[ChatStorage]
-  dataLayers += this
 
   override def storeMessage(): Unit = {}
 

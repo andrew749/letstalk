@@ -10,3 +10,7 @@ Note: I set this up as a intellij project so you should just be able to import i
 ## Running
 `sbt run`
 
+## Sample Request
+curl -X POST http://localhost:8080/messages/send \
+    -H "Content-Type: application/json" \
+    -d"{\"from\":\"acod\", \"to\":\"andrew\", \"payload\":\"Hello World\"}"

@@ -6,13 +6,13 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.letstalk.{ChatService, JsonSupport}
 import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
-import com.letstalk.data_models.{IncomingMessagePayload, UserModel}
+import com.letstalk.{ChatService, JsonSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 case class MessageData(from: String, to: String, payload: String)
 
@@ -37,33 +37,28 @@ trait MessageRoutes extends JsonSupport {
   lazy val sendMessageRoute: Route =
     pathPrefix("send") {
 
+      // messages sent via post
       post {
-        log.debug("Got message send route")
-        entity(as[IncomingMessagePayload]) { payload =>
 
-          // send the message to the chat server
-          val response = (chatServerActor ? payload).mapTo[String]
-
-          complete(response)
-        }
-      }
-
-      get {
+        log.debug("post")
         entity(as[MessageData]) { data: MessageData =>
-          log.debug("Got message")
 
-          val fromUser: Future[UserModel] = (userRegistryActor ? GetUser(data.from)).mapTo[UserModel]
-          val toUser: Future[UserModel] = (userRegistryActor ? GetUser(data.to)).mapTo[UserModel]
+          log.debug(s"Received message from ${data.from} to ${data.to}")
 
-          fromUser foreach {
-            from =>
-              {
-                toUser foreach {
-                  to =>
-                    chatServerActor ! Message(from, to, Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
-                }
-              }
+          implicit val atMost = 5 seconds
+          // get futures for user data
+          // FIXME: double trouble, first we block, second we cast
+          val fromUser = Await.result(userRegistryActor ? GetUser(data.from) , 3 seconds)
+          val toUser = Await.result(userRegistryActor ? GetUser(data.to), 3 seconds)
+          (fromUser, toUser) match {
+            case (Some(a: UserModel), Some(b:UserModel)) =>
+              log.debug("Sending message ... ")
+              chatServerActor ! Message(a, b, Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
+            case x =>
+              log.debug(s"Got an unknown type ${x}")
           }
+
+
 
           complete("OK")
         }
