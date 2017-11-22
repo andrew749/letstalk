@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ Actor, ActorRef }
 import akka.event.Logging
 import com.letstalk.data_models.Message
 
@@ -13,12 +13,12 @@ trait ChatManagement { this: Actor =>
   lazy val log = Logging.getLogger(context.system, this)
 
   protected def chatManagement: Receive = {
-    case msg @ Message(sender, recipient, payload) =>
+    case msg @ Message(id, sender, recipient, payload) =>
       log.debug("Got Message!")
 
       // send this message to the sessions if they exists
-      getSession(recipient.id) foreach {_ ! msg}
-      getSession(sender.id) foreach {_ ! msg}
+      getSession(recipient.id) foreach { _ ! msg }
+      getSession(sender.id) foreach { _ ! msg }
 
   }
 

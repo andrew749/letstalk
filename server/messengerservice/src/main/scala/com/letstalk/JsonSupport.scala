@@ -4,7 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.letstalk.UserRegistryActor.ActionPerformed
 import com.letstalk.data_models._
 import com.letstalk.routes.MessageData
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 
 /**
  * Unmarshall json into the data models

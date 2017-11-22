@@ -1,26 +1,50 @@
 package com.letstalk.data_layer
 
-import akka.actor.Actor
+import akka.actor.{ Actor, ActorLogging, Props }
 import com.letstalk.data_models.Message
 
 import scala.collection.mutable
 
 /**
-  * This class receives messages with data that should be stored in
-  * the appropriate datalayer type for it.
-  *
-  *
-  * Massive WIP
-  */
-class DataManager extends Actor with MemoryChatStorage with DatabaseChatStorage {
+ * This class receives messages with data that should be stored in
+ * the appropriate datalayer type for it.
+ *
+ * Massive WIP
+ */
+
+class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with ActorLogging {
 
   implicit var dataLayers: mutable.Buffer[ChatStorage] = mutable.Buffer()
 
-  def receive: Receive = {
-    case Message =>
+  if (useMemory) {
+    val memoryChatStorage: MemoryChatStorage = new MemoryChatStorage()
+    dataLayers.append(memoryChatStorage)
+  }
 
+  if (useDatabase) {
+    val databaseChatStorage: DatabaseChatStorage = new DatabaseChatStorage()
+    dataLayers.append(databaseChatStorage)
+  }
+
+  def receive: Receive = {
+    case message: Message =>
+      // store the message in all data layers
+      dataLayers foreach { layer => layer storeMessage message }
+
+    case GetMessage(id) =>
+      val results = dataLayers flatMap {
+        _.retrieveMessage(id)
+      }
+
+      sender() ! results.head
   }
 
 }
 
+object DataManager {
+  def props(useMemory: Boolean, useDatabase: Boolean): Props = {
+    Props(classOf[DataManager], useMemory, useDatabase)
+  }
+}
 
+case class GetMessage(id: String)

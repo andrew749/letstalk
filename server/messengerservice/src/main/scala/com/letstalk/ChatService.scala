@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.{ ActorRef, Props }
 import com.letstalk.data_layer.DataManager
 
 class ChatService
@@ -8,7 +8,7 @@ class ChatService
     with SessionManagement
     with ChatManagement {
 
-  implicit val storage: ActorRef = context.actorOf(Props[DataManager])
+  implicit val storage: ActorRef = context.actorOf(DataManager.props(useMemory = true, useDatabase = true))
 
   override def preStart() = {
   }

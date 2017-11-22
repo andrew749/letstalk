@@ -1,7 +1,7 @@
 package com.letstalk
 
-import akka.actor.{Actor, ActorRef, Props}
-import com.letstalk.data_models.{Message, UserModel}
+import akka.actor.{ Actor, ActorRef, Props }
+import com.letstalk.data_models.{ Message, UserModel }
 
 object Session {
 }
@@ -13,7 +13,7 @@ class Session(user: UserModel, storage: ActorRef) extends Actor {
 
   def receive = {
 
-    case msg @ Message(id, sender, payload) =>
+    case msg @ Message(id, sender, recipient, payload) =>
       // save this message into a in memory log
       log ::= msg
 

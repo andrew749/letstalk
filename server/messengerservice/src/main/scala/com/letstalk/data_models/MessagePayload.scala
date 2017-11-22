@@ -23,8 +23,8 @@ case class IncomingMessagePayload(messageContent: String, time: Long) extends Me
  */
 case class OutgoingMessagePayload(id: String, messageContent: String, time: Long) extends MessagePayload {}
 
-class MessagePayloadTable(tag: Tag) extends Table[(Int, String, Long)](tag, "MESSAGES") {
-  def id = column[Int]("ID", O.PrimaryKey)
+class MessagePayloadTable(tag: Tag) extends Table[(String, String, Long)](tag, "MESSAGES") {
+  def id = column[String]("ID", O.PrimaryKey)
   def messageContent = column[String]("DATA")
   def time = column[Long]("DATE_SENT")
 
