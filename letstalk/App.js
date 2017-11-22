@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 
 import store from './store';
-import MessagesList from './messages-list';
-import MessageView from './message-view';
+import MessagesList from './components/MessagesList';
+import MessageView from './components/MessageView';
 
 import { StackNavigator } from 'react-navigation';
 
