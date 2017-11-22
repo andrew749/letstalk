@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{Actor, ActorLogging, Props}
 import com.letstalk.data_models.UserModel
 
 //#user-case-classes
@@ -17,6 +17,7 @@ class UserRegistryActor extends Actor with ActorLogging {
   import UserRegistryActor._
 
   var users = Set.empty[UserModel]
+
 
   def receive: Receive = {
 

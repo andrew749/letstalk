@@ -1,7 +1,7 @@
 package com.letstalk
 
-import akka.actor.{ Actor, ActorRef, Props }
-import com.letstalk.data_models.{ Message, UserModel }
+import akka.actor.{Actor, ActorRef, Props}
+import com.letstalk.data_models.{Message, UserModel}
 
 object Session {
 }

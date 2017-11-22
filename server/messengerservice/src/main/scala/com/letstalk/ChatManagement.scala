@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ Actor, ActorRef }
+import akka.actor.{Actor, ActorRef}
 import akka.event.Logging
 import com.letstalk.data_models.Message
 

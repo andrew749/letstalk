@@ -1,17 +1,17 @@
 package com.letstalk.routes
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models.{ IncomingMessagePayload, Message, UserModel }
-import com.letstalk.{ ChatService, JsonSupport }
+import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
+import com.letstalk.{ChatService, JsonSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 case class MessageData(from: String, to: String, payload: String)

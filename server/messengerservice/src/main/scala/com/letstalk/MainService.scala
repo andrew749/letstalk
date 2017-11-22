@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -9,12 +9,12 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.CreateUser
-import com.letstalk.data_models.{ ContactInfo, NormalUser, PersonalInfo }
+import com.letstalk.data_models.{ContactInfo, NormalUser, PersonalInfo}
 import com.letstalk.routes.MessageRoutes
 import com.letstalk.sample.routes.UserRoutes
 import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.io.StdIn
 import slick.jdbc.PostgresProfile.api._
