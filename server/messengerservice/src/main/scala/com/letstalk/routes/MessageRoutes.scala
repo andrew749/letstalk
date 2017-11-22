@@ -10,8 +10,7 @@ import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
 import com.letstalk.{ChatService, JsonSupport}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 case class MessageData(from: String, to: String, payload: String)
@@ -56,7 +55,7 @@ trait MessageRoutes extends JsonSupport {
           val toUser = Await.result(userRegistryActor ? GetUser(data.to), 3 seconds)
           (fromUser, toUser) match {
             case (Some(a: UserModel), Some(b: UserModel)) =>
-              log.debug("Sending message ... ")
+
               // get some id
               val tempId = getUUID()
 
@@ -68,8 +67,6 @@ trait MessageRoutes extends JsonSupport {
             case x =>
               log.debug(s"Got an unknown type ${x}")
           }
-
-
 
           complete("OK")
         }
