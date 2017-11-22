@@ -7,7 +7,7 @@ import { fetchMessages } from '../state/thread';
 
 class MessageView extends Component {
   componentDidMount() {
-    this.props.fetchMessages('adam');
+    this.props.fetchMessages(this.props.navigation.state.params.name);
   }
 
   render() {

@@ -8,10 +8,12 @@ class Requestor {
 
   _makeRequest(route, fetchParams) {
     return fetch(route, fetchParams).then((response) => {
-      if (!response.ok) return response.json().then(data => {
+      if (!response.ok) return response.json().then((data) => {
         throw new Error(data.error);
       });
       return response.json();
+    }, (reason) => {
+      throw reason;
     });
   }
 
