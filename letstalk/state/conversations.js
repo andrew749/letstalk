@@ -1,4 +1,4 @@
-import MessageData from '../message-data';
+import MessageData from '../models/message-data';
 
 // TODO: Add a type
 const initialState = {

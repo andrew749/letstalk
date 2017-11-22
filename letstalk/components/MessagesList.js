@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { AppRegistry, Text, View, FlatList, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 
-import DefaultListElement from './list-element';
-import MessageData from './message-data';
+import DefaultListElement from './DefaultListElement';
+import MessageData from '../models/message-data';
 
 class MessagesList extends Component {
   render() {
