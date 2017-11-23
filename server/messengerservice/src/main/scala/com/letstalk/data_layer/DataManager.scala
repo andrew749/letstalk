@@ -1,7 +1,7 @@
 package com.letstalk.data_layer
 
 import akka.actor.{ Actor, ActorLogging, Props }
-import com.letstalk.data_models.Message
+import com.letstalk.data_models.{ Message, UserModel }
 
 import scala.collection.mutable
 
@@ -29,13 +29,18 @@ class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with A
   def receive: Receive = {
     case message: Message =>
       // store the message in all data layers
-      dataLayers foreach { layer => layer storeMessage message }
+      dataLayers foreach { _ storeMessage message }
 
     case GetMessage(id) =>
-      val results = dataLayers flatMap {
-        _.retrieveMessage(id)
-      }
+      val results = dataLayers flatMap (_.retrieveMessage(id))
 
+      sender() ! results.head
+
+    case user: UserModel =>
+      dataLayers foreach { _ storeUser user }
+
+    case GetUser(id) =>
+      val results = dataLayers flatMap (_.retrieveUser(id))
       sender() ! results.head
   }
 
@@ -48,3 +53,4 @@ object DataManager {
 }
 
 case class GetMessage(id: String)
+case class GetUser(id: String)

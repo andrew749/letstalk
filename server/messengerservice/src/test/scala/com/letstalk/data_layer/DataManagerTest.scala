@@ -30,7 +30,7 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
 
   implicit val timeout: Timeout = 10 seconds
 
-  "An DataManager actor" must "store messages and return these messages" in new DataManagerTrait with TestUsers {
+  "A DataManager actor" must "store messages and return these messages" in new DataManagerTrait with TestUsers {
 
     val messagePayload = IncomingMessagePayload("Test Message", System.currentTimeMillis)
 
@@ -39,6 +39,12 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
     dataManager ! message
 
     assert(Await.result(dataManager ? GetMessage("1"), 10 seconds) === message)
+  }
+
+  "A DataManager actor" must "store users and return these user" in new DataManagerTrait with TestUsers {
+    dataManager ! user1
+    dataManager ! GetUser(user1.id)
+    assert(Await.result(dataManager ? GetUser("acod"), 10 seconds) === user1)
   }
 
   override protected def afterAll(): Unit = {
