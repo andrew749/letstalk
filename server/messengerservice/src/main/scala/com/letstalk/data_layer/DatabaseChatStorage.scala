@@ -1,5 +1,7 @@
 package com.letstalk.data_layer
 
+import java.util.UUID
+
 import com.letstalk.data_models.{ Message, UserModel }
 
 class DatabaseChatStorage extends ChatStorage {
@@ -9,7 +11,7 @@ class DatabaseChatStorage extends ChatStorage {
     ???
   }
 
-  override def retrieveMessage(id: String): Option[Message] = {
+  override def retrieveMessage(id: UUID): Option[Message] = {
     // FIXME: retrieve from db
     ???
   }
@@ -19,7 +21,7 @@ class DatabaseChatStorage extends ChatStorage {
     ???
   }
 
-  override def retrieveUser(id: String): Option[UserModel] = {
+  override def retrieveUser(id: UUID): Option[UserModel] = {
     // FIXME: retrieve from db
     ???
   }

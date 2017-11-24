@@ -1,5 +1,7 @@
 package com.letstalk.data_layer
 
+import java.util.UUID
+
 import akka.actor.{ Actor, ActorLogging, Props }
 import com.letstalk.data_models.{ Message, UserModel }
 
@@ -52,5 +54,5 @@ object DataManager {
   }
 }
 
-case class GetMessage(id: String)
-case class GetUser(id: String)
+case class GetMessage(id: UUID)
+case class GetUser(id: UUID)

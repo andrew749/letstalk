@@ -1,15 +1,15 @@
 package com.letstalk.sample.routes
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.MethodDirectives.{get, post}
+import akka.http.scaladsl.server.directives.MethodDirectives.{ get, post }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.JsonSupport
 import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models.{AdministratorUser, NormalUser}
+import com.letstalk.data_models.{ AdministratorUser, NormalUser }
 
 import scala.concurrent.duration._
 

@@ -1,14 +1,16 @@
 package com.letstalk.routes
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import java.util.UUID
+
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models.{IncomingMessagePayload, Message, UserModel}
-import com.letstalk.{ChatService, JsonSupport}
+import com.letstalk.data_models.{ IncomingMessagePayload, Message, UserModel }
+import com.letstalk.{ ChatService, JsonSupport }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -20,8 +22,8 @@ trait MessageRoutes extends JsonSupport {
   implicit val system: ActorSystem
   implicit val timeout: Timeout
 
-  def getUUID(): String = {
-    java.util.UUID.randomUUID.toString
+  def getUUID(): UUID = {
+    java.util.UUID.randomUUID
   }
 
   // reference to the actor for the chat server
