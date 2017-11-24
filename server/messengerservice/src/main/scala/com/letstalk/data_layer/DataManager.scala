@@ -38,6 +38,11 @@ class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with A
 
       sender() ! results.head
 
+    case GetMessages(threadId) =>
+      // This doesn't make much sense in the context of multiple datastores where you would need to
+      // do some kind of consolidation so just using the first datastore for now.
+      sender() ! dataLayers.head.retrieveMessages(threadId)
+
     case user: UserModel =>
       dataLayers foreach { _ storeUser user }
 
@@ -56,3 +61,4 @@ object DataManager {
 
 case class GetMessage(id: UUID)
 case class GetUser(id: UUID)
+case class GetMessages(threadId: UUID)

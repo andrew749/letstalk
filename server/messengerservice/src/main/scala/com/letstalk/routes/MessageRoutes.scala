@@ -10,6 +10,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{ IncomingMessagePayload, Message, UserModel }
+import com.letstalk.data_layer.GetMessages
 import com.letstalk.{ ChatService, JsonSupport }
 
 import scala.concurrent.Await
@@ -54,7 +55,7 @@ trait MessageRoutes extends JsonSupport {
           // get futures for user data
           // FIXME: double trouble, first we block, second we cast
           val fromUser = Await.result(userRegistryActor ? GetUser(data.from), 3 seconds)
-          val toUser = Await.result(userRegistryActor ? GetUser(data.to), 3 seconds)
+          val toThread = Await.result(chatServerActor ? GetThread(data.to), 3 seconds)
           (fromUser, toUser) match {
             case (Some(a: UserModel), Some(b: UserModel)) =>
 
@@ -78,10 +79,11 @@ trait MessageRoutes extends JsonSupport {
 
   lazy val getMessagesRoute: Route =
     pathPrefix("get") {
-      path(Segment) { userId =>
+      path(Segment) { threadId =>
         log.debug("Got message get route")
-        // TODO: get messages for this user
-        ???
+
+        val future = chatServerActor ? GetMessages(threadId)
+        onSuccess(future) { messages: Seq[Message] => complete(messages.head) }
       }
     }
 
