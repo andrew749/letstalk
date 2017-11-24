@@ -1,16 +1,30 @@
 package com.letstalk.data_layer
 
-import scala.collection.mutable
+import java.util.UUID
 
-trait DatabaseChatStorage extends ChatStorage { this: DataManager =>
+import com.letstalk.data_models.{ Message, UserModel }
 
-  implicit var dataLayers: mutable.Buffer[ChatStorage]
+class DatabaseChatStorage extends ChatStorage {
 
-  override def storeMessage(): Unit = ???
+  override def storeMessage(message: Message): Unit = {
+    // FIXME: store in db
+    ???
+  }
 
-  override def storeMessagePayload(): Unit = ???
+  override def retrieveMessage(id: UUID): Option[Message] = {
+    // FIXME: retrieve from db
+    ???
+  }
 
-  override def storeUser(): Unit = ???
+  override def storeUser(user: UserModel) = {
+    // FIXME: store in db
+    ???
+  }
+
+  override def retrieveUser(id: UUID): Option[UserModel] = {
+    // FIXME: retrieve from db
+    ???
+  }
 
   override def storeUserInfo(): Unit = ???
 

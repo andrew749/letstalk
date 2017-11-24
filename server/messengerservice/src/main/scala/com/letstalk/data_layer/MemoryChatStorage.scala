@@ -1,20 +1,30 @@
 package com.letstalk.data_layer
 
-import com.letstalk.data_models.UserModel
+import java.util.UUID
+
+import com.letstalk.data_models.{ Message, UserModel }
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
-trait MemoryChatStorage extends ChatStorage { this: DataManager =>
-  private var log = ArrayBuffer[UserModel]()
+class MemoryChatStorage extends ChatStorage {
 
-  implicit var dataLayers: mutable.Buffer[ChatStorage]
+  private val messageBuffer: mutable.HashMap[UUID, Message] = mutable.HashMap()
+  override def storeMessage(message: Message): Unit = {
+    messageBuffer put (message.id, message)
+  }
 
-  override def storeMessage(): Unit = {}
+  override def retrieveMessage(id: UUID): Option[Message] = {
+    messageBuffer get id
+  }
 
-  override def storeMessagePayload(): Unit = ???
+  private val userBuffer: mutable.HashMap[UUID, UserModel] = mutable.HashMap()
+  override def storeUser(user: UserModel): Unit = {
+    userBuffer put (user.id, user)
+  }
 
-  override def storeUser(): Unit = ???
+  override def retrieveUser(id: UUID): Option[UserModel] = {
+    userBuffer get id
+  }
 
   override def storeUserInfo(): Unit = ???
 

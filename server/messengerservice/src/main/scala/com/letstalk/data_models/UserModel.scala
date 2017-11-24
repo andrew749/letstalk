@@ -1,5 +1,7 @@
 package com.letstalk.data_models
 
+import java.util.UUID
+
 /**
  * Created by andrewcodispoti on 2017-11-14.
  */
@@ -8,7 +10,7 @@ package com.letstalk.data_models
  * Base trait to represent a user
  */
 trait UserModel {
-  def id: String
+  def id: UUID
   def info: PersonalInfo
   def contactInfo: ContactInfo
 }
@@ -19,7 +21,7 @@ trait UserModel {
  * @param info personal information to identify a user
  * @param contactInfo
  */
-final case class NormalUser(id: String, info: PersonalInfo, contactInfo: ContactInfo) extends UserModel {}
+final case class NormalUser(id: UUID, info: PersonalInfo, contactInfo: ContactInfo) extends UserModel {}
 
 /**
  * Administrator of the platform
@@ -29,4 +31,4 @@ final case class NormalUser(id: String, info: PersonalInfo, contactInfo: Contact
  * @param info personal information to identify a user
  * @param contactInfo
  */
-final case class AdministratorUser(id: String, info: PersonalInfo, contactInfo: ContactInfo) extends UserModel {}
+final case class AdministratorUser(id: UUID, info: PersonalInfo, contactInfo: ContactInfo) extends UserModel {}

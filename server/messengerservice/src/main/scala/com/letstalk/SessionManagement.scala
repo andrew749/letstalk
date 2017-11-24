@@ -1,17 +1,19 @@
 package com.letstalk
 
-import akka.actor.{Actor, ActorRef, Props}
+import java.util.UUID
+
+import akka.actor.{ Actor, ActorRef, Props }
 import com.letstalk.data_models.UserModel
 
 import scala.collection.mutable
 
 sealed trait UserEvent {
-  val userId: String
+  val userId: UUID
 }
 
-case class LoginEvent(userId: String) extends UserEvent
-case class SignupEvent(userId: String) extends UserEvent
-case class LogoutEvent(userId: String) extends UserEvent
+case class LoginEvent(userId: UUID) extends UserEvent
+case class SignupEvent(userId: UUID) extends UserEvent
+case class LogoutEvent(userId: UUID) extends UserEvent
 
 trait SessionManagement { this: Actor =>
 
@@ -19,14 +21,14 @@ trait SessionManagement { this: Actor =>
   val storage: ActorRef
 
   // store all user sessions on this server
-  val sessions = new mutable.HashMap[String, ActorRef]
+  val sessions = new mutable.HashMap[UUID, ActorRef]
 
   /**
    * Helper method to get a usermodel for a specific id
    * @param userId
    * @return
    */
-  private def getUserForId(userId: String): UserModel = {
+  private def getUserForId(userId: UUID): UserModel = {
     ???
   }
 

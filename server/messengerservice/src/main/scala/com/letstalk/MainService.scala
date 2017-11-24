@@ -1,6 +1,6 @@
 package com.letstalk
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -9,12 +9,12 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.CreateUser
-import com.letstalk.data_models.{ContactInfo, NormalUser, PersonalInfo}
+import com.letstalk.data_models.{ ContactInfo, NormalUser, PersonalInfo }
 import com.letstalk.routes.MessageRoutes
 import com.letstalk.sample.routes.UserRoutes
 import com.typesafe.config.ConfigFactory
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 import scala.io.StdIn
 import slick.jdbc.PostgresProfile.api._
@@ -35,6 +35,7 @@ object MainService extends App
 
   private val log = Logging.getLogger(system, this)
 
+  // database engine to use
   implicit val db = Database.forConfig("h2mem1")
 
   // Needed for the Future and its methods flatMap/onComplete in the end
@@ -44,28 +45,12 @@ object MainService extends App
 
   val userRegistryActor: ActorRef = system.actorOf(UserRegistryActor.props, "userRegistryActor")
 
-  /**
-    * FIXME: Remove this. just here to create fake data
-    */
-  def createUsers() = {
-    val pinfo = PersonalInfo("Andrew")
-    val pinfo2 = PersonalInfo("Andrew 2")
-    val cinfo = ContactInfo("test@gmail.com", "5555555555")
-    userRegistryActor ! CreateUser(NormalUser("acod", pinfo, cinfo))
-    userRegistryActor ! CreateUser(NormalUser("andrew", pinfo2, cinfo))
-    log.debug("Created fake users")
-  }
-
-  // create fake users
-  createUsers()
-
   //#main-class
   // from the UserRoutes trait
   lazy val routes: Route = concat(
     userRoutes,
     messageRoute
   )
-
 
   //#main-class
 
