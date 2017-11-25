@@ -1,5 +1,7 @@
 package com.letstalk
 
+import java.util.UUID
+
 import akka.actor.{ Actor, ActorLogging, Props }
 import com.letstalk.data_models.UserModel
 
@@ -8,7 +10,7 @@ import com.letstalk.data_models.UserModel
 object UserRegistryActor {
   final case class ActionPerformed(description: String)
   final case class CreateUser(user: UserModel)
-  final case class GetUser(id: String)
+  final case class GetUser(id: UUID)
 
   def props: Props = Props[UserRegistryActor]
 }

@@ -3,7 +3,7 @@ package com.letstalk.data_layer
 import java.util.UUID
 
 import akka.actor.{ Actor, ActorLogging, Props }
-import com.letstalk.data_models.{ Message, UserModel }
+import com.letstalk.data_models.{ Message, Thread, UserModel }
 
 import scala.collection.mutable
 
@@ -41,7 +41,19 @@ class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with A
     case GetMessages(threadId) =>
       // This doesn't make much sense in the context of multiple datastores where you would need to
       // do some kind of consolidation so just using the first datastore for now.
-      sender() ! dataLayers.head.retrieveMessages(threadId)
+      println(threadId)
+      val results = dataLayers.head.retrieveMessages(threadId)
+      println(results)
+      sender() ! results
+
+    case thread: Thread =>
+
+      dataLayers foreach { _ storeThread thread }
+
+    case GetThread(id) =>
+      val results = dataLayers flatMap (_.retrieveThread(id))
+
+      sender() ! results.head
 
     case user: UserModel =>
       dataLayers foreach { _ storeUser user }
@@ -49,6 +61,8 @@ class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with A
     case GetUser(id) =>
       val results = dataLayers flatMap (_.retrieveUser(id))
       sender() ! results.head
+
+    case x => None
   }
 
 }
@@ -62,3 +76,4 @@ object DataManager {
 case class GetMessage(id: UUID)
 case class GetUser(id: UUID)
 case class GetMessages(threadId: UUID)
+case class GetThread(id: UUID)

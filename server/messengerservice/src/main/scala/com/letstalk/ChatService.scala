@@ -8,7 +8,7 @@ class ChatService
     with SessionManagement
     with ChatManagement {
 
-  implicit val storage: ActorRef = context.actorOf(DataManager.props(useMemory = true, useDatabase = true))
+  implicit val storage: ActorRef = context.actorOf(DataManager.props(useMemory = true, useDatabase = false))
 
   override def preStart() = {
   }

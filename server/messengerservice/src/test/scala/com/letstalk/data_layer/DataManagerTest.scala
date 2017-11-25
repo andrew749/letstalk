@@ -26,7 +26,7 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
     val uuid2 = UUID.randomUUID()
 
     val user1 = NormalUser(uuid1, pinfo, cinfo)
-    val user2 = NormalUser(uuid2, pinfo2, cinfo)
+    val thread1 = Thread(uuid2)
   }
 
   trait DataManagerTrait {
@@ -40,7 +40,7 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
     val messagePayload = IncomingMessagePayload("Test Message", System.currentTimeMillis)
     val uuid = UUID.randomUUID()
 
-    val message = Message(uuid, user1, user2, Option(messagePayload))
+    val message = Message(uuid, uuid1, uuid2, Option(messagePayload))
 
     dataManager ! message
 
@@ -50,6 +50,11 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
   "A DataManager actor" must "store users and return these user" in new DataManagerTrait with TestUsers {
     dataManager ! user1
     assert(Await.result(dataManager ? GetUser(user1.id), 10 seconds) === user1)
+  }
+
+  "A DataManager actor" must "store threads and returns these threads" in new DataManagerTrait with TestUsers {
+    dataManager ! thread1
+    assert(Await.result(dataManager ? GetThread(thread1.id), 10 seconds) === thread1)
   }
 
   override protected def afterAll(): Unit = {

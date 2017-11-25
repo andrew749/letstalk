@@ -15,12 +15,13 @@ trait ChatManagement { this: Actor =>
   lazy val log = Logging.getLogger(context.system, this)
 
   protected def chatManagement: Receive = {
-    case msg @ Message(id, sender, recipient, payload) =>
+    case msg @ Message(id, senderId, threadId, payload) =>
       log.debug("Got Message!")
 
       // send this message to the sessions if they exists
-      getSession(recipient.id) foreach { _ ! msg }
-      getSession(sender.id) foreach { _ ! msg }
+      // NOTE: mixing threads and users, not too sure about this
+      getSession(threadId) foreach { _ ! msg }
+      getSession(senderId) foreach { _ ! msg }
 
   }
 

@@ -15,35 +15,20 @@ import slick.jdbc.PostgresProfile.api._
  * @param threadId: id of Thread object that owns this message.
  * @param payload: Message data
  */
-<<<<<<< HEAD
-final case class Message(id: UUID, sender: UserModel, recipient: UserModel, payload: Option[MessagePayload])
-=======
-final case class Message(id: String, senderId: String, threadId: String, payload: Option[MessagePayload])
->>>>>>> WIP
+final case class Message(id: UUID, senderId: UUID, threadId: UUID, payload: Option[MessagePayload])
 
 /**
  * The table schema definition for a table.
  * @param tag
  */
-<<<<<<< HEAD
 class MessageTable(tag: Tag) extends Table[(UUID, UUID, UUID, UUID)](tag, "Messages") {
   def messageId = column[UUID]("ID", O.PrimaryKey)
   def senderId = column[UUID]("SENDER_ID")
-  def recipientId = column[UUID]("RECIPIENT_ID")
+  def threadId = column[UUID]("THREAD_ID")
   def payload = column[UUID]("PAYLOAD")
 
   // need to add this projection
-  def * = (messageId, senderId, recipientId, payload)
-=======
-class MessageTable(tag: Tag) extends Table[(String, String, String, String)](tag, "Messages") {
-  def messageId = column[String]("ID", O.PrimaryKey)
-  def senderId = column[String]("SENDER_ID")
-  def threadId = column[String]("THREAD_ID")
-  def payload = column[String]("PAYLOAD")
-
-  // need to add this projection
   def * = (messageId, senderId, threadId, payload)
->>>>>>> WIP
 
   val payloads = TableQuery[MessagePayloadTable]
   def payloadForeign = foreignKey("PAYLOAD_FK", payload, payloads)(_.id)

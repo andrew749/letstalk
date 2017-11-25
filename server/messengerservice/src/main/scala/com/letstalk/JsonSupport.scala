@@ -6,7 +6,9 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.letstalk.UserRegistryActor.ActionPerformed
 import com.letstalk.data_models._
 import com.letstalk.routes.MessageData
-import spray.json.{ DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat }
+import spray.json._
+
+import scala.collection.immutable
 
 /**
  * Unmarshall json into the data models
@@ -14,16 +16,16 @@ import spray.json.{ DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJson
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
   /**
-    * Custom serializer for UUID
-    * @return
-    */
-  implicit def UUIDFormat = new JsonFormat[UUID] {
+   * Custom serializer for UUID
+   * @return
+   */
+  implicit def UUIDFormat = new RootJsonFormat[UUID] {
     override def write(obj: UUID) = {
       new JsString(obj.toString)
     }
 
     override def read(json: JsValue) = {
-      UUID.fromString(json.toString)
+      UUID.fromString(json.convertTo[String])
     }
   }
   // import the default encoders for primitive types (Int, String, Lists etc)
@@ -38,11 +40,19 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val administratorUserJsonFormat: RootJsonFormat[AdministratorUser] = jsonFormat3(AdministratorUser)
 
   // Message Payload
-  implicit val incomingMessagePayloadJsonFormat: RootJsonFormat[IncomingMessagePayload] = jsonFormat2(IncomingMessagePayload)
-  implicit val outgoingMessagePayloadJsonFormat: RootJsonFormat[OutgoingMessagePayload] = jsonFormat3(OutgoingMessagePayload)
+  implicit val incomingMessagePayloadJsonFormat = jsonFormat2(IncomingMessagePayload)
+  implicit val outgoingMessagePayloadJsonFormat = jsonFormat3(OutgoingMessagePayload)
+  implicit object MessagePayloadFormat extends RootJsonFormat[MessagePayload] {
+    override def write(obj: MessagePayload) = obj match {
+      case msg: IncomingMessagePayload => msg.toJson
+      case msg: OutgoingMessagePayload => msg.toJson
+    }
+    override def read(value: JsValue) = value match {
+      case obj: JsObject if (obj.fields.size == 2) => value.convertTo[IncomingMessagePayload]
+      case obj: JsObject => value.convertTo[OutgoingMessagePayload]
+    }
+  }
 
   implicit val messageDataJsonFormat: RootJsonFormat[MessageData] = jsonFormat3(MessageData)
   implicit val messageJsonFormat: RootJsonFormat[Message] = jsonFormat4(Message)
-  implicit val messageImmSeqJsonFormat: RootJsonFormat[immutable.Seq[Message]] = immSeqFormat[Message]
-
 }
