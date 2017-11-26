@@ -8,7 +8,10 @@ import slick.jdbc.PostgresProfile.api._
  * Created by andrewcodispoti on 2017-11-14.
  */
 
-trait MessagePayload
+trait MessagePayload {
+  val messageContent: String
+  val time: Long
+}
 
 /**
  * Encapsulate incoming message payload

@@ -4,6 +4,8 @@ import java.util.UUID
 
 import slick.jdbc.PostgresProfile.api._
 
+import com.letstalk.data_layer.MessageEvent
+
 /**
  * Created by andrewcodispoti on 2017-11-14.
  */
@@ -16,6 +18,7 @@ import slick.jdbc.PostgresProfile.api._
  * @param payload: Message data
  */
 final case class Message(id: UUID, senderId: UUID, threadId: UUID, payload: Option[MessagePayload])
+  extends MessageEvent
 
 /**
  * The table schema definition for a table.

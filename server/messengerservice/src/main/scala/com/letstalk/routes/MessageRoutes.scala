@@ -10,15 +10,13 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{ IncomingMessagePayload, Message, Thread, UserModel }
-import com.letstalk.data_layer.{ GetMessages, GetThread }
-import com.letstalk.{ ChatService, JsonSupport }
+import com.letstalk.data_layer.{ GetMessages, GetThread, MemoryChatStorage, Messages }
+import com.letstalk.{ ChatService, JsonSupport, WithAuth }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
 case class MessageData(sender: UUID, thread: UUID, payload: String)
-
-case class Messages(values: Seq[Message])
 
 trait MessageRoutes extends JsonSupport {
 
@@ -26,11 +24,11 @@ trait MessageRoutes extends JsonSupport {
   implicit val timeout: Timeout
 
   def getUUID(): UUID = {
-    java.util.UUID.randomUUID
+    UUID.randomUUID
   }
 
   // reference to the actor for the chat server
-  lazy val chatServerActor: ActorRef = system.actorOf(Props[ChatService])
+  lazy val chatServerActor: ActorRef = system.actorOf(ChatService.props(new MemoryChatStorage))
 
   // TODO: make this a public service
   val userRegistryActor: ActorRef
@@ -39,59 +37,47 @@ trait MessageRoutes extends JsonSupport {
 
   lazy val messageRoute: Route =
     pathPrefix("messages") {
-      sendMessageRoute
+      cookie("sid") { sid =>
+        val token = UUID.fromString(sid.value)
+        sendMessageRoute(token) ~
+          getMessagesRoute(token)
+      }
     }
 
-  lazy val sendMessageRoute: Route =
+  def sendMessageRoute(token: UUID): Route =
     pathPrefix("send") {
 
-      // messages sent via post
       post {
 
         log.debug("post")
+
         entity(as[MessageData]) { data: MessageData =>
 
-          log.debug(s"Received message from ${data.sender} to ${data.thread}")
+          cookie("sid") { sid =>
+            // FIXME: probably don't need to send sender since that can be found from session token
+            log.debug(s"Received message from ${data.sender} to ${data.thread}")
+            implicit val atMost = 5 seconds
 
-          implicit val atMost = 5 seconds
-          // get futures for user data
-          // FIXME: double trouble, first we block, second we cast
-          val sender = Await.result(userRegistryActor ? GetUser(data.sender), 3 seconds)
-          val thread = Await.result(chatServerActor ? GetThread(data.thread), 3 seconds)
-          (sender, thread) match {
-            case (Some(_: UserModel), Some(_: Thread)) =>
+            // FIXME: Not entirely sure that this belongs here, probably should have a separate
+            // CreateMessage event
+            val messageId = getUUID()
+            val message = Message(messageId, data.sender, data.thread,
+              Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
 
-              // get some id
-              val tempId = getUUID()
+            chatServerActor ! WithAuth(token, message)
 
-              chatServerActor ! Message(tempId, data.sender, data.thread,
-                Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
-
-              // return the generated id to the requested
-              complete(tempId)
-
-            case x =>
-              // FIXME: Proper error handling, perhaps the thread or user don't exist
-              log.debug(s"Got an unknown type ${x}")
+            // return the generated id to the requested
+            complete(messageId)
           }
-
-          complete("OK")
         }
       }
-
     }
 
-  lazy val getMessagesRoute: Route =
+  def getMessagesRoute(token: UUID): Route =
     pathPrefix("get") {
       path(Segment) { threadId =>
-        log.debug("Got message get route")
-
-        val future = chatServerActor ? GetMessages(UUID.fromString(threadId))
-        onSuccess(future) {
-          case Messages(msgs) => complete(msgs)
-          case x => complete("Unknown Type")
-        }
+        val future = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
+        onSuccess(future) { case Messages(msgs) => complete(msgs) }
       }
     }
-
 }

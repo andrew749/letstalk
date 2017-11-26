@@ -1,15 +1,17 @@
 package com.letstalk.data_layer
 
 import java.util.UUID
+import scala.collection.mutable
+
+import akka.actor.Actor
 
 import com.letstalk.data_models.{ Message, Thread, UserModel }
-
-import scala.collection.mutable
 
 class MemoryChatStorage extends ChatStorage {
 
   private val messageBuffer: mutable.HashMap[UUID, Message] = mutable.HashMap()
   override def storeMessage(message: Message): Unit = {
+    println(s"storing message ${message.payload}")
     messageBuffer put (message.id, message)
   }
 
@@ -27,7 +29,6 @@ class MemoryChatStorage extends ChatStorage {
   }
 
   override def retrieveThread(id: UUID): Option[Thread] = {
-    // FIXME: retrieve from db
     threadBuffer get id
   }
 

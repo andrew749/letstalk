@@ -4,10 +4,12 @@ import java.util.UUID
 
 import slick.jdbc.PostgresProfile.api._
 
+import com.letstalk.data_layer.MessageEvent
+
 /**
  * Immutable thread object that uniquely identifies a conversation.
  */
-final case class Thread(id: UUID)
+final case class Thread(id: UUID) extends MessageEvent
 
 /**
  * The table schema definition for the thread table
