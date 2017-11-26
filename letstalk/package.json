@@ -3,14 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@types/react": "^16.0.25",
+    "@types/react-native": "^0.50.7",
     "flow-bin": "0.53.0",
     "jest-expo": "^22.0.0",
     "react-native-scripts": "^1.7.0",
-    "react-test-renderer": "16.0.0-beta.5"
+    "react-native-typescript-transformer": "^1.1.4",
+    "react-test-renderer": "16.0.0-beta.5",
+    "typescript": "^2.6.1"
   },
   "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "start": "react-native-scripts start",
+    "start": "react-native start --transformer node_modules/react-native-typescript-transformer/index.js --sourceExts ts,tsx",
     "eject": "react-native-scripts eject",
     "android": "react-native-scripts android",
     "ios": "react-native-scripts ios",
@@ -28,6 +32,7 @@
     "react-navigation": "^1.0.0-beta.19",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "watchman": "^0.1.8"
   }
 }

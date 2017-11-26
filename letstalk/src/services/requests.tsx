@@ -2,6 +2,8 @@ import fetch from 'cross-fetch';
 
 class Requestor {
 
+  serverUrl: string;
+
   constructor(serverUrl) {
     this.serverUrl = serverUrl;
   }

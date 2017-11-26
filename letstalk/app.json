@@ -1,4 +1,6 @@
 {
+  "name": "letsTalk",
+  "displayName": "letsTalk",
   "expo": {
     "sdkVersion": "22.0.0"
   }

@@ -8,10 +8,6 @@ const initialState = {
   ],
 };
 
-function conversationsReducer(state = initialState, action) {
+export function conversationsReducer(state = initialState, action) {
   return state;
 }
-
-export {
-  conversationsReducer,
-};

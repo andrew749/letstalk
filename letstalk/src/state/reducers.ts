@@ -1,4 +1,4 @@
-import { RECEIVE_MESSAGES } from './actions';
+import { RECEIVE_MESSAGES } from './types';
 import { BASE_URL } from '../services/constants';
 import Requestor from '../services/requests';
 
@@ -6,7 +6,7 @@ const initialState = {
   messages: [],
 };
 
-function threadReducer(state = initialState, action) {
+export function threadReducer(state = initialState, action) {
   switch (action.type) {
     case RECEIVE_MESSAGES: 
       return {
@@ -21,16 +21,11 @@ function threadReducer(state = initialState, action) {
 function receiveMessages(data) {
   return {
     type: RECEIVE_MESSAGES,
-    messages 
+    messages: data
   };
 };
 
-function fetchMessages(userId) {
+export function fetchMessages(userId) {
   return dispatch => (new Requestor(BASE_URL)).get('/messages/get')
     .then(data => dispatch(receiveMessages(data)));
-};
-
-export {
-  fetchMessages,
-  threadReducer,
 };

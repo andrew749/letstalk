@@ -3,17 +3,19 @@ import { AppRegistry, Text, View, StyleSheet } from 'react-native';
 
 export default class MessageElement extends Component {
   render() {
-    <View>
-      <Text>Message Text</Text>
-      <Text>Sender Image</Text>
-    </View>
+    return(
+      <View>
+        <Text>Message Text</Text>
+        <Text>Sender Image</Text>
+      </View>
+    );
   }
 }
 
 const styles = StyleSheet.create({
   item: {
    flex: 1,
-   flex-direction: row;
+   flexDirection: 'row',
    paddingTop: 22
   }
 });

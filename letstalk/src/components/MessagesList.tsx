@@ -5,7 +5,16 @@ import { connect } from 'react-redux';
 import DefaultListElement from './DefaultListElement';
 import MessageData from '../models/message-data';
 
-class MessagesList extends Component {
+interface Props {
+  threads: any;
+  navigation: any;
+}
+
+class MessagesList extends Component<Props, {}> {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     return(
       <View style={styles.container}>

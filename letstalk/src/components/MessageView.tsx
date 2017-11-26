@@ -3,9 +3,18 @@ import { ScrollView, AppRegistry, Text, TextInput, View, FlatList, StyleSheet } 
 import { connect } from 'react-redux';
 
 import MessageData from '../models/message-data';
-import { fetchMessages } from '../state/thread';
+import { fetchMessages } from '../state/reducers';
 
-class MessageView extends Component {
+interface Props {
+  fetchMessages: (stateName: string) => any;
+  navigation: any;
+}
+
+class MessageView extends Component<Props, {}> {
+  constructor(props) {
+    super(props);
+  }
+
   componentDidMount() {
     this.props.fetchMessages(this.props.navigation.state.params.name);
   }
