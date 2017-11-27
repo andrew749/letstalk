@@ -1,25 +1,25 @@
-import fetch from 'cross-fetch';
+// import fetch from 'cross-fetch';
 
 class Requestor {
 
   serverUrl: string;
 
-  constructor(serverUrl) {
+  constructor(serverUrl: string) {
     this.serverUrl = serverUrl;
   }
 
-  _makeRequest(route, fetchParams) {
-    return fetch(route, fetchParams).then((response) => {
-      if (!response.ok) return response.json().then((data) => {
+  _makeRequest(route: string, fetchParams: any) {
+    return fetch(route, fetchParams).then((response: any) => {
+      if (!response.ok) return response.json().then((data: any) => {
         throw new Error(data.error);
       });
       return response.json();
-    }, (reason) => {
+    }, (reason: any) => {
       throw reason;
     });
   }
 
-  get(endpoint) {
+  get(endpoint: string) {
     const fetchParams = {
       method: 'GET',
     };
@@ -27,7 +27,7 @@ class Requestor {
     return this._makeRequest(this.serverUrl + endpoint, fetchParams)
   }
 
-  post(endpoint, data) {
+  post(endpoint: string, data: any[]) {
     const fetchParams = {
       method: 'POST',
       body: JSON.stringify(data),

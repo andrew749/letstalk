@@ -1,4 +1,4 @@
-import MessageData from '../models/message-data';
+import MessageData from '../../models/message-data';
 
 // TODO: Add a type
 const initialState = {
@@ -8,6 +8,6 @@ const initialState = {
   ],
 };
 
-export function conversationsReducer(state = initialState, action) {
+export default function conversationsReducer(state = initialState, action: any) {
   return state;
 }

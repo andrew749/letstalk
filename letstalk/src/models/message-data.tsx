@@ -4,7 +4,7 @@ export default class MessageData {
   _id: number;
   _onClickAction: () => any;
 
-  constructor(id, user) {
+  constructor(id: number, user: string) {
     this._user = user;
     this._id = id;
   }
@@ -17,7 +17,7 @@ export default class MessageData {
     return this._id;
   }
 
-  setOnClickAction(action) {
+  setOnClickAction(action: () => any) {
     this._onClickAction = action;
   }
 

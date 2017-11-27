@@ -7,11 +7,7 @@ interface Props {
   style? : any;
 }
 
-export default class DefaultListElement extends Component<Props, {}> {
-  constructor(props) {
-    super(props);
-  }
-
+export default class DefaultListElement extends Component<Props> {
   render() {
     return(
       <TouchableOpacity onPress={ this.props.onPress }>

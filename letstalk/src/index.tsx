@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { compose, createStore } from 'redux';
 import { Provider } from 'react-redux';
+import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
+import createLogger from 'redux-logger';
+import thunk from 'redux-thunk';
 
-import store from './store';
+import rootReducer from './redux';
+
 import MessagesList from './components/MessagesList';
 import MessageView from './components/MessageView';
 
 import { StackNavigator } from 'react-navigation';
 
-const ConversationsScene = ({ navigation }) => (
-  <MessagesList navigation={navigation}/>
+const ConversationsScene = ({ navigation, threads }: any) => (
+  <MessagesList threads= { threads} navigation={ navigation }/>
 );
 
 const styles = StyleSheet.create({
@@ -31,6 +34,8 @@ const AppNavigation = StackNavigator({
   },
   MessageThread: {screen: MessageView}
 });
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
 
 class App extends React.Component {
   render() {
