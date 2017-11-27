@@ -53,11 +53,13 @@ object MainService extends App
   def createUsers() = {
     val pinfo = PersonalInfo("Andrew")
     val cinfo = ContactInfo("test@gmail.com", "5555555555")
-    val userUUID = java.util.UUID.randomUUID
-    val threadUUID = java.util.UUID.randomUUID
-    userRegistryActor ! CreateUser(NormalUser(userUUID, pinfo, cinfo))
-    chatServerActor ! Thread(threadUUID)
-    log.debug(s"Created user ${userUUID} and thread ${threadUUID}")
+    val user1UUID = UUID.randomUUID
+    val user2UUID = UUID.randomUUID
+    val threadUUID = UUID.randomUUID
+    userRegistryActor ! CreateUser(NormalUser(user1UUID, pinfo, cinfo))
+    userRegistryActor ! CreateUser(NormalUser(user2UUID, pinfo, cinfo))
+    chatServerActor ! WithAuth(UUID.randomUUID, Thread(threadUUID, user1UUID :: user2UUID :: Nil))
+    log.debug(s"Created users ${user1UUID}, ${user2UUID} and thread ${threadUUID}")
   }
 
   // create fake users
@@ -67,7 +69,8 @@ object MainService extends App
   // from the UserRoutes trait
   lazy val routes: Route = concat(
     userRoutes,
-    messageRoute
+    messageRoute,
+    threadRoute,
   )
 
   //#main-class

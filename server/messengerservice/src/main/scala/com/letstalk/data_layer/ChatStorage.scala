@@ -9,7 +9,7 @@ trait ChatStorage {
   def retrieveMessage(id: UUID): Option[Message]
   def retrieveMessages(threadId: UUID): Seq[Message]
   def storeThread(thread: Thread)
-  def retrieveThread(id: UUID): Option[Thread]
+  def retrieveThreads(userId: UUID): Seq[Thread]
   def storeUser(user: UserModel)
   def retrieveUser(id: UUID): Option[UserModel]
   def storeUserInfo()

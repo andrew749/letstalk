@@ -26,7 +26,7 @@ class DatabaseChatStorage extends ChatStorage {
     ???
   }
 
-  override def retrieveThread(id: UUID): Option[Thread] = {
+  override def retrieveThreads(threadId: UUID): Seq[Thread] = {
     // FIXME: retrieve from db
     ???
   }

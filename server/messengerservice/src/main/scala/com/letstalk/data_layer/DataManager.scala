@@ -10,9 +10,10 @@ import scala.collection.mutable
 trait MessageEvent
 
 case class GetMessages(threadId: UUID) extends MessageEvent
-case class GetThread(id: UUID) extends MessageEvent
+case class GetThreads(userId: UUID) extends MessageEvent
 
 case class Messages(values: Seq[Message])
+case class Threads(values: Seq[Thread])
 
 /**
  * This class receives messages with data that should be stored in
@@ -27,17 +28,16 @@ class DataManager(storage: ChatStorage) extends Actor with ActorLogging {
     case message: Message =>
       storage storeMessage message
 
-    case GetMessages(id) =>
-      println(s"get messages with id ${id}")
-      val messages = storage retrieveMessages id
+    case GetMessages(threadId) =>
+      val messages = storage retrieveMessages threadId
       sender() ! Messages(messages)
 
     case thread: Thread =>
       storage storeThread thread
 
-    case GetThread(id) =>
-      val thread = storage retrieveThread id
-      sender() ! thread
+    case GetThreads(userId) =>
+      val threads = storage retrieveThreads userId
+      sender() ! Threads(threads)
   }
 
 }

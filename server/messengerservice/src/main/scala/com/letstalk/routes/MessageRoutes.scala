@@ -10,7 +10,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
 import com.letstalk.data_models.{ IncomingMessagePayload, Message, Thread, UserModel }
-import com.letstalk.data_layer.{ GetMessages, GetThread, MemoryChatStorage, Messages }
+import com.letstalk.data_layer.{ GetMessages, GetThreads, MemoryChatStorage, Messages, Threads }
 import com.letstalk.{ ChatService, JsonSupport, WithAuth }
 
 import scala.concurrent.Await
@@ -41,6 +41,22 @@ trait MessageRoutes extends JsonSupport {
         val token = UUID.fromString(sid.value)
         sendMessageRoute(token) ~
           getMessagesRoute(token)
+      }
+    }
+
+  lazy val threadRoute: Route =
+    pathPrefix("threads") {
+      // FIXME: Place session cookie stuff outside of thread/messageRoute
+      cookie("sid") { sid =>
+        val token = UUID.fromString(sid.value)
+
+        path(Segment) { userId =>
+          get {
+            log.debug(s"Getting threads for ${userId}")
+            val future = chatServerActor ? WithAuth(token, GetThreads(UUID.fromString(userId)))
+            onSuccess(future) { case Threads(threads) => complete(threads) }
+          }
+        }
       }
     }
 
@@ -76,8 +92,10 @@ trait MessageRoutes extends JsonSupport {
   def getMessagesRoute(token: UUID): Route =
     pathPrefix("get") {
       path(Segment) { threadId =>
-        val future = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
-        onSuccess(future) { case Messages(msgs) => complete(msgs) }
+        get {
+          val future = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
+          onSuccess(future) { case Messages(msgs) => complete(msgs) }
+        }
       }
     }
 }

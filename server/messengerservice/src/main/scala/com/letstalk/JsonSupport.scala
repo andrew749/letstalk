@@ -55,4 +55,6 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit val messageDataJsonFormat: RootJsonFormat[MessageData] = jsonFormat3(MessageData)
   implicit val messageJsonFormat: RootJsonFormat[Message] = jsonFormat4(Message)
+
+  implicit val threadJsonFormat: RootJsonFormat[Thread] = jsonFormat2(Thread)
 }

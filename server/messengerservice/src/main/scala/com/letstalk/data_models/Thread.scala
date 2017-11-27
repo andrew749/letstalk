@@ -9,7 +9,7 @@ import com.letstalk.data_layer.MessageEvent
 /**
  * Immutable thread object that uniquely identifies a conversation.
  */
-final case class Thread(id: UUID) extends MessageEvent
+final case class Thread(id: UUID, userIds: List[UUID]) extends MessageEvent
 
 /**
  * The table schema definition for the thread table
