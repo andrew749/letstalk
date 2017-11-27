@@ -18,8 +18,8 @@ class MemoryChatStorage extends ChatStorage {
     messageBuffer.get(id)
   }
 
-  override def retrieveMessages(threadId: UUID): Seq[Message] = {
-    messageBuffer.values.filter(_.threadId == threadId).toSeq
+  override def retrieveMessages(threadId: UUID): List[Message] = {
+    messageBuffer.values.filter(_.threadId == threadId).toList
   }
 
   private val threadUserBuffer = mutable.HashMap[UUID, List[UUID]]()
@@ -30,8 +30,8 @@ class MemoryChatStorage extends ChatStorage {
       userThreadBuffer.update(userId, thread.id :: userThreadBuffer(userId)))
   }
 
-  override def retrieveThreads(userId: UUID): Seq[Thread] = {
-    userThreadBuffer.get(userId).getOrElse(Seq()).map((threadId: UUID) =>
+  override def retrieveThreads(userId: UUID): List[Thread] = {
+    userThreadBuffer.get(userId).getOrElse(Nil).map((threadId: UUID) =>
       Thread(threadId, threadUserBuffer.get(threadId).getOrElse(Nil)))
   }
 

@@ -12,8 +12,8 @@ trait MessageEvent
 case class GetMessages(threadId: UUID) extends MessageEvent
 case class GetThreads(userId: UUID) extends MessageEvent
 
-case class Messages(values: Seq[Message])
-case class Threads(values: Seq[Thread])
+case class Messages(values: List[Message])
+case class Threads(values: List[Thread])
 
 /**
  * This class receives messages with data that should be stored in

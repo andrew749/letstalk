@@ -46,13 +46,13 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
 
     dataManager ! message
 
-    assert(Await.result(dataManager ? GetMessages(thread1UUID), 10 seconds) === Messages(Seq(message)))
+    assert(Await.result(dataManager ? GetMessages(thread1UUID), 10 seconds) === Messages(List(message)))
   }
 
   "A DataManager actor" must "store threads and returns these threads" in new DataManagerTrait with TestUsers {
     dataManager ! thread1
-    assert(Await.result(dataManager ? GetThreads(user1.id), 10 seconds) === Threads(Seq(thread1)))
-    assert(Await.result(dataManager ? GetThreads(user2.id), 10 seconds) === Threads(Seq(thread1)))
+    assert(Await.result(dataManager ? GetThreads(user1.id), 10 seconds) === Threads(List(thread1)))
+    assert(Await.result(dataManager ? GetThreads(user2.id), 10 seconds) === Threads(List(thread1)))
   }
 
   override protected def afterAll(): Unit = {

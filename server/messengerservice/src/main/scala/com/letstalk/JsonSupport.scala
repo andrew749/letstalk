@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.letstalk.UserRegistryActor.ActionPerformed
 import com.letstalk.data_models._
-import com.letstalk.routes.MessageData
+import com.letstalk.routes.{ MessageData, SendMessageResponse }
 import spray.json._
 
 import scala.collection.immutable
@@ -54,7 +54,9 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   }
 
   implicit val messageDataJsonFormat: RootJsonFormat[MessageData] = jsonFormat3(MessageData)
-  implicit val messageJsonFormat: RootJsonFormat[Message] = jsonFormat4(Message)
+  implicit val sendMessageResponseFormat: RootJsonFormat[SendMessageResponse] =
+    jsonFormat1(SendMessageResponse)
 
+  implicit val messageJsonFormat: RootJsonFormat[Message] = jsonFormat4(Message)
   implicit val threadJsonFormat: RootJsonFormat[Thread] = jsonFormat2(Thread)
 }

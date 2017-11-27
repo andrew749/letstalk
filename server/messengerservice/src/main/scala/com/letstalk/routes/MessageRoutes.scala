@@ -18,6 +18,8 @@ import scala.concurrent.duration._
 
 case class MessageData(sender: UUID, thread: UUID, payload: String)
 
+case class SendMessageResponse(messageId: UUID)
+
 trait MessageRoutes extends JsonSupport {
 
   implicit val system: ActorSystem
@@ -53,8 +55,8 @@ trait MessageRoutes extends JsonSupport {
         path(Segment) { userId =>
           get {
             log.debug(s"Getting threads for ${userId}")
-            val future = chatServerActor ? WithAuth(token, GetThreads(UUID.fromString(userId)))
-            onSuccess(future) { case Threads(threads) => complete(threads) }
+            val threadsFuture = chatServerActor ? WithAuth(token, GetThreads(UUID.fromString(userId)))
+            onSuccess(threadsFuture) { case Threads(threads) => complete(threads) }
           }
         }
       }
@@ -83,7 +85,7 @@ trait MessageRoutes extends JsonSupport {
             chatServerActor ! WithAuth(token, message)
 
             // return the generated id to the requested
-            complete(messageId)
+            complete(SendMessageResponse(messageId))
           }
         }
       }
@@ -93,8 +95,8 @@ trait MessageRoutes extends JsonSupport {
     pathPrefix("get") {
       path(Segment) { threadId =>
         get {
-          val future = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
-          onSuccess(future) { case Messages(msgs) => complete(msgs) }
+          val messagesFuture = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
+          onSuccess(messagesFuture) { case Messages(msgs) => complete(msgs) }
         }
       }
     }

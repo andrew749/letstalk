@@ -8,6 +8,7 @@ import akka.event.Logging
 import com.letstalk.data_models.Message
 import com.letstalk.data_layer.MessageEvent
 
+// Wrapper for MessageEvents that does the correct authentication and authorization.
 case class WithAuth(token: UUID, messageEvent: MessageEvent)
 
 trait ChatManagement { this: Actor =>
