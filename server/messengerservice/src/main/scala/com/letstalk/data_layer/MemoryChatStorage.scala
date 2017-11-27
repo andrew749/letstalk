@@ -11,11 +11,11 @@ class MemoryChatStorage extends ChatStorage {
 
   private val messageBuffer: mutable.HashMap[UUID, Message] = mutable.HashMap()
   override def storeMessage(message: Message): Unit = {
-    messageBuffer put (message.id, message)
+    messageBuffer.put(message.id, message)
   }
 
   override def retrieveMessage(id: UUID): Option[Message] = {
-    messageBuffer get id
+    messageBuffer.get(id)
   }
 
   override def retrieveMessages(threadId: UUID): Seq[Message] = {
@@ -31,18 +31,17 @@ class MemoryChatStorage extends ChatStorage {
   }
 
   override def retrieveThreads(userId: UUID): Seq[Thread] = {
-    println(userThreadBuffer)
     userThreadBuffer.get(userId).getOrElse(Seq()).map((threadId: UUID) =>
       Thread(threadId, threadUserBuffer.get(threadId).getOrElse(Nil)))
   }
 
   private val userBuffer: mutable.HashMap[UUID, UserModel] = mutable.HashMap()
   override def storeUser(user: UserModel): Unit = {
-    userBuffer put (user.id, user)
+    userBuffer.put(user.id, user)
   }
 
   override def retrieveUser(id: UUID): Option[UserModel] = {
-    userBuffer get id
+    userBuffer.get(id)
   }
 
   override def storeUserInfo(): Unit = ???
