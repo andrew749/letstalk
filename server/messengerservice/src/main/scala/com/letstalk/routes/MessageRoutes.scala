@@ -9,13 +9,16 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models.{ IncomingMessagePayload, Message, UserModel }
-import com.letstalk.{ ChatService, JsonSupport }
+import com.letstalk.data_models.{ IncomingMessagePayload, Message, Thread, UserModel }
+import com.letstalk.data_layer.{ GetMessages, GetThreads, MemoryChatStorage, Messages, Threads }
+import com.letstalk.{ ChatService, JsonSupport, WithAuth }
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-case class MessageData(from: String, to: String, payload: String)
+case class MessageData(sender: UUID, thread: UUID, payload: String)
+
+case class SendMessageResponse(messageId: UUID)
 
 trait MessageRoutes extends JsonSupport {
 
@@ -23,11 +26,11 @@ trait MessageRoutes extends JsonSupport {
   implicit val timeout: Timeout
 
   def getUUID(): UUID = {
-    java.util.UUID.randomUUID
+    UUID.randomUUID
   }
 
   // reference to the actor for the chat server
-  lazy val chatServerActor: ActorRef = system.actorOf(Props[ChatService])
+  lazy val chatServerActor: ActorRef = system.actorOf(ChatService.props(new MemoryChatStorage))
 
   // TODO: make this a public service
   val userRegistryActor: ActorRef
@@ -36,53 +39,65 @@ trait MessageRoutes extends JsonSupport {
 
   lazy val messageRoute: Route =
     pathPrefix("messages") {
-      sendMessageRoute
+      cookie("sid") { sid =>
+        val token = UUID.fromString(sid.value)
+        sendMessageRoute(token) ~
+          getMessagesRoute(token)
+      }
     }
 
-  lazy val sendMessageRoute: Route =
+  lazy val threadRoute: Route =
+    pathPrefix("threads") {
+      // FIXME: Place session cookie stuff outside of thread/messageRoute
+      cookie("sid") { sid =>
+        val token = UUID.fromString(sid.value)
+
+        path(Segment) { userId =>
+          get {
+            log.debug(s"Getting threads for ${userId}")
+            val threadsFuture = chatServerActor ? WithAuth(token, GetThreads(UUID.fromString(userId)))
+            onSuccess(threadsFuture) { case Threads(threads) => complete(threads) }
+          }
+        }
+      }
+    }
+
+  def sendMessageRoute(token: UUID): Route =
     pathPrefix("send") {
 
-      // messages sent via post
       post {
 
         log.debug("post")
+
         entity(as[MessageData]) { data: MessageData =>
 
-          log.debug(s"Received message from ${data.from} to ${data.to}")
+          cookie("sid") { sid =>
+            // FIXME: probably don't need to send sender since that can be found from session token
+            log.debug(s"Received message from ${data.sender} to ${data.thread}")
+            implicit val atMost = 5 seconds
 
-          implicit val atMost = 5 seconds
-          // get futures for user data
-          // FIXME: double trouble, first we block, second we cast
-          val fromUser = Await.result(userRegistryActor ? GetUser(data.from), 3 seconds)
-          val toUser = Await.result(userRegistryActor ? GetUser(data.to), 3 seconds)
-          (fromUser, toUser) match {
-            case (Some(a: UserModel), Some(b: UserModel)) =>
+            // FIXME: Not entirely sure that this belongs here, probably should have a separate
+            // CreateMessage event
+            val messageId = getUUID()
+            val message = Message(messageId, data.sender, data.thread,
+              Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
 
-              // get some id
-              val tempId = getUUID()
+            chatServerActor ! WithAuth(token, message)
 
-              chatServerActor ! Message(tempId, a, b, Some(IncomingMessagePayload(data.payload, System.currentTimeMillis())))
-
-              // return the generated id to the requested
-              complete(tempId)
-
-            case x =>
-              log.debug(s"Got an unknown type ${x}")
+            // return the generated id to the requested
+            complete(SendMessageResponse(messageId))
           }
-
-          complete("OK")
         }
       }
-
     }
 
-  lazy val getMessagesRoute: Route =
+  def getMessagesRoute(token: UUID): Route =
     pathPrefix("get") {
-      path(Segment) { userId =>
-        log.debug("Got message get route")
-        // TODO: get messages for this user
-        ???
+      path(Segment) { threadId =>
+        get {
+          val messagesFuture = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))
+          onSuccess(messagesFuture) { case Messages(msgs) => complete(msgs) }
+        }
       }
     }
-
 }

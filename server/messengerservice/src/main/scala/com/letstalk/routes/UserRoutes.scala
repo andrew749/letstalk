@@ -1,5 +1,7 @@
 package com.letstalk.sample.routes
 
+import java.util.UUID
+
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
@@ -41,7 +43,7 @@ trait UserRoutes extends JsonSupport {
 
   lazy val getUserRoute: Route = pathPrefix("get") {
     get {
-      parameters('test.as[String]) { id =>
+      parameters('test.as[UUID]) { id =>
         // TODO: perform auth on this request
         log.debug("Got user get route")
         // TODO: get a users info

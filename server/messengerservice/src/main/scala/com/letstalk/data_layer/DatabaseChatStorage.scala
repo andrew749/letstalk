@@ -2,7 +2,7 @@ package com.letstalk.data_layer
 
 import java.util.UUID
 
-import com.letstalk.data_models.{ Message, UserModel }
+import com.letstalk.data_models.{ Message, Thread, UserModel }
 
 class DatabaseChatStorage extends ChatStorage {
 
@@ -12,6 +12,21 @@ class DatabaseChatStorage extends ChatStorage {
   }
 
   override def retrieveMessage(id: UUID): Option[Message] = {
+    // FIXME: retrieve from db
+    ???
+  }
+
+  override def retrieveMessages(threadId: UUID): List[Message] = {
+    // FIXME: retrieve from db
+    ???
+  }
+
+  override def storeThread(thread: Thread) = {
+    // FIXME: store in db
+    ???
+  }
+
+  override def retrieveThreads(threadId: UUID): List[Thread] = {
     // FIXME: retrieve from db
     ???
   }

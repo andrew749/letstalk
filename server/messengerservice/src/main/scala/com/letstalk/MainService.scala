@@ -1,5 +1,7 @@
 package com.letstalk
 
+import java.util.UUID
+
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
@@ -9,7 +11,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.letstalk.UserRegistryActor.CreateUser
-import com.letstalk.data_models.{ ContactInfo, NormalUser, PersonalInfo }
+import com.letstalk.data_models.{ ContactInfo, NormalUser, PersonalInfo, Thread }
 import com.letstalk.routes.MessageRoutes
 import com.letstalk.sample.routes.UserRoutes
 import com.typesafe.config.ConfigFactory
@@ -45,11 +47,30 @@ object MainService extends App
 
   val userRegistryActor: ActorRef = system.actorOf(UserRegistryActor.props, "userRegistryActor")
 
+  /**
+   * FIXME: Remove this. just here to create fake data
+   */
+  def createUsers() = {
+    val pinfo = PersonalInfo("Andrew")
+    val cinfo = ContactInfo("test@gmail.com", "5555555555")
+    val user1UUID = UUID.randomUUID
+    val user2UUID = UUID.randomUUID
+    val threadUUID = UUID.randomUUID
+    userRegistryActor ! CreateUser(NormalUser(user1UUID, pinfo, cinfo))
+    userRegistryActor ! CreateUser(NormalUser(user2UUID, pinfo, cinfo))
+    chatServerActor ! WithAuth(UUID.randomUUID, Thread(threadUUID, user1UUID :: user2UUID :: Nil))
+    log.debug(s"Created users ${user1UUID}, ${user2UUID} and thread ${threadUUID}")
+  }
+
+  // create fake users
+  createUsers()
+
   //#main-class
   // from the UserRoutes trait
   lazy val routes: Route = concat(
     userRoutes,
-    messageRoute
+    messageRoute,
+    threadRoute,
   )
 
   //#main-class

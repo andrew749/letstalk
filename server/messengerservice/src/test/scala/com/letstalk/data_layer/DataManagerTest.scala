@@ -22,15 +22,17 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
     val pinfo = PersonalInfo("acod")
     val pinfo2 = PersonalInfo("Andrew 2")
     val cinfo = ContactInfo("test@gmail.com", "5555555555")
-    val uuid1 = UUID.randomUUID()
-    val uuid2 = UUID.randomUUID()
+    val user1UUID = UUID.randomUUID()
+    val user2UUID = UUID.randomUUID()
+    val thread1UUID = UUID.randomUUID()
 
-    val user1 = NormalUser(uuid1, pinfo, cinfo)
-    val user2 = NormalUser(uuid2, pinfo2, cinfo)
+    val user1 = NormalUser(user1UUID, pinfo, cinfo)
+    val user2 = NormalUser(user2UUID, pinfo, cinfo)
+    val thread1 = Thread(thread1UUID, user1UUID :: user2UUID :: Nil)
   }
 
   trait DataManagerTrait {
-    val dataManager: ActorRef = system.actorOf(DataManager.props(useMemory = true, useDatabase = false))
+    val dataManager: ActorRef = system.actorOf(DataManager.props(new MemoryChatStorage))
   }
 
   implicit val timeout: Timeout = 10 seconds
@@ -40,16 +42,17 @@ class DataManagerTest() extends TestKit(ActorSystem("DataManagerTest"))
     val messagePayload = IncomingMessagePayload("Test Message", System.currentTimeMillis)
     val uuid = UUID.randomUUID()
 
-    val message = Message(uuid, user1, user2, Option(messagePayload))
+    val message = Message(uuid, user1UUID, thread1UUID, Option(messagePayload))
 
     dataManager ! message
 
-    assert(Await.result(dataManager ? GetMessage(uuid), 10 seconds) === message)
+    assert(Await.result(dataManager ? GetMessages(thread1UUID), 10 seconds) === Messages(List(message)))
   }
 
-  "A DataManager actor" must "store users and return these user" in new DataManagerTrait with TestUsers {
-    dataManager ! user1
-    assert(Await.result(dataManager ? GetUser(user1.id), 10 seconds) === user1)
+  "A DataManager actor" must "store threads and returns these threads" in new DataManagerTrait with TestUsers {
+    dataManager ! thread1
+    assert(Await.result(dataManager ? GetThreads(user1.id), 10 seconds) === Threads(List(thread1)))
+    assert(Await.result(dataManager ? GetThreads(user2.id), 10 seconds) === Threads(List(thread1)))
   }
 
   override protected def afterAll(): Unit = {

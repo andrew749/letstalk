@@ -3,9 +3,17 @@ package com.letstalk.data_layer
 import java.util.UUID
 
 import akka.actor.{ Actor, ActorLogging, Props }
-import com.letstalk.data_models.{ Message, UserModel }
+import com.letstalk.data_models.{ Message, Thread, UserModel }
 
 import scala.collection.mutable
+
+trait MessageEvent
+
+case class GetMessages(threadId: UUID) extends MessageEvent
+case class GetThreads(userId: UUID) extends MessageEvent
+
+case class Messages(values: List[Message])
+case class Threads(values: List[Thread])
 
 /**
  * This class receives messages with data that should be stored in
@@ -14,45 +22,28 @@ import scala.collection.mutable
  * Massive WIP
  */
 
-class DataManager(useMemory: Boolean, useDatabase: Boolean) extends Actor with ActorLogging {
-
-  implicit var dataLayers: mutable.Buffer[ChatStorage] = mutable.Buffer()
-
-  if (useMemory) {
-    val memoryChatStorage: MemoryChatStorage = new MemoryChatStorage()
-    dataLayers.append(memoryChatStorage)
-  }
-
-  if (useDatabase) {
-    val databaseChatStorage: DatabaseChatStorage = new DatabaseChatStorage()
-    dataLayers.append(databaseChatStorage)
-  }
+class DataManager(storage: ChatStorage) extends Actor with ActorLogging {
 
   def receive: Receive = {
     case message: Message =>
-      // store the message in all data layers
-      dataLayers foreach { _ storeMessage message }
+      storage storeMessage message
 
-    case GetMessage(id) =>
-      val results = dataLayers flatMap (_.retrieveMessage(id))
+    case GetMessages(threadId) =>
+      val messages = storage retrieveMessages threadId
+      sender() ! Messages(messages)
 
-      sender() ! results.head
+    case thread: Thread =>
+      storage storeThread thread
 
-    case user: UserModel =>
-      dataLayers foreach { _ storeUser user }
-
-    case GetUser(id) =>
-      val results = dataLayers flatMap (_.retrieveUser(id))
-      sender() ! results.head
+    case GetThreads(userId) =>
+      val threads = storage retrieveThreads userId
+      sender() ! Threads(threads)
   }
 
 }
 
 object DataManager {
-  def props(useMemory: Boolean, useDatabase: Boolean): Props = {
-    Props(classOf[DataManager], useMemory, useDatabase)
+  def props(storage: ChatStorage): Props = {
+    Props(classOf[DataManager], storage)
   }
 }
-
-case class GetMessage(id: UUID)
-case class GetUser(id: UUID)
