@@ -5,15 +5,9 @@ import { connect } from 'react-redux';
 import DefaultListElement from './DefaultListElement';
 import MessageData from '../models/message-data';
 
-import conversationsReducer from '../redux/conversation/reducer'
-
 interface Props {
   threads: any;
   navigation: any;
-}
-
-function mapStateToProps (state: any) {
-  return conversationsReducer(state, null);
 }
 
 class MessagesList extends Component<Props> {

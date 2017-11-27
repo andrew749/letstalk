@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux';
 
-import conversationReducer from './conversation/reducer';
+import conversationsReducer from './conversation/reducer';
 import threadReducer from './thread/reducer';
 
 const appReducer = combineReducers({
-    conversationReducer,
+    conversationsReducer,
     threadReducer
 });
 
