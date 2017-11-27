@@ -22,8 +22,8 @@ class MemoryChatStorage extends ChatStorage {
     messageBuffer.values.filter(_.threadId == threadId).toSeq
   }
 
-  private var threadUserBuffer = mutable.HashMap[UUID, List[UUID]]()
-  private var userThreadBuffer = mutable.HashMap[UUID, List[UUID]]().withDefaultValue(Nil)
+  private val threadUserBuffer = mutable.HashMap[UUID, List[UUID]]()
+  private val userThreadBuffer = mutable.HashMap[UUID, List[UUID]]().withDefaultValue(Nil)
   override def storeThread(thread: Thread): Unit = {
     threadUserBuffer put (thread.id, thread.userIds)
     thread.userIds.foreach((userId: UUID) =>
