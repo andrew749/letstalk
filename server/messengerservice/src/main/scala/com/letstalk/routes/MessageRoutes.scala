@@ -2,21 +2,20 @@ package com.letstalk.routes
 
 import java.util.UUID
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem}
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.letstalk.UserRegistryActor.GetUser
-import com.letstalk.data_models.{ IncomingMessagePayload, Message, Thread, UserModel }
-import com.letstalk.data_layer.{ GetMessages, GetThreads, MemoryChatStorage, Messages, Threads }
-import com.letstalk.{ ChatService, JsonSupport, WithAuth }
+import com.letstalk.data_layer._
+import com.letstalk.data_models.{CreateThread, IncomingMessagePayload, Message, Thread}
+import com.letstalk.{ChatService, JsonSupport, WithAuth}
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
 case class MessageData(sender: UUID, thread: UUID, payload: String)
+case class NewThread()
 
 case class SendMessageResponse(messageId: UUID)
 
@@ -38,6 +37,7 @@ trait MessageRoutes extends JsonSupport {
   private lazy val log = Logging.getLogger(system, this)
 
   lazy val messageRoute: Route =
+    // /messages
     pathPrefix("messages") {
       cookie("sid") { sid =>
         val token = UUID.fromString(sid.value)
@@ -52,6 +52,7 @@ trait MessageRoutes extends JsonSupport {
       cookie("sid") { sid =>
         val token = UUID.fromString(sid.value)
 
+        // /threads/<userId>
         path(Segment) { userId =>
           get {
             log.debug(s"Getting threads for ${userId}")
@@ -59,6 +60,22 @@ trait MessageRoutes extends JsonSupport {
             onSuccess(threadsFuture) { case Threads(threads) => complete(threads) }
           }
         }
+
+        // /threads/create
+        pathPrefix("create") {
+          post {
+            entity(as[CreateThread]) { newThread: CreateThread =>
+
+              val threadId = getUUID()
+              log.debug(s"Creating new thread with Id=${threadId}")
+
+              // FIXME: Check if a users exist and error if they do not
+              chatServerActor ! WithAuth(token, Thread(threadId, newThread.userIds))
+              complete(threadId)
+            }
+          }
+        }
+
       }
     }
 
@@ -93,6 +110,7 @@ trait MessageRoutes extends JsonSupport {
 
   def getMessagesRoute(token: UUID): Route =
     pathPrefix("get") {
+      // /messages/get/<threadId>
       path(Segment) { threadId =>
         get {
           val messagesFuture = chatServerActor ? WithAuth(token, GetMessages(UUID.fromString(threadId)))

@@ -11,6 +11,8 @@ import com.letstalk.data_layer.MessageEvent
  */
 final case class Thread(id: UUID, userIds: List[UUID]) extends MessageEvent
 
+final case class CreateThread(userIds: List[UUID]) extends MessageEvent
+
 /**
  * The table schema definition for the thread table
  * @param tag
