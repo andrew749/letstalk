@@ -15,7 +15,6 @@ import com.letstalk.{ChatService, JsonSupport, WithAuth}
 import scala.concurrent.duration._
 
 case class MessageData(sender: UUID, thread: UUID, payload: String)
-case class NewThread()
 
 case class SendMessageResponse(messageId: UUID)
 
