@@ -2,19 +2,21 @@ package com.letstalk.routes
 
 import java.util.UUID
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.letstalk.data_layer._
-import com.letstalk.data_models.{CreateThread, IncomingMessagePayload, Message, Thread}
-import com.letstalk.{ChatService, JsonSupport, WithAuth}
+import com.letstalk.data_models.{ IncomingMessagePayload, Message, Thread }
+import com.letstalk.{ ChatService, JsonSupport, WithAuth }
 
 import scala.concurrent.duration._
 
 case class MessageData(sender: UUID, thread: UUID, payload: String)
+
+final case class CreateThread(userIds: List[UUID])
 
 case class SendMessageResponse(messageId: UUID)
 
