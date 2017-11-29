@@ -10,6 +10,12 @@ interface Props {
   navigation: any;
 }
 
+function mapStateToProps (state: any): any {
+  return {
+    threads: state.conversationsReducer.threads
+  }
+}
+
 class MessagesList extends Component<Props> {
   render() {
     return(
@@ -32,7 +38,7 @@ class MessagesList extends Component<Props> {
   }
 }
 
-export default connect(({conversationsReducer}: any) => conversationsReducer, {})(MessagesList);
+export default connect(mapStateToProps)(MessagesList);
 
 const styles = StyleSheet.create({
   container: {

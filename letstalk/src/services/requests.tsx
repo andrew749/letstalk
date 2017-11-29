@@ -1,5 +1,3 @@
-// import fetch from 'cross-fetch';
-
 class Requestor {
 
   serverUrl: string;

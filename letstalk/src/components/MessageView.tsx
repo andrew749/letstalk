@@ -8,14 +8,24 @@ import { fetchMessages } from '../redux/thread/actions';
 
 interface Props {
   fetchMessages: (userId: string) => any;
+  messages: any[];
   navigation: any;
 }
 
-// function mapStateToProps(state: any) {
-//   return { 
-//     navigation: state.navigation
-//   }
-// }
+function mapStateToProps(state: any): any {
+  return { 
+    messages: state.threadReducer.messages
+  }
+}
+
+function mapDispatchToProps(dispatch: any): any {
+  console.log(dispatch);
+  return {
+    fetchMessages: (userId: string) => {
+      dispatch(fetchMessages(userId));
+    }
+  }
+}
 
 class MessageView extends Component<Props> {
   componentDidMount() {
@@ -35,7 +45,7 @@ class MessageView extends Component<Props> {
   }
 }
 
-export default connect(({threadReducer} : any) => threadReducer, { fetchMessages })(MessageView);
+export default connect(mapStateToProps, mapDispatchToProps)(MessageView);
 
 const styles = StyleSheet.create({
   container: {

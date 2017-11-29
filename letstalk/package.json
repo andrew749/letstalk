@@ -4,8 +4,8 @@
   "private": true,
   "devDependencies": {
     "flow-bin": "0.53.0",
-    "jest-expo": "^22.0.0",
-    "jest-expo-ts": "~20.0.0",
+    "jest-expo": "^20.0.0",
+    "jest-expo-ts": "^20.0.0",
     "react-native-scripts": "^1.7.0",
     "react-native-typescript-transformer": "^1.1.4",
     "react-test-renderer": "16.0.0-beta.5",
@@ -30,13 +30,7 @@
     "clean-build-test": "yarn run clean && yarn build && yarn test"
   },
   "jest": {
-    "preset": "jest-expo-ts",
-    "mapCoverage": true,
-    "verbose": true,
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "<rootDir>/build/"
-    ]
+    "preset": "jest-expo-ts"
   },
   "dependencies": {
     "@types/jest": "^21.1.8",
@@ -46,7 +40,6 @@
     "@types/react-redux": "^5.0.13",
     "@types/react-test-renderer": "^16.0.0",
     "@types/redux-logger": "^3.0.5",
-    "cross-fetch": "^1.1.1",
     "expo": "^22.0.2",
     "react": "16.0.0-beta.5",
     "react-native": "^0.49.5",
