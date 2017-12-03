@@ -5,7 +5,18 @@ import { connect } from 'react-redux';
 import DefaultListElement from './DefaultListElement';
 import MessageData from '../models/message-data';
 
-class MessagesList extends Component {
+interface Props {
+  threads: any;
+  navigation: any;
+}
+
+function mapStateToProps (state: any): any {
+  return {
+    threads: state.conversationsReducer.threads
+  }
+}
+
+class MessagesList extends Component<Props> {
   render() {
     return(
       <View style={styles.container}>
@@ -27,7 +38,7 @@ class MessagesList extends Component {
   }
 }
 
-export default connect(({conversationsReducer}) => conversationsReducer, {})(MessagesList);
+export default connect(mapStateToProps)(MessagesList);
 
 const styles = StyleSheet.create({
   container: {

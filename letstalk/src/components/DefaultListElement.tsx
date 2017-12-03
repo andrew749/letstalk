@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { AppRegistry, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default class DefaultListElement extends Component {
-  constructor() {
-    super();
-  }
+interface Props {
+  onPress: () => any;
+  data: any;
+  style? : any;
+}
 
+export default class DefaultListElement extends Component<Props> {
   render() {
     return(
       <TouchableOpacity onPress={ this.props.onPress }>

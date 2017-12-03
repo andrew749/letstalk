@@ -1,11 +1,33 @@
 import React, { Component } from 'react';
 import { ScrollView, AppRegistry, Text, TextInput, View, FlatList, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux'
 
 import MessageData from '../models/message-data';
-import { fetchMessages } from '../state/thread';
+import { fetchMessages } from '../redux/thread/actions';
 
-class MessageView extends Component {
+interface Props {
+  fetchMessages: (userId: string) => any;
+  messages: any[];
+  navigation: any;
+}
+
+function mapStateToProps(state: any): any {
+  return { 
+    messages: state.threadReducer.messages
+  }
+}
+
+function mapDispatchToProps(dispatch: any): any {
+  console.log(dispatch);
+  return {
+    fetchMessages: (userId: string) => {
+      dispatch(fetchMessages(userId));
+    }
+  }
+}
+
+class MessageView extends Component<Props> {
   componentDidMount() {
     this.props.fetchMessages(this.props.navigation.state.params.name);
   }
@@ -17,13 +39,13 @@ class MessageView extends Component {
     return(
       <View style={ styles.container }>
         <ScrollView></ScrollView>
-        <TextInput value={placeholderText} />
+        <TextInput value={ placeholderText } />
       </View>
     );
   }
 }
 
-export default connect(({threadReducer}) => threadReducer, { fetchMessages })(MessageView);
+export default connect(mapStateToProps, mapDispatchToProps)(MessageView);
 
 const styles = StyleSheet.create({
   container: {

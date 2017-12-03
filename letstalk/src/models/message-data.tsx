@@ -1,19 +1,23 @@
 export default class MessageData {
 
-  constructor(id, user) {
+  _user: string;
+  _id: number;
+  _onClickAction: () => any;
+
+  constructor(id: number, user: string) {
     this._user = user;
     this._id = id;
   }
 
-  getUserName() {
+  getUserName(): string {
     return this._user;
   }
 
-  getId() {
+  getId(): number {
     return this._id;
   }
 
-  setOnClickAction(action) {
+  setOnClickAction(action: () => any) {
     this._onClickAction = action;
   }
 

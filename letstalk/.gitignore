@@ -4,3 +4,8 @@ npm-debug.*
 yarn-error.log
 package-lock.json
 yarn.lock
+__tests__/
+build/
+coverage/
+.vscode/
+.DS_Store
