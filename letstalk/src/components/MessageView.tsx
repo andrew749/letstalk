@@ -8,12 +8,12 @@ import { fetchMessages } from '../redux/thread/actions';
 
 interface Props {
   fetchMessages: (userId: string) => any;
-  messages: any[];
+  messages: MessageData[];
   navigation: any;
 }
 
 function mapStateToProps(state: any): any {
-  return { 
+  return {
     messages: state.threadReducer.messages
   }
 }
@@ -27,6 +27,16 @@ function mapDispatchToProps(dispatch: any): any {
   }
 }
 
+class MElementData {
+    message: string;
+    ours: boolean;
+    constructor(message: string, ours: boolean) {
+        this.message = message;
+        this.ours = ours;
+    }
+
+}
+
 class MessageView extends Component<Props> {
   componentDidMount() {
     this.props.fetchMessages(this.props.navigation.state.params.name);
@@ -38,8 +48,18 @@ class MessageView extends Component<Props> {
 
     return(
       <View style={ styles.container }>
-        <ScrollView></ScrollView>
-        <TextInput value={ placeholderText } />
+        <FlatList
+        data = { [ new MElementData("Test", true), new MElementData("Test theirs", false) ] }
+        renderItem = {(obj) =>
+            <View style = {[styles.message, obj.item.ours ? styles.ourMessage : styles.theirMessage ]} >
+                <Text>{obj.item.message}</Text>
+            </View>
+        }
+        />
+        <TextInput
+            style={ styles.textInput }
+            value={ placeholderText }
+            editable={ true }/>
       </View>
     );
   }
@@ -52,12 +72,29 @@ const styles = StyleSheet.create({
    flex: 1,
    paddingTop: 22
   },
+  message: {
+    padding:5,
+    paddingRight: 10,
+    paddingLeft: 10,
+    borderRadius: 5,
+    backgroundColor: "#01F"
+  },
+  theirMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#00B0FF",
+    marginLeft: 10
+  },
+  ourMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#E0E0E0",
+    marginRight: 10
+  },
   item: {
     padding: 10,
     fontSize: 18,
     height: 44,
   },
   textInput: {
-    padding:20
+    marginBottom:10
   }
 });
