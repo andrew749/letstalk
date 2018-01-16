@@ -1,31 +1,15 @@
 import React, { Component } from 'react';
 import { ScrollView, AppRegistry, Text, TextInput, View, FlatList, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux'
+import { Dispatch } from 'redux'
 
 import MessageData from '../models/message-data';
-import { fetchMessages } from '../redux/thread/actions';
+import { RootState } from '../redux';
+import { State as ThreadState } from '../redux/thread/reducer';
 
-interface Props {
-  fetchMessages: (userId: string) => any;
-  messages: MessageData[];
+interface Props extends ThreadState {
   navigation: any;
-}
-
-function mapStateToProps(state: any): any {
-  return {
-    messages: state.threadReducer.messages
-  }
-}
-
-function mapDispatchToProps(dispatch: any): any {
-  console.log(dispatch);
-  return {
-    fetchMessages: (userId: string) => {
-      dispatch(fetchMessages(userId));
-    }
-  }
-}
+};
 
 class MElementData {
     message: string;
@@ -38,10 +22,6 @@ class MElementData {
 }
 
 class MessageView extends Component<Props> {
-  componentDidMount() {
-    this.props.fetchMessages(this.props.navigation.state.params.name);
-  }
-
   render() {
     const { params } = this.props.navigation.state;
     const placeholderText = `Send a message to ${ params.name }`;
@@ -65,8 +45,17 @@ class MessageView extends Component<Props> {
   }
 }
 
+function mapStateToProps(state: RootState): ThreadState {
+  return state.thread;
+}
+
+function mapDispatchToProps(dispatch: Dispatch<ThreadState>): any {
+  return {};
+}
+
 export default connect(mapStateToProps, mapDispatchToProps)(MessageView);
 
+// TODO: Move style into some stylesheet
 const styles = StyleSheet.create({
   container: {
    flex: 1,

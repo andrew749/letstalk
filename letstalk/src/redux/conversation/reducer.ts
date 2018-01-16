@@ -1,13 +1,20 @@
-import MessageData from '../../models/message-data';
+import Immutable from 'immutable';
 
-// TODO: Add a type
-const initialState = {
-  threads: [
-    new MessageData(1, "Andrew"),
-    new MessageData(2, "Adam"),
-  ],
+import MessageData from '../../models/message-data';
+import { Action } from '../actions';
+
+export type State = {
+  threads: Immutable.List<MessageData>,
 };
 
-export default function conversationsReducer(state = initialState, action: any) {
+const initialState: State = {
+  threads: Immutable.List<MessageData>([
+    new MessageData(1, "Andrew"),
+    new MessageData(2, "Adam"),
+    new MessageData(3, "Wojtek"),
+  ]),
+};
+
+export function reducer(state: State = initialState, action: Action<any>) {
   return state;
 }

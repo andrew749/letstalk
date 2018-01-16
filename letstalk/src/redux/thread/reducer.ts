@@ -1,21 +1,24 @@
-import { RECEIVE_MESSAGES } from './types';
+import Immutable from 'immutable';
 
-interface State {
-  messages: any[]
-}
+import { receiveMessages } from './actions';
+import MessageData from '../../models/message-data';
+import { Action, isType } from '../actions';
+
+export type State = {
+  messages: Immutable.List<MessageData>,
+};
 
 const initialState: State = {
-  messages: []
-}
+  messages: Immutable.List<MessageData>(),
+};
 
-export default function threadReducer(state = initialState, action: any) {
-  switch (action.type) {
-    case RECEIVE_MESSAGES: 
-      return {
-        ...state,
-        messages: action.messages,
-      };
-    default:
-      return state;
-  };
+export function reducer(state: State = initialState, action: Action<any>): State {
+  if (isType(action, receiveMessages)) {
+    return {
+      ...state,
+      messages: action.payload.messages,
+    };
+  }
+
+  return state;
 };

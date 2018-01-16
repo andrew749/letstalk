@@ -1,17 +1,17 @@
-import { combineReducers } from 'redux';
+import { combineReducers, Reducer } from 'redux';
 
-import conversationsReducer from './conversation/reducer';
-import threadReducer from './thread/reducer';
+import { reducer as conversation, State as ConversationState } from './conversation/reducer';
+import { reducer as thread, State as ThreadState } from './thread/reducer';
+import { receiveMessages } from './thread/actions';
 
-const appReducer = combineReducers({
-    conversationsReducer,
-    threadReducer
-});
-
-// Setup root reducer
-const rootReducer = (state: any, action: any) => {
-    const newState = (action.type === 'RESET') ? undefined : state;
-    return appReducer(newState, action);
+export interface RootState {
+  conversation: ConversationState;
+  thread: ThreadState;
 };
 
-export default rootReducer;
+const appReducer: Reducer<RootState> = combineReducers<RootState>({
+  conversation,
+  thread,
+});
+
+export default appReducer;

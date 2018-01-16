@@ -1,15 +1,15 @@
-import { RECEIVE_MESSAGES } from './types';
-import Requestor from '../../services/requests';
-import { BASE_URL } from '../../services/constants'
+import Immutable from 'immutable';
 
-function receiveMessages(data: any[]) {
-    return {
-      type: RECEIVE_MESSAGES,
-      messages: data
-    };
-  };
-  
-export function fetchMessages(userId: string) {
-    return (dispatch: any) => (new Requestor(BASE_URL)).get('/messages/get')
-        .then((data: any[]) => dispatch(receiveMessages(data)));
+import MessageData from '../../models/message-data';
+import { actionCreator } from '../actions';
+
+// TODO: Figure out a nice way to make sure these are unique.
+// TODO: Use enum???
+const RECEIVE_MESSAGES = 'THREAD_RECEIVE_MESSAGES';
+
+interface ReceiveMessagesPayload {
+  readonly messages: Immutable.List<MessageData>;
 };
+
+export const receiveMessages =
+  actionCreator<ReceiveMessagesPayload>(RECEIVE_MESSAGES);
