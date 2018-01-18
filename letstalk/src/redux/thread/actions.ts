@@ -1,15 +1,24 @@
 import Immutable from 'immutable';
+import { Action, ActionCreator } from 'redux';
 
 import MessageData from '../../models/message-data';
-import { actionCreator } from '../actions';
 
-// TODO: Figure out a nice way to make sure these are unique.
-// TODO: Use enum???
-const RECEIVE_MESSAGES = 'THREAD_RECEIVE_MESSAGES';
+export enum TypeKeys {
+  RECEIVE_MESSAGES = 'RECEIVE_MESSAGES',
+}
 
-interface ReceiveMessagesPayload {
+export interface ReceiveMessagesAction extends Action {
+  readonly type: TypeKeys.RECEIVE_MESSAGES;
   readonly messages: Immutable.List<MessageData>;
 };
 
-export const receiveMessages =
-  actionCreator<ReceiveMessagesPayload>(RECEIVE_MESSAGES);
+export const receiveMessages: ActionCreator<ReceiveMessagesAction> =
+  (messages: Immutable.List<MessageData>) => {
+  return {
+    type: TypeKeys.RECEIVE_MESSAGES,
+    messages,
+  };
+};
+
+export type ActionTypes =
+  | ReceiveMessagesAction

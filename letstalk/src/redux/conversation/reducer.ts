@@ -1,7 +1,8 @@
 import Immutable from 'immutable';
+import { Action } from 'redux';
 
 import MessageData from '../../models/message-data';
-import { Action } from '../actions';
+import { ActionTypes, TypeKeys } from './actions';
 
 export type State = {
   threads: Immutable.List<MessageData>,
@@ -15,6 +16,17 @@ const initialState: State = {
   ]),
 };
 
-export function reducer(state: State = initialState, action: Action<any>) {
-  return state;
+// TODO: Change Action to a union of actual possible action types, when they exist
+export function reducer(state: State = initialState, action: ActionTypes) {
+  switch (action.type) {
+    case TypeKeys.RECEIVE_CONVERSATIONS:
+      return {
+        ...state,
+        threads: action.threads,
+      }
+    default:
+      // Ensure exhaustiveness of select
+      const _: never = action.type;
+      return state;
+  }
 }

@@ -6,6 +6,7 @@
         "outDir": "./build/dist",
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
+        "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
         "experimentalDecorators": true,
         "preserveConstEnums": true,

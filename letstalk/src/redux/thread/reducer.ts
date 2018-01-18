@@ -1,8 +1,8 @@
 import Immutable from 'immutable';
+import { Action } from 'redux';
 
-import { receiveMessages } from './actions';
 import MessageData from '../../models/message-data';
-import { Action, isType } from '../actions';
+import { ActionTypes, TypeKeys } from './actions';
 
 export type State = {
   messages: Immutable.List<MessageData>,
@@ -12,13 +12,16 @@ const initialState: State = {
   messages: Immutable.List<MessageData>(),
 };
 
-export function reducer(state: State = initialState, action: Action<any>): State {
-  if (isType(action, receiveMessages)) {
-    return {
-      ...state,
-      messages: action.payload.messages,
-    };
+export function reducer(state: State = initialState, action: ActionTypes): State {
+  switch (action.type) {
+    case TypeKeys.RECEIVE_MESSAGES:
+      return {
+        ...state,
+        messages: action.messages,
+      };
+    default:
+      // Ensure exhaustiveness of select
+      const _: never = action.type;
+      return state;
   }
-
-  return state;
 };

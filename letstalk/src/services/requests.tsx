@@ -6,6 +6,7 @@ class Requestor {
     this.serverUrl = serverUrl;
   }
 
+  // TODO: Add types
   _makeRequest(route: string, fetchParams: any) {
     return fetch(route, fetchParams).then((response: any) => {
       if (!response.ok) return response.json().then((data: any) => {

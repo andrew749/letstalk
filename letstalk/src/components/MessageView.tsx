@@ -1,13 +1,21 @@
 import React, { Component } from 'react';
 import { ScrollView, AppRegistry, Text, TextInput, View, FlatList, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { Dispatch } from 'redux'
+import { ActionCreator, Dispatch } from 'redux'
+import { ThunkAction } from 'redux-thunk';
 
 import MessageData from '../models/message-data';
 import { RootState } from '../redux';
 import { State as ThreadState } from '../redux/thread/reducer';
+import { ReceiveMessagesAction, receiveMessages } from '../redux/thread/actions';
+import { BASE_URL } from '../services/constants';
+import Requestor from '../services/requests';
 
-interface Props extends ThreadState {
+interface DispatchActions {
+  fetchMessages: ActionCreator<ThunkAction<Promise<ReceiveMessagesAction>, ThreadState, void>>;
+};
+
+interface Props extends ThreadState, DispatchActions {
   navigation: any;
 };
 
@@ -45,13 +53,25 @@ class MessageView extends Component<Props> {
   }
 }
 
-function mapStateToProps(state: RootState): ThreadState {
+const mapStateToProps = (state: RootState): ThreadState => {
   return state.thread;
-}
+};
 
-function mapDispatchToProps(dispatch: Dispatch<ThreadState>): any {
-  return {};
-}
+// TODO: Move elsewhere
+const fetchMessages: ActionCreator<
+  ThunkAction<Promise<ReceiveMessagesAction>, ThreadState, void>> = (userId: string) => {
+  return async (dispatch: Dispatch<ThreadState>): Promise<ReceiveMessagesAction> => {
+    const data = await (new Requestor(BASE_URL)).get('/messages/get');
+    // TODO: Add types for JSON
+    return receiveMessages(data);
+  };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch<ThreadState>): DispatchActions => {
+  return {
+    fetchMessages,
+  };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(MessageView);
 
