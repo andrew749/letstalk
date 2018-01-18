@@ -4,24 +4,23 @@ import { connect } from 'react-redux';
 
 import DefaultListElement from './DefaultListElement';
 import MessageData from '../models/message-data';
+import { RootState } from '../redux';
+import { State as ConversationState } from '../redux/conversation/reducer';
 
-interface Props {
-  threads: any;
+interface Props extends ConversationState {
   navigation: any;
 }
 
-function mapStateToProps (state: any): any {
-  return {
-    threads: state.conversationsReducer.threads
-  }
-}
+function mapStateToProps (state: RootState): ConversationState {
+  return state.conversation;
+};
 
 class MessagesList extends Component<Props> {
   render() {
     return(
       <View style={styles.container}>
         <FlatList
-          data={this.props.threads}
+          data={this.props.threads.toArray()}
           keyExtractor={ (item) => item.getId() }
 
           renderItem={(

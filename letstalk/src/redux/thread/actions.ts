@@ -1,15 +1,24 @@
-import { RECEIVE_MESSAGES } from './types';
-import Requestor from '../../services/requests';
-import { BASE_URL } from '../../services/constants'
+import Immutable from 'immutable';
+import { Action, ActionCreator } from 'redux';
 
-function receiveMessages(data: any[]) {
-    return {
-      type: RECEIVE_MESSAGES,
-      messages: data
-    };
-  };
-  
-export function fetchMessages(userId: string) {
-    return (dispatch: any) => (new Requestor(BASE_URL)).get('/messages/get')
-        .then((data: any[]) => dispatch(receiveMessages(data)));
+import MessageData from '../../models/message-data';
+
+export enum TypeKeys {
+  RECEIVE_MESSAGES = 'RECEIVE_MESSAGES',
+}
+
+export interface ReceiveMessagesAction extends Action {
+  readonly type: TypeKeys.RECEIVE_MESSAGES;
+  readonly messages: Immutable.List<MessageData>;
 };
+
+export const receiveMessages: ActionCreator<ReceiveMessagesAction> =
+  (messages: Immutable.List<MessageData>) => {
+  return {
+    type: TypeKeys.RECEIVE_MESSAGES,
+    messages,
+  };
+};
+
+export type ActionTypes =
+  | ReceiveMessagesAction

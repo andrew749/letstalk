@@ -5,15 +5,16 @@ import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 
-import rootReducer from './redux';
+import appReducer from './redux';
 
 import MessagesList from './components/MessagesList';
 import MessageView from './components/MessageView';
 
 import { StackNavigator } from 'react-navigation';
 
-const ConversationsScene = ({ navigation, threads }: any) => (
-  <MessagesList threads= { threads} navigation={ navigation }/>
+// TODO: Investigate typing with navigation
+const ConversationsScene = ({ navigation }: any) => (
+  <MessagesList navigation={ navigation }/>
 );
 
 const styles = StyleSheet.create({
@@ -35,7 +36,7 @@ const AppNavigation = StackNavigator({
   MessageThread: {screen: MessageView}
 });
 
-const store = createStore(rootReducer, applyMiddleware(thunk));
+const store = createStore(appReducer, applyMiddleware(thunk));
 
 class App extends React.Component {
   render() {

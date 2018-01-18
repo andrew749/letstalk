@@ -1,21 +1,27 @@
-import { RECEIVE_MESSAGES } from './types';
+import Immutable from 'immutable';
+import { Action } from 'redux';
 
-interface State {
-  messages: any[]
-}
+import MessageData from '../../models/message-data';
+import { ActionTypes, TypeKeys } from './actions';
+
+export type State = {
+  messages: Immutable.List<MessageData>,
+};
 
 const initialState: State = {
-  messages: []
-}
+  messages: Immutable.List<MessageData>(),
+};
 
-export default function threadReducer(state = initialState, action: any) {
+export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
-    case RECEIVE_MESSAGES: 
+    case TypeKeys.RECEIVE_MESSAGES:
       return {
         ...state,
         messages: action.messages,
       };
     default:
+      // Ensure exhaustiveness of select
+      const _: never = action.type;
       return state;
-  };
+  }
 };
