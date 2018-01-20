@@ -1,4 +1,4 @@
-package service
+package main
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	_ := routes.RegisterControllers()
+	routes.RegisterControllers()
 	// start server
 	http.ListenAndServe(":8080", nil)
 }
