@@ -2,6 +2,10 @@ package routes
 
 import "net/http"
 
+/**
+* A Controller consists of a route and a payload.
+* A Controller's handler determines what is returned to the user.
+ */
 type Controller struct {
 	Name string
 }
