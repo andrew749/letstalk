@@ -1,25 +1,20 @@
 package data_types
 
-import (
-  "./program"
-  "./school_stream"
-)
-
 type SchoolInfo struct {
-	Program Program
-	Stream  SchoolStream
+	Program *Program
+	Stream  *SchoolStream
 }
 
-func CreateSchoolInfo(program Program, stream SchoolStream) SchoolInfo, error {
-  program, err := CreateProgram(program)
-  if err != nil {
-    return err
-  }
+func CreateSchoolInfo(program *Program, stream *SchoolStream) (*SchoolInfo, error) {
+	program, err := CreateProgram(program)
+	if err != nil {
+		return nil, err
+	}
 
-  stream, err := CreateSchoolStream(stream)
-  if err != nil {
-    return err
-  }
+	stream, err = CreateSchoolStream(stream)
+	if err != nil {
+		return nil, err
+	}
 
-  return SchoolInfo{program, stfream}
+	return &SchoolInfo{program, stream}, nil
 }

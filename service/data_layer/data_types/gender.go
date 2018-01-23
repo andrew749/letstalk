@@ -9,21 +9,21 @@ type GenderError struct {
 const (
 	MALE   Gender = 0
 	FEMALE Gender = 1
-  OTHER Gender = 10
+	OTHER  Gender = 10
 )
 
-func CreateGender(genderCode int) Gender, error {
-    if err := validateGender(genderCode) != nil {
-      return nil, err
-    }
-    return genderCode, nil
+func CreateGender(genderCode *Gender) (*Gender, error) {
+	if err := validateGender(genderCode); err != nil {
+		return nil, err
+	}
+	return genderCode, nil
 }
 
-func validateGender(gender Gender) error {
-	switch gender {
+func validateGender(gender *Gender) error {
+	switch *gender {
 	case MALE:
 	case FEMALE:
-  case OTHER:
+	case OTHER:
 		return nil
 	}
 	return GenderError{0}

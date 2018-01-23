@@ -1,34 +1,29 @@
 package data_types
 
-import (
-  "gender"
-)
-
 type UserInfo struct {
-	Gender    Gender
-	Birthdate Time
+	Gender    *Gender
+	Birthdate *Birthdate
 }
 
 /**
  * Validates user info and constructs a safe struct
  */
 func CreateUserInfo(
-	gender Gender
-	birthdate Time
-) UserInfo, error {
+	gender *Gender,
+	birthdate *Birthdate,
+) (*UserInfo, error) {
 
-  gender, err := CreateGender(genderCode)
+	gender, err := CreateGender(gender)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  birthdate, err := CreateBirthdate(birthdate)
+	birthdate, err = CreateBirthdate(birthdate)
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  return UserInfo{gender, birthdate}
-
+	return &UserInfo{gender, birthdate}, nil
 }
