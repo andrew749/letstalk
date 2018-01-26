@@ -1,10 +1,10 @@
 package data_types
 
-type Program string
+import (
+	"uwletstalk/service/data_layer/exceptions"
+)
 
-type ProgramError struct {
-	ErrorCode int
-}
+type Program string
 
 func CreateProgram(program *Program) (*Program, error) {
 	if err := validateProgram(program); err != nil {
@@ -14,6 +14,7 @@ func CreateProgram(program *Program) (*Program, error) {
 }
 
 func validateProgram(program *Program) error {
+	// TODO: Don't hardcode these
 	switch *program {
 	case "Software Engineering":
 	case "Computer Engineering":
@@ -21,13 +22,5 @@ func validateProgram(program *Program) error {
 	case "Systems Design Engineering":
 		return nil
 	}
-	return ProgramError{0}
-}
-
-func (pe ProgramError) Error() string {
-	switch pe.ErrorCode {
-	case 0:
-		return "Bad Program"
-	}
-	return "Unknown Error"
+	return exceptions.CreateClientException("Invalid Program")
 }
