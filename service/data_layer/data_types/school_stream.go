@@ -1,10 +1,10 @@
 package data_types
 
-type SchoolStream string
+import (
+	"uwletstalk/service/data_layer/exceptions"
+)
 
-type SchoolStreamError struct {
-	ErrorCode int
-}
+type SchoolStream string
 
 func CreateSchoolStream(schoolStream *SchoolStream) (*SchoolStream, error) {
 	if err := validateSchoolStream(schoolStream); err != nil {
@@ -14,18 +14,11 @@ func CreateSchoolStream(schoolStream *SchoolStream) (*SchoolStream, error) {
 }
 
 func validateSchoolStream(schoolStream *SchoolStream) error {
+	// TODO: remove this hardcoding possibly
 	switch *schoolStream {
 	case "4 Stream":
 	case "8 Stream":
 		return nil
 	}
-	return SchoolStreamError{0}
-}
-
-func (sse SchoolStreamError) Error() string {
-	switch sse.ErrorCode {
-	case 0:
-		return "Bad School Term"
-	}
-	return "Unknown Error"
+	return exceptions.CreateClientException("Unknown Stream")
 }

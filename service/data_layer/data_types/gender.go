@@ -1,10 +1,10 @@
 package data_types
 
-type Gender int
+import (
+	"uwletstalk/service/data_layer/exceptions"
+)
 
-type GenderError struct {
-	ErrorCode int
-}
+type Gender int
 
 const (
 	MALE   Gender = 0
@@ -22,17 +22,11 @@ func CreateGender(genderCode *Gender) (*Gender, error) {
 func validateGender(gender *Gender) error {
 	switch *gender {
 	case MALE:
+		fallthrough
 	case FEMALE:
+		fallthrough
 	case OTHER:
 		return nil
 	}
-	return GenderError{0}
-}
-
-func (ge GenderError) Error() string {
-	switch ge.ErrorCode {
-	case 0:
-		return "Invalid Gender"
-	}
-	return "Unknown Error"
+	return exceptions.CreateClientException("Unknown Gender")
 }
