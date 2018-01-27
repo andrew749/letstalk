@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"letstalk/server/routes"
+	"letstalk/server/core/routes"
 )
 
 func main() {
