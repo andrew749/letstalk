@@ -15,5 +15,8 @@ type IController interface {
 	Handler(res http.ResponseWriter, req *http.Request)
 }
 
+type IControllerFactory interface {
+}
+
 type Response struct {
 }
