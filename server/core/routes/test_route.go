@@ -5,6 +5,6 @@ import (
 )
 
 func GetTest(c *ctx.Context) {
-	result := struct{ Response string }{ "test controller" }
+	result := struct{ Response string }{"test controller"}
 	c.Result = result
 }

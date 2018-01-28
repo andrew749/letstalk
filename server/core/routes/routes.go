@@ -5,9 +5,10 @@ import (
 	"letstalk/server/core/users"
 	"net/http"
 
+	"letstalk/server/core/login"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mijia/modelq/gmq"
-	"letstalk/server/core/login"
 )
 
 type handlerWrapper struct {
@@ -28,10 +29,10 @@ func Register(db *gmq.Db) *gin.Engine {
 	v1.GET("/users", hw.wrapHandler(users.GetUsers))
 	v1.POST("/users", hw.wrapHandler(users.PostUser))
 
-	v1.OPTIONS("login")
+	v1.OPTIONS("/login")
 	v1.GET("/login", hw.wrapHandler(login.GetLogin))
 
-	v1.OPTIONS("login_succeed")
+	v1.OPTIONS("/login_succeed")
 	v1.POST("/login_succeed", hw.wrapHandler(login.PostLoginSucceed))
 
 	return router

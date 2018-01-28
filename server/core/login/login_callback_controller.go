@@ -1,9 +1,6 @@
 package login
 
-import (
-	"net/http"
-	"letstalk/server/core/ctx"
-)
+import "letstalk/server/core/ctx"
 
 type CallbackResponse struct {
 	Status string

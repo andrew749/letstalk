@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/mijia/modelq/gmq"
-	"log"
 )
 
 var idMutex = sync.Mutex{}

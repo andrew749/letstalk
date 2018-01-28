@@ -1,15 +1,16 @@
 package main
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
-	"github.com/mijia/modelq/gmq"
-	_ "github.com/go-sql-driver/mysql"
-	"letstalk/server/core/routes"
-	"letstalk/server/core/secrets"
 	"flag"
 	"fmt"
+	"letstalk/server/core/routes"
+	"letstalk/server/core/secrets"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/mijia/modelq/gmq"
 )
 
 // DB flags
