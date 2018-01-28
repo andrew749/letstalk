@@ -1,3 +1,4 @@
 # vim
 *.swp
 .idea
+secrets.json
