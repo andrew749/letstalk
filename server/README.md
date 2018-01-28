@@ -31,6 +31,10 @@ CREATE DATABASE letstalk;
 GRANT ALL PRIVILEGES ON letstalk . * TO letstalk;
 ```
 
+### Easy database/modelq setup
+
+run `$SERVER/db/update_db.sh`.
+
 ### Rebuilding the database
 
 An up-to-date schema of the entire database should be kept under

@@ -1,15 +1,34 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
+	"flag"
+	"fmt"
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/mijia/modelq/gmq"
+)
+
+// DB flags
+var (
+	dbUser = flag.String("db-user", "", "mySQL user")
+	dbPass = flag.String("db-pass", "", "mySQL password")
+	dbAddr = flag.String("db-addr", "", "address of the database connection")
 )
 
 func main() {
-	routes.RegisterControllers()
+	flag.Parse()
+	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk", *dbUser, *dbPass, *dbAddr))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	router := routes.Register(db)
 	secrets.GetSecrets()
-	// start server
-	http.ListenAndServe(":8080", nil)
+	// Start server
+	http.ListenAndServe(":8080", router)
 }
