@@ -8,8 +8,9 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"github.com/mijia/modelq/gmq"
 	"strings"
+
+	"github.com/mijia/modelq/gmq"
 )
 
 type Program struct {

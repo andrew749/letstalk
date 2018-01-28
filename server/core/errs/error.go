@@ -8,26 +8,29 @@ import (
 
 type Error interface {
 	error
-	Code() int
+	GetHTTPCode() int
 }
 
 type ClientError struct {
 	error
 }
 
-func (e *ClientError) Code() int { return http.StatusBadRequest }
+func (e *ClientError) GetHTTPCode() int { return http.StatusBadRequest }
 
-func NewClientError(msg string, args ...interface{}) *ClientError {
+func NewClientError(msg string, args ...interface{}) Error {
 	return &ClientError{errors.New(fmt.Sprintf(msg, args...))}
 }
-
 
 type InternalError struct {
 	error
 }
 
-func (e *InternalError) Code() int { return http.StatusInternalServerError }
+func (e *InternalError) GetHTTPCode() int { return http.StatusInternalServerError }
 
-func NewInternalError(msg string, args ...interface{}) *InternalError {
+func NewInternalError(msg string, args ...interface{}) Error {
 	return &InternalError{errors.New(fmt.Sprintf(msg, args...))}
+}
+
+func NewDbError(err error) Error {
+	return NewInternalError("encountered database error: %s", err)
 }

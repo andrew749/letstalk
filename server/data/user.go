@@ -8,9 +8,10 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"github.com/mijia/modelq/gmq"
 	"strings"
 	"time"
+
+	"github.com/mijia/modelq/gmq"
 )
 
 type User struct {

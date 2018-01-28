@@ -1,12 +1,13 @@
 package users
 
 import (
-	"errors"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/db"
 	"letstalk/server/data"
 	"log"
+
+	"letstalk/server/core/errs"
 
 	"github.com/mijia/modelq/gmq"
 )
@@ -26,18 +27,18 @@ func PostUser(c *ctx.Context) {
 	var inputUser api.User
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
-		c.GinContext.Error(err)
+		c.AddError(errs.NewClientError("failed to bind user: %s", err))
 		return
 	}
 	log.Print("post user: ", inputUser)
 	// Check that no user exists with this email.
 	existingUser, err := data.UserObjs.Select().Where(data.UserObjs.FilterEmail("=", inputUser.Email)).List(c.Db)
 	if err != nil {
-		c.GinContext.Error(err)
+		c.AddError(errs.NewDbError(err))
 		return
 	}
 	if len(existingUser) != 0 {
-		c.GinContext.Error(errors.New("a user already exists with email: " + inputUser.Email))
+		c.AddError(errs.NewClientError("a user already exists with email: %s", inputUser.Email))
 		return
 	}
 	// Look up the existing cohort.
@@ -47,11 +48,11 @@ func PostUser(c *ctx.Context) {
 			And(data.CohortObjs.FilterProgramId("=", inputUser.Program))).
 		List(c.Db)
 	if err != nil {
-		c.GinContext.Error(err)
+		c.AddError(errs.NewDbError(err))
 		return
 	}
 	if len(cohorts) == 0 {
-		c.GinContext.Error(errors.New("cohort not found"))
+		c.AddError(errs.NewClientError("cohort not found"))
 		return
 	}
 	// Create user and cohort data structures.
@@ -67,8 +68,7 @@ func PostUser(c *ctx.Context) {
 		UserId:   user.UserId,
 		CohortId: cohorts[0].CohortId,
 	}
-	// TODO(aklen): nicer checks for errors in context
-	if len(c.GinContext.Errors) > 0 {
+	if c.HasErrors() {
 		return
 	}
 	// Insert data structures within a transaction.
@@ -82,7 +82,7 @@ func PostUser(c *ctx.Context) {
 		return nil
 	})
 	if dbErr != nil {
-		c.GinContext.Error(dbErr)
+		c.AddError(errs.NewDbError(dbErr))
 		return
 	}
 	c.Result = inputUser

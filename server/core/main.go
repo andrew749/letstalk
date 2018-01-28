@@ -9,6 +9,8 @@ import (
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
 
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
 )
@@ -20,15 +22,26 @@ var (
 	dbAddr = flag.String("db-addr", "", "address of the database connection")
 )
 
+// Auth flags
+var (
+	secretsPath = flag.String("secrets-path", "~/secrets.json", "path to secrets.json")
+)
+
 func main() {
 	flag.Parse()
 	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk", *dbUser, *dbPass, *dbAddr))
 	if err != nil {
 		log.Fatal(err)
-		return
+		os.Exit(1)
 	}
+	defer db.Close()
+	if err := db.Ping(); err != nil {
+		log.Fatal("failed to connect to database: ", err)
+		os.Exit(1)
+	}
+
 	router := routes.Register(db)
-	secrets.GetSecrets()
+	secrets.LoadSecrets(*secretsPath)
 	// Start server
 	http.ListenAndServe(":8080", router)
 }
