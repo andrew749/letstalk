@@ -26,7 +26,6 @@ func Register(db *gmq.Db) *gin.Engine {
 	v1 := router.Group("/v1")
 
 	v1.OPTIONS("/users")
-	v1.GET("/users", hw.wrapHandler(users.GetUsers))
 	v1.POST("/users", hw.wrapHandler(users.PostUser))
 
 	v1.OPTIONS("/login")
