@@ -3,9 +3,9 @@ package routes
 import (
 	"bytes"
 	"fmt"
+	"letstalk/server/core/secrets"
 	"net/http"
 	"text/template"
-	"uwletstalk/service/secrets"
 )
 
 type LoginController struct {
