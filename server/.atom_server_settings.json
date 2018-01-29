@@ -1,0 +1,16 @@
+{
+  "configurations":
+  [{
+    "name": "Debuggable Server",
+    "mode": "debug",
+    "cwd": "${workspaceRoot}/server/core",
+    "args": [
+      "--db-user=letstalk",
+      "--db-pass=uwletstalk",
+      "--db-addr=tcp(127.0.0.1:3306)",
+      "--secrets-path=${workspaceRoot}/server/core/secrets/secrets.json"
+    ],
+    "env": {
+    }
+  }]
+}
