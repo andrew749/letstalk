@@ -3,7 +3,6 @@ package secrets
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 
 	"github.com/romana/rlog"
 )
@@ -23,11 +22,13 @@ func getSecrets(path string) Secrets {
 
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		rlog.Error(err)
+		return Secrets{}
 	}
 
 	if err := json.Unmarshal(file, &secrets); err != nil {
-		log.Fatal(err)
+		rlog.Error(err)
+		return Secrets{}
 	}
 	rlog.Debug("Successfully loaded secrets")
 	return secrets
