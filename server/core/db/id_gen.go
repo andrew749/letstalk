@@ -5,15 +5,13 @@ import (
 	"letstalk/server/data"
 	"sync"
 
-	"letstalk/server/core/errs"
-
 	"github.com/mijia/modelq/gmq"
 )
 
 var idMutex = sync.Mutex{}
 
 // NumId safely generates a unique numerical id.
-func NumId(c *ctx.Context) int {
+func NumId(c *ctx.Context) (int, error) {
 	idMutex.Lock()
 	defer idMutex.Unlock()
 	var nextId int
@@ -28,8 +26,7 @@ func NumId(c *ctx.Context) int {
 		return err
 	})
 	if err != nil {
-		c.AddError(errs.NewDbError(err))
-		return 0
+		return 0, err
 	}
-	return nextId
+	return nextId, nil
 }

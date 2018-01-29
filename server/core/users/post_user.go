@@ -23,23 +23,20 @@ func genderIdByName(gender string) int {
 	}
 }
 
-func PostUser(c *ctx.Context) {
+func PostUser(c *ctx.Context) errs.Error {
 	var inputUser api.User
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
-		c.AddError(errs.NewClientError("failed to bind user: %s", err))
-		return
+		return errs.NewClientError("failed to bind user: %s", err)
 	}
 	log.Print("post user: ", inputUser)
 	// Check that no user exists with this email.
 	existingUser, err := data.UserObjs.Select().Where(data.UserObjs.FilterEmail("=", inputUser.Email)).List(c.Db)
 	if err != nil {
-		c.AddError(errs.NewDbError(err))
-		return
+		return errs.NewDbError(err)
 	}
 	if len(existingUser) != 0 {
-		c.AddError(errs.NewClientError("a user already exists with email: %s", inputUser.Email))
-		return
+		return errs.NewClientError("a user already exists with email: %s", inputUser.Email)
 	}
 	// Look up the existing cohort.
 	cohorts, err := data.CohortObjs.Select().Where(
@@ -48,28 +45,26 @@ func PostUser(c *ctx.Context) {
 			And(data.CohortObjs.FilterProgramId("=", inputUser.Program))).
 		List(c.Db)
 	if err != nil {
-		c.AddError(errs.NewDbError(err))
-		return
+		return errs.NewDbError(err)
 	}
 	if len(cohorts) == 0 {
-		c.AddError(errs.NewClientError("cohort not found"))
-		return
+		return errs.NewClientError("cohort not found")
 	}
 	// Create user and cohort data structures.
+
 	user := data.User{
-		UserId:    db.NumId(c),
 		Email:     inputUser.Email,
 		Nickname:  inputUser.Nickname,
 		Name:      inputUser.FullName,
 		Gender:    genderIdByName(inputUser.Gender),
 		Birthdate: inputUser.Birthday,
 	}
+	if user.UserId, err = db.NumId(c); err != nil {
+		return errs.NewDbError(err)
+	}
 	userCohort := data.UserCohort{
 		UserId:   user.UserId,
 		CohortId: cohorts[0].CohortId,
-	}
-	if c.HasErrors() {
-		return
 	}
 	// Insert data structures within a transaction.
 	dbErr := gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
@@ -82,8 +77,8 @@ func PostUser(c *ctx.Context) {
 		return nil
 	})
 	if dbErr != nil {
-		c.AddError(errs.NewDbError(dbErr))
-		return
+		return errs.NewDbError(dbErr)
 	}
 	c.Result = inputUser
+	return nil
 }
