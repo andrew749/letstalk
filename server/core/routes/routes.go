@@ -7,6 +7,11 @@ import (
 
 	"letstalk/server/core/login"
 
+	"letstalk/server/core/api"
+	"letstalk/server/core/errs"
+
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mijia/modelq/gmq"
 )
@@ -14,6 +19,8 @@ import (
 type handlerWrapper struct {
 	db *gmq.Db
 }
+
+type handlerFunc func(*ctx.Context)
 
 func Register(db *gmq.Db) *gin.Engine {
 	hw := handlerWrapper{db}
@@ -37,13 +44,30 @@ func Register(db *gmq.Db) *gin.Engine {
 	return router
 }
 
-func (hw handlerWrapper) wrapHandler(handler func(*ctx.Context)) func(*gin.Context) {
-	return func(gCtx *gin.Context) {
-		c := &ctx.Context{GinContext: gCtx, Db: hw.db}
+func (hw handlerWrapper) wrapHandler(handler handlerFunc) gin.HandlerFunc {
+	return func(g *gin.Context) {
+		c := ctx.NewContext(g, hw.db)
 		handler(c)
-		// TODO(aklen): handle errors in context
-		if c.Result != nil {
-			c.GinContext.JSON(http.StatusOK, c.Result) // Encode json response.
+
+		if c.HasErrors() {
+			errors := make([]api.Error, 0, len(c.Errors))
+			code := http.StatusOK
+			for _, err := range c.Errors {
+				code = err.GetHTTPCode()
+				errors = append(errors, convertError(err))
+			}
+			c.GinContext.JSON(code, gin.H{"Errors": errors})
+			log.Printf("Errors: %s\n", errors)
+			return
 		}
+		log.Printf("Result: %s\n", c.Result)
+		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
+	}
+}
+
+func convertError(e errs.Error) api.Error {
+	return api.Error{
+		Code:    e.GetHTTPCode(),
+		Message: e.Error(),
 	}
 }

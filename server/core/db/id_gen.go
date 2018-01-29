@@ -5,6 +5,8 @@ import (
 	"letstalk/server/data"
 	"sync"
 
+	"letstalk/server/core/errs"
+
 	"github.com/mijia/modelq/gmq"
 )
 
@@ -26,7 +28,7 @@ func NumId(c *ctx.Context) int {
 		return err
 	})
 	if err != nil {
-		c.GinContext.Error(err)
+		c.AddError(errs.NewDbError(err))
 		return 0
 	}
 	return nextId

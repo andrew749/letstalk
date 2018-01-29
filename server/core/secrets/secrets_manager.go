@@ -16,10 +16,10 @@ type SecretsManager struct {
 	secrets Secrets
 }
 
-func getSecrets() Secrets {
+func getSecrets(path string) Secrets {
 	var secrets Secrets
 
-	file, err := ioutil.ReadFile("core/secrets/secrets.json")
+	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,12 +31,17 @@ func getSecrets() Secrets {
 	return secrets
 }
 
-// TODO: concurrency bug
 var secrets_manager *SecretsManager
 
+func LoadSecrets(path string) Secrets {
+	secrets_manager = &SecretsManager{getSecrets(path)}
+	return secrets_manager.secrets
+}
+
+// TODO: concurrency bug
 func GetSecrets() Secrets {
 	if secrets_manager == nil {
-		secrets_manager = &SecretsManager{getSecrets()}
+		return Secrets{}
 	}
 	return secrets_manager.secrets
 }
