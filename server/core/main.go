@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"flag"
@@ -41,5 +42,9 @@ func main() {
 	secrets.LoadSecrets(*secretsPath)
 	// Start server
 	rlog.Info("Serving on port 8080...")
-	http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(":8080", router)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
