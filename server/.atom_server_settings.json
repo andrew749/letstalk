@@ -8,7 +8,7 @@
       "--db-user=letstalk",
       "--db-pass=uwletstalk",
       "--db-addr=tcp(127.0.0.1:3306)",
-      "--secrets-path=${workspaceRoot}/server/core/secrets/secrets.json"
+      "--secrets-path=${workspaceRoot}/server/secrets.json"
     ],
     "env": {
     }
