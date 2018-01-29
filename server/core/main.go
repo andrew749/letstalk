@@ -9,8 +9,6 @@ import (
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
 
-	"os"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
 )
@@ -31,13 +29,11 @@ func main() {
 	flag.Parse()
 	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk", *dbUser, *dbPass, *dbAddr))
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		log.Print(err)
 	}
 	defer db.Close()
 	if err := db.Ping(); err != nil {
-		log.Fatal("failed to connect to database: ", err)
-		os.Exit(1)
+		log.Print("failed to connect to database: ", err)
 	}
 
 	router := routes.Register(db)
