@@ -31,7 +31,6 @@ func getSecrets(path string) Secrets {
 	return secrets
 }
 
-// TODO: concurrency bug
 var secrets_manager *SecretsManager
 
 func LoadSecrets(path string) Secrets {
@@ -39,6 +38,7 @@ func LoadSecrets(path string) Secrets {
 	return secrets_manager.secrets
 }
 
+// TODO: concurrency bug
 func GetSecrets() Secrets {
 	if secrets_manager == nil {
 		return Secrets{}

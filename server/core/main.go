@@ -22,7 +22,7 @@ var (
 	dbAddr = flag.String("db-addr", "", "address of the database connection")
 )
 
-// Auth flags
+// Authentication flags
 var (
 	secretsPath = flag.String("secrets-path", "~/secrets.json", "path to secrets.json")
 )

@@ -10,6 +10,8 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/errs"
 
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mijia/modelq/gmq"
 )
@@ -55,8 +57,10 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc) gin.HandlerFunc {
 				errors = append(errors, convertError(err))
 			}
 			c.GinContext.JSON(code, gin.H{"Errors": errors})
+			log.Printf("Errors: %s\n", errors)
 			return
 		}
+		log.Printf("Result: %s\n", c.Result)
 		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
 	}
 }
