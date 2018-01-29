@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
@@ -9,6 +9,7 @@ import appReducer from './redux';
 
 import MessagesList from './components/MessagesList';
 import MessageView from './components/MessageView';
+import LoginView from './views/LoginView';
 
 import { StackNavigator } from 'react-navigation';
 
@@ -27,6 +28,9 @@ const styles = StyleSheet.create({
 });
 
 const AppNavigation = StackNavigator({
+  Login: {
+    screen: LoginView,
+  },
   Home: {
     screen: ConversationsScene,
     navigationOptions: {
