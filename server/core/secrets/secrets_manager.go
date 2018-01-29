@@ -19,7 +19,7 @@ type SecretsManager struct {
 func getSecrets() Secrets {
 	var secrets Secrets
 
-	file, err := ioutil.ReadFile("secrets/secrets.json")
+	file, err := ioutil.ReadFile("core/secrets/secrets.json")
 	if err != nil {
 		log.Fatal(err)
 	}

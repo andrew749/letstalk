@@ -8,7 +8,7 @@ type CallbackResponse struct {
 	State  string
 }
 
-func PostLoginSucceed(c *ctx.Context) {
+func GetLoginResponse(c *ctx.Context) {
 	status := c.GinContext.Query("status")
 	code := c.GinContext.Query("code")
 	state := c.GinContext.Query("state")

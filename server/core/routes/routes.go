@@ -31,8 +31,8 @@ func Register(db *gmq.Db) *gin.Engine {
 	v1.OPTIONS("/login")
 	v1.GET("/login", hw.wrapHandler(login.GetLogin))
 
-	v1.OPTIONS("/login_succeed")
-	v1.POST("/login_succeed", hw.wrapHandler(login.PostLoginSucceed))
+	v1.OPTIONS("/login_redirect")
+	v1.GET("/login_redirect", hw.wrapHandler(login.GetLoginResponse))
 
 	return router
 }
