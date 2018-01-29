@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+
+	"github.com/romana/rlog"
 )
 
 type Secrets struct {
@@ -27,7 +29,7 @@ func getSecrets(path string) Secrets {
 	if err := json.Unmarshal(file, &secrets); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Successfully loaded secrets")
+	rlog.Debug("Successfully loaded secrets")
 	return secrets
 }
 
