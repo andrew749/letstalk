@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"flag"
@@ -11,6 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
+	"github.com/romana/rlog"
 )
 
 // DB flags
@@ -27,17 +27,19 @@ var (
 
 func main() {
 	flag.Parse()
+
 	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk", *dbUser, *dbPass, *dbAddr))
 	if err != nil {
-		log.Print(err)
+		rlog.Error(err)
 	}
 	defer db.Close()
 	if err := db.Ping(); err != nil {
-		log.Print("failed to connect to database: ", err)
+		rlog.Error("failed to connect to database: ", err)
 	}
 
 	router := routes.Register(db)
 	secrets.LoadSecrets(*secretsPath)
 	// Start server
+	rlog.Info("Serving on port 8080...")
 	http.ListenAndServe(":8080", router)
 }

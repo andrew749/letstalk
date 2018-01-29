@@ -4,12 +4,11 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/db"
-	"letstalk/server/data"
-	"log"
-
 	"letstalk/server/core/errs"
+	"letstalk/server/data"
 
 	"github.com/mijia/modelq/gmq"
+	"github.com/romana/rlog"
 )
 
 func genderIdByName(gender string) int {
@@ -29,7 +28,7 @@ func PostUser(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewClientError("failed to bind user: %s", err)
 	}
-	log.Print("post user: ", inputUser)
+	rlog.Debugf("post user: %s", inputUser)
 	// Check that no user exists with this email.
 	existingUser, err := data.UserObjs.Select().Where(data.UserObjs.FilterEmail("=", inputUser.Email)).List(c.Db)
 	if err != nil {

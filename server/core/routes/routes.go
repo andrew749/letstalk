@@ -1,16 +1,16 @@
 package routes
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
 	"letstalk/server/core/users"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mijia/modelq/gmq"
-	"letstalk/server/core/api"
+	"github.com/romana/rlog"
 )
 
 type handlerWrapper struct {
@@ -47,11 +47,11 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc) gin.HandlerFunc {
 		err := handler(c)
 
 		if err != nil {
-			log.Printf("Returning error: %s\n", err)
+			rlog.Infof("Returning error: %s\n", err)
 			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 			return
 		}
-		log.Printf("returning result: %s\n", c.Result)
+		rlog.Infof("Returning result: %s\n", c.Result)
 		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
 	}
 }
