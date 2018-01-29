@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"letstalk/server/core/ctx"
+	"letstalk/server/core/errs"
 	"letstalk/server/core/secrets"
 	"net/http"
 	"text/template"
@@ -20,7 +21,7 @@ type redirectData struct {
 	CSRFToken   string
 }
 
-func GetLogin(c *ctx.Context) {
+func GetLogin(c *ctx.Context) errs.Error {
 	data := redirectData{
 		AppId:       secrets.GetSecrets().AppId,
 		RedirectUrl: secrets.GetSecrets().RedirectUrl,
@@ -33,4 +34,6 @@ func GetLogin(c *ctx.Context) {
 	fmt.Println(redirectUrl)
 
 	c.GinContext.Redirect(http.StatusSeeOther, redirectUrl)
+
+	return nil
 }

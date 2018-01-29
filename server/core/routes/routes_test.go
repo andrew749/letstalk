@@ -18,8 +18,9 @@ func TestHandlerResult(t *testing.T) {
 	db := &gmq.Db{}
 	hw := handlerWrapper{db}
 	msg := "test message"
-	handler := hw.wrapHandler(func(c *ctx.Context) {
+	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
+		return nil
 	})
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
@@ -28,31 +29,30 @@ func TestHandlerResult(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf(`{"Result":"%s"}`, msg), writer.Output)
 }
 
-func TestHandlerError(t *testing.T) {
+func TestHandlerClientError(t *testing.T) {
 	db := &gmq.Db{}
 	hw := handlerWrapper{db}
 	msg := "test error message"
-	handler := hw.wrapHandler(func(c *ctx.Context) {
-		c.AddError(errs.NewClientError(msg))
+	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
+		return errs.NewClientError(msg)
 	})
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
 	assert.Equal(t, code.StatusBadRequest, writer.StatusCode)
-	assert.Equal(t, fmt.Sprintf(`{"Errors":[{"Code":400,"Message":"%s"}]}`, msg), writer.Output)
+	assert.Equal(t, fmt.Sprintf(`{"Error":{"Code":400,"Message":"%s"}}`, msg), writer.Output)
 }
 
-func TestHandlerMultipleErrors(t *testing.T) {
+func TestHandlerInternalError(t *testing.T) {
 	db := &gmq.Db{}
 	hw := handlerWrapper{db}
-	msg1, msg2 := "test error message 1", "test error message 2"
-	handler := hw.wrapHandler(func(c *ctx.Context) {
-		c.AddError(errs.NewClientError(msg1))
-		c.AddError(errs.NewInternalError(msg2))
+	msg := "test error message"
+	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
+		return errs.NewInternalError(msg)
 	})
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
 	assert.Equal(t, code.StatusInternalServerError, writer.StatusCode)
-	assert.Equal(t, fmt.Sprintf(`{"Errors":[{"Code":400,"Message":"%s"},{"Code":500,"Message":"%s"}]}`, msg1, msg2), writer.Output)
+	assert.Equal(t, fmt.Sprintf(`{"Error":{"Code":500,"Message":"%s"}}`, msg), writer.Output)
 }
