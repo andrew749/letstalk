@@ -20,7 +20,15 @@ export class InvalidCredentialsError extends Error {
 export class MockSessionService implements SessionService {
   private static readonly token: string = 'some-session-token'
 
+  private static getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
   async login(username: string, password: string): Promise<SessionToken> {
+    await new Promise(resolve => setTimeout(() => resolve(),
+      MockSessionService.getRandomInt(100, 500)));
     if (username !== 'foo' || password !== 'bar') throw new InvalidCredentialsError();
     return MockSessionService.token;
   }

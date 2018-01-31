@@ -12,7 +12,7 @@ import MessageView from './components/MessageView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 
-import { StackNavigator } from 'react-navigation';
+import { StackNavigator, TabNavigator } from 'react-navigation';
 
 // TODO: Investigate typing with navigation
 const ConversationsScene = ({ navigation }: any) => (
@@ -28,12 +28,30 @@ const styles = StyleSheet.create({
   }
 });
 
-const AppNavigation = StackNavigator({
-  Profile: {
+const MainPage = TabNavigator({
+  TabItem1: {
     screen: ProfileView,
+    navigationOptions: {
+      tabBarLabel:"Tab 1",
+    },
   },
+  TabItem2: {
+    screen: ProfileView,
+    navigationOptions: {
+      tabBarLabel:"Tab 1",
+    },
+  },
+});
+
+const AppNavigation = StackNavigator({
   Login: {
     screen: LoginView,
+  },
+  Profile: {
+    screen: MainPage,
+    navigationOptions: {
+      header: null,
+    },
   },
   Home: {
     screen: ConversationsScene,

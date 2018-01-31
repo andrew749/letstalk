@@ -1,21 +1,29 @@
 import React, { Component } from 'react';
 import { Button as ReactNativeButton, Dimensions, View } from 'react-native';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { FormInput, FormLabel, FormValidationMessage } from 'react-native-elements';
+import { ThunkAction } from 'redux-thunk';
 
 import { ActionButton } from '../components';
-import auth from '../services/auth';
+import { RootState } from '../redux';
+import { login, State as LoginState } from '../redux/login/reducer';
+import {
+  setPasswordAction,
+  setUsernameAction,
+  SetPasswordAction,
+  SetUsernameAction,
+} from '../redux/login/actions';
 import { InvalidCredentialsError } from '../services/sessionService';
 
-interface Props {
-}
+interface DispatchActions {
+  login: ActionCreator<ThunkAction<Promise<void>, LoginState, void>>;
+  setUsername: ActionCreator<SetUsernameAction>;
+  setPassword: ActionCreator<SetPasswordAction>;
+};
 
-interface State {
-  username: string
-  password: string
-  error: string | null
-}
+interface Props extends LoginState, DispatchActions { }
 
-export default class LoginPage extends Component<Props, State> {
+class LoginView extends Component<Props> {
   usernameInput: FormInput
   passwordInput: FormInput
 
@@ -26,11 +34,6 @@ export default class LoginPage extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = {
-      username: '',
-      password: '',
-      error: null,
-    };
     this.usernameInput = null;
     this.passwordInput = null;
 
@@ -40,32 +43,31 @@ export default class LoginPage extends Component<Props, State> {
   }
 
   onUsernameChange(username: string) {
-    this.setState({ username });
+    this.props.setUsername(username);
   }
 
   onPasswordChange(password: string) {
-    this.setState({ password });
+    this.props.setPassword(password);
   }
 
   async onLoginPress() {
     const {
       username,
       password,
-    } = this.state;
+    } = this.props;
     try {
-      await auth.login(username, password)
+      await this.props.login(username, password);
     } catch(e) {
+      console.log(e.message);
       if (e.message !== InvalidCredentialsError.tpe) throw e;
-      this.setState({ error: 'Invalid username or password' });
       this.usernameInput.shake();
       this.passwordInput.shake();
-      this.passwordInput.focus();
     }
   }
 
   render() {
     // TODO: Add header
-    let validationMessage = this.state.error || ' ';
+    let validationMessage = this.props.errorMsg || ' ';
     return (
       <View>
         <FormLabel>Username</FormLabel>
@@ -83,8 +85,18 @@ export default class LoginPage extends Component<Props, State> {
         <FormValidationMessage>
           {validationMessage}
         </FormValidationMessage>
-        <ActionButton title="Log in" onPress={this.onLoginPress} />
+        <ActionButton
+          loading={this.props.isFetching}
+          title={this.props.isFetching ? null : "Log in"}
+          onPress={this.onLoginPress}
+        />
       </View>
     );
   }
 }
+
+export default connect(({ login }: RootState) => login, {
+  login,
+  setUsername: setUsernameAction,
+  setPassword: setPasswordAction,
+})(LoginView);
