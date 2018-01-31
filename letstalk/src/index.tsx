@@ -10,6 +10,7 @@ import appReducer from './redux';
 import MessagesList from './components/MessagesList';
 import MessageView from './components/MessageView';
 import LoginView from './views/LoginView';
+import ProfileView from './views/ProfileView';
 
 import { StackNavigator } from 'react-navigation';
 
@@ -28,6 +29,9 @@ const styles = StyleSheet.create({
 });
 
 const AppNavigation = StackNavigator({
+  Profile: {
+    screen: ProfileView,
+  },
   Login: {
     screen: LoginView,
   },
