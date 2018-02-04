@@ -13,12 +13,32 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 
-import MessageData from '../models/message-data';
+import auth from '../services/auth';
 
 const window = Dimensions.get('window');
 
-class ProfileView extends Component {
+interface Props {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
+
+class ProfileView extends Component<Props> {
+
+  constructor(props: Props) {
+    super(props);
+
+    this.onLogoutPress = this.onLogoutPress.bind(this);
+  }
+
+  async onLogoutPress() {
+    await auth.logout();
+    this.props.navigation.dispatch(NavigationActions.reset({
+      index: 0,
+      key: null,
+      actions: [NavigationActions.navigate({ routeName: 'Login' })]
+    }));
+  }
 
   render() {
     const title = `My Profile`;
@@ -54,13 +74,13 @@ class ProfileView extends Component {
           <FormLabel>Phone Number</FormLabel>
           <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
         </View>
-        <Button onPress={() => null} title='LOGOUT' backgroundColor='#EB5757'/>
+        <Button onPress={this.onLogoutPress} title='LOGOUT' backgroundColor='#EB5757'/>
       </ScrollView>
     );
   }
 }
 
-export default connect()(ProfileView);
+export default ProfileView;
 
 const styles = StyleSheet.create({
   container: {

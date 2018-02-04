@@ -2,22 +2,17 @@ import React, { Component } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Icon } from 'react-native-elements';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 
 import appReducer from './redux';
-
-import MessagesList from './components/MessagesList';
-import MessageView from './components/MessageView';
+import auth from './services/auth';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
-
-// TODO: Investigate typing with navigation
-const ConversationsScene = ({ navigation }: any) => (
-  <MessagesList navigation={ navigation }/>
-);
 
 const styles = StyleSheet.create({
   container: {
@@ -28,44 +23,67 @@ const styles = StyleSheet.create({
   }
 });
 
-const MainPage = TabNavigator({
-  TabItem1: {
+const MainView = TabNavigator({
+  Home: {
     screen: ProfileView,
     navigationOptions: {
-      tabBarLabel:"Tab 1",
+      tabBarLabel:"Home",
     },
   },
-  TabItem2: {
+  Events: {
     screen: ProfileView,
     navigationOptions: {
-      tabBarLabel:"Tab 1",
+      tabBarLabel:"Events",
+    },
+  },
+  Achievements: {
+    screen: ProfileView,
+    navigationOptions: {
+      tabBarLabel:"Achievements",
+      tabBarIcon: <Icon name='rowing' />,
     },
   },
 });
 
-const AppNavigation = StackNavigator({
+const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
   },
-  Profile: {
-    screen: MainPage,
+  Main: {
+    screen: MainView,
     navigationOptions: {
       header: null,
     },
   },
-  Home: {
-    screen: ConversationsScene,
-    navigationOptions: {
-      headerTitle: 'Conversations'
-    }
-  },
-  MessageThread: {screen: MessageView}
+}, {
+  initialRouteName: loggedIn ? "Main" : "Login",
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
 
-class App extends React.Component {
+interface AppState {
+  loggedIn: null | boolean;
+}
+
+class App extends React.Component<void, AppState> {
+  constructor(props: void) {
+    super(props);
+    this.state = {
+      loggedIn: null,
+    };
+  }
+
+  async componentWillMount() {
+    await MaterialIcons.loadFont();
+    const sessionToken = await auth.getSessionToken();
+    this.setState({ loggedIn: sessionToken !== null });
+  }
+
   render() {
+    const { loggedIn } = this.state;
+    if (loggedIn === null) return <View><Text>Splash</Text></View>;
+
+    const AppNavigation = createAppNavigation(loggedIn)
     return (
       <Provider store={store}>
         <AppNavigation />

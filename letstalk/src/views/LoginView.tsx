@@ -3,11 +3,14 @@ import { Button as ReactNativeButton, Dimensions, View } from 'react-native';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { FormInput, FormLabel, FormValidationMessage } from 'react-native-elements';
 import { ThunkAction } from 'redux-thunk';
+import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 
 import { ActionButton } from '../components';
 import { RootState } from '../redux';
 import { login, State as LoginState } from '../redux/login/reducer';
 import {
+  resetAction,
+  ResetAction,
   setPasswordAction,
   setUsernameAction,
   SetPasswordAction,
@@ -19,9 +22,12 @@ interface DispatchActions {
   login: ActionCreator<ThunkAction<Promise<void>, LoginState, void>>;
   setUsername: ActionCreator<SetUsernameAction>;
   setPassword: ActionCreator<SetPasswordAction>;
+  reset: ActionCreator<ResetAction>;
 };
 
-interface Props extends LoginState, DispatchActions { }
+interface Props extends LoginState, DispatchActions {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
 
 class LoginView extends Component<Props> {
   usernameInput: FormInput
@@ -57,6 +63,12 @@ class LoginView extends Component<Props> {
     } = this.props;
     try {
       await this.props.login(username, password);
+      this.props.reset();
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'Main' })]
+      }));
     } catch(e) {
       console.log(e.message);
       if (e.message !== InvalidCredentialsError.tpe) throw e;
@@ -74,6 +86,7 @@ class LoginView extends Component<Props> {
         <FormInput
           ref={input => this.usernameInput = input}
           autoCorrect={false}
+          autoCapitalize={'none'}
           onChangeText={this.onUsernameChange}
         />
         <FormLabel>Password</FormLabel>
@@ -99,4 +112,5 @@ export default connect(({ login }: RootState) => login, {
   login,
   setUsername: setUsernameAction,
   setPassword: setPasswordAction,
+  reset: resetAction,
 })(LoginView);

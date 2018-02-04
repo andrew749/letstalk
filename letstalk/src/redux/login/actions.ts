@@ -6,6 +6,7 @@ export enum TypeKeys {
   RECEIVED_ERROR_MSG  = 'LOGIN/RECEIVED_ERROR_MSG',
   SET_USERNAME        = 'LOGIN/SET_USERNAME',
   SET_PASSWORD        = 'LOGIN/SET_PASSWORD',
+  RESET               = 'LOGIN/RESET',
 }
 
 export interface FetchingLoginAction extends Action {
@@ -25,6 +26,10 @@ export interface SetUsernameAction extends Action {
 export interface SetPasswordAction extends Action {
   readonly type: TypeKeys.SET_PASSWORD,
   readonly password: string,
+}
+
+export interface ResetAction extends Action {
+  readonly type: TypeKeys.RESET,
 }
 
 export const fetchingLoginAction: ActionCreator<FetchingLoginAction> =
@@ -48,8 +53,12 @@ export const setPasswordAction: ActionCreator<SetPasswordAction> =
   password,
 });
 
+export const resetAction: ActionCreator<ResetAction> =
+  () => ({ type: TypeKeys.RESET });
+
 export type ActionTypes =
   | FetchingLoginAction
   | ReceivedErrorMsgAction
   | SetUsernameAction
   | SetPasswordAction
+  | ResetAction

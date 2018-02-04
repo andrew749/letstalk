@@ -59,6 +59,8 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...state,
         password: action.password,
       };
+    case TypeKeys.RESET:
+      return initialState;
     default:
       // Ensure exhaustiveness of select
       const _: never = action;
