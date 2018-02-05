@@ -15,13 +15,20 @@ INSERT INTO id_gen (num_id) VALUE (1);
 
 CREATE TABLE user (
   user_id INT NOT NULL PRIMARY KEY,
-  nickname VARCHAR(128) NOT NULL,
-  name VARCHAR(128) NOT NULL,
-  email VARCHAR(64) NOT NULL,
+  first_name VARCHAR(128) NOT NULL,
+  last_name VARCHAR(128) NOT NULL,
+  email VARCHAR(128) NOT NULL,
   gender INT NOT NULL,
   birthdate DATETIME(6) NOT NULL,
 
   UNIQUE KEY (email)
+);
+
+CREATE TABLE authentication_data (
+  user_id INT NOT NULL PRIMARY KEY,
+  password_hash VARCHAR(128) NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
 CREATE TABLE program (
