@@ -6,9 +6,10 @@ import (
 )
 
 type Context struct {
-	GinContext *gin.Context
-	Db         *gmq.Db
-	Result     interface{}
+	GinContext  *gin.Context
+	Db          *gmq.Db
+	SessionData *SessionData
+	Result      interface{}
 }
 
 func NewContext(g *gin.Context, db *gmq.Db) *Context {

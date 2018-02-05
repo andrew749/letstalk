@@ -8,9 +8,8 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/mijia/modelq/gmq"
+	"strings"
 )
 
 type IdGen struct {

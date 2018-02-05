@@ -5,7 +5,6 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
-	"letstalk/server/core/users"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,12 +28,15 @@ func Register(db *gmq.Db) *gin.Engine {
 
 	v1 := router.Group("/v1")
 
-	v1.OPTIONS("/users")
-	v1.POST("/users", hw.wrapHandler(users.PostUser))
+	// create a new user
+	v1.OPTIONS("/signup")
+	v1.POST("/signup", hw.wrapHandler(login.SignupUser))
 
+	// create a new session for an existing user
 	v1.OPTIONS("/login")
 	v1.GET("/login", hw.wrapHandler(login.GetLogin))
 
+	// for fb_authentication
 	v1.OPTIONS("/login_redirect")
 	v1.GET("/login_redirect", hw.wrapHandler(login.GetLoginResponse))
 

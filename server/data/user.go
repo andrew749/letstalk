@@ -8,16 +8,15 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"github.com/mijia/modelq/gmq"
 	"strings"
 	"time"
-
-	"github.com/mijia/modelq/gmq"
 )
 
 type User struct {
 	UserId    int       `json:"user_id"`
-	Nickname  string    `json:"nickname"`
-	Name      string    `json:"name"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Gender    int       `json:"gender"`
 	Birthdate time.Time `json:"birthdate"`
@@ -48,7 +47,7 @@ func (obj User) Insert(dbtx gmq.DbTx) (User, error) {
 }
 
 func (obj User) Update(dbtx gmq.DbTx) (int64, error) {
-	fields := []string{"Nickname", "Name", "Email", "Gender", "Birthdate"}
+	fields := []string{"FirstName", "LastName", "Email", "Gender", "Birthdate"}
 	filter := UserObjs.FilterUserId("=", obj.UserId)
 	if result, err := UserObjs.Update(obj, fields...).Where(filter).Run(dbtx); err != nil {
 		return 0, err
@@ -179,7 +178,7 @@ func (o _UserObjs) Names() (schema, tbl, alias string) {
 func (o _UserObjs) Select(fields ...string) _UserQuery {
 	q := _UserQuery{}
 	if len(fields) == 0 {
-		fields = []string{"UserId", "Nickname", "Name", "Email", "Gender", "Birthdate"}
+		fields = []string{"UserId", "FirstName", "LastName", "Email", "Gender", "Birthdate"}
 	}
 	q.Query = gmq.Select(o, o.columns(fields...))
 	return q
@@ -187,7 +186,7 @@ func (o _UserObjs) Select(fields ...string) _UserQuery {
 
 func (o _UserObjs) Insert(obj User) _UserQuery {
 	q := _UserQuery{}
-	q.Query = gmq.Insert(o, o.columnsWithData(obj, "UserId", "Nickname", "Name", "Email", "Gender", "Birthdate"))
+	q.Query = gmq.Insert(o, o.columnsWithData(obj, "UserId", "FirstName", "LastName", "Email", "Gender", "Birthdate"))
 	return q
 }
 
@@ -214,22 +213,22 @@ func (o _UserObjs) FilterUserId(op string, p int, ps ...int) gmq.Filter {
 	return o.newFilter("user_id", op, params...)
 }
 
-func (o _UserObjs) FilterNickname(op string, p string, ps ...string) gmq.Filter {
+func (o _UserObjs) FilterFirstName(op string, p string, ps ...string) gmq.Filter {
 	params := make([]interface{}, 1+len(ps))
 	params[0] = p
 	for i := range ps {
 		params[i+1] = ps[i]
 	}
-	return o.newFilter("nickname", op, params...)
+	return o.newFilter("first_name", op, params...)
 }
 
-func (o _UserObjs) FilterName(op string, p string, ps ...string) gmq.Filter {
+func (o _UserObjs) FilterLastName(op string, p string, ps ...string) gmq.Filter {
 	params := make([]interface{}, 1+len(ps))
 	params[0] = p
 	for i := range ps {
 		params[i+1] = ps[i]
 	}
-	return o.newFilter("name", op, params...)
+	return o.newFilter("last_name", op, params...)
 }
 
 func (o _UserObjs) FilterEmail(op string, p string, ps ...string) gmq.Filter {
@@ -269,20 +268,20 @@ func (o _UserObjs) ColumnUserId(p ...int) gmq.Column {
 	return gmq.Column{"user_id", value}
 }
 
-func (o _UserObjs) ColumnNickname(p ...string) gmq.Column {
+func (o _UserObjs) ColumnFirstName(p ...string) gmq.Column {
 	var value interface{}
 	if len(p) > 0 {
 		value = p[0]
 	}
-	return gmq.Column{"nickname", value}
+	return gmq.Column{"first_name", value}
 }
 
-func (o _UserObjs) ColumnName(p ...string) gmq.Column {
+func (o _UserObjs) ColumnLastName(p ...string) gmq.Column {
 	var value interface{}
 	if len(p) > 0 {
 		value = p[0]
 	}
-	return gmq.Column{"name", value}
+	return gmq.Column{"last_name", value}
 }
 
 func (o _UserObjs) ColumnEmail(p ...string) gmq.Column {
@@ -325,10 +324,10 @@ func (o _UserObjs) toUser(columns []gmq.Column, rb []sql.RawBytes) User {
 			switch columns[i].Name {
 			case "user_id":
 				obj.UserId = gmq.AsInt(rb[i])
-			case "nickname":
-				obj.Nickname = gmq.AsString(rb[i])
-			case "name":
-				obj.Name = gmq.AsString(rb[i])
+			case "first_name":
+				obj.FirstName = gmq.AsString(rb[i])
+			case "last_name":
+				obj.LastName = gmq.AsString(rb[i])
 			case "email":
 				obj.Email = gmq.AsString(rb[i])
 			case "gender":
@@ -347,10 +346,10 @@ func (o _UserObjs) columns(fields ...string) []gmq.Column {
 		switch f {
 		case "UserId":
 			data = append(data, o.ColumnUserId())
-		case "Nickname":
-			data = append(data, o.ColumnNickname())
-		case "Name":
-			data = append(data, o.ColumnName())
+		case "FirstName":
+			data = append(data, o.ColumnFirstName())
+		case "LastName":
+			data = append(data, o.ColumnLastName())
 		case "Email":
 			data = append(data, o.ColumnEmail())
 		case "Gender":
@@ -368,10 +367,10 @@ func (o _UserObjs) columnsWithData(obj User, fields ...string) []gmq.Column {
 		switch f {
 		case "UserId":
 			data = append(data, o.ColumnUserId(obj.UserId))
-		case "Nickname":
-			data = append(data, o.ColumnNickname(obj.Nickname))
-		case "Name":
-			data = append(data, o.ColumnName(obj.Name))
+		case "FirstName":
+			data = append(data, o.ColumnFirstName(obj.FirstName))
+		case "LastName":
+			data = append(data, o.ColumnLastName(obj.LastName))
 		case "Email":
 			data = append(data, o.ColumnEmail(obj.Email))
 		case "Gender":
@@ -388,8 +387,8 @@ var UserObjs _UserObjs
 func init() {
 	UserObjs.fcMap = map[string]string{
 		"UserId":    "user_id",
-		"Nickname":  "nickname",
-		"Name":      "name",
+		"FirstName": "first_name",
+		"LastName":  "last_name",
 		"Email":     "email",
 		"Gender":    "gender",
 		"Birthdate": "birthdate",

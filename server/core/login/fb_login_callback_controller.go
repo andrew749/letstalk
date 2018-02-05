@@ -1,5 +1,10 @@
 package login
 
+/**
+ * TODO(acod)
+ * Massive WIP: do not touch
+ */
+
 import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
