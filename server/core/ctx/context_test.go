@@ -14,8 +14,10 @@ func TestNewContext(t *testing.T) {
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	db := &gmq.Db{}
-	c := ctx.NewContext(g, db)
+	sessionData, _ := ctx.CreateSessionData("testUserId")
+	c := ctx.NewContext(g, db, sessionData)
 	assert.Equal(t, db, c.Db)
 	assert.Equal(t, g, c.GinContext)
+	assert.Equal(t, sessionData, c.SessionData)
 	assert.Nil(t, c.Result)
 }

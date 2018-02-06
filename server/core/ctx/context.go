@@ -12,9 +12,10 @@ type Context struct {
 	Result      interface{}
 }
 
-func NewContext(g *gin.Context, db *gmq.Db) *Context {
+func NewContext(g *gin.Context, db *gmq.Db, sessionData *SessionData) *Context {
 	return &Context{
-		GinContext: g,
-		Db:         db,
+		GinContext:  g,
+		Db:          db,
+		SessionData: sessionData,
 	}
 }
