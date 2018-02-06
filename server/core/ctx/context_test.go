@@ -2,6 +2,7 @@ package ctx_test
 
 import (
 	"letstalk/server/core/ctx"
+	"letstalk/server/core/sessions"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,11 @@ func TestNewContext(t *testing.T) {
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	db := &gmq.Db{}
-	c := ctx.NewContext(g, db)
+	sm := sessions.CreateSessionManager()
+	sessionData, _ := sessions.CreateSessionData(1)
+	c := ctx.NewContext(g, db, sessionData, &sm)
 	assert.Equal(t, db, c.Db)
 	assert.Equal(t, g, c.GinContext)
+	assert.Equal(t, sessionData, c.SessionData)
 	assert.Nil(t, c.Result)
 }

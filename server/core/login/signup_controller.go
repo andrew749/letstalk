@@ -11,7 +11,6 @@ import (
 
 	"github.com/mijia/modelq/gmq"
 	"github.com/romana/rlog"
-	"golang.org/x/crypto/bcrypt"
 )
 
 /**
@@ -19,6 +18,7 @@ import (
  * The following data must be POSTed to create a new user.
  * Users cannot have the same email address.
 
+ Request:
   {
     'first_name': string,
     'last_name': string,
@@ -27,6 +27,12 @@ import (
 		'gender': string,
 		'birthday': date,
     'password': string,
+  }
+
+
+	Response
+	{
+		user_id: string,
   }
 */
 
@@ -65,16 +71,6 @@ func SignupUser(c *ctx.Context) errs.Error {
 	return writeUser(user, c)
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
 /**
  * Create a new user given a particular request and insert in the db.
  */
@@ -95,7 +91,7 @@ func writeUser(user *api.User, c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	hashedPassword, err := HashPassword(*user.Password)
+	hashedPassword, err := utility.HashPassword(*user.Password)
 
 	if err != nil {
 		return errs.NewInternalError("Unable to hash password")
@@ -119,7 +115,6 @@ func writeUser(user *api.User, c *ctx.Context) errs.Error {
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-	user.Password = nil
-	c.Result = user
+	c.Result = struct{ UserId int }{userModel.UserId}
 	return nil
 }
