@@ -9,7 +9,7 @@ import { RootState } from '../redux';
 import { State as ThreadState } from '../redux/thread/reducer';
 import { ReceiveMessagesAction, receiveMessages } from '../redux/thread/actions';
 import { BASE_URL } from '../services/constants';
-import Requestor from '../services/requests';
+import requestor from '../services/requests';
 
 interface DispatchActions {
   fetchMessages: ActionCreator<ThunkAction<Promise<ReceiveMessagesAction>, ThreadState, void>>;
@@ -61,7 +61,7 @@ const mapStateToProps = (state: RootState): ThreadState => {
 const fetchMessages: ActionCreator<
   ThunkAction<Promise<ReceiveMessagesAction>, ThreadState, void>> = (userId: string) => {
   return async (dispatch: Dispatch<ThreadState>): Promise<ReceiveMessagesAction> => {
-    const data = await (new Requestor(BASE_URL)).get('/messages/get');
+    const data = await requestor.get('/messages/get');
     // TODO: Add types for JSON
     return receiveMessages(data);
   };
