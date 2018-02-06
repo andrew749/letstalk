@@ -3,6 +3,8 @@ package utility
 import (
 	"crypto/rand"
 	"encoding/base64"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
@@ -28,4 +30,14 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 func GenerateRandomString(s int) (string, error) {
 	b, err := GenerateRandomBytes(s)
 	return base64.URLEncoding.EncodeToString(b), err
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

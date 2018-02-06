@@ -15,12 +15,13 @@ import (
 )
 
 type handlerWrapper struct {
-	db *gmq.Db
+	db *gmq.Db,
+	sm *sessions.ISessionManager
 }
 
 type handlerFunc func(*ctx.Context) errs.Error
 
-func Register(db *gmq.Db) *gin.Engine {
+func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine {
 	hw := handlerWrapper{db}
 
 	router := gin.Default()
@@ -69,9 +70,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 				return
 			}
 
-			sm := sessions.GetSessionManager()
-
-			session, err := sm.GetSessionForSessionId(sessionId)
+			session, err := hw.sm.GetSessionForSessionId(sessionId)
 
 			// check that the session Id corresponds to an existing session
 			if err != nil {
