@@ -2,17 +2,24 @@ import React, { Component } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { Icon } from 'react-native-elements';
+import { MaterialIcons } from '@expo/vector-icons';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 
 import appReducer from './redux';
 import auth from './services/auth';
+import AchievementsView from './views/AchievementsView';
+import EventsView from './views/EventsView';
+import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
+
+interface TabBarIcon {
+  tintColor: (string | null),
+  focused: boolean,
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -25,22 +32,44 @@ const styles = StyleSheet.create({
 
 const MainView = TabNavigator({
   Home: {
-    screen: ProfileView,
+    screen: StackNavigator({
+      Home: {
+        screen: HomeView,
+      },
+      Profile: {
+        screen: ProfileView,
+      },
+    }, {
+      headerMode: 'float',
+    }),
     navigationOptions: {
       tabBarLabel:"Home",
+      tabBarIcon: ({ tintColor }: TabBarIcon) =>
+        <MaterialIcons name="home" size={32} color={tintColor} />,
     },
   },
   Events: {
-    screen: ProfileView,
+    screen: StackNavigator({
+      Events: {
+        screen: EventsView,
+      },
+    }),
     navigationOptions: {
       tabBarLabel:"Events",
+      tabBarIcon: ({ tintColor }: TabBarIcon) =>
+        <MaterialIcons name="event" size={32} color={tintColor} />,
     },
   },
   Achievements: {
-    screen: ProfileView,
+    screen: StackNavigator({
+      Achievements: {
+        screen: AchievementsView,
+      },
+    }),
     navigationOptions: {
       tabBarLabel:"Achievements",
-      tabBarIcon: <Icon name='rowing' />,
+      tabBarIcon: ({ tintColor }: TabBarIcon) =>
+        <MaterialIcons name="done" size={32} color={tintColor} />,
     },
   },
 });
@@ -57,6 +86,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
 }, {
   initialRouteName: loggedIn ? "Main" : "Login",
+  headerMode: 'float',
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
@@ -74,7 +104,6 @@ class App extends React.Component<void, AppState> {
   }
 
   async componentWillMount() {
-    await MaterialIcons.loadFont();
     const sessionToken = await auth.getSessionToken();
     this.setState({ loggedIn: sessionToken !== null });
   }

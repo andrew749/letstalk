@@ -84,8 +84,6 @@ export default ProfileView;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    flexDirection: 'column',
     alignItems: 'center',
     marginHorizontal: 25
   },
