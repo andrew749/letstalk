@@ -18,6 +18,7 @@ import (
  * The following data must be POSTed to create a new user.
  * Users cannot have the same email address.
 
+ Request:
   {
     'first_name': string,
     'last_name': string,
@@ -26,6 +27,12 @@ import (
 		'gender': string,
 		'birthday': date,
     'password': string,
+  }
+
+
+	Response
+	{
+		user_id: string,
   }
 */
 
@@ -108,7 +115,6 @@ func writeUser(user *api.User, c *ctx.Context) errs.Error {
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-	user.Password = nil
-	c.Result = user
+	c.Result = struct{ UserId int }{userModel.UserId}
 	return nil
 }

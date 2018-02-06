@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/sessions"
 	code "net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,13 @@ import (
 
 func TestHandlerResult(t *testing.T) {
 	db := &gmq.Db{}
-	hw := handlerWrapper{db}
+	sm := sessions.CreateSessionManager()
+	hw := handlerWrapper{db, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
 		return nil
-	})
+	}, false)
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
@@ -31,11 +33,12 @@ func TestHandlerResult(t *testing.T) {
 
 func TestHandlerClientError(t *testing.T) {
 	db := &gmq.Db{}
-	hw := handlerWrapper{db}
+	sm := sessions.CreateSessionManager()
+	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		return errs.NewClientError(msg)
-	})
+	}, false)
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
@@ -45,11 +48,12 @@ func TestHandlerClientError(t *testing.T) {
 
 func TestHandlerInternalError(t *testing.T) {
 	db := &gmq.Db{}
-	hw := handlerWrapper{db}
+	sm := sessions.CreateSessionManager()
+	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		return errs.NewInternalError(msg)
-	})
+	}, false)
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)

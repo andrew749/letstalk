@@ -15,14 +15,14 @@ import (
 )
 
 type handlerWrapper struct {
-	db *gmq.Db,
+	db *gmq.Db
 	sm *sessions.ISessionManager
 }
 
 type handlerFunc func(*ctx.Context) errs.Error
 
 func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine {
-	hw := handlerWrapper{db}
+	hw := handlerWrapper{db, sessionManager}
 
 	router := gin.Default()
 
@@ -37,7 +37,7 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine 
 
 	// create a new session for an existing user
 	v1.OPTIONS("/login")
-	v1.GET("/login", hw.wrapHandler(login.GetLogin, false))
+	v1.POST("/login", hw.wrapHandler(login.LoginUser, false))
 
 	// for fb_authentication
 	v1.OPTIONS("/login_redirect")
@@ -52,10 +52,11 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine 
  */
 func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.HandlerFunc {
 	return func(g *gin.Context) {
-		var session *ctx.SessionData
+		var session *sessions.SessionData
 
-		c := ctx.NewContext(g, hw.db, session)
+		c := ctx.NewContext(g, hw.db, session, hw.sm)
 
+		rlog.Debug("Checking if Auth needed")
 		// the api route requires authentication so we have a session Id
 		if needAuth {
 			sessionId := g.GetHeader("sessionId")
@@ -70,7 +71,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 				return
 			}
 
-			session, err := hw.sm.GetSessionForSessionId(sessionId)
+			session, err := (*hw.sm).GetSessionForSessionId(sessionId)
 
 			// check that the session Id corresponds to an existing session
 			if err != nil {
@@ -87,6 +88,8 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 			}
 
 		}
+
+		rlog.Debug("Running handler")
 
 		err := handler(c)
 
