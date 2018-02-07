@@ -65,8 +65,8 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 			if sessionId == "" {
 				rlog.Info("No session id provided.")
 				c.GinContext.JSON(
-					403,
-					gin.H{"Error": api.Error{Code: 403, Message: "No session id provided."}},
+					401,
+					gin.H{"Error": api.Error{Code: 401, Message: "No session id provided. This is required."}},
 				)
 				return
 			}
@@ -76,14 +76,14 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 			// check that the session Id corresponds to an existing session
 			if err != nil {
 				rlog.Infof("%s", err)
-				c.GinContext.JSON(403, gin.H{"Error": api.Error{Code: 403, Message: "Bad session Id."}})
+				c.GinContext.JSON(401, gin.H{"Error": api.Error{Code: 401, Message: "Bad session Id."}})
 				return
 			}
 
 			// check that the session token is not expired.
 			if session.ExpiryDate.Before(time.Now()) {
 				rlog.Error("Session token expired.")
-				c.GinContext.JSON(400, gin.H{"Error": api.Error{Code: 400, Message: "Session token expired."}})
+				c.GinContext.JSON(401, gin.H{"Error": api.Error{Code: 401, Message: "Session token expired."}})
 				return
 			}
 

@@ -14,16 +14,11 @@ type SessionData struct {
 	ExpiryDate time.Time
 }
 
-// default expiry time in days
-const DEFAULT_EXPIRY = 7 * 24
-
-func CreateSessionData(userId int) (*SessionData, error) {
+func CreateSessionData(userId int, expiry time.Time) (*SessionData, error) {
 	sessionId, err := utility.GenerateRandomString(32)
 	if err != nil {
 		return nil, err
 	}
 
-	expiryDate := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
-
-	return &SessionData{&sessionId, userId, expiryDate}, nil
+	return &SessionData{&sessionId, userId, expiry}, nil
 }

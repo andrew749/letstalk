@@ -2,12 +2,14 @@ package sessions
 
 import (
 	"letstalk/server/core/errs"
+	"time"
 )
 
 type ISessionManager interface {
 	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
 	GetUserSessions(userId int) ([]*SessionData, errs.Error)
 	CreateNewSessionForUserId(userId int) (*SessionData, errs.Error)
+	CreateNewSessionForUserIdWithExpiry(userId int, expiry time.Time) (*SessionData, errs.Error)
 }
 
 type InMemorySessionManager struct {
@@ -25,10 +27,21 @@ func CreateSessionManager() ISessionManager {
 	return sm
 }
 
+// default expiry time in days
+const DEFAULT_EXPIRY = 7 * 24
+
 func (sm InMemorySessionManager) CreateNewSessionForUserId(
 	userId int,
 ) (*SessionData, errs.Error) {
-	session, err := CreateSessionData(userId)
+	defaultExpiry := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
+	return sm.CreateNewSessionForUserIdWithExpiry(userId, defaultExpiry)
+}
+
+func (sm InMemorySessionManager) CreateNewSessionForUserIdWithExpiry(
+	userId int,
+	expiry time.Time,
+) (*SessionData, errs.Error) {
+	session, err := CreateSessionData(userId, expiry)
 	if err != nil {
 		return nil, errs.NewInternalError("Unable to create new session")
 	}
