@@ -10,3 +10,8 @@ func GetTest(c *ctx.Context) errs.Error {
 	c.Result = result
 	return nil
 }
+
+func GetTestAuth(c *ctx.Context) errs.Error {
+	c.Result = struct{ Message string }{"test"}
+	return nil
+}

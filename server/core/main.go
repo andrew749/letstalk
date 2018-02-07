@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
+	"letstalk/server/core/sessions"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
@@ -37,8 +38,9 @@ func main() {
 	if err := db.Ping(); err != nil {
 		rlog.Error("failed to connect to database: ", err)
 	}
+	sessionManager := sessions.CreateSessionManager()
 
-	router := routes.Register(db)
+	router := routes.Register(db, &sessionManager)
 	secrets.LoadSecrets(*secretsPath)
 	// Start server
 	rlog.Info("Serving on port 8080...")
