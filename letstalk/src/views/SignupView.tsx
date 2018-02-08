@@ -14,23 +14,12 @@ interface Props {
 }
 
 export default class SignupView extends Component<Props> {
-  firstNameInput: FormInput
-  lastNameInput: FormInput
-  emailInput: FormInput
-  phoneNumberInput: FormInput
-  passwordInput: FormInput
-
   static navigationOptions = {
     headerTitle: 'Signup',
   }
 
   constructor(props: Props) {
     super(props);
-    this.firstNameInput = null;
-    this.lastNameInput = null;
-    this.emailInput = null;
-    this.phoneNumberInput = null;
-    this.passwordInput = null;
   }
 
   render() {
