@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button as ReactNativeButton, View } from 'react-native';
 import { FormValidationMessage } from 'react-native-elements';
-import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
+import { reduxForm, Field, SubmissionError } from 'redux-form';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -9,7 +9,12 @@ import {
   NavigationScreenDetails,
 } from 'react-navigation';
 
-import { ActionButton, LabeledFormInput } from '../components';
+import {
+  ActionButton,
+  FormP,
+  FormProps,
+  LabeledFormInput
+} from '../components';
 import { InvalidCredentialsError } from '../services/sessionService';
 import auth from '../services/auth';
 
@@ -18,12 +23,7 @@ interface LoginFormData {
   password: string;
 }
 
-interface LoginFormProps {
-  onSubmit(values: LoginFormData): void;
-}
-
-const LoginForm: React.SFC<
-    LoginFormProps & InjectedFormProps<LoginFormData, LoginFormProps>> = props => {
+const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting } = props;
   const onSubmitWithReset = async (values: LoginFormData): Promise<void> => {
     await onSubmit(values);
@@ -54,8 +54,9 @@ const LoginForm: React.SFC<
   );
 }
 
-const LoginFormWithRedux = reduxForm<LoginFormData, LoginFormProps>({
-  form: 'signup',
+const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
+  // TODO: Enum with these to make sure there are no conflicts
+  form: 'login',
 })(LoginForm);
 
 interface Props {
