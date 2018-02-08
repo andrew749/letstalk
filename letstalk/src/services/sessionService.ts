@@ -9,11 +9,8 @@ export interface SessionService {
 }
 
 export class InvalidCredentialsError extends Error {
-  // TODO: Find out why instanceof is not working with exceptions thrown in promises
-  static readonly tpe: string = 'invalidCredentialsError'
-
   constructor() {
-    super(InvalidCredentialsError.tpe);
+    super('Invalid username or password');
   }
 }
 
@@ -34,7 +31,7 @@ export class MockSessionService implements SessionService {
   }
 
   async logout(sessionToken: SessionToken): Promise<void> {
-    if (sessionToken !== MockSessionService.token) return Promise.reject(new Error('Invalid session token'));
+    if (sessionToken !== MockSessionService.token) throw new Error('Invalid session token');
     // no-op
   }
 }

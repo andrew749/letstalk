@@ -1,19 +1,19 @@
 import { combineReducers, Reducer } from 'redux';
+import { reducer as form, FormState } from 'redux-form';
 
 import { reducer as conversation, State as ConversationState } from './conversation/reducer';
-import { reducer as login, State as LoginState } from './login/reducer';
 import { reducer as thread, State as ThreadState } from './thread/reducer';
 import { receiveMessages } from './thread/actions';
 
 export interface RootState {
+  form: FormState;
   conversation: ConversationState;
-  login: LoginState;
   thread: ThreadState;
 };
 
 const appReducer: Reducer<RootState> = combineReducers<RootState>({
+  form,
   conversation,
-  login,
   thread,
 });
 

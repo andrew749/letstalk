@@ -1,116 +1,99 @@
 import React, { Component } from 'react';
-import { Button as ReactNativeButton, Dimensions, View } from 'react-native';
-import { connect, ActionCreator, Dispatch } from 'react-redux';
-import { FormInput, FormLabel, FormValidationMessage } from 'react-native-elements';
-import { ThunkAction } from 'redux-thunk';
-import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
-
-import { ActionButton } from '../components';
-import { RootState } from '../redux';
-import { login, State as LoginState } from '../redux/login/reducer';
+import { Button as ReactNativeButton, View } from 'react-native';
+import { FormValidationMessage } from 'react-native-elements';
+import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import {
-  resetAction,
-  ResetAction,
-  setPasswordAction,
-  setUsernameAction,
-  SetPasswordAction,
-  SetUsernameAction,
-} from '../redux/login/actions';
+  NavigationScreenProp,
+  NavigationStackAction,
+  NavigationActions,
+  NavigationScreenDetails,
+} from 'react-navigation';
+
+import { ActionButton, LabeledFormInput } from '../components';
 import { InvalidCredentialsError } from '../services/sessionService';
+import auth from '../services/auth';
 
-interface DispatchActions {
-  login: ActionCreator<ThunkAction<Promise<void>, LoginState, void>>;
-  setUsername: ActionCreator<SetUsernameAction>;
-  setPassword: ActionCreator<SetPasswordAction>;
-  reset: ActionCreator<ResetAction>;
-};
+interface LoginFormData {
+  username: string;
+  password: string;
+}
 
-interface Props extends LoginState, DispatchActions {
+interface LoginFormProps {
+  onSubmit(values: LoginFormData): void;
+}
+
+const LoginForm: React.SFC<
+    LoginFormProps & InjectedFormProps<LoginFormData, LoginFormProps>> = props => {
+  const { error, handleSubmit, onSubmit, reset, submitting } = props;
+  const onSubmitWithReset = async (values: LoginFormData): Promise<void> => {
+    await onSubmit(values);
+    reset();
+  };
+  return (
+    <View>
+      <Field
+        label="Username"
+        name="username"
+        component={LabeledFormInput}
+        autoCorrect={false}
+        autoCapitalize={'none' as 'none'}
+      />
+      <Field
+        label="Password"
+        name="password"
+        component={LabeledFormInput}
+        secureTextEntry={true}
+      />
+      {error && <FormValidationMessage>{error}</FormValidationMessage>}
+      <ActionButton
+        loading={submitting}
+        title={submitting ? null : "Log in"}
+        onPress={handleSubmit(onSubmitWithReset)}
+      />
+    </View>
+  );
+}
+
+const LoginFormWithRedux = reduxForm<LoginFormData, LoginFormProps>({
+  form: 'signup',
+})(LoginForm);
+
+interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class LoginView extends Component<Props> {
-  usernameInput: FormInput
-  passwordInput: FormInput
-
-  static navigationOptions = {
-    headerRight: <ReactNativeButton title="Sign up" onPress={() => null} />,
+export default class LoginView extends Component<Props> {
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Log in',
-  }
+    headerRight: <ReactNativeButton title="Sign up"
+      onPress={() => navigation.navigate('Signup')} />,
+  })
 
   constructor(props: Props) {
     super(props);
-    this.usernameInput = null;
-    this.passwordInput = null;
 
-    this.onLoginPress = this.onLoginPress.bind(this);
-    this.onUsernameChange = this.onUsernameChange.bind(this);
-    this.onPasswordChange = this.onPasswordChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
-  onUsernameChange(username: string) {
-    this.props.setUsername(username);
-  }
-
-  onPasswordChange(password: string) {
-    this.props.setPassword(password);
-  }
-
-  async onLoginPress() {
+  async onSubmit(values: LoginFormData) {
     const {
       username,
       password,
-    } = this.props;
+    } = values;
+    console.log(values);
     try {
-      await this.props.login(username, password);
-      this.props.reset();
+      await auth.login(username, password);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         key: null,
         actions: [NavigationActions.navigate({ routeName: 'Main' })]
       }));
     } catch(e) {
-      console.log(e.message);
-      if (e.message !== InvalidCredentialsError.tpe) throw e;
-      this.usernameInput.shake();
-      this.passwordInput.shake();
+      throw new SubmissionError({_error: e.message});
     }
   }
 
   render() {
-    // TODO: Add header
-    let validationMessage = this.props.errorMsg || ' ';
-    return (
-      <View>
-        <FormLabel>Username</FormLabel>
-        <FormInput
-          ref={input => this.usernameInput = input}
-          autoCorrect={false}
-          autoCapitalize={'none'}
-          onChangeText={this.onUsernameChange}
-        />
-        <FormLabel>Password</FormLabel>
-        <FormInput
-          ref={input => this.passwordInput = input}
-          secureTextEntry={true}
-          onChangeText={this.onPasswordChange}
-        />
-        <FormValidationMessage>
-          {validationMessage}
-        </FormValidationMessage>
-        <ActionButton
-          loading={this.props.isFetching}
-          title={this.props.isFetching ? null : "Log in"}
-          onPress={this.onLoginPress}
-        />
-      </View>
-    );
+    return <LoginFormWithRedux onSubmit={this.onSubmit} />;
   }
 }
-
-export default connect(({ login }: RootState) => login, {
-  login,
-  setUsername: setUsernameAction,
-  setPassword: setPasswordAction,
-  reset: resetAction,
-})(LoginView);
