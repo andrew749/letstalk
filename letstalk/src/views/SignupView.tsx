@@ -15,6 +15,7 @@ import {
   FormProps,
   LabeledFormInput,
 } from '../components';
+import profileService from '../services/profile-service';
 
 interface SignupFormData {
   firstName: string;
@@ -94,7 +95,11 @@ export default class SignupView extends Component<Props> {
   }
 
   async onSubmit(values: SignupFormData) {
-    console.log(values);
+    const userId = await profileService.signup({
+      ...values,
+      gender: 'male',
+      birthday: 847324800,
+    });
   }
 
   render() {

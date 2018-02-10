@@ -2,7 +2,8 @@
 // import * as Keychain from 'react-native-keychain';
 import { AsyncStorage } from 'react-native';
 
-import { SessionService, SessionToken, MockSessionService } from './sessionService';
+import requestor from './requests';
+import { SessionService, SessionToken, RemoteSessionService } from './session-service';
 
 class Auth {
   private sessionService: SessionService
@@ -40,6 +41,6 @@ class Auth {
   }
 };
 
-const auth = new Auth(new MockSessionService());
+const auth = new Auth(new RemoteSessionService(requestor));
 
 export default auth;

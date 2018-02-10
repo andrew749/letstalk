@@ -15,7 +15,7 @@ import {
   FormProps,
   LabeledFormInput
 } from '../components';
-import { InvalidCredentialsError } from '../services/sessionService';
+import { InvalidCredentialsError } from '../services/session-service';
 import auth from '../services/auth';
 
 interface LoginFormData {
