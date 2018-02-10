@@ -13,6 +13,7 @@ import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
+import SignupView from './views/SignupView';
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
 
@@ -77,6 +78,9 @@ const MainView = TabNavigator({
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
+  },
+  Signup: {
+    screen: SignupView,
   },
   Main: {
     screen: MainView,
