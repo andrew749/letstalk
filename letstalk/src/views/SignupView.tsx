@@ -25,8 +25,19 @@ interface SignupFormData {
   password: string;
 }
 
+// TODO: move elsewhere
+const required = (value: any) => (value ? undefined : 'Required')
+const email = (value: string) =>
+  value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
+    ? 'Invalid email address'
+    : undefined
+const phoneNumber = (value: string) =>
+  value && !/^(0|[1-9][0-9]{9})$/i.test(value)
+    ? 'Invalid phone number, must be 10 digits'
+    : undefined
+
 const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting } = props;
+  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: SignupFormData): Promise<void> => {
     await onSubmit(values);
     reset();
@@ -38,12 +49,14 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         name="firstName"
         component={LabeledFormInput}
         autoCorrect={false}
+        validate={required}
       />
       <Field
         label="Last name"
         name="lastName"
         component={LabeledFormInput}
         autoCorrect={false}
+        validate={required}
       />
       <Field
         label="Email"
@@ -52,21 +65,25 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         keyboardType={'email-address' as 'email-address'}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
+        validate={[required, email]}
       />
       <Field
         label="Phone number"
         name="phoneNumber"
         component={LabeledFormInput}
         keyboardType={'phone-pad' as 'phone-pad'}
+        validate={[required, phoneNumber]}
       />
       <Field
         label="Password"
         name="password"
         component={LabeledFormInput}
         secureTextEntry={true}
+        validate={required} // Add some rules for password
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Sign up"}
         onPress={handleSubmit(onSubmitWithReset)}
@@ -95,11 +112,15 @@ export default class SignupView extends Component<Props> {
   }
 
   async onSubmit(values: SignupFormData) {
-    const userId = await profileService.signup({
-      ...values,
-      gender: 'male',
-      birthday: 847324800,
-    });
+    try {
+      await profileService.signup({
+        ...values,
+        gender: 'male',
+        birthday: 847324800,
+      });
+    } catch(e) {
+      throw new SubmissionError({_error: e.message});
+    }
   }
 
   render() {
