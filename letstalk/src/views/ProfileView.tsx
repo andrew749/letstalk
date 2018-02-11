@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
-import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 
 import auth from '../services/auth';
+import { ActionButton } from '../components';
 
 const window = Dimensions.get('window');
 
@@ -74,7 +75,7 @@ class ProfileView extends Component<Props> {
           <FormLabel>Phone Number</FormLabel>
           <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
         </View>
-        <Button onPress={this.onLogoutPress} title='LOGOUT' backgroundColor='#EB5757'/>
+        <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
   }
