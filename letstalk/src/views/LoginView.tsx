@@ -23,8 +23,11 @@ interface LoginFormData {
   password: string;
 }
 
+// TODO: move elsewhere
+const required = (value: any) => (value ? undefined : 'Required')
+
 const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting } = props;
+  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: LoginFormData): Promise<void> => {
     await onSubmit(values);
     reset();
@@ -37,15 +40,18 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
         component={LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
+        validate={required}
       />
       <Field
         label="Password"
         name="password"
         component={LabeledFormInput}
         secureTextEntry={true}
+        validate={required}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Log in"}
         onPress={handleSubmit(onSubmitWithReset)}
