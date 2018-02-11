@@ -118,6 +118,12 @@ export default class SignupView extends Component<Props> {
         gender: 'male',
         birthday: 847324800,
       });
+      // TODO: have a prompt saying successfully signed up
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'Login' })]
+      }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
