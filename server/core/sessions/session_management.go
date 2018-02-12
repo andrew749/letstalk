@@ -5,12 +5,21 @@ import (
 	"time"
 )
 
-type ISessionManager interface {
+type ISessionStore interface {
 	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
-	GetUserSessions(userId int) ([]*SessionData, errs.Error)
+	GetUserSessions(userId int) ([]SessionData, errs.Error)
+	AddNewSession(session *SessionData) error
+}
+
+type ISessionManagerBase interface {
 	CreateNewSessionForUserId(userId int) (*SessionData, errs.Error)
 	CreateNewSessionForUserIdWithExpiry(userId int, expiry time.Time) (*SessionData, errs.Error)
+	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
+	GetUserSessions(userId int) ([]SessionData, errs.Error)
 }
+
+// default expiry time in days
+const DEFAULT_EXPIRY = 7 * 24
 
 //TODO(acod): create redis backed session manager
 //TODO(acod): create backend job to delete stale sessions
