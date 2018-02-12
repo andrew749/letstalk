@@ -1,6 +1,8 @@
 package api
 
 import (
+	"letstalk/server/data"
+
 	"github.com/mijia/modelq/gmq"
 )
 
@@ -22,11 +24,13 @@ type User struct {
 	Password *string `json:"password" binding:"required"`
 }
 
-/**
- * Try to see if there is school data assiociated with this account.
- * If there is no data, return nil
- */
-func (u *User) GetSchoolInfo(db *gmq.Db) *SchoolInfo {
-	// TODO(acod): get the school info for a particular user
-	return nil
+func GetUserWithId(userId int, db *gmq.Db) (*data.User, error) {
+	userObj := data.UserObjs
+	user, err := userObj.Select().Where(userObj.FilterUserId("=", userId)).One(db)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

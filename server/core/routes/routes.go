@@ -5,6 +5,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
+	"letstalk/server/core/onboarding"
 	"letstalk/server/core/sessions"
 	"net/http"
 	"time"
@@ -45,6 +46,17 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine 
 	// for fb_authentication
 	v1.OPTIONS("/login_redirect")
 	v1.GET("/login_redirect", hw.wrapHandler(login.GetLoginResponse, false))
+
+	// update user data
+	v1.OPTIONS("/cohort")
+	v1.POST(
+		"/cohort",
+		hw.wrapHandler(onboarding.UpdateUserCohort, true),
+	)
+	v1.GET(
+		"/cohort",
+		hw.wrapHandler(api.GetCohortController, true),
+	)
 
 	return router
 }
@@ -89,6 +101,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 				c.GinContext.JSON(401, gin.H{"Error": api.Error{Code: 401, Message: "Session token expired."}})
 				return
 			}
+			c.SessionData = session
 
 		}
 
