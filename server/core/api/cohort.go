@@ -24,7 +24,7 @@ func GetCohortController(c *ctx.Context) errs.Error {
 }
 
 /**
- * Try to see if there is school data assiociated with this account.
+ * Try to see if there is school data associated with this account.
  * If there is no data, return nil
  */
 func GetUserCohort(db *gmq.Db, userId int) (*data.Cohort, error) {

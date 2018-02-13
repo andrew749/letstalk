@@ -111,11 +111,11 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 
 		if err != nil {
 			rlog.Infof("Returning error: %s\n", err)
-			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
+			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"error": convertError(err)})
 			return
 		}
 		rlog.Infof("Returning result: %s\n", c.Result)
-		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
+		c.GinContext.JSON(http.StatusOK, gin.H{"result": c.Result})
 	}
 }
 

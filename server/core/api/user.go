@@ -7,15 +7,15 @@ import (
 )
 
 /**
- * Holds all the data that we currently assiociate to a user.
+ * Holds all the data that we currently associate with a user.
  */
 type User struct {
-	FirstName string `json:"first_name" binding:"required"`
-	LastName  string `json:"last_name" binding:"required"`
+	FirstName string `json:"firstName" binding:"required"`
+	LastName  string `json:"lastName" binding:"required"`
 
 	// Contact information
 	Email       string  `json:"email" binding:"required"`
-	PhoneNumber *string `json:"phone_number"`
+	PhoneNumber *string `json:"phoneNumber"`
 
 	// Personal information
 	Gender   string `json:"gender" binding:"required"`
