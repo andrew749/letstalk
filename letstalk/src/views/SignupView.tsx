@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView } from 'react-native';
+import { Picker, ScrollView } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -7,13 +7,13 @@ import {
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
-import { FormInput } from 'react-native-elements';
 
 import {
   ActionButton,
   FormP,
   FormProps,
   LabeledFormInput,
+  ModalPicker,
 } from '../components';
 import profileService from '../services/profile-service';
 
@@ -23,6 +23,7 @@ interface SignupFormData {
   email: string;
   phoneNumber: string;
   password: string;
+  gender: string;
 }
 
 // TODO: move elsewhere
@@ -39,6 +40,7 @@ const phoneNumber = (value: string) =>
 const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: SignupFormData): Promise<void> => {
+    console.log(values.gender);
     await onSubmit(values);
     reset();
   };
@@ -81,6 +83,25 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         secureTextEntry={true}
         validate={required} // Add some rules for password
       />
+      <Field
+        label="Gender"
+        name="gender"
+        component={ModalPicker}
+        validate={required} // Add some rules for password
+      >
+        <Picker.Item
+          label="Male"
+          value="male"
+        />
+        <Picker.Item
+          label="Female"
+          value="female"
+        />
+        <Picker.Item
+          label="Other"
+          value="other"
+        />
+      </Field>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         disabled={!valid}

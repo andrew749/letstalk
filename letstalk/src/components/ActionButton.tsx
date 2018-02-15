@@ -4,18 +4,18 @@ import { Button, ButtonProps } from 'react-native-elements';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-export default class ActionButton extends Component<ButtonProps> {
-  render() {
-    return (
-      <Button
-        style={styles.loginButtonContainerStyle}
-        buttonStyle={styles.loginButtonStyle}
-        textStyle={styles.loginButtonTextStyle}
-        {...this.props}
-      />
-    );
-  }
+const ActionButton: React.SFC<ButtonProps> = props => {
+  return (
+    <Button
+      style={styles.loginButtonContainerStyle}
+      buttonStyle={styles.loginButtonStyle}
+      textStyle={styles.loginButtonTextStyle}
+      {...props}
+    />
+  );
 };
+
+export default ActionButton;
 
 const styles = {
   loginButtonStyle: {
