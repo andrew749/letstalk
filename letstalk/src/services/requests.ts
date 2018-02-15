@@ -12,7 +12,7 @@ export class Requestor {
   async _makeRequest(route: string, fetchParams: object): Promise<any> {
     const response = await fetch(route, fetchParams)
     if (!response.ok) return response.json().then((data: any) => {
-      throw new Error(data.Error.Message);
+      throw new Error(data.error.Message);
     });
     return response.json();
   }
