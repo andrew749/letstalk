@@ -40,7 +40,6 @@ const phoneNumber = (value: string) =>
 const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: SignupFormData): Promise<void> => {
-    console.log(values.gender);
     await onSubmit(values);
     reset();
   };
@@ -136,7 +135,6 @@ export default class SignupView extends Component<Props> {
     try {
       await profileService.signup({
         ...values,
-        gender: 'male',
         birthday: 847324800,
       });
       // TODO: have a prompt saying successfully signed up
