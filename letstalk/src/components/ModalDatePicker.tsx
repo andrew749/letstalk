@@ -1,9 +1,10 @@
+// TODO: Remove shared code between this and [ModalPicker]
 import React, { ReactNode } from 'react';
 import {
   Dimensions,
   Modal,
-  PickerIOS,
-  PickerProperties,
+  DatePickerIOS,
+  DatePickerIOSProperties,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -50,27 +51,22 @@ const styles = StyleSheet.create({
   },
 });
 
-type Props = PickerProperties & WrappedFieldProps & {
+type Props = WrappedFieldProps & {
   label: string;
-  children?: ReactNode;
+  defaultDate: Date;
+  mode?: 'date' | 'time' | 'datetime';
 };
 
 interface State {
   modalVisible: boolean;
-  values: Array<any>;
-  labels: Array<string>;
 };
 
-class StatefulModalPicker extends React.Component<Props, State> {
+class StatefulModalDatePicker extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { values, labels } = this.getLabelsAndValues();
-
     this.state = {
       modalVisible: false,
-      values,
-      labels,
     };
 
     this.show = this.show.bind(this);
@@ -79,21 +75,9 @@ class StatefulModalPicker extends React.Component<Props, State> {
     this.onSubmitPress = this.onSubmitPress.bind(this);
   }
 
-  getLabelsAndValues () {
-    return {
-      labels: React.Children.map(this.props.children, child => (child as any).props.label),
-      values: React.Children.map(this.props.children, child => (child as any).props.value),
-    };
-  }
-
-  componentWillReceiveProps(props: Props) {
-    this.setState(this.getLabelsAndValues());
-  }
-
   onSubmitPress() {
-    // If the user
     const { value, onChange } = this.props.input;
-    onChange(value || this.state.values[0]);
+    onChange(value || this.props.defaultDate);
     this.hide()
   }
 
@@ -116,11 +100,10 @@ class StatefulModalPicker extends React.Component<Props, State> {
   }
 
   render() {
-    const { label } = this.props;
+    const { defaultDate, label, mode } = this.props;
     const { onChange, value } = this.props.input;
     const { error, touched, warning } = this.props.meta;
-    const { modalVisible, values, labels } = this.state;
-    const valueLabel = value ? labels[values.indexOf(value)] : label;
+    const { modalVisible } = this.state;
 
     // TODO: Don't use action button
     return (
@@ -146,19 +129,19 @@ class StatefulModalPicker extends React.Component<Props, State> {
                 </TouchableOpacity>
               </View>
               <View>
-                <PickerIOS
+                <DatePickerIOS
+                  mode={mode}
                   style={styles.bottomPicker}
-                  selectedValue={value}
-                  onValueChange={onChange}
+                  date={value || defaultDate}
+                  onDateChange={onChange}
                 >
-                  {this.props.children}
-                </PickerIOS>
+                </DatePickerIOS>
               </View>
             </View>
           </View>
         </Modal>
         <ActionButton
-          title={valueLabel}
+          title={value ? value.toString() : label}
           onPress={this.show}
         />
         {touched && (
@@ -169,7 +152,7 @@ class StatefulModalPicker extends React.Component<Props, State> {
   }
 }
 
-const ModalPicker: React.SFC<Props> = props => {
-  return <StatefulModalPicker {...props} />;
+const ModalDatePicker: React.SFC<Props> = props => {
+  return <StatefulModalDatePicker {...props} />;
 }
-export default ModalPicker;
+export default ModalDatePicker;

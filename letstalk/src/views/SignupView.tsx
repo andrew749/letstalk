@@ -14,6 +14,7 @@ import {
   FormProps,
   LabeledFormInput,
   ModalPicker,
+  ModalDatePicker,
 } from '../components';
 import profileService from '../services/profile-service';
 
@@ -24,6 +25,7 @@ interface SignupFormData {
   phoneNumber: string;
   password: string;
   gender: string;
+  birthday: Date;
 }
 
 // TODO: move elsewhere
@@ -40,6 +42,7 @@ const phoneNumber = (value: string) =>
 const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: SignupFormData): Promise<void> => {
+    console.log(values);
     await onSubmit(values);
     reset();
   };
@@ -96,11 +99,15 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
           label="Female"
           value="female"
         />
-        <Picker.Item
-          label="Other"
-          value="other"
-        />
       </Field>
+      <Field
+        label="Birthday"
+        name="birthday"
+        mode={'date' as 'date'}
+        defaultDate={new Date('1996-11-07T00:00:00.000Z')}
+        component={ModalDatePicker}
+        validate={required} // Add some rules for password
+      />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         disabled={!valid}
@@ -135,7 +142,7 @@ export default class SignupView extends Component<Props> {
     try {
       await profileService.signup({
         ...values,
-        birthday: 847324800,
+        birthday: Math.round(values.birthday.getTime() / 1000),
       });
       // TODO: have a prompt saying successfully signed up
       this.props.navigation.dispatch(NavigationActions.reset({
