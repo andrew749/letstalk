@@ -16,7 +16,7 @@ func GetCohortController(c *ctx.Context) errs.Error {
 	userId := c.SessionData.UserId
 	cohort, err := GetUserCohort(c.Db, userId)
 	if err != nil {
-		return errs.NewClientError("Bad request for user cohort")
+		return errs.NewClientError(err.Error())
 	}
 
 	c.Result = cohort
@@ -29,9 +29,15 @@ func GetCohortController(c *ctx.Context) errs.Error {
  */
 func GetUserCohort(db *gmq.Db, userId int) (*data.Cohort, error) {
 	cohortIdMapping, err := GetUserCohortMappingById(db, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	cohort, err := data.CohortObjs.
 		Select().
-		Where(data.CohortObjs.FilterCohortId("=", cohortIdMapping.CohortId)).One(db)
+		Where(data.CohortObjs.FilterCohortId("=", cohortIdMapping.CohortId)).
+		One(db)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +58,7 @@ func GetUserCohortMappingById(db *gmq.Db, userId int) (*data.UserCohort, error) 
 	}
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, errs.NewClientError("No cohorts found")
 	}
 
 	return &cohortIdMapping, nil

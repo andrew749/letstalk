@@ -37,7 +37,11 @@ func LoginUser(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Bad login request data %s", err)
 	}
 
-	authenticationEntry, err := data.AuthenticationDataObjs.Select().Where(data.AuthenticationDataObjs.FilterUserId("=", req.UserId)).List(c.Db)
+	authenticationEntry, err := data.AuthenticationDataObjs.
+		Select().
+		Where(data.AuthenticationDataObjs.FilterUserId("=", req.UserId)).
+		List(c.Db)
+
 	if len(authenticationEntry) == 0 {
 		return errs.NewClientError("Couldn't find an account")
 	}
@@ -46,6 +50,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 	if !utility.CheckPasswordHash(req.Password, authenticationEntry[0].PasswordHash) {
 		return errs.NewClientError("Bad password")
 	}
+
 	rlog.Debug("Successfully Checked Password")
 
 	// if all preconditions pass, then create a new session
