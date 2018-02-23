@@ -90,7 +90,7 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 		return true, nil
 	})
 
-	if err != nil {
+	if err != nil || session == nil {
 		return nil, errs.NewClientError("Unable to get session: %s", err)
 	}
 

@@ -21,7 +21,10 @@ type ISessionManagerBase interface {
 }
 
 func CreateSessionManager(db *gmq.Db) ISessionManagerBase {
-	return CreateCompositeSessionManager(CreateInMemorySessionStore(), CreateDBSessionStore(db))
+	return CreateCompositeSessionManager(
+		CreateInMemorySessionStore(),
+		CreateDBSessionStore(db),
+	)
 }
 
 // default expiry time in days
