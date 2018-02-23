@@ -31,6 +31,9 @@ func GetUserCohort(db *gmq.Db, userId int) (*data.Cohort, error) {
 	cohortIdMapping, err := GetUserCohortMappingById(db, userId)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errs.NewClientError("No cohort found")
+		}
 		return nil, err
 	}
 
@@ -53,12 +56,8 @@ func GetUserCohortMappingById(db *gmq.Db, userId int) (*data.UserCohort, error) 
 		Where(data.UserCohortObjs.FilterUserId("=", userId)).
 		One(db)
 
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil {
 		return nil, err
-	}
-
-	if err == sql.ErrNoRows {
-		return nil, errs.NewClientError("No cohorts found")
 	}
 
 	return &cohortIdMapping, nil
