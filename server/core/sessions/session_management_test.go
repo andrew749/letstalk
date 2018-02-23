@@ -7,7 +7,8 @@ import (
 )
 
 func TestCreateAndGetSession(t *testing.T) {
-	sm := CreateInMemorySessionStore()
+	ss := CreateInMemorySessionStore()
+	sm := CreateCompositeSessionManager(ss)
 
 	session, _ := sm.CreateNewSessionForUserId(1)
 
@@ -17,10 +18,11 @@ func TestCreateAndGetSession(t *testing.T) {
 }
 
 func TestCreateAndGetMultipleSessions(t *testing.T) {
-	sm := CreateInMemorySessionStore()
+	ss := CreateInMemorySessionStore()
+	sm := CreateCompositeSessionManager(ss)
 
-	session1, _ := CreateNewSessionForUserId(1)
-	session2, _ := CreateNewSessionForUserId(1)
+	session1, _ := sm.CreateNewSessionForUserId(1)
+	session2, _ := sm.CreateNewSessionForUserId(1)
 
 	sessions, _ := sm.GetUserSessions(1)
 
@@ -29,7 +31,8 @@ func TestCreateAndGetMultipleSessions(t *testing.T) {
 }
 
 func TestCreateAndGetSessionBySessionId(t *testing.T) {
-	sm := CreateSessionManager()
+	ss := CreateInMemorySessionStore()
+	sm := CreateCompositeSessionManager(ss)
 
 	session1, _ := sm.CreateNewSessionForUserId(1)
 

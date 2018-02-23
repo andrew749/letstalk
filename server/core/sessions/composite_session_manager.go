@@ -3,15 +3,13 @@ package sessions
 import (
 	"letstalk/server/core/errs"
 	"time"
-
-	"github.com/mijia/modelq/gmq"
 )
 
 type CompositeSessionManager struct {
 	sessionStores []ISessionStore
 }
 
-func CreateCompositeSessionManager(db *gmq.Db, sessionManagers ...ISessionStore) ISessionManagerBase {
+func CreateCompositeSessionManager(sessionManagers ...ISessionStore) ISessionManagerBase {
 	sm := CompositeSessionManager{
 		make([]ISessionStore, 0),
 	}
