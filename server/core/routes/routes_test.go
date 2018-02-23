@@ -18,7 +18,7 @@ import (
 
 func TestHandlerResult(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 	hw := handlerWrapper{db, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
@@ -29,12 +29,12 @@ func TestHandlerResult(t *testing.T) {
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
 	assert.Equal(t, code.StatusOK, writer.StatusCode)
-	assert.Equal(t, fmt.Sprintf(`{"Result":"%s"}`, msg), writer.Output)
+	assert.Equal(t, fmt.Sprintf(`{"result":"%s"}`, msg), writer.Output)
 }
 
 func TestHandlerAuthBad(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 
 	hw := handlerWrapper{db, &sm}
 	msg := "test message"
@@ -52,7 +52,7 @@ func TestHandlerAuthBad(t *testing.T) {
 
 func TestHandlerAuthGood(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 
 	session, err := sm.CreateNewSessionForUserId(1)
 	assert.Nil(t, err)
@@ -74,7 +74,7 @@ func TestHandlerAuthGood(t *testing.T) {
 
 func TestHandlerExpiredToken(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 
 	session, err := sm.CreateNewSessionForUserIdWithExpiry(1, time.Unix(0, 0))
 	assert.Nil(t, err)
@@ -95,7 +95,7 @@ func TestHandlerExpiredToken(t *testing.T) {
 
 func TestHandlerClientError(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
@@ -110,7 +110,7 @@ func TestHandlerClientError(t *testing.T) {
 
 func TestHandlerInternalError(t *testing.T) {
 	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	sm := sessions.CreateSessionManager(db)
 	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {

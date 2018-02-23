@@ -2,6 +2,11 @@ package errs
 
 import "bytes"
 
+/**
+ * Error class to hold multiple errors.
+ * Useful when operations are applied on an array and multiple operations
+ * can fail.
+ */
 type CompositeError struct {
 	errors []error
 }

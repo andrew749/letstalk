@@ -99,8 +99,8 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 
 func (sm CompositeSessionManager) GetUserSessions(
 	userId int,
-) ([]SessionData, errs.Error) {
-	var res []SessionData = make([]SessionData, 0)
+) ([]*SessionData, errs.Error) {
+	var res []*SessionData = make([]*SessionData, 0)
 	err := sm.forEverySm(func(x ISessionStore) error {
 		sessions, err := x.GetUserSessions(userId)
 		if err != nil {

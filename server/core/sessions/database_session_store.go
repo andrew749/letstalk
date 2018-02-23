@@ -46,12 +46,12 @@ func (sm DatabaseSessionStore) GetSessionForSessionId(
 		return nil, errs.NewClientError("Could not get session for user: %s", res)
 	}
 	convertedSessionData := SessionDataFromDBSessionData(res)
-	return &convertedSessionData, nil
+	return convertedSessionData, nil
 }
 
 func (sm DatabaseSessionStore) GetUserSessions(
 	userId int,
-) ([]SessionData, errs.Error) {
+) ([]*SessionData, errs.Error) {
 	sessions, err := data.SessionsObjs.
 		Select().
 		Where(data.SessionsObjs.FilterUserId("=", userId)).
