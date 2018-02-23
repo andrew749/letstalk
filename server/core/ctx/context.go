@@ -11,7 +11,7 @@ type Context struct {
 	GinContext     *gin.Context
 	Db             *gmq.Db
 	SessionData    *sessions.SessionData
-	SessionManager *sessions.ISessionManager
+	SessionManager *sessions.ISessionManagerBase
 	Result         interface{}
 }
 
@@ -19,7 +19,7 @@ func NewContext(
 	g *gin.Context,
 	db *gmq.Db,
 	sessionData *sessions.SessionData,
-	sm *sessions.ISessionManager,
+	sm *sessions.ISessionManagerBase,
 ) *Context {
 	return &Context{
 		GinContext:     g,

@@ -38,7 +38,7 @@ func main() {
 	if err := db.Ping(); err != nil {
 		rlog.Error("failed to connect to database: ", err)
 	}
-	sessionManager := sessions.CreateSessionManager()
+	sessionManager := sessions.CreateSessionManager(db)
 
 	router := routes.Register(db, &sessionManager)
 	secrets.LoadSecrets(*secretsPath)

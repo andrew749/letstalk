@@ -68,3 +68,14 @@ CREATE TABLE user_cohort (
   FOREIGN KEY (cohort_id)
     REFERENCES cohort(cohort_id)
 );
+
+CREATE TABLE sessions (
+  session_id VARCHAR(64) NOT NULL,
+  user_id INT NOT NULL,
+  expiry_date DATETIME(6) NOT NULL,
+
+  UNIQUE KEY (session_id),
+
+  FOREIGN KEY (user_id)
+    REFERENCES user(user_id)
+)

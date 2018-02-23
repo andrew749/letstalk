@@ -14,11 +14,21 @@ import (
 	"github.com/mijia/modelq/gmq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/http"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
+func setupSessionManager(t *testing.T) (*gmq.Db, sessions.ISessionManagerBase) {
+	dbMock, _, err := sqlmock.New()
+	if err != nil {
+		assert.Fail(t, "Unable to create mock db.")
+	}
+	db := gmq.NewDb(dbMock, "Mock DB Driver")
+	sm := sessions.CreateSessionManager(db)
+	return db, sm
+}
+
 func TestHandlerResult(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	db, sm := setupSessionManager(t)
 	hw := handlerWrapper{db, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
@@ -33,9 +43,7 @@ func TestHandlerResult(t *testing.T) {
 }
 
 func TestHandlerAuthBad(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
-
+	db, sm := setupSessionManager(t)
 	hw := handlerWrapper{db, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
@@ -51,8 +59,7 @@ func TestHandlerAuthBad(t *testing.T) {
 }
 
 func TestHandlerAuthGood(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	db, sm := setupSessionManager(t)
 
 	session, err := sm.CreateNewSessionForUserId(1)
 	assert.Nil(t, err)
@@ -73,8 +80,7 @@ func TestHandlerAuthGood(t *testing.T) {
 }
 
 func TestHandlerExpiredToken(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	db, sm := setupSessionManager(t)
 
 	session, err := sm.CreateNewSessionForUserIdWithExpiry(1, time.Unix(0, 0))
 	assert.Nil(t, err)
@@ -94,8 +100,8 @@ func TestHandlerExpiredToken(t *testing.T) {
 }
 
 func TestHandlerClientError(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	db, sm := setupSessionManager(t)
+
 	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
@@ -109,8 +115,8 @@ func TestHandlerClientError(t *testing.T) {
 }
 
 func TestHandlerInternalError(t *testing.T) {
-	db := &gmq.Db{}
-	sm := sessions.CreateSessionManager()
+	db, sm := setupSessionManager(t)
+
 	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
