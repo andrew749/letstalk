@@ -5,7 +5,7 @@ import { AsyncStorage } from 'react-native';
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
 
-class Auth {
+export class Auth {
   private sessionService: SessionService
   private sessionToken: SessionToken
 

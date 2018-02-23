@@ -11,7 +11,7 @@ import (
 )
 
 type LoginRequestData struct {
-	UserId   int    `json:"user_id" binding:"required"`
+	UserId   int    `json:"userId" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 

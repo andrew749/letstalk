@@ -14,6 +14,7 @@ import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
+import OnboardingView from './views/OnboardingView';
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
 
@@ -82,6 +83,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Signup: {
     screen: SignupView,
   },
+  Onboarding: {
+    screen: OnboardingView,
+  },
   Main: {
     screen: MainView,
     navigationOptions: {
@@ -89,7 +93,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     },
   },
 }, {
-  initialRouteName: loggedIn ? "Main" : "Login",
+  initialRouteName: loggedIn ? "Onboarding" : "Login",
   headerMode: 'float',
 });
 
