@@ -87,13 +87,12 @@ export default class LoginView extends Component<Props> {
       username,
       password,
     } = values;
-    console.log(values);
     try {
       await auth.login(username, password);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         key: null,
-        actions: [NavigationActions.navigate({ routeName: 'Main' })]
+        actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
       }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
