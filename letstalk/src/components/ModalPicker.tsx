@@ -73,6 +73,8 @@ class StatefulModalPicker extends React.Component<Props, State> {
       labels,
     };
 
+    console.log(this.props);
+
     this.show = this.show.bind(this);
     this.hide = this.hide.bind(this);
     this.hideAndBlur = this.hideAndBlur.bind(this);

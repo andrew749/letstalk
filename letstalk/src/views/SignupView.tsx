@@ -42,7 +42,6 @@ const phoneNumber = (value: string) =>
 const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
   const onSubmitWithReset = async (values: SignupFormData): Promise<void> => {
-    console.log(values);
     await onSubmit(values);
     reset();
   };
@@ -89,7 +88,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Gender"
         name="gender"
         component={ModalPicker}
-        validate={required} // Add some rules for password
+        validate={required}
       >
         <Picker.Item
           label="Male"
@@ -106,7 +105,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         mode={'date' as 'date'}
         defaultDate={new Date('1996-11-07T00:00:00.000Z')}
         component={ModalDatePicker}
-        validate={required} // Add some rules for password
+        validate={required}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
