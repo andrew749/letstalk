@@ -38,6 +38,9 @@ func LoginUser(c *ctx.Context) errs.Error {
 	}
 
 	authenticationEntry, err := data.AuthenticationDataObjs.Select().Where(data.AuthenticationDataObjs.FilterUserId("=", req.UserId)).List(c.Db)
+	if len(authenticationEntry) == 0 {
+		return errs.NewClientError("Couldn't find an account")
+	}
 
 	// check if the password is correct
 	if !utility.CheckPasswordHash(req.Password, authenticationEntry[0].PasswordHash) {
