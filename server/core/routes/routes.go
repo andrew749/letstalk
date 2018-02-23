@@ -17,12 +17,12 @@ import (
 
 type handlerWrapper struct {
 	db *gmq.Db
-	sm *sessions.ISessionManager
+	sm *sessions.ISessionManagerBase
 }
 
 type handlerFunc func(*ctx.Context) errs.Error
 
-func Register(db *gmq.Db, sessionManager *sessions.ISessionManager) *gin.Engine {
+func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Engine {
 	hw := handlerWrapper{db, sessionManager}
 
 	router := gin.Default()

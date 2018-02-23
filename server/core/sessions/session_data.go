@@ -24,16 +24,16 @@ func CreateSessionData(userId int, expiry time.Time) (*SessionData, error) {
 	return &SessionData{&sessionId, userId, expiry}, nil
 }
 
-func SessionDataFromDBSessionData(session data.Sessions) SessionData {
-	return SessionData{
+func SessionDataFromDBSessionData(session data.Sessions) *SessionData {
+	return &SessionData{
 		SessionId:  &session.SessionId,
 		UserId:     session.UserId,
 		ExpiryDate: session.ExpiryDate,
 	}
 }
 
-func MapSessionDataFromDBSessionData(sessions []data.Sessions) []SessionData {
-	res := make([]SessionData, 0)
+func MapSessionDataFromDBSessionData(sessions []data.Sessions) []*SessionData {
+	res := make([]*SessionData, 0)
 	for _, session := range sessions {
 		res = append(res, SessionDataFromDBSessionData(session))
 	}
