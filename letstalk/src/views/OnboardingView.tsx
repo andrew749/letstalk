@@ -1,6 +1,11 @@
 // TODO: maybe rename to OnboardingView
 import React, { Component } from 'react';
 import { Picker, ScrollView } from 'react-native';
+import {
+  NavigationScreenProp,
+  NavigationStackAction,
+  NavigationActions
+} from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
 
@@ -62,7 +67,9 @@ const OnboardingFormWithRedux = reduxForm<OnboardingFormData, FormP<OnboardingFo
   form: 'onboarding',
 })(OnboardingForm);
 
-interface Props { }
+interface Props {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
 
 export default class OnboardingView extends Component<Props> {
   static navigationOptions = {
@@ -78,6 +85,11 @@ export default class OnboardingView extends Component<Props> {
   async onSubmit(values: OnboardingFormData) {
     try {
       await profileService.updateCohort(values);
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'Main' })]
+      }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
