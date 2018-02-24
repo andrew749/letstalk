@@ -2,6 +2,7 @@ package routes
 
 import (
 	"letstalk/server/core/api"
+	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
@@ -56,6 +57,14 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 	v1.GET(
 		"/cohort",
 		hw.wrapHandler(api.GetCohortController, true),
+	)
+
+	// boostrap endpoints
+
+	v1.OPTIONS("/bootstrap")
+	v1.GET(
+		"/bootstrap",
+		hw.wrapHandler(bootstrap.GetCurrentUserBoostrapStatusController, true),
 	)
 
 	return router

@@ -167,6 +167,32 @@
 				"description": ""
 			},
 			"response": []
+		},
+		{
+			"name": "Bootstrap (Account status)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "uVLKY_LGjH7XvKBcq7A_qfWmycjouM5r5fvIfZRanro="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "localhost:8080/v1/bootstrap",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"bootstrap"
+					]
+				},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }
