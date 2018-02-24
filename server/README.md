@@ -17,6 +17,7 @@ dependency management for this project.
 
 ### Install/Update Go dependencies
 ```
+go get github.com/codegangsta/gin
 dep ensure
 ```
 
@@ -76,4 +77,10 @@ Generate code from schema:
 ```
 cd $SERVER
 modelq -db="modelq@/letstalk" -pkg=data -driver=mysql -schema=letstalk -p=8
+```
+
+## Running the server (development)
+
+```
+SECRETS_PATH="secrets.json" ./run_local.sh
 ```

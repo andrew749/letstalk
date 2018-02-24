@@ -8,6 +8,17 @@ export RLOG_TIME_FORMAT='2006-01-02T15:04:05'
 #RLOG_LOG_FILE
 #RLOG_LOG_STREAM
 
-SERVER=$GOPATH/src/letstalk/server
-go run $SERVER/core/main.go --db-user='letstalk' --db-pass='uwletstalk' --db-addr='tcp(127.0.0.1:3306)' "$@"
+usage ()
+{
+  echo 'Usage : SECRETS_PATH=<path to secrets> ./run_local.sh'
+  exit
+}
 
+if [[ -z $SECRETS_PATH ]];
+then
+  usage
+fi
+
+SERVER=$GOPATH/src/letstalk/server
+DB_USER='letstalk' DB_PASS="uwletstalk" DB_ADDR='tcp(127.0.0.1:3306)' \
+  $GOPATH/bin/gin --build="core" run core/main.go
