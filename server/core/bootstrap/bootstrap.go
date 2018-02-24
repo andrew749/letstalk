@@ -27,22 +27,34 @@ type BootstrapResponse struct {
  * Returns what the current status of a user is
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
-	// TODO: check if the user account is matched with a peer
+	// since this method is authenticated the account needs to exist.
 	var response = BootstrapResponse{
 		State: ACCOUNT_CREATED,
 	}
 
+	// check if the user has been matched with another user yet
+	_, err := data.MatchingsObjs.
+		Select().
+		Where(data.MatchingsObjs.FilterUser("=", c.SessionData.UserId)).
+		List(c.Db)
+
+	if err == nil {
+		response.State = ACCOUNT_MATCHED
+		c.Result = response
+		return nil
+	}
+
 	// check if the account has been onboarded
-	_, err := data.UserCohortObjs.
+	_, err = data.UserCohortObjs.
 		Select().
 		Where(data.UserCohortObjs.FilterUserId("=", c.SessionData.UserId)).
 		One(c.Db)
 
 	if err == nil {
 		response.State = ACCOUNT_SETUP
+		c.Result = response
+		return nil
 	}
 
-	// since this method is authenticated the account needs to exist.
-	c.Result = response
 	return nil
 }
