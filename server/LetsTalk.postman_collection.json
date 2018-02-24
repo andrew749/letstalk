@@ -1,0 +1,172 @@
+{
+	"info": {
+		"name": "LetsTalk",
+		"_postman_id": "447164e3-c9d0-d589-5965-ef1b44fc2ede",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Signup",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Andrew\",\n    \"lastName\": \"Codispoti\",\n    \"email\": \"test@acod.me\",\n    \"phoneNumber\": \"123-555-5555\",\n\t\"gender\": \"male\",\n\t\"birthday\": 1095379198,\n\t\"password\": \"testPassword\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/v1/signup",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"signup"
+					]
+				},
+				"description": "Signup a new user"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\": 2,\n\t\"password\": \"testPassword\"\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/v1/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"login"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Route No Authorization Required",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:8080/test",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"test"
+					]
+				},
+				"description": "This route requires no authorization."
+			},
+			"response": []
+		},
+		{
+			"name": "Route Authorization Required",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "aiI36vOJ7yZb6XtwU7KmvjVoj6BPiKKrgA5V7a6a-rA="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "localhost:8080/testAuth",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"testAuth"
+					]
+				},
+				"description": "This route requires authorization to access."
+			},
+			"response": []
+		},
+		{
+			"name": "Add New Cohort",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "uVLKY_LGjH7XvKBcq7A_qfWmycjouM5r5fvIfZRanro="
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"cohortId\": 2\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/v1/cohort",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"cohort"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Cohort Data",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "mhLAwgNvT3abf7Pq7tN0os3MV6mVjgSG9ZKR9V-cyeU="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "localhost:8080/v1/cohort",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"cohort"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
