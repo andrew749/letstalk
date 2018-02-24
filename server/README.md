@@ -4,6 +4,7 @@ This is the main server for the UW Let's Talk app.
 
 ## Go Development Setup
 
+Get the repository
 ```
 cd $GOPATH/src
 git clone git@github.com:andrew749/letstalk.git
@@ -11,10 +12,17 @@ git clone git@github.com:andrew749/letstalk.git
 
 `$SERVER` will now refer to `$GOPATH/src/letstalk/server`.
 
-Install Go dependencies:
+Follow the latest instruction for installing go dep at https://golang.github.io/dep/docs/installation.html. This is how we do
+dependency management for this project.
+
+### Install/Update Go dependencies
 ```
-cd $SERVER
-go get ./...
+dep ensure
+```
+
+### Adding new dependencies
+```
+dep ensure -add github.com/pkg/errors
 ```
 
 ## MySQL
@@ -69,4 +77,3 @@ Generate code from schema:
 cd $SERVER
 modelq -db="modelq@/letstalk" -pkg=data -driver=mysql -schema=letstalk -p=8
 ```
-
