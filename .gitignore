@@ -3,3 +3,4 @@
 .idea
 secrets.json
 vendor/
+credentials.csv
