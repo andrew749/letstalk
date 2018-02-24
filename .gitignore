@@ -2,3 +2,4 @@
 *.swp
 .idea
 secrets.json
+vendor/
