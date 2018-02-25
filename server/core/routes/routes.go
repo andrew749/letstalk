@@ -3,6 +3,7 @@ package routes
 import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/bootstrap"
+	"letstalk/server/core/contact_info"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
@@ -57,6 +58,12 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 	v1.GET(
 		"/cohort",
 		hw.wrapHandler(api.GetCohortController, true),
+	)
+
+	v1.OPTIONS("/contact_info")
+	v1.GET("/contact_info", hw.wrapHandler(
+		contact_info.GetContactInfoController,
+		true),
 	)
 
 	// boostrap endpoints
