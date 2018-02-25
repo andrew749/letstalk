@@ -3,6 +3,9 @@ import Immutable from 'immutable';
 export interface Relationship {
   readonly userId: number;
   readonly userType: 'mentor' | 'mentee';
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
 }
 
 export interface Cohort {

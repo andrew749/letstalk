@@ -50,7 +50,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
 }, {
   initialRouteName: loggedIn ? "Home" : "Login",
-  headerMode: 'float',
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));

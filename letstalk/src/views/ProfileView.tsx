@@ -12,11 +12,10 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux'
-import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 
 import auth from '../services/auth';
-import { ActionButton } from '../components';
+import { ActionButton, Header } from '../components';
 
 const window = Dimensions.get('window');
 
@@ -46,34 +45,10 @@ class ProfileView extends Component<Props> {
     const placeholderText = `Lorem Ipsum`;
 
     return(
-      <ScrollView contentContainerStyle={ styles.container }>
-        <Text style= { styles.textInput }>{ title } </Text>
-        <Image style= {styles.image} source={require('../img/profile.jpg')} />
-        <View>
-          <FormLabel>Name</FormLabel>
-          <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
-        </View>
-        <View>
-          <FormLabel>Program</FormLabel>
-          <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
-        </View>
-        <View style = {styles.row} >
-          <View style = {styles.unit} >
-            <FormLabel>Term</FormLabel>
-            <FormInput placeholder={placeholderText}/>
-          </View>
-          <View style = {styles.unit}>
-            <FormLabel>Stream</FormLabel>
-            <FormInput placeholder={placeholderText}/>
-          </View>
-        </View>
-        <View>
-          <FormLabel>Email</FormLabel>
-          <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
-        </View>
-        <View>
-          <FormLabel>Phone Number</FormLabel>
-          <FormInput containerStyle = {styles.formInput} placeholder={placeholderText}/>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Header title="Profile" />
+        <View style={styles.contentContainer} >
+          <Image style={styles.image} source={require('../img/profile.jpg')} />
         </View>
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
@@ -85,11 +60,11 @@ export default ProfileView;
 
 const styles = StyleSheet.create({
   container: {
+    paddingBottom: 10,
+  },
+  contentContainer: {
     alignItems: 'center',
     marginHorizontal: 25
-  },
-  textInput: {
-    padding: 20
   },
   image: {
     width: 150,

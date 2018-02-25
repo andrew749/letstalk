@@ -64,9 +64,9 @@ const fetchBootstrap: ActionCreator<
     dispatch(fetch.start());
     try {
       const data = await profileService.bootstrap();
-      return fetch.receive(data);
+      return dispatch(fetch.receive(data));
     } catch(e) {
-      return fetch.error(e.message);
+      return dispatch(fetch.error(e.message));
     }
   };
 }

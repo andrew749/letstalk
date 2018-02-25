@@ -10,8 +10,6 @@ import {
   FetchActionCreators,
 } from '../actions';
 
-// TODO: move elsewhere
-
 export enum TypeKeys {
   FETCH = 'BOOTSTRAP/FETCH',
 }

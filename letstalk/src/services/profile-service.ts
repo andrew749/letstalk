@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
 import requestor, { Requestor } from './requests';
-import { BootstrapData, Relationship } from '../models/bootstrap';
+import { BootstrapData, Cohort, Relationship } from '../models/bootstrap';
 import auth, { Auth } from './auth';
 import { BOOTSTRAP_ROUTE, COHORT_ROUTE, SIGNUP_ROUTE } from './constants';
 
@@ -19,22 +19,10 @@ interface UpdateCohortRequest {
   cohortId: number;
 }
 
-interface RelationshipResponse {
-  readonly user_id: number;
-  readonly user_type: 'mentor' | 'mentee';
-}
-
-interface CohortResponse {
-  readonly cohort_id: number;
-  readonly program_id: string;
-  readonly grad_year: number;
-  readonly sequence: string;
-}
-
 export interface BootstrapResponse {
-  readonly relationships: Immutable.List<RelationshipResponse>;
+  readonly relationships: Immutable.List<Relationship>;
   readonly state: 'account_created' | 'account_setup' | 'account_matched';
-  readonly cohort: CohortResponse;
+  readonly cohort: Cohort;
 };
 
 export interface ProfileService {
@@ -70,18 +58,9 @@ export class RemoteProfileService implements ProfileService {
       cohort,
     } = response;
     return {
-      relationships:
-        Immutable.List(response.relationships).map(relationship => ({
-          userId: relationship.user_id,
-          userType: relationship.user_type,
-        })).toList(),
+      relationships: Immutable.List(response.relationships),
       state,
-      cohort: {
-        cohortId: cohort.cohort_id,
-        programId: cohort.program_id,
-        gradYear: cohort.grad_year,
-        sequence: cohort.sequence,
-      },
+      cohort,
     };
   }
 }

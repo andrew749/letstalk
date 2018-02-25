@@ -87,8 +87,7 @@ export default class OnboardingView extends Component<Props> {
       await profileService.updateCohort(values);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        key: null,
-        actions: [NavigationActions.navigate({ routeName: 'Main' })]
+        actions: [NavigationActions.navigate({ routeName: 'Home' })]
       }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});

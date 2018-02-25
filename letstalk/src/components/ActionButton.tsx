@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Dimensions } from 'react-native';
+import React from 'react';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Button, ButtonProps } from 'react-native-elements';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -17,7 +17,7 @@ const ActionButton: React.SFC<ButtonProps> = props => {
 
 export default ActionButton;
 
-const styles = {
+const styles = StyleSheet.create({
   loginButtonStyle: {
     height: 55,
     width: SCREEN_WIDTH - 40,
@@ -30,4 +30,4 @@ const styles = {
     fontSize: 20,
     color: 'white',
   },
-};
+});
