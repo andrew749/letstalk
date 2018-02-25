@@ -25,10 +25,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: SCREEN_WIDTH - MARGIN_HOR - PADDING,
     padding: PADDING,
-    marginLeft: MARGIN_HOR,
-    marginRight: MARGIN_HOR,
-    marginTop: MARGIN_VER,
-    marginBottom: MARGIN_VER,
+    marginHorizontal: MARGIN_HOR,
+    marginVertical: MARGIN_VER,
     borderRadius: 10,
   },
 });
