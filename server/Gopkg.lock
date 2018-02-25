@@ -18,10 +18,10 @@
   packages = [
     ".",
     "binding",
+    "json",
     "render"
   ]
-  revision = "d459835d2b077e44f7c9b453505ee29881d5d12d"
-  version = "v1.2"
+  revision = "5d3f30"
 
 [[projects]]
   name = "github.com/go-sql-driver/mysql"
@@ -34,6 +34,12 @@
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/json-iterator/go"
+  packages = ["."]
+  revision = "0ac74bba4a81211b28e32ef260c0f16ae41f1377"
+  version = "1.1.1"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -88,6 +94,15 @@
   version = "v1.1"
 
 [[projects]]
+  name = "github.com/v2pro/plz"
+  packages = [
+    "concurrent",
+    "reflect2"
+  ]
+  revision = "10fc95fad3224a032229e59f6e7023137d82b526"
+  version = "0.9.1"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
@@ -123,6 +138,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "da6d02594c43d9be39f59e1e15029f661d306dcafbaf5586637499c8ccde3757"
+  inputs-digest = "a26cad0b656d2a6b6cceae498d2bb1e8f40271644be46db58c5bc6405953d4b7"
   solver-name = "gps-cdcl"
   solver-version = 1

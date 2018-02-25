@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"
-  version = "1.2.0"
+  revision = "5d3f30"
 
 [[constraint]]
   name = "github.com/go-sql-driver/mysql"
