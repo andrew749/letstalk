@@ -55,7 +55,7 @@
     "react-native-keychain": "^2.0.0",
     "react-native-simple-picker": "^1.4.3",
     "react-native-vector-icons": "^4.5.0",
-    "react-navigation": "^1.0.0-beta.29",
+    "react-navigation": "^1.1.2",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
     "redux-form": "^7.2.3",

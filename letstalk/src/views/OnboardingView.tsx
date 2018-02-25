@@ -1,9 +1,16 @@
-// TODO: maybe rename to OnboardingView
 import React, { Component } from 'react';
+import { connect, ActionCreator } from 'react-redux';
+import { ThunkAction } from 'redux-thunk';
 import { Picker, ScrollView } from 'react-native';
+import {
+  NavigationScreenProp,
+  NavigationStackAction,
+  NavigationActions
+} from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
 
+import { RootState } from '../redux';
 import {
   ActionButton,
   FormP,
@@ -11,6 +18,8 @@ import {
   ModalPicker,
 } from '../components';
 import profileService from '../services/profile-service';
+import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
+import { ActionTypes } from '../redux/bootstrap/actions';
 
 interface OnboardingFormData {
   cohortId: number,
@@ -62,9 +71,15 @@ const OnboardingFormWithRedux = reduxForm<OnboardingFormData, FormP<OnboardingFo
   form: 'onboarding',
 })(OnboardingForm);
 
-interface Props { }
+interface DispatchActions {
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+}
 
-export default class OnboardingView extends Component<Props> {
+interface Props extends DispatchActions {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
+
+class OnboardingView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'Onboarding',
   }
@@ -78,6 +93,12 @@ export default class OnboardingView extends Component<Props> {
   async onSubmit(values: OnboardingFormData) {
     try {
       await profileService.updateCohort(values);
+      // Reload bootstrap data after updating
+      await this.props.fetchBootstrap();
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: 'Home' })]
+      }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
@@ -87,3 +108,5 @@ export default class OnboardingView extends Component<Props> {
     return <OnboardingFormWithRedux onSubmit={this.onSubmit} />;
   }
 }
+
+export default connect(null, { fetchBootstrap })(OnboardingView);

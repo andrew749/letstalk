@@ -32,50 +32,6 @@ const styles = StyleSheet.create({
   }
 });
 
-const MainView = TabNavigator({
-  Home: {
-    screen: StackNavigator({
-      Home: {
-        screen: HomeView,
-      },
-      Profile: {
-        screen: ProfileView,
-      },
-    }, {
-      headerMode: 'float',
-    }),
-    navigationOptions: {
-      tabBarLabel:"Home",
-      tabBarIcon: ({ tintColor }: TabBarIcon) =>
-        <MaterialIcons name="home" size={32} color={tintColor} />,
-    },
-  },
-  Events: {
-    screen: StackNavigator({
-      Events: {
-        screen: EventsView,
-      },
-    }),
-    navigationOptions: {
-      tabBarLabel:"Events",
-      tabBarIcon: ({ tintColor }: TabBarIcon) =>
-        <MaterialIcons name="event" size={32} color={tintColor} />,
-    },
-  },
-  Achievements: {
-    screen: StackNavigator({
-      Achievements: {
-        screen: AchievementsView,
-      },
-    }),
-    navigationOptions: {
-      tabBarLabel:"Achievements",
-      tabBarIcon: ({ tintColor }: TabBarIcon) =>
-        <MaterialIcons name="done" size={32} color={tintColor} />,
-    },
-  },
-});
-
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
@@ -83,18 +39,17 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Signup: {
     screen: SignupView,
   },
+  Home: {
+    screen: HomeView,
+  },
+  Profile: {
+    screen: ProfileView,
+  },
   Onboarding: {
     screen: OnboardingView,
   },
-  Main: {
-    screen: MainView,
-    navigationOptions: {
-      header: null,
-    },
-  },
 }, {
-  initialRouteName: loggedIn ? "Onboarding" : "Login",
-  headerMode: 'float',
+  initialRouteName: loggedIn ? "Home" : "Login",
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
