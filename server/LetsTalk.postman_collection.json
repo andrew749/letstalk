@@ -21,11 +21,11 @@
 					"raw": "{\n    \"firstName\": \"Andrew\",\n    \"lastName\": \"Codispoti\",\n    \"email\": \"test@acod.me\",\n    \"phoneNumber\": \"123-555-5555\",\n\t\"gender\": \"male\",\n\t\"birthday\": 1095379198,\n\t\"password\": \"testPassword\"\n}"
 				},
 				"url": {
-					"raw": "localhost:8080/v1/signup",
+					"raw": "localhost:3000/v1/signup",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"v1",
 						"signup"
@@ -47,14 +47,14 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"userId\": 2,\n\t\"password\": \"testPassword\"\n}"
+					"raw": "{\n\t\"userId\": 3,\n\t\"password\": \"testPassword\"\n}"
 				},
 				"url": {
-					"raw": "localhost:8080/v1/login",
+					"raw": "localhost:3000/v1/login",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"v1",
 						"login"
@@ -71,11 +71,11 @@
 				"header": [],
 				"body": {},
 				"url": {
-					"raw": "localhost:8080/test",
+					"raw": "localhost:3000/test",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"test"
 					]
@@ -91,16 +91,16 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "aiI36vOJ7yZb6XtwU7KmvjVoj6BPiKKrgA5V7a6a-rA="
+						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
 					}
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:8080/testAuth",
+					"raw": "localhost:3000/testAuth",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"testAuth"
 					]
@@ -116,7 +116,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "uVLKY_LGjH7XvKBcq7A_qfWmycjouM5r5fvIfZRanro="
+						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
 					},
 					{
 						"key": "Content-Type",
@@ -128,11 +128,11 @@
 					"raw": "{\n\t\"cohortId\": 2\n}"
 				},
 				"url": {
-					"raw": "localhost:8080/v1/cohort",
+					"raw": "localhost:3000/v1/cohort",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"v1",
 						"cohort"
@@ -149,16 +149,16 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "mhLAwgNvT3abf7Pq7tN0os3MV6mVjgSG9ZKR9V-cyeU="
+						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
 					}
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:8080/v1/cohort",
+					"raw": "localhost:3000/v1/cohort",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"v1",
 						"cohort"
@@ -175,19 +175,52 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "uVLKY_LGjH7XvKBcq7A_qfWmycjouM5r5fvIfZRanro="
+						"value": "6J_ZQYdjFA7b1O-sK-BPuyjnsJ_ffxAbL6i9X2Kuz0s="
 					}
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:8080/v1/bootstrap",
+					"raw": "localhost:3000/v1/bootstrap",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "3000",
 					"path": [
 						"v1",
 						"bootstrap"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Contact Info",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "localhost:3000/v1/contact_info?userId=3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"contact_info"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "3",
+							"equals": true
+						}
 					]
 				},
 				"description": ""
