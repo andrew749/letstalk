@@ -82,13 +82,13 @@ CREATE TABLE sessions (
 
 CREATE TABLE matchings (
   matching_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user INT NOT NULL,
-  other_user INT NOT NULL,
-  UNIQUE KEY (user, other_user),
-  KEY(user),
-  KEY(other_user),
-  FOREIGN KEY (user)
+  mentor INT NOT NULL,
+  mentee INT NOT NULL,
+  UNIQUE KEY (mentor, mentee),
+  KEY(mentor),
+  KEY(mentee),
+  FOREIGN KEY (mentor)
     REFERENCES user(user_id),
-  FOREIGN KEY (other_user)
+  FOREIGN KEY (mentee)
     REFERENCES user(user_id)
 );

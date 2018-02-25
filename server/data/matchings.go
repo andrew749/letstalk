@@ -14,8 +14,8 @@ import (
 
 type Matchings struct {
 	MatchingId int `json:"matching_id"`
-	User       int `json:"user"`
-	OtherUser  int `json:"other_user"`
+	Mentor     int `json:"mentor"`
+	Mentee     int `json:"mentee"`
 }
 
 // Start of the Matchings APIs.
@@ -54,7 +54,7 @@ func (obj Matchings) Insert(dbtx gmq.DbTx) (Matchings, error) {
 }
 
 func (obj Matchings) Update(dbtx gmq.DbTx) (int64, error) {
-	fields := []string{"User", "OtherUser"}
+	fields := []string{"Mentor", "Mentee"}
 	filter := MatchingsObjs.FilterMatchingId("=", obj.MatchingId)
 	if result, err := MatchingsObjs.Update(obj, fields...).Where(filter).Run(dbtx); err != nil {
 		return 0, err
@@ -185,7 +185,7 @@ func (o _MatchingsObjs) Names() (schema, tbl, alias string) {
 func (o _MatchingsObjs) Select(fields ...string) _MatchingsQuery {
 	q := _MatchingsQuery{}
 	if len(fields) == 0 {
-		fields = []string{"MatchingId", "User", "OtherUser"}
+		fields = []string{"MatchingId", "Mentor", "Mentee"}
 	}
 	q.Query = gmq.Select(o, o.columns(fields...))
 	return q
@@ -193,7 +193,7 @@ func (o _MatchingsObjs) Select(fields ...string) _MatchingsQuery {
 
 func (o _MatchingsObjs) Insert(obj Matchings) _MatchingsQuery {
 	q := _MatchingsQuery{}
-	q.Query = gmq.Insert(o, o.columnsWithData(obj, "User", "OtherUser"))
+	q.Query = gmq.Insert(o, o.columnsWithData(obj, "Mentor", "Mentee"))
 	return q
 }
 
@@ -220,22 +220,22 @@ func (o _MatchingsObjs) FilterMatchingId(op string, p int, ps ...int) gmq.Filter
 	return o.newFilter("matching_id", op, params...)
 }
 
-func (o _MatchingsObjs) FilterUser(op string, p int, ps ...int) gmq.Filter {
+func (o _MatchingsObjs) FilterMentor(op string, p int, ps ...int) gmq.Filter {
 	params := make([]interface{}, 1+len(ps))
 	params[0] = p
 	for i := range ps {
 		params[i+1] = ps[i]
 	}
-	return o.newFilter("user", op, params...)
+	return o.newFilter("mentor", op, params...)
 }
 
-func (o _MatchingsObjs) FilterOtherUser(op string, p int, ps ...int) gmq.Filter {
+func (o _MatchingsObjs) FilterMentee(op string, p int, ps ...int) gmq.Filter {
 	params := make([]interface{}, 1+len(ps))
 	params[0] = p
 	for i := range ps {
 		params[i+1] = ps[i]
 	}
-	return o.newFilter("other_user", op, params...)
+	return o.newFilter("mentee", op, params...)
 }
 
 ///// Managed Objects Columns definition
@@ -248,20 +248,20 @@ func (o _MatchingsObjs) ColumnMatchingId(p ...int) gmq.Column {
 	return gmq.Column{"matching_id", value}
 }
 
-func (o _MatchingsObjs) ColumnUser(p ...int) gmq.Column {
+func (o _MatchingsObjs) ColumnMentor(p ...int) gmq.Column {
 	var value interface{}
 	if len(p) > 0 {
 		value = p[0]
 	}
-	return gmq.Column{"user", value}
+	return gmq.Column{"mentor", value}
 }
 
-func (o _MatchingsObjs) ColumnOtherUser(p ...int) gmq.Column {
+func (o _MatchingsObjs) ColumnMentee(p ...int) gmq.Column {
 	var value interface{}
 	if len(p) > 0 {
 		value = p[0]
 	}
-	return gmq.Column{"other_user", value}
+	return gmq.Column{"mentee", value}
 }
 
 ////// Internal helper funcs
@@ -280,10 +280,10 @@ func (o _MatchingsObjs) toMatchings(columns []gmq.Column, rb []sql.RawBytes) Mat
 			switch columns[i].Name {
 			case "matching_id":
 				obj.MatchingId = gmq.AsInt(rb[i])
-			case "user":
-				obj.User = gmq.AsInt(rb[i])
-			case "other_user":
-				obj.OtherUser = gmq.AsInt(rb[i])
+			case "mentor":
+				obj.Mentor = gmq.AsInt(rb[i])
+			case "mentee":
+				obj.Mentee = gmq.AsInt(rb[i])
 			}
 		}
 	}
@@ -296,10 +296,10 @@ func (o _MatchingsObjs) columns(fields ...string) []gmq.Column {
 		switch f {
 		case "MatchingId":
 			data = append(data, o.ColumnMatchingId())
-		case "User":
-			data = append(data, o.ColumnUser())
-		case "OtherUser":
-			data = append(data, o.ColumnOtherUser())
+		case "Mentor":
+			data = append(data, o.ColumnMentor())
+		case "Mentee":
+			data = append(data, o.ColumnMentee())
 		}
 	}
 	return data
@@ -311,10 +311,10 @@ func (o _MatchingsObjs) columnsWithData(obj Matchings, fields ...string) []gmq.C
 		switch f {
 		case "MatchingId":
 			data = append(data, o.ColumnMatchingId(obj.MatchingId))
-		case "User":
-			data = append(data, o.ColumnUser(obj.User))
-		case "OtherUser":
-			data = append(data, o.ColumnOtherUser(obj.OtherUser))
+		case "Mentor":
+			data = append(data, o.ColumnMentor(obj.Mentor))
+		case "Mentee":
+			data = append(data, o.ColumnMentee(obj.Mentee))
 		}
 	}
 	return data
@@ -325,8 +325,8 @@ var MatchingsObjs _MatchingsObjs
 func init() {
 	MatchingsObjs.fcMap = map[string]string{
 		"MatchingId": "matching_id",
-		"User":       "user",
-		"OtherUser":  "other_user",
+		"Mentor":     "mentor",
+		"Mentee":     "mentee",
 	}
 	gob.Register(Matchings{})
 }
