@@ -4,11 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"flag"
 	"fmt"
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/sessions"
+
+	"github.com/namsral/flag"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
@@ -17,14 +18,18 @@ import (
 
 // DB flags
 var (
-	dbUser = flag.String("db-user", "", "mySQL user")
-	dbPass = flag.String("db-pass", "", "mySQL password")
-	dbAddr = flag.String("db-addr", "", "address of the database connection")
+	dbUser = flag.String("db_user", "", "mySQL user")
+	dbPass = flag.String("db_pass", "", "mySQL password")
+	dbAddr = flag.String("db_addr", "", "address of the database connection")
+)
+
+var (
+	port = flag.String("port", "", "Port to host server on")
 )
 
 // Authentication flags
 var (
-	secretsPath = flag.String("secrets-path", "~/secrets.json", "path to secrets.json")
+	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
 )
 
 func main() {
@@ -43,8 +48,8 @@ func main() {
 	router := routes.Register(db, &sessionManager)
 	secrets.LoadSecrets(*secretsPath)
 	// Start server
-	rlog.Info("Serving on port 8080...")
-	err = http.ListenAndServe(":8080", router)
+	rlog.Info("Serving on port ", *port)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", *port), router)
 
 	if err != nil {
 		log.Fatal(err)
