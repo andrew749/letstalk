@@ -8,6 +8,7 @@ import {
   NavigationActions,
   NavigationScreenDetails,
 } from 'react-navigation';
+import { Permissions, Notifications } from 'expo';
 
 import {
   ActionButton,
@@ -82,6 +83,32 @@ export default class LoginView extends Component<Props> {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
+  async registerForPushNotificationsAsync() {
+    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS as any);
+    let finalStatus = existingStatus;
+
+    // only ask if permissions have not already been determined, because
+    // iOS won't necessarily prompt the user a second time.
+    if (existingStatus !== 'granted') {
+      // Android remote notification permissions are granted during the app
+      // install, so this will only ask on iOS
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS as any);
+      finalStatus = status;
+    }
+
+    // Stop here if the user did not grant permissions
+    if (finalStatus !== 'granted') {
+      return;
+    }
+
+    // Get the token that uniquely identifies this device
+    let token = await Notifications.getExpoPushTokenAsync();
+
+    // TODO: POST the token to your backend server from where you can retrieve it to send push
+    // notifications.
+    console.log(token);
+  }
+
   async onSubmit(values: LoginFormData) {
     const {
       username,
@@ -89,6 +116,7 @@ export default class LoginView extends Component<Props> {
     } = values;
     try {
       await auth.login(username, password);
+      await this.registerForPushNotificationsAsync();
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Home' })]

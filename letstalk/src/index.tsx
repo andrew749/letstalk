@@ -3,8 +3,11 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Notifications } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
+import { StackNavigator, TabNavigator } from 'react-navigation';
+import Notification from 'react-native-in-app-notification';
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -15,8 +18,6 @@ import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
-
-import { StackNavigator, TabNavigator } from 'react-navigation';
 
 interface TabBarIcon {
   tintColor: (string | null),
@@ -59,16 +60,28 @@ interface AppState {
 }
 
 class App extends React.Component<void, AppState> {
+  private notification: any
+
   constructor(props: void) {
     super(props);
     this.state = {
       loggedIn: null,
     };
+
+    this.handleNotification = this.handleNotification.bind(this);
+  }
+
+  handleNotification(notification: any) {
+    this.notification.show({
+      title: 'Got a notification',
+      message: '' + notification.data.yo,
+    });
   }
 
   async componentWillMount() {
     const sessionToken = await auth.getSessionToken();
     this.setState({ loggedIn: sessionToken !== null });
+    Notifications.addListener(this.handleNotification);
   }
 
   render() {
@@ -78,7 +91,10 @@ class App extends React.Component<void, AppState> {
     const AppNavigation = createAppNavigation(loggedIn)
     return (
       <Provider store={store}>
-        <AppNavigation />
+        <View style={{ flex: 1 }}>
+          <AppNavigation />
+          <Notification ref={(ref: any) => { this.notification = ref; }} />
+        </View>
       </Provider>
     );
   }
