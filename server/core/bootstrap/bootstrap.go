@@ -91,7 +91,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		Where(data.MatchingsObjs.FilterMentee("=", c.SessionData.UserId)).
 		List(c.Db)
 
-	if err == nil && len(mentee_matchings) > 0 {
+	if err == nil && len(mentor_matchings) > 0 {
 		response.State = ACCOUNT_MATCHED
 		// create array of matchings
 		for _, matching := range mentor_matchings {
