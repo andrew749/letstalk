@@ -91,7 +91,7 @@ class StatefulModalPicker extends React.Component<Props, State> {
   }
 
   onSubmitPress() {
-    // If the user
+    // If the user presses submit without changing options, we choose first.
     const { value, onChange } = this.props.input;
     onChange(value || this.state.values[0]);
     this.hide()

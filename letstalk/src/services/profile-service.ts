@@ -1,6 +1,9 @@
+import Immutable from 'immutable';
+
 import requestor, { Requestor } from './requests';
+import { BootstrapData, Relationship } from '../models/bootstrap';
 import auth, { Auth } from './auth';
-import { COHORT_ROUTE, SIGNUP_ROUTE } from './constants';
+import { BOOTSTRAP_ROUTE, COHORT_ROUTE, SIGNUP_ROUTE } from './constants';
 
 interface SignupRequest {
   firstName: string;
@@ -12,9 +15,27 @@ interface SignupRequest {
   password: string;
 }
 
-interface updateCohortRequest {
+interface UpdateCohortRequest {
   cohortId: number;
 }
+
+interface RelationshipResponse {
+  readonly user_id: number;
+  readonly user_type: 'mentor' | 'mentee';
+}
+
+interface CohortResponse {
+  readonly cohort_id: number;
+  readonly program_id: string;
+  readonly grad_year: number;
+  readonly sequence: string;
+}
+
+export interface BootstrapResponse {
+  readonly relationships: Immutable.List<RelationshipResponse>;
+  readonly state: 'account_created' | 'account_setup' | 'account_matched';
+  readonly cohort: CohortResponse;
+};
 
 export interface ProfileService {
   signup(request: SignupRequest): Promise<number>;
@@ -34,9 +55,34 @@ export class RemoteProfileService implements ProfileService {
     return response.userId;
   }
 
-  async updateCohort(request: updateCohortRequest): Promise<void> {
+  async updateCohort(request: UpdateCohortRequest): Promise<void> {
     const sessionToken = await auth.getSessionToken();
     await this.requestor.post(COHORT_ROUTE, request, sessionToken);
+  }
+
+  async bootstrap(): Promise<BootstrapData> {
+    const sessionToken = await auth.getSessionToken();
+    const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
+    // TODO, change to more sane types when response becomes camelCase
+    const {
+      relationships,
+      state,
+      cohort,
+    } = response;
+    return {
+      relationships:
+        Immutable.List(response.relationships).map(relationship => ({
+          userId: relationship.user_id,
+          userType: relationship.user_type,
+        })).toList(),
+      state,
+      cohort: {
+        cohortId: cohort.cohort_id,
+        programId: cohort.program_id,
+        gradYear: cohort.grad_year,
+        sequence: cohort.sequence,
+      },
+    };
   }
 }
 
