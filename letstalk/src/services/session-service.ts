@@ -46,7 +46,7 @@ export class RemoteSessionService implements SessionService {
   async login(username: string, password: string): Promise<SessionToken> {
     const response = await this.requestor.post(LOGIN_ROUTE,
       { userId: Number(username), password });
-    return response.result.sessionId;
+    return response.sessionId;
   }
 
   async logout(sessionToken: SessionToken): Promise<void> {

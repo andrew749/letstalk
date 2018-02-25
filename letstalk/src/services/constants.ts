@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://192.168.0.6:8080';
+export const BASE_URL = 'http://192.168.0.6:3000';
 
 // Routes
 export const LOGIN_ROUTE  = '/v1/login';

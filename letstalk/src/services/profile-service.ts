@@ -31,7 +31,7 @@ export class RemoteProfileService implements ProfileService {
 
   async signup(request: SignupRequest): Promise<number> {
     const response = await this.requestor.post(SIGNUP_ROUTE, request);
-    return response.result.userId;
+    return response.userId;
   }
 
   async updateCohort(request: updateCohortRequest): Promise<void> {

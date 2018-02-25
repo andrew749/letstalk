@@ -25,9 +25,10 @@ export class Requestor {
     fetchParams.headers.append('sessionId', sessionToken);
     const response = await fetch(route, fetchParams);
     if (!response.ok) return response.json().then((data: any) => {
-      throw new Error(data.error.Message);
+      throw new Error(data.Error.Message);
     });
-    return response.json();
+    const data = await response.json();
+    return data.Result;
   }
 
   async get(endpoint: string, sessionToken?: SessionToken): Promise<any> {

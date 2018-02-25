@@ -93,7 +93,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     },
   },
 }, {
-  initialRouteName: loggedIn ? "Onboarding" : "Login",
+  initialRouteName: loggedIn ? "Main" : "Login",
   headerMode: 'float',
 });
 
