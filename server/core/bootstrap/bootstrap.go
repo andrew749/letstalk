@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"database/sql"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -29,8 +30,11 @@ const (
 )
 
 type BootstrapUserRelationshipDataModel struct {
-	User     int      `json:"user_id" binding:"required"`
-	UserType UserType `json:"user_type" binding:"required"`
+	User      int      `json:"userId" binding:"required"`
+	UserType  UserType `json:"userType" binding:"required"`
+	FirstName string   `json:"firstName" binding:"required"`
+	LastName  string   `json:"lastName" binding:"required"`
+	Email     string   `json:"email" binding:"required"`
 }
 
 type BootstrapResponse struct {
@@ -39,14 +43,30 @@ type BootstrapResponse struct {
 	Cohort          *data.Cohort                         `json:"cohort" binding:"required"`
 }
 
-func convertMatchingToRelationshipDataModel(
-	userId int,
+func sqlResultToBoostrapUserRelationshipDataModel(
+	relationships *[]BootstrapUserRelationshipDataModel,
+	res *sql.Rows,
 	userType UserType,
-) BootstrapUserRelationshipDataModel {
-	return BootstrapUserRelationshipDataModel{
-		User:     userId,
-		UserType: userType,
+) error {
+	var (
+		id        int
+		firstName string
+		lastName  string
+		email     string
+	)
+
+	for res.Next() {
+		// bind this row to variables
+		err := res.Scan(&id, &firstName, &lastName, &email)
+		if err != nil {
+			return err
+		}
+		*relationships = append(
+			*relationships,
+			BootstrapUserRelationshipDataModel{id, userType, firstName, lastName, email},
+		)
 	}
+	return nil
 }
 
 /**
@@ -68,38 +88,64 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 
 	relationships := make([]BootstrapUserRelationshipDataModel, 0)
 
-	// find any of this person's mentees
-	mentee_matchings, err := data.MatchingsObjs.
-		Select().
-		Where(data.MatchingsObjs.FilterMentor("=", c.SessionData.UserId)).
-		List(c.Db)
+	find_mentees_statement, err := c.Db.Prepare(
+		`	SELECT
+				mentee, first_name, last_name, email
+			FROM
+				matchings
+			INNER JOIN
+				user ON user.user_id=matchings.mentee
+			WHERE
+				mentor=?`,
+	)
 
-	if err == nil && len(mentee_matchings) > 0 {
-		response.State = ACCOUNT_MATCHED
-		// create array of matchings
-		for _, matching := range mentee_matchings {
-			relationships = append(
-				relationships,
-				convertMatchingToRelationshipDataModel(matching.Mentee, MENTEE),
-			)
-		}
+	if err != nil {
+		return errs.NewInternalError(err.Error())
 	}
 
-	// find all people this person is a mentor for
-	mentor_matchings, err := data.MatchingsObjs.
-		Select().
-		Where(data.MatchingsObjs.FilterMentee("=", c.SessionData.UserId)).
-		List(c.Db)
+	res, err := find_mentees_statement.Query(c.SessionData.UserId)
+	if err != nil {
+		return errs.NewInternalError("Unable to create statement")
+	}
 
-	if err == nil && len(mentor_matchings) > 0 {
+	defer res.Close()
+	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, MENTEE)
+	err = res.Err()
+
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	find_mentors_statement, err := c.Db.Prepare(
+		`	SELECT
+				mentor, first_name, last_name, email
+			FROM
+				matchings
+			INNER JOIN
+				user ON user.user_id=matchings.mentor
+			WHERE
+				mentee=?`,
+	)
+
+	if err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	res, err = find_mentors_statement.Query(c.SessionData.UserId)
+	if err != nil {
+		return errs.NewClientError("Unable to create statement")
+	}
+
+	defer res.Close()
+	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, MENTOR)
+	err = res.Err()
+
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	if len(relationships) > 0 {
 		response.State = ACCOUNT_MATCHED
-		// create array of matchings
-		for _, matching := range mentor_matchings {
-			relationships = append(
-				relationships,
-				convertMatchingToRelationshipDataModel(matching.Mentor, MENTOR),
-			)
-		}
 	}
 
 	response.Relatationships = relationships
