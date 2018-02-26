@@ -226,6 +226,39 @@
 				"description": ""
 			},
 			"response": []
+		},
+		{
+			"name": "Register Notification",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "zgKosFuK6YY9kj3-sexznYOElhBu9wenSzyXE9sotu4="
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"token\":\"iHZUndEkmdGwEIziwGhtNt\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3000/v1/register_notification",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v1",
+						"register_notification"
+					]
+				},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }
