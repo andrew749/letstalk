@@ -92,3 +92,10 @@ CREATE TABLE matchings (
   FOREIGN KEY (mentee)
     REFERENCES user(user_id)
 );
+
+CREATE TABLE notification_tokens (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  token varchar(255) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
