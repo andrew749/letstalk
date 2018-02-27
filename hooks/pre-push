@@ -1,0 +1,18 @@
+#!/bin/bash
+
+
+CMD="server/run_tests.sh"
+protected_branch="master"
+
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [[ $current_branch = $protected_branch ]]; then
+    echo "Running tests before pushing to protected branch."
+    $CMD
+    RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+        echo "failed $CMD"
+        exit 1
+    fi
+fi
+exit 0
