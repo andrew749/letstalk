@@ -1,7 +1,8 @@
 # Hive (tentative)
 ## A mentorship platform
 
-![Build Status](https://circleci.com/gh/andrew749/letstalk/tree/:branch.png)
+[![CircleCI](https://circleci.com/gh/andrew749/letstalk.svg?style=svg)](https://circleci.com/gh/andrew749/letstalk)
+
 
 ## Basic project structure
 
