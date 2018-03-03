@@ -12,6 +12,7 @@
   revision = "64efb26269cc5d9c363a143a936a7c75b053e06d"
 
 [[projects]]
+  branch = "master"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -42,10 +43,10 @@
     "private/protocol/xml/xmlutil",
     "service/lambda",
     "service/sns",
+    "service/sqs",
     "service/sts"
   ]
-  revision = "f3a52638aeadcd5d6ba1d747b8c552c8e0066312"
-  version = "v1.13.5"
+  revision = "8a0e4eacaec13849a4177fa293f5e908760056a9"
 
 [[projects]]
   name = "github.com/certifi/gocertifi"
@@ -213,6 +214,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ab54e8f9fb56c4da40969e73bf5de9fbcbecd2dd314b36f42405e34781b6067f"
+  inputs-digest = "c2726138fff45e3ce970a285eb7724a84301eaa25c1b164c145df416b1111224"
   solver-name = "gps-cdcl"
   solver-version = 1
