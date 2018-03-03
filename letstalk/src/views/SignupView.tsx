@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Picker, ScrollView } from 'react-native';
+import { Picker, ScrollView, StyleSheet } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
