@@ -1,11 +1,15 @@
 package notifications
 
 import (
+	"fmt"
+	"letstalk/server/aws_utils"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/jobs"
 
 	"github.com/mijia/modelq/gmq"
+	"github.com/romana/rlog"
 )
 
 type NotificationTokenSubmissionRequest struct {
@@ -25,15 +29,21 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 	}
 
 	err = gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
+		// check if this token already exists
 		if _, err = notification_token.Insert(tx); err != nil {
 			return err
 		}
 		// send test notification
-		go SendNotification(
-			notification_token.Token,
-			"Successfully registered for notification",
-			"Hive",
+		rlog.Debug("Dispatching notification lambda")
+		aws_utils.DispatchLambdaJob(
+			jobs.SendNotification,
+			Notification{
+				To:    fmt.Sprintf("ExponentPushToken[%s]", notification_token.Token),
+				Body:  "Subscribed for notifications.",
+				Title: "Hive",
+			},
 		)
+
 		return nil
 	})
 
