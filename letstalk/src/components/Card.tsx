@@ -1,16 +1,17 @@
 import React, { ReactNode } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Props {
-  children?: ReactNode,
+  children?: ReactNode;
+  style?: ViewStyle;
 }
 
 const Card: React.SFC<Props> = props => {
-  const { children } = props;
+  const { children, style } = props;
   return (
-    <View style={styles.card}>{children}</View>
+    <View style={[styles.card, style]}>{children}</View>
   );
 };
 
@@ -23,7 +24,7 @@ const PADDING = 20;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
-    width: SCREEN_WIDTH - MARGIN_HOR - PADDING,
+    width: SCREEN_WIDTH - MARGIN_HOR * 2,
     padding: PADDING,
     marginHorizontal: MARGIN_HOR,
     marginVertical: MARGIN_VER,
