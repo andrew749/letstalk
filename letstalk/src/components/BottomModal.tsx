@@ -78,6 +78,12 @@ const styles = StyleSheet.create({
     height: 60,
     padding: 10,
   },
+
+  inlineLabel: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
 
 type Props = WrappedFieldProps & {
@@ -132,7 +138,7 @@ class StatefulBottomModal extends React.Component<Props, State> {
   renderDisplayWithValue() {
     const { valueLabel, label } = this.props;
     return (
-      <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+      <View style={styles.inlineLabel}>
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.valueLabel}>{valueLabel}</Text>
       </View>
