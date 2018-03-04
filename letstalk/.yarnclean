@@ -39,3 +39,5 @@ Gruntfile.js
 # misc
 *.gz
 *.md
+
+!images/
