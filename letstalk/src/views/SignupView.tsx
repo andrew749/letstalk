@@ -10,6 +10,7 @@ import { FormValidationMessage } from 'react-native-elements';
 
 import {
   ActionButton,
+  ButtonPicker,
   FormP,
   FormProps,
   LabeledFormInput,
@@ -87,7 +88,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <Field
         label="Gender"
         name="gender"
-        component={ModalPicker}
+        component={ButtonPicker}
         validate={required}
       >
         <Picker.Item
