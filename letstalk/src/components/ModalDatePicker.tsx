@@ -1,4 +1,5 @@
-// TODO: Remove shared code between this and [ModalPicker]
+// NB: This is meant for iOS only.
+// TODO: Rename to .ios.tsx
 import React, { ReactNode } from 'react';
 import {
   Dimensions,
@@ -13,43 +14,7 @@ import {
 } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
-import ActionButton from './ActionButton';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
-const styles = StyleSheet.create({
-  basicContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-
-  overlayContainer: {
-    flex: 1,
-    width: SCREEN_WIDTH,
-  },
-
-  modalContainer: {
-    width: SCREEN_WIDTH,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0,
-    backgroundColor: '#F5FCFF',
-  },
-
-  buttonView: {
-    width: SCREEN_WIDTH,
-    padding: 8,
-    borderTopWidth: 0.5,
-    borderTopColor: 'lightgrey',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-  },
-
-  bottomPicker: {
-    width: SCREEN_WIDTH,
-  },
-});
+import BottomModal from './BottomModal';
 
 type Props = WrappedFieldProps & {
   label: string;
@@ -57,102 +22,35 @@ type Props = WrappedFieldProps & {
   mode?: 'date' | 'time' | 'datetime';
 };
 
-interface State {
-  modalVisible: boolean;
-};
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
-class StatefulModalDatePicker extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
+const styles = StyleSheet.create({
+  bottomPicker: {
+    width: SCREEN_WIDTH,
+  },
+});
 
-    this.state = {
-      modalVisible: false,
-    };
-
-    this.show = this.show.bind(this);
-    this.hide = this.hide.bind(this);
-    this.hideAndBlur = this.hideAndBlur.bind(this);
-    this.onSubmitPress = this.onSubmitPress.bind(this);
+const ModalDatePicker: React.SFC<Props> = (props) => {
+  const { defaultDate, label, mode } = props;
+  const { onChange, value } = props.input;
+  const onSubmitPress = () => {
+    onChange(value || defaultDate);
   }
+  // TODO: make this externally configurable
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const valueLabel = value ? value.toLocaleDateString('en-US', options) : null;
 
-  onSubmitPress() {
-    const { value, onChange } = this.props.input;
-    onChange(value || this.props.defaultDate);
-    this.hide()
-  }
-
-  hideAndBlur() {
-    // So that we show required error if user clicks 'Cancel'
-    (this.props.input.onBlur as () => void)();
-    this.hide();
-  }
-
-  show() {
-    this.setState({
-      modalVisible: true,
-    });
-  }
-
-  hide() {
-    this.setState({
-      modalVisible: false,
-    });
-  }
-
-  render() {
-    const { defaultDate, label, mode } = this.props;
-    const { onChange, value } = this.props.input;
-    const { error, touched, warning } = this.props.meta;
-    const { modalVisible } = this.state;
-
-    // TODO: Don't use action button
-    return (
-      <View>
-        <Modal
-          animationType={'slide'}
-          transparent
-          visible={modalVisible}
-        >
-          <View style={styles.basicContainer}>
-            <View style={styles.overlayContainer}>
-              <TouchableWithoutFeedback onPress={this.hideAndBlur}>
-                <View style={styles.overlayContainer} />
-              </TouchableWithoutFeedback>
-            </View>
-            <View style={styles.modalContainer}>
-              <View style={styles.buttonView}>
-                <TouchableOpacity onPress={this.hideAndBlur}>
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this.onSubmitPress}>
-                  <Text>Confirm</Text>
-                </TouchableOpacity>
-              </View>
-              <View>
-                <DatePickerIOS
-                  mode={mode}
-                  style={styles.bottomPicker}
-                  date={value || defaultDate}
-                  onDateChange={onChange}
-                >
-                </DatePickerIOS>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <ActionButton
-          title={value ? value.toString() : label}
-          onPress={this.show}
-        />
-        {touched && (
-          (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
-          (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}
-      </View>
-    );
-  }
-}
-
-const ModalDatePicker: React.SFC<Props> = props => {
-  return <StatefulModalDatePicker {...props} />;
+  // TODO: Maybe hold state about what the value is using another onChange, and only call the
+  // passed in onChange when the user presses submit.
+  return (
+    <BottomModal {...props} onSubmitPress={onSubmitPress} valueLabel={valueLabel}>
+      <DatePickerIOS
+        mode={mode}
+        style={styles.bottomPicker}
+        date={value || defaultDate}
+        onDateChange={onChange}
+      />
+    </BottomModal>
+  );
 }
 export default ModalDatePicker;
