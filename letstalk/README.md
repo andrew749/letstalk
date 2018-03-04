@@ -1,7 +1,15 @@
 # LetsTalkClient
 
+## Installation
+```
+npm install -g copyfiles
+npm install -g typescript
+npm install -g yarn
+```
+
 ## Building
 `yarn`
+This will also install dependencies.
 
 ## Running
 `yarn start`
