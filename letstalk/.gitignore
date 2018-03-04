@@ -2,7 +2,6 @@ node_modules/
 .expo/
 npm-debug.*
 yarn-error.log
-package-lock.json
 __tests__/
 build/
 coverage/
