@@ -41,6 +41,7 @@ type BootstrapResponse struct {
 	State           BootstrapState                       `json:"state" binding:"required"`
 	Relatationships []BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort          *data.Cohort                         `json:"cohort" binding:"required"`
+	Me              *data.User                           `json:"me" binding:"required"`
 }
 
 func sqlResultToBoostrapUserRelationshipDataModel(
@@ -73,9 +74,17 @@ func sqlResultToBoostrapUserRelationshipDataModel(
  * Returns what the current status of a user is
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
+	// TODO(wswiderski): Maybe for consistencies sake, always pass DB in first?
+	// Refering to the `GetUserCohort` method below
+	user, err := api.GetUserWithId(c.SessionData.UserId, c.Db)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
 	// since this method is authenticated the account needs to exist.
 	var response = BootstrapResponse{
 		State: ACCOUNT_CREATED,
+		Me:    user,
 	}
 
 	// check if the account has been onboarded
