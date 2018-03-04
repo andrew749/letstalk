@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Picker, ScrollView, StyleSheet } from 'react-native';
+import { Picker, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -110,6 +110,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        style={styles.submitButton}
         disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Sign up"}
@@ -156,6 +157,17 @@ export default class SignupView extends Component<Props> {
   }
 
   render() {
-    return <SignupFormWithRedux onSubmit={this.onSubmit} />;
+    return (
+      <KeyboardAvoidingView behavior="padding">
+        <SignupFormWithRedux onSubmit={this.onSubmit} />
+      </KeyboardAvoidingView>
+    );
   }
 }
+
+// Hack to make submit button available when keyboard is open.
+const styles = StyleSheet.create({
+  submitButton: {
+    marginBottom: 100,
+  },
+});
