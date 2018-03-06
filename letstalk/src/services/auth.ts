@@ -28,8 +28,12 @@ export class Auth {
     this.sessionToken = sessionToken;
   }
 
-  async login(username: string, password: string): Promise<SessionToken> {
-    const sessionToken = await this.sessionService.login(username, password);
+  async login(username: string, password: string, notificationToken?: string): Promise<SessionToken> {
+    const sessionToken = await this.sessionService.login(
+        username,
+        password,
+        notificationToken,
+    );
     await this.setSessionToken(sessionToken);
     return this.getSessionToken();
   }

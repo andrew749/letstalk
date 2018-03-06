@@ -7,7 +7,6 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
-	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/sessions"
 	"net/http"
@@ -67,9 +66,9 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 		true),
 	)
 
-	v1.OPTIONS("/register_notification")
-	v1.POST("/register_notification", hw.wrapHandler(
-		notifications.GetNewNotificationToken,
+	v1.OPTIONS("/logout")
+	v1.POST("/logout", hw.wrapHandler(
+		login.LogoutHandler,
 		true),
 	)
 

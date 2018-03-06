@@ -39,7 +39,9 @@ class ProfileView extends Component<Props> {
   }
 
   private async onLogoutPress() {
-    await auth.logout();
+    try {
+      await auth.logout();
+    } catch(error) {}
     this.props.navigation.dispatch(NavigationActions.reset({
       index: 0,
       key: null,
