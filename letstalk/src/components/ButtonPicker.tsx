@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Component } from 'react';
 import {
   Dimensions,
   Modal,
@@ -38,7 +38,7 @@ interface State {
   labels: Array<string>;
 };
 
-class StatefulButtonPicker extends React.Component<Props, State> {
+class StatefulButtonPicker extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 

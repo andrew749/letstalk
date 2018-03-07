@@ -59,10 +59,12 @@ interface AppState {
   loggedIn: null | boolean;
 }
 
-class App extends React.Component<void, AppState> {
-  private notification: any
+type Props = {};
 
-  constructor(props: void) {
+class App extends React.Component<Props, AppState> {
+  private notification: any;
+
+  constructor(props: Props) {
     super(props);
     this.state = {
       loggedIn: null,
@@ -88,7 +90,7 @@ class App extends React.Component<void, AppState> {
     const { loggedIn } = this.state;
     if (loggedIn === null) return <View><Text>Splash</Text></View>;
 
-    const AppNavigation = createAppNavigation(loggedIn)
+    const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>
         <View style={{ flex: 1 }}>
@@ -101,4 +103,3 @@ class App extends React.Component<void, AppState> {
 }
 
 export default App;
-
