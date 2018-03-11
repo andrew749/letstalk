@@ -39,7 +39,11 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 				session.UserId,
 				*session.NotificationToken,
 			}
-			notificationModel.Insert(tx)
+			_, err := notificationModel.Insert(tx)
+			if err != nil {
+				// log the error when storing notification token
+				rlog.Error(err)
+			}
 		}
 		return nil
 	})
