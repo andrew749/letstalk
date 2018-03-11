@@ -79,6 +79,12 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 		true),
 	)
 
+	v1.OPTIONS("/user_vector")
+	v1.POST("/user_vector", hw.wrapHandler(
+		onboarding.UserVectorUpdateController,
+		true,
+	))
+
 	// boostrap endpoints
 
 	v1.OPTIONS("/bootstrap")

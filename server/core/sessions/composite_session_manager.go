@@ -50,6 +50,7 @@ func (sm CompositeSessionManager) forEverySmPredicate(
 
 func (sm CompositeSessionManager) AddNewSession(session *SessionData) error {
 	err := sm.forEverySm(func(x ISessionStore) error {
+		rlog.Debug("Adding to session store")
 		return x.AddNewSession(session)
 	})
 	return err

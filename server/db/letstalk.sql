@@ -98,6 +98,18 @@ CREATE TABLE notification_tokens (
   user_id INT NOT NULL,
   token varchar(255) NOT NULL,
   -- remove the notification when the session doesn't exist anymore
-  FOREIGN KEY(id) references sessions(session_id) ON DELETE CASCADE,
+  FOREIGN KEY (id) REFERENCES sessions(session_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
+CREATE TABLE user_vector (
+  user_id INT PRIMARY KEY NOT NULL,
+  preference_type INT NOT NULL, -- indicate if this is their preferences for a mentee or for a mentor
+  sociable  INT NOT NULL,
+  hard_working INT NOT NULL,
+  ambitious INT NOT NULL,
+  energetic INT NOT NULL,
+  carefree iNT NOT NULL,
+  confident INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES user(user_id)
 );

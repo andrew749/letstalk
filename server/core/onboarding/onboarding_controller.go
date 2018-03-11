@@ -11,14 +11,13 @@ import (
 	"github.com/romana/rlog"
 )
 
-// TODO(acod): make this flow dynamic in nature
 // i.e. fetch a onboarding type and the posible options
 
 /**
 *
 * Sample post request:
  {
- 	"cohortId": string
+ 	"cohortId": UserVectorType
  }
 */
 
@@ -94,6 +93,83 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
+
+	return nil
+}
+
+type UserVectorType string
+
+const (
+	Sociable     UserVectorType = "Sociable"
+	Hard_Working UserVectorType = "Hard Working"
+	Ambitious    UserVectorType = "Ambitious"
+	Energetic    UserVectorType = "Energetic"
+	Carefree     UserVectorType = "Carefree"
+	Confident    UserVectorType = "Confident"
+)
+
+type UserVectorPreferenceType int
+
+const (
+	MenteePreference UserVectorPreferenceType = iota
+	MentorPreference
+)
+
+type UpdateUserVectorRequest struct {
+	PreferenceType int `json:"isMenteePreference" binding:"required"`
+	Sociable       int `json:"sociable" binding:"required"`
+	Hard_Working   int `json:"hardWorking" binding:"required"`
+	Ambitious      int `json:"ambitious" binding:"required"`
+	Energetic      int `json:"energetic" binding:"required"`
+	Carefree       int `json:"carefree" binding:"required"`
+	Confident      int `json:"confident" binding:"required"`
+}
+
+/**
+ * Update the user vector.
+ */
+func UserVectorUpdateController(c *ctx.Context) errs.Error {
+	var updateUserVectorRequest UpdateUserVectorRequest
+	err := c.GinContext.BindJSON(&updateUserVectorRequest)
+	if err != nil {
+		return errs.NewClientError("Unable to parse request %s", err)
+	}
+
+	// check if the user already has a vector for this
+	stmt, err := c.Db.Prepare(
+		`
+		REPLACE INTO user_vector (
+			user_id,
+			preference_type,
+			sociable,
+			hard_working,
+			ambitious,
+			energetic,
+			carefree,
+			confident
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`,
+	)
+
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	_, err = stmt.Query(
+		c.SessionData.UserId,
+		int(updateUserVectorRequest.PreferenceType),
+		updateUserVectorRequest.Sociable,
+		updateUserVectorRequest.Hard_Working,
+		updateUserVectorRequest.Ambitious,
+		updateUserVectorRequest.Energetic,
+		updateUserVectorRequest.Carefree,
+		updateUserVectorRequest.Confident,
+	)
+	if err != nil {
+		return errs.NewInternalError("Unable to insert new vector", err)
+	}
+
+	c.Result = struct{ Status string }{"Ok"}
 
 	return nil
 }
