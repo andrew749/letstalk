@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mijia/modelq/gmq"
+	"github.com/romana/rlog"
 )
 
 type DatabaseSessionStore struct {
@@ -30,6 +31,15 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 		_, e := sessionModel.Insert(tx)
 		if e != nil {
 			return e
+		}
+		if session.NotificationToken != nil {
+			rlog.Debug("Storing notification data")
+			notificationModel := data.NotificationTokens{
+				*session.SessionId,
+				session.UserId,
+				*session.NotificationToken,
+			}
+			notificationModel.Insert(tx)
 		}
 		return nil
 	})

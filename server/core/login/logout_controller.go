@@ -29,6 +29,9 @@ func LogoutHandler(c *ctx.Context) errs.Error {
 		Where(data.SessionsObjs.FilterSessionId("=", *c.SessionData.SessionId)).
 		One(c.Db)
 
+	// if there is a notification token store, this deletion is handled
+	// transparently by the db engine
+
 	if err != nil {
 		return errs.NewInternalError("Unable to remove session")
 	}

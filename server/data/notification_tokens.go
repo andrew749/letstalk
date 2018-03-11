@@ -13,7 +13,7 @@ import (
 )
 
 type NotificationTokens struct {
-	Id     int    `json:"id"`
+	Id     string `json:"id"`
 	UserId int    `json:"user_id"`
 	Token  string `json:"token"`
 }
@@ -38,19 +38,8 @@ func (obj NotificationTokens) Get(dbtx gmq.DbTx) (NotificationTokens, error) {
 }
 
 func (obj NotificationTokens) Insert(dbtx gmq.DbTx) (NotificationTokens, error) {
-	if result, err := NotificationTokensObjs.Insert(obj).Run(dbtx); err != nil {
-		return obj, err
-	} else {
-		if dbtx.DriverName() != "postgres" {
-			if id, err := result.LastInsertId(); err != nil {
-				return obj, err
-			} else {
-				obj.Id = int(id)
-				return obj, err
-			}
-		}
-		return obj, nil
-	}
+	_, err := NotificationTokensObjs.Insert(obj).Run(dbtx)
+	return obj, err
 }
 
 func (obj NotificationTokens) Update(dbtx gmq.DbTx) (int64, error) {
@@ -193,7 +182,7 @@ func (o _NotificationTokensObjs) Select(fields ...string) _NotificationTokensQue
 
 func (o _NotificationTokensObjs) Insert(obj NotificationTokens) _NotificationTokensQuery {
 	q := _NotificationTokensQuery{}
-	q.Query = gmq.Insert(o, o.columnsWithData(obj, "UserId", "Token"))
+	q.Query = gmq.Insert(o, o.columnsWithData(obj, "Id", "UserId", "Token"))
 	return q
 }
 
@@ -211,7 +200,7 @@ func (o _NotificationTokensObjs) Delete() _NotificationTokensQuery {
 
 ///// Managed Objects Filters definition
 
-func (o _NotificationTokensObjs) FilterId(op string, p int, ps ...int) gmq.Filter {
+func (o _NotificationTokensObjs) FilterId(op string, p string, ps ...string) gmq.Filter {
 	params := make([]interface{}, 1+len(ps))
 	params[0] = p
 	for i := range ps {
@@ -240,7 +229,7 @@ func (o _NotificationTokensObjs) FilterToken(op string, p string, ps ...string) 
 
 ///// Managed Objects Columns definition
 
-func (o _NotificationTokensObjs) ColumnId(p ...int) gmq.Column {
+func (o _NotificationTokensObjs) ColumnId(p ...string) gmq.Column {
 	var value interface{}
 	if len(p) > 0 {
 		value = p[0]
@@ -279,7 +268,7 @@ func (o _NotificationTokensObjs) toNotificationTokens(columns []gmq.Column, rb [
 		for i := range columns {
 			switch columns[i].Name {
 			case "id":
-				obj.Id = gmq.AsInt(rb[i])
+				obj.Id = gmq.AsString(rb[i])
 			case "user_id":
 				obj.UserId = gmq.AsInt(rb[i])
 			case "token":
