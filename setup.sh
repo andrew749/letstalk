@@ -7,14 +7,14 @@ MOUNT_ROOT=/go/src
 
 # setup database
 if [ "$(uname)" == "Darwin" ]; then
-    brew install mysql
+    echo "Detected Mac"
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    # Do something under GNU/Linux platform
-    sudo apt-get install mysql-server
+    echo "Detected Linux"
 fi
 
-# build docker image
+echo "Building docker image"
 docker build -t hive:latest .
 
+echo "Starting Container"
 # run the container and mount the project
-docker run -it -p 3000:80 -v server:/go/src/letstalk hive:latest
+docker run -it -p 3000:80 -v $(pwd)/server:/go/src/letstalk/server hive:latest
