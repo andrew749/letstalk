@@ -83,7 +83,7 @@ export default class LoginView extends Component<Props> {
     this.onSubmit = this.onSubmit.bind(this);
   }
 
-  async registerForPushNotificationsAsync() {
+  async registerForPushNotificationsAsync(): Promise<string> {
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS as any);
     let finalStatus = existingStatus;
 
@@ -103,10 +103,8 @@ export default class LoginView extends Component<Props> {
 
     // Get the token that uniquely identifies this device
     let token = await Notifications.getExpoPushTokenAsync();
-
-    // TODO: POST the token to your backend server from where you can retrieve it to send push
-    // notifications.
-    console.log(token);
+    console.log("Registered with expo notification service: " + token);
+    return token;
   }
 
   async onSubmit(values: LoginFormData) {
@@ -115,8 +113,14 @@ export default class LoginView extends Component<Props> {
       password,
     } = values;
     try {
-      await auth.login(username, password);
-      await this.registerForPushNotificationsAsync();
+      var token: string = null;
+      // don't fail if expo is down
+      try {
+        token = await this.registerForPushNotificationsAsync();
+      } catch(e){
+        console.log("Failed to register for notification")
+      }
+      await auth.login(username, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Home' })]

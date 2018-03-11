@@ -94,8 +94,10 @@ CREATE TABLE matchings (
 );
 
 CREATE TABLE notification_tokens (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(64) NOT NULL PRIMARY KEY,
   user_id INT NOT NULL,
   token varchar(255) NOT NULL,
+  -- remove the notification when the session doesn't exist anymore
+  FOREIGN KEY(id) references sessions(session_id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES user(user_id)
 );

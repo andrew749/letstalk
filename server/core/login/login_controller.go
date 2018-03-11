@@ -13,6 +13,8 @@ import (
 type LoginRequestData struct {
 	UserId   int    `json:"userId" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	// optional token to associate with this session
+	NotificationToken *string `json:"notificationToken"`
 }
 
 type LoginResponse struct {
@@ -27,7 +29,6 @@ type LoginResponse struct {
  * ```
  */
 func LoginUser(c *ctx.Context) errs.Error {
-	rlog.Debug("Handling route")
 	// create new session
 	sm := c.SessionManager
 
@@ -53,14 +54,10 @@ func LoginUser(c *ctx.Context) errs.Error {
 
 	rlog.Debug("Successfully Checked Password")
 
-	// if all preconditions pass, then create a new session
-	session, errSession := (*sm).CreateNewSessionForUserId(req.UserId)
-
-	if errSession != nil {
-		return errSession
+	session, err := (*sm).CreateNewSessionForUserId(req.UserId, req.NotificationToken)
+	if err != nil {
+		return errs.NewClientError("%s", err)
 	}
-	rlog.Debug("Successfully Created Session")
-
 	c.Result = LoginResponse{*session.SessionId, session.ExpiryDate}
 
 	return nil

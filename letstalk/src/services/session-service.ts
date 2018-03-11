@@ -4,7 +4,7 @@ import { LOGIN_ROUTE, LOGOUT_ROUTE } from './constants';
 export type SessionToken = string | null;
 
 export interface SessionService {
-  login(username: string, password: string): Promise<SessionToken>;
+  login(username: string, password: string, notificationToken?: string): Promise<SessionToken>;
   logout(sessionToken: SessionToken): Promise<void>;
 }
 
@@ -23,7 +23,7 @@ export class MockSessionService implements SessionService {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
-  async login(username: string, password: string): Promise<SessionToken> {
+  async login(username: string, password: string, notificationToken?: string): Promise<SessionToken> {
     await new Promise(resolve => setTimeout(() => resolve(),
       MockSessionService.getRandomInt(100, 500)));
     if (username !== 'foo' || password !== 'bar') throw new InvalidCredentialsError();
@@ -43,15 +43,21 @@ export class RemoteSessionService implements SessionService {
     this.requestor = requestor;
   }
 
-  async login(username: string, password: string): Promise<SessionToken> {
+  async login(username: string, password: string, notificationToken?: string):
+    Promise<SessionToken> {
     const response = await this.requestor.post(LOGIN_ROUTE,
-      { userId: Number(username), password });
+      {
+        userId: Number(username),
+        password: password,
+        notificationToken: notificationToken,
+      });
     return response.sessionId;
   }
 
   async logout(sessionToken: SessionToken): Promise<void> {
-    // TODO: Actually do something here
-    // await this.requestor.post(LOGOUT_ROUTE, { sessionToken });
+    await this.requestor.post(
+      LOGOUT_ROUTE,
+      { sessionToken }
+    );
   }
 }
-

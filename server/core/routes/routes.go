@@ -73,6 +73,12 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 		true),
 	)
 
+	v1.OPTIONS("/logout")
+	v1.POST("/logout", hw.wrapHandler(
+		login.LogoutHandler,
+		true),
+	)
+
 	// boostrap endpoints
 
 	v1.OPTIONS("/bootstrap")

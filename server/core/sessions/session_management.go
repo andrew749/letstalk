@@ -14,8 +14,8 @@ type ISessionStore interface {
 }
 
 type ISessionManagerBase interface {
-	CreateNewSessionForUserId(userId int) (*SessionData, errs.Error)
-	CreateNewSessionForUserIdWithExpiry(userId int, expiry time.Time) (*SessionData, errs.Error)
+	CreateNewSessionForUserId(userId int, notificationToken *string) (*SessionData, errs.Error)
+	CreateNewSessionForUserIdWithExpiry(userId int, notificationToken *string, expiry time.Time) (*SessionData, errs.Error)
 	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
 	GetUserSessions(userId int) ([]*SessionData, errs.Error)
 }

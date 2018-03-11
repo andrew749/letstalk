@@ -55,16 +55,18 @@ func (sm CompositeSessionManager) AddNewSession(session *SessionData) error {
 
 func (sm CompositeSessionManager) CreateNewSessionForUserId(
 	userId int,
+	notificationToken *string,
 ) (*SessionData, errs.Error) {
 	defaultExpiry := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
-	return sm.CreateNewSessionForUserIdWithExpiry(userId, defaultExpiry)
+	return sm.CreateNewSessionForUserIdWithExpiry(userId, notificationToken, defaultExpiry)
 }
 
 func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	userId int,
+	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, errs.Error) {
-	session, err := CreateSessionData(userId, expiry)
+	session, err := CreateSessionData(userId, notificationToken, expiry)
 	if err != nil {
 		return nil, errs.NewInternalError("Unable to create new session")
 	}
