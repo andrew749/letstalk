@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 export GIN_MODE=release
 export RLOG_LOG_LEVEL=DEBUG

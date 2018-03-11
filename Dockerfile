@@ -2,32 +2,27 @@ FROM ubuntu:16.04
 MAINTAINER Andrew Codispoti
 
 RUN apt-get update -y
-RUN apt-get install -y postgresql redis-server scala
-
+RUN apt-get install -y golang git
 RUN apt-get install -y curl
 
-ENV SCALA_VERSION 2.12.4
-ENV SBT_VERSION 1.0.2
+# gopath in root
+ENV GOPATH /go
+ENV PATH="${PATH}:/go/bin"
 
-# Install Scala
-## Piping curl directly in tar
-RUN \
-  curl -fsL https://downloads.typesafe.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz | tar xfz - -C /root/ && \
-  echo >> /root/.bashrc && \
-  echo "export PATH=~/scala-$SCALA_VERSION/bin:$PATH" >> /root/.bashrc
+# gin to run reloading server
+RUN go get github.com/codegangsta/gin
 
-# Install sbt
-RUN \
-  curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
-  dpkg -i sbt-$SBT_VERSION.deb && \
-  rm sbt-$SBT_VERSION.deb && \
-  apt-get update && \
-  apt-get install sbt && \
-  sbt sbtVersion
+# add the source code
+ADD ./server /go/src/letstalk/server
 
-# Add server/app using docker run so we have a mounted filesystem
+# install dep
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # set the working directory
-WORKDIR /home/app
-CMD sbt run messengerservice/
-EXPOSE 8080
+WORKDIR go/src/letstalk/server
+RUN dep ensure
+
+# fetch dependencies
+ENV SECRETS_PATH secrets.json
+CMD ./run_local.sh
+EXPOSE 3000
