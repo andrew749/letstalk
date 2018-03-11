@@ -19,6 +19,7 @@ then
   usage
 fi
 
+dep ensure
 SERVER=$GOPATH/src/letstalk/server
 DB_USER='letstalk' DB_PASS="uwletstalk" DB_ADDR='tcp(127.0.0.1:3306)' \
   $GOPATH/bin/gin --build="core" run core/main.go

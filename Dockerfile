@@ -13,14 +13,15 @@ ENV PATH="${PATH}:/go/bin"
 RUN go get github.com/codegangsta/gin
 
 # add the source code
-ADD ./server /go/src/letstalk/server
+# currently this is handled by the docker run command
+# ADD ./server /go/src/letstalk/server
 
 # install dep
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # set the working directory
-WORKDIR go/src/letstalk/server
-RUN dep ensure
+WORKDIR /go/src/letstalk/server
+# RUN dep ensure
 
 # fetch dependencies
 ENV SECRETS_PATH secrets.json
