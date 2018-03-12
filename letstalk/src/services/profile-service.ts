@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
 import requestor, { Requestor } from './requests';
-import { BootstrapData, Cohort, Relationship } from '../models/bootstrap';
+import { BootstrapData, Cohort, Relationship, UserData, UserState } from '../models';
 import auth, { Auth } from './auth';
 import { BOOTSTRAP_ROUTE, COHORT_ROUTE, SIGNUP_ROUTE } from './constants';
 
@@ -21,8 +21,9 @@ interface UpdateCohortRequest {
 
 export interface BootstrapResponse {
   readonly relationships: Immutable.List<Relationship>;
-  readonly state: 'account_created' | 'account_setup' | 'account_matched';
+  readonly state: UserState;
   readonly cohort: Cohort;
+  readonly me: UserData;
 };
 
 export interface ProfileService {
@@ -51,16 +52,17 @@ export class RemoteProfileService implements ProfileService {
   async bootstrap(): Promise<BootstrapData> {
     const sessionToken = await auth.getSessionToken();
     const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
-    // TODO, change to more sane types when response becomes camelCase
     const {
       relationships,
-      state,
-      cohort,
+      me,
     } = response;
     return {
-      relationships: Immutable.List(response.relationships),
-      state,
-      cohort,
+      ...response,
+      relationships: Immutable.List(relationships),
+      me: {
+        ...me,
+        birthdate: new Date(me.birthdate),
+      },
     };
   }
 }
