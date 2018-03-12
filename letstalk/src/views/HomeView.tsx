@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Button as ReactNativeButton,
   Linking,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -42,7 +41,7 @@ class HomeView extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    console.log(Platform.OS);
+
     this.load = this.load.bind(this);
   }
 
