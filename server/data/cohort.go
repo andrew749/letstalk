@@ -13,9 +13,9 @@ import (
 )
 
 type Cohort struct {
-	CohortId  int    `json:"cohort_id"`
-	ProgramId string `json:"program_id"`
-	GradYear  int    `json:"grad_year"`
+	CohortId  int    `json:"cohortId"`
+	ProgramId string `json:"programId"`
+	GradYear  int    `json:"gradYear"`
 	Sequence  string `json:"sequence"`
 }
 

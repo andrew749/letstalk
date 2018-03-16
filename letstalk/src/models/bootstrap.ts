@@ -1,5 +1,8 @@
 import Immutable from 'immutable';
 
+import { Cohort } from './cohort';
+import { UserData } from './user';
+
 export interface Relationship {
   readonly userId: number;
   readonly userType: 'mentor' | 'mentee';
@@ -8,15 +11,14 @@ export interface Relationship {
   readonly email: string;
 }
 
-export interface Cohort {
-  readonly cohortId: number;
-  readonly programId: string;
-  readonly gradYear: number;
-  readonly sequence: string;
-}
+export type UserState =
+  | 'account_created'
+  | 'account_setup'
+  | 'account_matched';
 
 export interface BootstrapData {
   readonly relationships: Immutable.List<Relationship>;
-  readonly state: 'account_created' | 'account_setup' | 'account_matched';
+  readonly state: UserState;
   readonly cohort: Cohort;
+  readonly me: UserData;
 };

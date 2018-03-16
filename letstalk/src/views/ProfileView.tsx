@@ -17,6 +17,7 @@ import { NavigationScreenProp, NavigationStackAction, NavigationActions } from '
 
 import auth from '../services/auth';
 import { ActionButton, Card, Header } from '../components';
+import { genderIdToString } from '../models';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
@@ -78,19 +79,57 @@ class ProfileView extends Component<Props> {
           </View>
         );
       case 'success':
+        // TODO: right now the code assumes that cohort always exists. remove this assumption.
         const {
           programId,
           gradYear,
           sequence,
         } = this.props.bootstrap.cohort;
+
+        const {
+          gender,
+          email,
+          birthdate,
+        } = this.props.bootstrap.me;
+
+        const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+        const genderStr = capitalize(genderIdToString(gender));
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const birthdayStr = birthdate.toLocaleDateString('en-US', options);
+
         return (
           <View style={styles.contentContainer} >
             <Image style={styles.image} source={require('../img/profile.jpg')} />
             <Card>
-              <Text style={styles.cohort}>Cohort</Text>
-              <Text style={styles.cohortText}>{programId}</Text>
-              <Text style={styles.cohortText}>{gradYear}</Text>
-              <Text style={styles.cohortText}>{sequence}</Text>
+              <Text style={styles.sectionHeader}>Profile</Text>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Gender:</Text>
+                <Text style={styles.value}>{genderStr}</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Email:</Text>
+                <Text style={styles.value}>{email}</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Birthday:</Text>
+                <Text style={styles.value}>{birthdayStr}</Text>
+              </View>
+            </Card>
+            <Card>
+              <Text style={styles.sectionHeader}>Cohort</Text>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Program:</Text>
+                <Text style={styles.value}>{programId}</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Sequence:</Text>
+                <Text style={styles.value}>{sequence}</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text style={styles.label}>Grad year:</Text>
+                <Text style={styles.value}>{gradYear}</Text>
+              </View>
             </Card>
           </View>
         );
@@ -102,9 +141,11 @@ class ProfileView extends Component<Props> {
 
   render() {
     const body = this.renderBody();
+    const headerText = this.props.bootstrap ?
+      this.props.bootstrap.me.firstName + ' ' + this.props.bootstrap.me.lastName : 'Profile';
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Header title="Profile" />
+        <Header title={headerText} />
         {body}
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
@@ -143,12 +184,21 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75
   },
-  cohort: {
+  listItem: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  sectionHeader: {
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 5,
   },
-  cohortText: {
+  label: {
+    fontWeight: 'bold',
     fontSize: 12,
+  },
+  value: {
+    fontSize: 12,
+    marginLeft: 10,
   },
 });
