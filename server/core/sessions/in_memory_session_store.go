@@ -1,7 +1,7 @@
 package sessions
 
 import (
-	"letstalk/server/core/errs"
+	"errors"
 )
 
 type InMemorySessionStore struct {
@@ -30,20 +30,20 @@ func (sm InMemorySessionStore) AddNewSession(session *SessionData) error {
 
 func (sm InMemorySessionStore) GetSessionForSessionId(
 	sessionId string,
-) (*SessionData, errs.Error) {
+) (*SessionData, error) {
 	session, ok := sm.SessionIdMapping[sessionId]
 	if ok != true {
-		return nil, errs.NewClientError("No session found.")
+		return nil, errors.New("Unable to find session in memory")
 	}
 	return &session, nil
 }
 
 func (sm InMemorySessionStore) GetUserSessions(
 	userId int,
-) ([]*SessionData, errs.Error) {
+) ([]*SessionData, error) {
 	sessions, ok := sm.UserIdToSessions[userId]
 	if !ok {
-		return nil, errs.NewClientError("No sessions for this userId")
+		return nil, errors.New("No sessions for this userId")
 	}
 	return sessions, nil
 }

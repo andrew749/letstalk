@@ -1,23 +1,22 @@
 package sessions
 
 import (
-	"letstalk/server/core/errs"
 	"time"
 
 	"github.com/mijia/modelq/gmq"
 )
 
 type ISessionStore interface {
-	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
-	GetUserSessions(userId int) ([]*SessionData, errs.Error)
+	GetSessionForSessionId(sessionId string) (*SessionData, error)
+	GetUserSessions(userId int) ([]*SessionData, error)
 	AddNewSession(session *SessionData) error
 }
 
 type ISessionManagerBase interface {
-	CreateNewSessionForUserId(userId int, notificationToken *string) (*SessionData, errs.Error)
-	CreateNewSessionForUserIdWithExpiry(userId int, notificationToken *string, expiry time.Time) (*SessionData, errs.Error)
-	GetSessionForSessionId(sessionId string) (*SessionData, errs.Error)
-	GetUserSessions(userId int) ([]*SessionData, errs.Error)
+	CreateNewSessionForUserId(userId int, notificationToken *string) (*SessionData, error)
+	CreateNewSessionForUserIdWithExpiry(userId int, notificationToken *string, expiry time.Time) (*SessionData, error)
+	GetSessionForSessionId(sessionId string) (*SessionData, error)
+	GetUserSessions(userId int) ([]*SessionData, error)
 }
 
 func CreateSessionManager(db *gmq.Db) ISessionManagerBase {

@@ -1,6 +1,8 @@
 package sessions
 
 import (
+	"errors"
+	"github.com/romana/rlog"
 	"letstalk/server/core/errs"
 	"time"
 )
@@ -56,7 +58,7 @@ func (sm CompositeSessionManager) AddNewSession(session *SessionData) error {
 func (sm CompositeSessionManager) CreateNewSessionForUserId(
 	userId int,
 	notificationToken *string,
-) (*SessionData, errs.Error) {
+) (*SessionData, error) {
 	defaultExpiry := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
 	return sm.CreateNewSessionForUserIdWithExpiry(userId, notificationToken, defaultExpiry)
 }
@@ -65,10 +67,10 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	userId int,
 	notificationToken *string,
 	expiry time.Time,
-) (*SessionData, errs.Error) {
+) (*SessionData, error) {
 	session, err := CreateSessionData(userId, notificationToken, expiry)
 	if err != nil {
-		return nil, errs.NewInternalError("Unable to create new session")
+		return nil, errors.New("Unable to create new session")
 	}
 
 	// maintain mappings
@@ -78,10 +80,11 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 
 func (sm CompositeSessionManager) GetSessionForSessionId(
 	sessionId string,
-) (*SessionData, errs.Error) {
+) (*SessionData, error) {
 	var session *SessionData
 	err := sm.forEverySmPredicate(func(x ISessionStore) (bool, error) {
 		res, err := x.GetSessionForSessionId(sessionId)
+		rlog.Debug(err)
 		if err != nil {
 			return false, err
 		}
@@ -93,7 +96,7 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 	})
 
 	if err != nil || session == nil {
-		return nil, errs.NewClientError("Unable to get session: %s", err)
+		return nil, errors.New("Unable to get session")
 	}
 
 	return session, nil
@@ -101,7 +104,7 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 
 func (sm CompositeSessionManager) GetUserSessions(
 	userId int,
-) ([]*SessionData, errs.Error) {
+) ([]*SessionData, error) {
 	var res []*SessionData = make([]*SessionData, 0)
 	err := sm.forEverySm(func(x ISessionStore) error {
 		sessions, err := x.GetUserSessions(userId)
@@ -114,7 +117,7 @@ func (sm CompositeSessionManager) GetUserSessions(
 		return nil
 	})
 	if err != nil {
-		return nil, errs.NewClientError("Could not get sessions for user %s", err)
+		return nil, errors.New("Could not get sessions for user")
 	}
 	return res, nil
 }

@@ -35,7 +35,7 @@ var (
 func main() {
 	flag.Parse()
 
-	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk", *dbUser, *dbPass, *dbAddr))
+	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr))
 	if err != nil {
 		rlog.Error(err)
 	}

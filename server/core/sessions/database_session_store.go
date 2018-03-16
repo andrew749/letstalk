@@ -2,7 +2,7 @@ package sessions
 
 import (
 	"database/sql"
-	"letstalk/server/core/errs"
+	"errors"
 	"letstalk/server/data"
 	"time"
 
@@ -35,9 +35,9 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 		if session.NotificationToken != nil {
 			rlog.Debug("Storing notification data")
 			notificationModel := data.NotificationTokens{
-				*session.SessionId,
-				session.UserId,
-				*session.NotificationToken,
+				Id:     *session.SessionId,
+				UserId: session.UserId,
+				Token:  *session.NotificationToken,
 			}
 			_, err := notificationModel.Insert(tx)
 			if err != nil {
@@ -52,31 +52,31 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 
 func (sm DatabaseSessionStore) GetSessionForSessionId(
 	sessionId string,
-) (*SessionData, errs.Error) {
+) (*SessionData, error) {
 
 	find_sessions_statement, err := sm.DB.Prepare(
 		`	SELECT
-				session_id, user_id, notification_token, expiry_date
+				session_id, sessions.user_id, token, expiry_date
 			FROM
 				sessions
-			INNER JOIN
+			LEFT JOIN
 				notification_tokens ON sessions.user_id=notification_tokens.user_id
 			WHERE
 				sessions.session_id=?`,
 	)
 	if err != nil {
-		return nil, errs.NewInternalError("Unable to perform session search operation")
+		return nil, err
 	}
 	res, err := find_sessions_statement.Query(sessionId)
 
 	if err != nil {
-		return nil, errs.NewClientError("Could not get session for user: %s", res)
+		return nil, err
 	}
 
 	data, err := getSessionData(res)
 
 	if err != nil {
-		return nil, errs.NewClientError("Unable to get session data")
+		return nil, err
 	}
 
 	return data[0], nil
@@ -103,33 +103,29 @@ func getSessionData(res *sql.Rows) ([]*SessionData, error) {
 
 func (sm DatabaseSessionStore) GetUserSessions(
 	userId int,
-) ([]*SessionData, errs.Error) {
-	sessions, err := data.SessionsObjs.
-		Select().
-		Where(data.SessionsObjs.FilterUserId("=", userId)).
-		List(sm.DB)
+) ([]*SessionData, error) {
 	find_sessions_statement, err := sm.DB.Prepare(
 		`	SELECT
-				session_id, user_id, notification_token, expiry_date
+				session_id, sessions.user_id, token, expiry_date
 			FROM
 				sessions
-			INNER JOIN
+			LEFT JOIN
 				notification_tokens ON sessions.user_id=notification_tokens.user_id
 			WHERE
 				sessions.user_id=?`,
 	)
 	if err != nil {
-		return nil, errs.NewInternalError("Unable to perform session search operation")
+		return nil, errors.New("Unable to perform session search operation")
 	}
 	sessionData, err := find_sessions_statement.Query(userId)
 
 	if err != nil {
-		return nil, errs.NewClientError("Could not get session for user: %s", sessions)
+		return nil, errors.New("Could not get session for user")
 	}
 
 	transformedSessions, err := getSessionData(sessionData)
 	if err != nil {
-		return nil, errs.NewInternalError("Unable to parse result")
+		return nil, errors.New("Unable to parse result")
 	}
 
 	return transformedSessions, nil
