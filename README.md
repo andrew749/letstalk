@@ -11,4 +11,10 @@ This is the react native app. Code for iOS and Android clients lives here.
 `server/`
 This is the main messenger service. All backend code lives here.
 
+## Quickstart
+Build a docker container and launch the container.
+```
+./setup.sh
+```
+
 See the respective project folders for installation instructions.

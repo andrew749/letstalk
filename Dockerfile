@@ -1,9 +1,8 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER Andrew Codispoti
 
-RUN apt-get update -y
-RUN apt-get install -y golang git
-RUN apt-get install -y curl
+RUN apt-get update --fix-missing -y
+RUN apt-get install -y vim curl golang git python3.6
 
 # gopath in root
 ENV GOPATH /go
@@ -14,16 +13,16 @@ RUN go get github.com/codegangsta/gin
 
 # add the source code
 # currently this is handled by the docker run command
-# ADD ./server /go/src/letstalk/server
+ADD ./server /go/src/letstalk/server
 
 # install dep
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # set the working directory
 WORKDIR /go/src/letstalk/server
-# RUN dep ensure
+RUN dep ensure
 
 # fetch dependencies
 ENV SECRETS_PATH secrets.json
-CMD ./run_local.sh
+CMD ./run_local.py
 EXPOSE 3000

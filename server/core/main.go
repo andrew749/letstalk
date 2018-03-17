@@ -33,6 +33,7 @@ var (
 )
 
 func main() {
+	rlog.Info("Starting server")
 	flag.Parse()
 
 	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr))
