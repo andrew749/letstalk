@@ -11,6 +11,8 @@ type Secrets struct {
 	AppId       string `json:"appId"`
 	AppSecret   string `json:"appSecret"`
 	RedirectUrl string `json:"redirectUrl"`
+	SentryToken string `json:"sentry_auth_token"`
+	SentryDSN   string `json:"sentry_dsn"`
 }
 
 type SecretsManager struct {

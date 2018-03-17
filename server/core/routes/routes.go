@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mijia/modelq/gmq"
 	"github.com/romana/rlog"
@@ -146,6 +147,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 
 		if err != nil {
 			rlog.Infof("Returning error: %s\n", err)
+			raven.CaptureError(err, nil)
 			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 			return
 		}

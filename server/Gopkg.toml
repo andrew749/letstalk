@@ -64,3 +64,7 @@
 [[constraint]]
   name = "github.com/namsral/flag"
   version = "1.7.4-pre"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/getsentry/raven-go"

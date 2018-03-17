@@ -11,6 +11,7 @@ import (
 
 	"github.com/namsral/flag"
 
+	"github.com/getsentry/raven-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/mijia/modelq/gmq"
 	"github.com/romana/rlog"
@@ -48,11 +49,19 @@ func main() {
 
 	router := routes.Register(db, &sessionManager)
 	secrets.LoadSecrets(*secretsPath)
+
+	// setup sentry
+	raven.SetDSN(secrets.GetSecrets().SentryDSN)
+
 	// Start server
 	rlog.Info("Serving on port ", *port)
-	err = http.ListenAndServe(fmt.Sprintf(":%s", *port), router)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	// catch error and log
+	raven.CapturePanic(func() {
+		err = http.ListenAndServe(fmt.Sprintf(":%s", *port), router)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			log.Fatal(err)
+		}
+	}, nil)
 }
