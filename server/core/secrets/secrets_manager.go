@@ -8,12 +8,14 @@ import (
 )
 
 type Secrets struct {
-	AppId       string `json:"app_id"`
-	AppSecret   string `json:"app_secret"`
-	RedirectUrl string `json:"redirect_url"`
-	SentryToken string `json:"sentry_auth_token"`
-	SentryDSN   string `json:"sentry_dsn"`
-	SendGrid    string `json:"sendgrid"`
+	AppId                  string `json:"app_id"`
+	AppSecret              string `json:"app_secret"`
+	DefaultAccessKeyID     string `json:"aws_access_key_id_default"`
+	DefaultAccessKeySecret string `json:"aws_secret_access_key_default"`
+	RedirectUrl            string `json:"redirect_url"`
+	SentryToken            string `json:"sentry_auth_token"`
+	SentryDSN              string `json:"sentry_dsn"`
+	SendGrid               string `json:"sendgrid"`
 }
 
 type SecretsManager struct {

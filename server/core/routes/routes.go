@@ -135,6 +135,12 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(request_to_match.GetUserCredentialRequestsController, true),
 	)
 
+	v1.OPTIONS("/upload_profile_pic")
+	v1.POST(
+		"/upload_profile_pic",
+		hw.wrapHandler(onboarding.ProfilePicController, true),
+	)
+
 	return router
 }
 

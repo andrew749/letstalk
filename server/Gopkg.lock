@@ -12,7 +12,6 @@
   revision = "ea03c2814414b2223eff860ed2286a83ed8a195c"
 
 [[projects]]
-  branch = "master"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -41,13 +40,18 @@
     "private/protocol/query/queryutil",
     "private/protocol/rest",
     "private/protocol/restjson",
+    "private/protocol/restxml",
     "private/protocol/xml/xmlutil",
     "service/lambda",
+    "service/s3",
+    "service/s3/s3iface",
+    "service/s3/s3manager",
     "service/sns",
     "service/sqs",
     "service/sts"
   ]
-  revision = "57564ea051fab8ccbb8cac2aff285647a1aeefd1"
+  revision = "9b0098a71f6d4d473a26ec8ad3c2feaac6eb1da6"
+  version = "v1.13.32"
 
 [[projects]]
   name = "github.com/certifi/gocertifi"
@@ -225,7 +229,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "2281fa97ef7b0c26324634d5a22f04babdac8713"
+  revision = "3ccc7e5779793fd54564baf60c51bf017955e0ba"
 
 [[projects]]
   name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -248,6 +252,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dd63369878120b93187b1b95020819d0eb746c2673d171a221af2c8635325a5f"
+  inputs-digest = "885bacff1435546264a0bda330ef8e96dc2fc9e3f7cbcda1e2406cd43c61fd5c"
   solver-name = "gps-cdcl"
   solver-version = 1
