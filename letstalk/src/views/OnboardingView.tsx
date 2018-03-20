@@ -7,8 +7,15 @@ import {
   NavigationStackAction,
   NavigationActions
 } from 'react-navigation';
-import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
+import {
+  reduxForm,
+  formValueSelector,
+  Field,
+  InjectedFormProps,
+  SubmissionError,
+} from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
+import Immutable from 'immutable';
 
 import { RootState } from '../redux';
 import {
@@ -20,41 +27,62 @@ import {
 import profileService from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
+import {
+  getCohortId,
+  programOptions,
+  sequenceOptions,
+  gradYearOptions,
+  ValueLabel,
+} from '../models/cohort';
 
 interface OnboardingFormData {
-  cohortId: number,
+  programId: string,
+  sequenceId: string;
+  gradYear: string;
 }
 
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
 
-const OnboardingForm: React.SFC<FormProps<OnboardingFormData>> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
+const OnboardingForm: React.SFC<FormProps<OnboardingFormData> & OnboardingFormData> = props => {
+  const { error, handleSubmit, onSubmit, reset, submitting, valid, programId, sequenceId } = props;
   const onSubmitWithReset = async (values: OnboardingFormData): Promise<void> => {
     await onSubmit(values);
     reset();
   };
-  // TODO: Maybe pull these from the server and split the form up into parts (program, year)
+  const buildItems = (rows: Immutable.List<ValueLabel>) => {
+    return rows.map(({ value, label }) => {
+      return <Picker.Item key={value} label={label} value={value}/>;
+    });
+  };
+  const programItems = buildItems(programOptions()).toJS();
+  const sequenceItems = buildItems(sequenceOptions(programId)).toJS();
+  const gradYearItems = buildItems(gradYearOptions(programId, sequenceId)).toJS();
   return (
     <ScrollView>
       <Field
-        label="Cohort"
-        name="cohortId"
+        label="Program"
+        name="programId"
         component={ModalPicker}
         validate={required}
       >
-        <Picker.Item
-          label="Software Engineering 2019"
-          value={1}
-        />
-        <Picker.Item
-          label="Computer Engineering Stream 8 2019"
-          value={2}
-        />
-        <Picker.Item
-          label="Computer Engineering Stream 4 2019"
-          value={3}
-        />
+        {programItems}
+      </Field>
+      <Field
+        label="Sequence"
+        name="sequenceId"
+        component={ModalPicker}
+        validate={required}
+      >
+        {sequenceItems}
+      </Field>
+      <Field
+        label="Grad Year"
+        name="gradYear"
+        component={ModalPicker}
+        validate={required}
+      >
+        {gradYearItems}
       </Field>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
@@ -67,9 +95,14 @@ const OnboardingForm: React.SFC<FormProps<OnboardingFormData>> = props => {
   );
 }
 
+const selector = formValueSelector('onboarding');
+
 const OnboardingFormWithRedux = reduxForm<OnboardingFormData, FormP<OnboardingFormData>>({
   form: 'onboarding',
-})(OnboardingForm);
+})(connect(state => ({
+  programId: selector(state, 'programId'),
+  sequenceId: selector(state, 'sequenceId'),
+}))(OnboardingForm));
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -91,8 +124,10 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmit(values: OnboardingFormData) {
+    const { programId, sequenceId, gradYear } = values;
+    const cohortId = getCohortId(programId, sequenceId, gradYear);
     try {
-      await profileService.updateCohort(values);
+      await profileService.updateCohort({ cohortId });
       // Reload bootstrap data after updating
       await this.props.fetchBootstrap();
       this.props.navigation.dispatch(NavigationActions.reset({
