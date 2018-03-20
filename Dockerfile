@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 MAINTAINER Andrew Codispoti
 
 RUN apt-get update --fix-missing -y
-RUN apt-get install -y vim curl golang git python3.6
+RUN apt-get install -y vim curl golang git python3.6 nginx
 
 # gopath in root
 ENV GOPATH /go

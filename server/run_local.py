@@ -3,6 +3,8 @@
 import sys
 from argparse import ArgumentParser
 from subprocess import run
+from shutil import copytree
+from utils.utils import template_file
 import subprocess
 import os
 import logging
@@ -23,6 +25,9 @@ DB_PASS="uwletstalk"
 GOPATH = os.environ['GOPATH']
 GO_BINARY = "/usr/bin/go"
 SERVER=f"{GOPATH}/src/letstalk/server"
+NGINX_CONFIG_FILE="hiveapp.nginx.conf"
+NGINX_CONFIG_PATH=""
+NGINX_INSTALL_PATH="/etc/nginx/sites-available/"
 
 def usage():
   print (
@@ -40,6 +45,26 @@ def get_args():
     )
     return parser.parse_args()
 
+def provision_nginx():
+    template_file(
+        file_path=os.path.join(NGINX_CONFIG_PATH, NGINX_CONFIG_FILE),
+        out_path=os.path.join(NGINX_INSTALL_PATH, NGINX_CONFIG_FILE),
+        fill_in_dict={
+        },
+    )
+
+    #copy certs to folder
+    os.makedirs("/etc/nginx/ssl/hiveapp")
+    copytree("dev_certs/", "/etc/nginx/ssl/hiveapp/")
+
+    #restart nginx
+    run(["service" "nginx", "restart"])
+
+
+def provision(is_prod=False):
+    if is_prod:
+        provision_nginx()
+
 def main():
     args = get_args()
     env = os.environ.update({
@@ -50,6 +75,7 @@ def main():
         "GOPATH": GOPATH,
     })
 
+    provision()
     # install dependencies
     if args.prod:
         logger.info("Running production server")
