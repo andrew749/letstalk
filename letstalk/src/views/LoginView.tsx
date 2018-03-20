@@ -81,6 +81,7 @@ export default class LoginView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+    this.onPressFb = this.onPressFb.bind(this);
   }
 
   async registerForPushNotificationsAsync(): Promise<string> {
@@ -107,6 +108,10 @@ export default class LoginView extends Component<Props> {
     return token;
   }
 
+  async onPressFb() {
+    await auth.loginWithFb();
+  }
+
   async onSubmit(values: LoginFormData) {
     const {
       username,
@@ -131,6 +136,11 @@ export default class LoginView extends Component<Props> {
   }
 
   render() {
-    return <LoginFormWithRedux onSubmit={this.onSubmit} />;
+    return (
+      <View>
+        <LoginFormWithRedux onSubmit={this.onSubmit} />
+        <ActionButton onPress={this.onPressFb} title="Log in with Facebook"/>
+      </View>
+    );
   }
 }

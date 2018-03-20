@@ -11,5 +11,8 @@
       "transformer": "node_modules/react-native-typescript-transformer/index.js"
     },
     "orientation": "portrait"
-  }
+  },
+  "facebookScheme": "fb153025458705124",
+  "facebookAppId": "153025458705124",
+  "facebookDisplayName": "Hive"
 }
