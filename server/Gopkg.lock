@@ -100,6 +100,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/huandu/facebook"
+  packages = ["."]
+  revision = "fbcfa67561723eccdeb05fde84ef1c2eb80fe284"
+  version = "v2.1.2"
+
+[[projects]]
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   revision = "0b12d6b5"
@@ -213,6 +219,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ab54e8f9fb56c4da40969e73bf5de9fbcbecd2dd314b36f42405e34781b6067f"
+  inputs-digest = "a0f449964b588131b9f9de16c5ec9044b5ba681106d66d7b8a7e0f49f82a0fa9"
   solver-name = "gps-cdcl"
   solver-version = 1

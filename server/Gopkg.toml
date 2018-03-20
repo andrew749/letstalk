@@ -68,3 +68,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/getsentry/raven-go"
+
+[[constraint]]
+  name = "github.com/huandu/facebook"
+  version = "2.1.2"

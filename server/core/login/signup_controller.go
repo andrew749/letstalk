@@ -98,8 +98,8 @@ func writeUser(user *api.User, c *ctx.Context) errs.Error {
 	}
 
 	authData := data.AuthenticationData{
-		userModel.UserId,
-		hashedPassword,
+		UserId:       userModel.UserId,
+		PasswordHash: hashedPassword,
 	}
 
 	// Insert data structures within a transaction.
