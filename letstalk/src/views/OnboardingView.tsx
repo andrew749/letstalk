@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Picker, ScrollView } from 'react-native';
+import { Picker, ScrollView, Text } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -14,14 +14,19 @@ import {
   InjectedFormProps,
   SubmissionError,
 } from 'redux-form';
-import { FormValidationMessage } from 'react-native-elements';
+import { FormValidationMessage, Rating } from 'react-native-elements';
 import Immutable from 'immutable';
 
 import { RootState } from '../redux';
+import { State as OnboardingState } from '../redux/onboarding/reducer';
+import { setStep, SetStepAction, Step } from '../redux/onboarding/actions';
 import {
   ActionButton,
+  Emoji,
   FormP,
   FormProps,
+  Header,
+  InfoText,
   ModalPicker,
 } from '../components';
 import profileService from '../services/profile-service';
@@ -88,27 +93,28 @@ const OnboardingForm: React.SFC<FormProps<OnboardingFormData> & OnboardingFormDa
       <ActionButton
         disabled={!valid}
         loading={submitting}
-        title={submitting ? null : "Finish Onboarding"}
+        title={submitting ? null : "Choose cohort"}
         onPress={handleSubmit(onSubmitWithReset)}
       />
     </ScrollView>
   );
 }
 
-const selector = formValueSelector('onboarding');
+const cohortSelector = formValueSelector('onboarding-cohort');
 
 const OnboardingFormWithRedux = reduxForm<OnboardingFormData, FormP<OnboardingFormData>>({
-  form: 'onboarding',
+  form: 'onboarding-cohort',
 })(connect(state => ({
-  programId: selector(state, 'programId'),
-  sequenceId: selector(state, 'sequenceId'),
+  programId: cohortSelector(state, 'programId'),
+  sequenceId: cohortSelector(state, 'sequenceId'),
 }))(OnboardingForm));
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  setStep(step: Step): SetStepAction;
 }
 
-interface Props extends DispatchActions {
+interface Props extends OnboardingState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
@@ -121,6 +127,18 @@ class OnboardingView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+    this.onSubmitCohort = this.onSubmitCohort.bind(this);
+  }
+
+  async onSubmitCohort(values: OnboardingFormData) {
+    const { programId, sequenceId, gradYear } = values;
+    const cohortId = getCohortId(programId, sequenceId, gradYear);
+    try {
+      // await profileService.updateCohort({ cohortId });
+    } catch(e) {
+      throw new SubmissionError({_error: e.message});
+    }
+    this.props.setStep(Step.MY_VECTOR);
   }
 
   async onSubmit(values: OnboardingFormData) {
@@ -128,6 +146,7 @@ class OnboardingView extends Component<Props> {
     const cohortId = getCohortId(programId, sequenceId, gradYear);
     try {
       await profileService.updateCohort({ cohortId });
+
       // Reload bootstrap data after updating
       await this.props.fetchBootstrap();
       this.props.navigation.dispatch(NavigationActions.reset({
@@ -140,8 +159,40 @@ class OnboardingView extends Component<Props> {
   }
 
   render() {
-    return <OnboardingFormWithRedux onSubmit={this.onSubmit} />;
+    const { step } = this.props;
+    switch (step) {
+      case Step.COHORT:
+        // TODO: Gender specific emoji
+        return (
+          <ScrollView>
+            <Header>Your Cohort</Header>
+            <InfoText>
+              Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
+              students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
+            </InfoText>
+            <OnboardingFormWithRedux onSubmit={this.onSubmitCohort} />
+          </ScrollView>
+        );
+      case Step.MY_VECTOR:
+        return (
+          <ScrollView>
+            <Header>Your Personality</Header>
+            <InfoText>
+              Looks like you're going to be a big <Emoji name="man"/>! We'd like to get
+              to know you a little better, so that we can find you some lit <Emoji name="fire"/>
+              noobies to mentor.
+            </InfoText>
+          </ScrollView>
+        );
+      case Step.YOUR_VECTOR:
+        return <Text>your vector</Text>;
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = step;
+    }
   }
 }
 
-export default connect(null, { fetchBootstrap })(OnboardingView);
+export default connect(({ onboarding }: RootState) => onboarding,
+  { fetchBootstrap, setStep }
+)(OnboardingView);
