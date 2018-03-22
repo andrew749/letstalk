@@ -30,7 +30,7 @@ import {
   ModalPicker,
   Rating,
 } from '../components';
-import profileService from '../services/profile-service';
+import profileService, { PersonalityVector, MenteePreference } from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
 import {
@@ -111,14 +111,7 @@ const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   gradYear: cohortSelector(state, 'gradYear'),
 }))(CohortForm));
 
-interface PersonalityFormData {
-  sociable: number;
-  hardworking: number;
-  ambitious: number;
-  energetic: number;
-  carefree: number;
-  confident: number;
-}
+type PersonalityFormData = PersonalityVector;
 
 const vectorsWithLabels = Immutable.Map({
   sociable: 'Sociable',
@@ -209,7 +202,6 @@ class OnboardingView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
-    this.onSubmit = this.onSubmit.bind(this);
     this.onSubmitCohort = this.onSubmitCohort.bind(this);
   }
 
@@ -217,25 +209,16 @@ class OnboardingView extends Component<Props> {
     const { programId, sequenceId, gradYear } = values;
     const cohortId = getCohortId(programId, sequenceId, gradYear);
     try {
-      // await profileService.updateCohort({ cohortId });
+      await profileService.updateCohort({ cohortId });
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
     this.props.setStep(Step.MY_VECTOR);
   }
 
-  async onSubmit(values: CohortFormData) {
-    const { programId, sequenceId, gradYear } = values;
-    const cohortId = getCohortId(programId, sequenceId, gradYear);
+  async onSubmitPersonality(preference: MenteePreference, values: PersonalityFormData) {
     try {
-      await profileService.updateCohort({ cohortId });
-
-      // Reload bootstrap data after updating
-      await this.props.fetchBootstrap();
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Home' })]
-      }));
+      await profileService.updateVector(preference, values);
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
@@ -257,6 +240,10 @@ class OnboardingView extends Component<Props> {
           </ScrollView>
         );
       case Step.MY_VECTOR:
+        const onSubmitMine = async (values: PersonalityFormData) => {
+          await this.onSubmitPersonality(MenteePreference.MENTOR_PREFERENCE, values);
+          this.props.setStep(Step.YOUR_VECTOR);
+        };
         return (
           <ScrollView>
             <Header>Your Personality</Header>
@@ -265,11 +252,32 @@ class OnboardingView extends Component<Props> {
               to know you a little better, so that we can find you some lit <Emoji name="fire"/>
               noobies to mentor.
             </InfoText>
-            <PersonalityFormWithRedux onSubmit={(values: PersonalityFormData) => null as void} />
+            <PersonalityFormWithRedux onSubmit={onSubmitMine} />
           </ScrollView>
         );
       case Step.YOUR_VECTOR:
-        return <Text>your vector</Text>;
+        const onSubmitYour = async (values: PersonalityFormData) => {
+          await this.onSubmitPersonality(MenteePreference.MENTEE_PREFERENCE, values);
+          // Reload bootstrap data after updating
+          await this.props.fetchBootstrap();
+          this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Home' })]
+          }));
+          // Reset state
+          // TODO: Maybe have an actual reset action.
+          this.props.setStep(Step.COHORT);
+        };
+        return (
+          <ScrollView>
+            <Header>Their Personality</Header>
+            <InfoText>
+              We'd also like to get a sense of what kind of noobies <Emoji name="baby"/> you would
+              like to mentor.
+            </InfoText>
+            <PersonalityFormWithRedux onSubmit={onSubmitYour} />
+          </ScrollView>
+        );
       default:
         // Ensure exhaustiveness of select
         const _: never = step;
