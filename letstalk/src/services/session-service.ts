@@ -6,7 +6,7 @@ export type SessionToken = string;
 
 export interface SessionService {
   login(username: string, password: string, notificationToken?: string): Promise<SessionToken>;
-  loginWithFb(): Promise<SessionToken>;
+  loginWithFb(notificationToken?: string): Promise<SessionToken>;
   logout(sessionToken: SessionToken): Promise<void>;
 }
 
@@ -59,10 +59,10 @@ export class RemoteSessionService implements SessionService {
     return response.sessionId;
   }
 
-  async loginWithFb(): Promise<SessionToken> {
-    const accessToken = await fbLogin();
-    if (accessToken === null) return null;
-    const response = await this.requestor.post(FB_LOGIN_ROUTE, { accessToken });
+  async loginWithFb(notificationToken?: string): Promise<SessionToken> {
+    const token = await fbLogin();
+    if (token === null) return null;
+    const response = await this.requestor.post(FB_LOGIN_ROUTE, { token, notificationToken });
     return response.sessionId;
   }
 

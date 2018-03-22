@@ -37,8 +37,8 @@ export class Auth {
     await this.setSessionToken(sessionToken);
   }
 
-  async loginWithFb(): Promise<void> {
-    const sessionToken = await this.sessionService.loginWithFb();
+  async loginWithFb(notificationToken?: string): Promise<void> {
+    const sessionToken = await this.sessionService.loginWithFb(notificationToken);
     console.log(sessionToken);
     if (sessionToken === null) return;
     await this.setSessionToken(sessionToken);

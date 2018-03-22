@@ -17,13 +17,13 @@ import (
  * Login with fb
  */
 type FBLoginRequestData struct {
-	Token             string
-	NotificationToken string
+	Token             string `json:"token" binding:"required"`
+	NotificationToken string `json:"notificationToken"`
 }
 
 func FBController(c *ctx.Context) errs.Error {
 	var loginRequest FBLoginRequestData
-	err := c.GinContext.BindJSON(loginRequest)
+	err := c.GinContext.BindJSON(&loginRequest)
 
 	if err != nil {
 		return errs.NewClientError("%s", err)

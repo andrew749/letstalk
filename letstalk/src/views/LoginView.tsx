@@ -109,7 +109,22 @@ export default class LoginView extends Component<Props> {
   }
 
   async onPressFb() {
-    await auth.loginWithFb();
+    try {
+      let token: string = null;
+      // don't fail if expo is down
+      try {
+        token = await this.registerForPushNotificationsAsync();
+      } catch(e){
+        console.log("Failed to register for notification")
+      }
+      await auth.loginWithFb(token);
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: 'Home' })]
+      }));
+    } catch(e) {
+      throw new SubmissionError({_error: e.message});
+    }
   }
 
   async onSubmit(values: LoginFormData) {
@@ -118,7 +133,7 @@ export default class LoginView extends Component<Props> {
       password,
     } = values;
     try {
-      var token: string = null;
+      let token: string = null;
       // don't fail if expo is down
       try {
         token = await this.registerForPushNotificationsAsync();
