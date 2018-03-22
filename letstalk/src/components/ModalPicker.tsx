@@ -38,23 +38,26 @@ class StatefulModalPicker extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { values, labels } = this.getLabelsAndValues();
-
-    this.state = {
-      values,
-      labels,
-    };
+    this.state = this.getLabelsAndValues(props);
+    this.setValueIfSingle();
   }
 
-  getLabelsAndValues () {
+  getLabelsAndValues (props: Props) {
     return {
-      labels: React.Children.map(this.props.children, child => (child as any).props.label),
-      values: React.Children.map(this.props.children, child => (child as any).props.value),
+      labels: React.Children.map(props.children, child => (child as any).props.label),
+      values: React.Children.map(props.children, child => (child as any).props.value),
     };
   }
 
   componentWillReceiveProps(props: Props) {
-    this.setState(this.getLabelsAndValues());
+    this.setState(this.getLabelsAndValues(props), this.setValueIfSingle);
+  }
+
+  setValueIfSingle() {
+    const { onChange, value } = this.props.input;
+    if (this.state.values.length === 1 && this.state.values[0] !== value) {
+      onChange(this.state.values[0]);
+    }
   }
 
   render() {

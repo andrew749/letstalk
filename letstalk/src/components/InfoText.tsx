@@ -2,22 +2,20 @@ import React, { Component, ReactNode } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode
 }
 
-const Header: React.SFC<Props> = props => {
+const InfoText: React.SFC<Props> = props => {
   const { children } = props
-  return (
-    <Text style={styles.text}>{children}</Text>
-  );
+  return <Text style={styles.text}>{children}</Text>;
 };
 
-export default Header;
+export default InfoText;
 
 const styles = StyleSheet.create({
   text: {
     padding: 10,
-    fontWeight: "900",
-    fontSize: 28,
+    fontWeight: '500',
+    fontSize: 18,
   },
 });

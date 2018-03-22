@@ -3,7 +3,12 @@ import Immutable from 'immutable';
 import requestor, { Requestor } from './requests';
 import { BootstrapData, Cohort, Relationship, UserData, UserState } from '../models';
 import auth, { Auth } from './auth';
-import { BOOTSTRAP_ROUTE, COHORT_ROUTE, SIGNUP_ROUTE } from './constants';
+import {
+  BOOTSTRAP_ROUTE,
+  COHORT_ROUTE,
+  SIGNUP_ROUTE,
+  USER_VECTOR_ROUTE,
+} from './constants';
 
 interface SignupRequest {
   firstName: string;
@@ -18,6 +23,24 @@ interface SignupRequest {
 interface UpdateCohortRequest {
   cohortId: number;
 }
+
+export interface PersonalityVector {
+  sociable: number;
+  hardworking: number;
+  ambitious: number;
+  energetic: number;
+  carefree: number;
+  confident: number;
+}
+
+export enum MenteePreference {
+  MENTEE_PREFERENCE = 0,
+  MENTOR_PREFERENCE
+}
+
+type UpdateVectorRequest = PersonalityVector & {
+  isMenteePreference: MenteePreference;
+};
 
 export interface BootstrapResponse {
   readonly relationships: Immutable.List<Relationship>;
@@ -47,6 +70,16 @@ export class RemoteProfileService implements ProfileService {
   async updateCohort(request: UpdateCohortRequest): Promise<void> {
     const sessionToken = await auth.getSessionToken();
     await this.requestor.post(COHORT_ROUTE, request, sessionToken);
+  }
+
+  async updateVector(preference: MenteePreference, vector: PersonalityVector) {
+    const sessionToken = await auth.getSessionToken();
+    const request: UpdateVectorRequest = {
+      ...vector,
+      isMenteePreference: preference,
+    };
+    console.log(request);
+    await this.requestor.post(USER_VECTOR_ROUTE, request, sessionToken);
   }
 
   async bootstrap(): Promise<BootstrapData> {

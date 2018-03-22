@@ -116,13 +116,13 @@ const (
 )
 
 type UpdateUserVectorRequest struct {
-	PreferenceType int `json:"isMenteePreference" binding:"required"`
-	Sociable       int `json:"sociable" binding:"required"`
-	Hard_Working   int `json:"hardWorking" binding:"required"`
-	Ambitious      int `json:"ambitious" binding:"required"`
-	Energetic      int `json:"energetic" binding:"required"`
-	Carefree       int `json:"carefree" binding:"required"`
-	Confident      int `json:"confident" binding:"required"`
+	PreferenceType int `json:"isMenteePreference" binding:"exists"`
+	Sociable       int `json:"sociable" binding:"exists"`
+	Hard_Working   int `json:"hardWorking" binding:"exists"`
+	Ambitious      int `json:"ambitious" binding:"exists"`
+	Energetic      int `json:"energetic" binding:"exists"`
+	Carefree       int `json:"carefree" binding:"exists"`
+	Confident      int `json:"confident" binding:"exists"`
 }
 
 /**

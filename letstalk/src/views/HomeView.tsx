@@ -88,7 +88,7 @@ class HomeView extends Component<Props> {
     });
     return (
       <ScrollView>
-        <Header title="Matches" />
+        <Header>Matches</Header>
         {matchCards}
       </ScrollView>
     );
