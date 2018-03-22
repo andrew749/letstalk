@@ -14,9 +14,9 @@ import (
 )
 
 type User struct {
-	UserId    int       `json:"userId"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
+	UserId    int       `json:"user_id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Gender    int       `json:"gender"`
 	Birthdate time.Time `json:"birthdate"`

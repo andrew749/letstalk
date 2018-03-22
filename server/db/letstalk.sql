@@ -31,6 +31,21 @@ CREATE TABLE authentication_data (
   FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
+CREATE TABLE fb_auth_data (
+  user_id INT NOT NULL PRIMARY KEY,
+  fb_user_id VARCHAR(32) NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
+CREATE TABLE fb_auth_token (
+  user_id INT NOT NULL,
+  auth_token VARCHAR(50) NOT NULL,
+  expiry DATETIME(6) NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES user(user_id)
+);
+
 CREATE TABLE program (
   program_id VARCHAR(64) NOT NULL PRIMARY KEY
 );
