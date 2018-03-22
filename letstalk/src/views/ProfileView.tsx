@@ -145,7 +145,7 @@ class ProfileView extends Component<Props> {
       this.props.bootstrap.me.firstName + ' ' + this.props.bootstrap.me.lastName : 'Profile';
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Header title={headerText} />
+        <Header>{headerText}</Header>
         {body}
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>

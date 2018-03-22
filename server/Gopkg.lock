@@ -12,6 +12,7 @@
   revision = "64efb26269cc5d9c363a143a936a7c75b053e06d"
 
 [[projects]]
+  branch = "master"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -42,10 +43,10 @@
     "private/protocol/xml/xmlutil",
     "service/lambda",
     "service/sns",
+    "service/sqs",
     "service/sts"
   ]
-  revision = "f3a52638aeadcd5d6ba1d747b8c552c8e0066312"
-  version = "v1.13.5"
+  revision = "8a0e4eacaec13849a4177fa293f5e908760056a9"
 
 [[projects]]
   name = "github.com/certifi/gocertifi"

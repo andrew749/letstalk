@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
 func getDefaultConfiguration() *aws.Config {
@@ -38,4 +39,14 @@ func GetLambdaServiceClient() (*lambda.Lambda, error) {
 
 	lambdaClient := lambda.New(sess)
 	return lambdaClient, nil
+}
+
+func GetSQSServiceClient() (*sqs.SQS, error) {
+	sess, err := getDefaultSession()
+	if err != nil {
+		return nil, err
+	}
+
+	sqsClient := sqs.New(sess)
+	return sqsClient, nil
 }

@@ -57,6 +57,10 @@
   name = "github.com/aws/aws-lambda-go"
   branch = "master"
 
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  branch = "master"
+
 [prune]
   go-tests = true
   unused-packages = true
