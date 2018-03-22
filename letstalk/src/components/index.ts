@@ -8,6 +8,7 @@ import InfoText from './InfoText';
 import LabeledFormInput from './LabeledFormInput';
 import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
+import Rating from './Rating';
 
 export {
   ActionButton,
@@ -21,4 +22,5 @@ export {
   LabeledFormInput,
   ModalDatePicker,
   ModalPicker,
+  Rating,
 };

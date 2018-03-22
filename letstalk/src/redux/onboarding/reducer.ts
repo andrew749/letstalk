@@ -9,7 +9,7 @@ export interface State {
 }
 
 const initialState: State = {
-  step: Step.COHORT,
+  step: Step.MY_VECTOR,
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Picker, ScrollView, Text } from 'react-native';
+import { Picker, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -14,7 +14,7 @@ import {
   InjectedFormProps,
   SubmissionError,
 } from 'redux-form';
-import { FormValidationMessage, Rating } from 'react-native-elements';
+import { FormValidationMessage } from 'react-native-elements';
 import Immutable from 'immutable';
 
 import { RootState } from '../redux';
@@ -28,6 +28,7 @@ import {
   Header,
   InfoText,
   ModalPicker,
+  Rating,
 } from '../components';
 import profileService from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
@@ -40,7 +41,7 @@ import {
   ValueLabel,
 } from '../models/cohort';
 
-interface OnboardingFormData {
+interface CohortFormData {
   programId: string,
   sequenceId: string;
   gradYear: string;
@@ -49,9 +50,9 @@ interface OnboardingFormData {
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
 
-const OnboardingForm: React.SFC<FormProps<OnboardingFormData> & OnboardingFormData> = props => {
+const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormData> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid, programId, sequenceId } = props;
-  const onSubmitWithReset = async (values: OnboardingFormData): Promise<void> => {
+  const onSubmitWithReset = async (values: CohortFormData): Promise<void> => {
     await onSubmit(values);
     reset();
   };
@@ -64,7 +65,7 @@ const OnboardingForm: React.SFC<FormProps<OnboardingFormData> & OnboardingFormDa
   const sequenceItems = buildItems(sequenceOptions(programId)).toJS();
   const gradYearItems = buildItems(gradYearOptions(programId, sequenceId)).toJS();
   return (
-    <ScrollView>
+    <View>
       <Field
         label="Program"
         name="programId"
@@ -96,18 +97,100 @@ const OnboardingForm: React.SFC<FormProps<OnboardingFormData> & OnboardingFormDa
         title={submitting ? null : "Choose cohort"}
         onPress={handleSubmit(onSubmitWithReset)}
       />
-    </ScrollView>
+    </View>
   );
 }
 
 const cohortSelector = formValueSelector('onboarding-cohort');
 
-const OnboardingFormWithRedux = reduxForm<OnboardingFormData, FormP<OnboardingFormData>>({
+const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   form: 'onboarding-cohort',
 })(connect(state => ({
   programId: cohortSelector(state, 'programId'),
   sequenceId: cohortSelector(state, 'sequenceId'),
-}))(OnboardingForm));
+  gradYear: cohortSelector(state, 'gradYear'),
+}))(CohortForm));
+
+interface PersonalityFormData {
+  sociable: number;
+  hardworking: number;
+  ambitious: number;
+  energetic: number;
+  carefree: number;
+  confident: number;
+}
+
+const vectorsWithLabels = Immutable.Map({
+  sociable: 'Sociable',
+  hardworking: 'Hardworking',
+  ambitious: 'Ambitious',
+  energetic: 'Energetic',
+  carefree: 'Carefree',
+  confident: 'Confident',
+});
+
+interface PersonalityProps {
+  values: PersonalityFormData;
+}
+
+const TOTAL_POINTS = 15;
+
+const PersonalityForm: React.SFC<FormProps<PersonalityFormData> & PersonalityProps> = props => {
+  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
+  if (!props.initialized) {
+    props.initialize({
+      sociable: 4,
+      hardworking: 0,
+      ambitious: 0,
+      energetic: 0,
+      carefree: 0,
+      confident: 0,
+    });
+  }
+  const values: Immutable.Map<string, number> = Immutable.Map(props.values);
+  const total = values.reduce((acc, value) => acc + value, 0);
+  const onSubmitWithReset = async (values: PersonalityFormData): Promise<void> => {
+    await onSubmit(values);
+    reset();
+  };
+  let buttonLabel = "Submit Personality";
+  if (total < TOTAL_POINTS) buttonLabel = "You have " + (TOTAL_POINTS - total) + " points left";
+  if (total > TOTAL_POINTS) buttonLabel = (total - TOTAL_POINTS) + " points too many";
+  const fields = vectorsWithLabels.map((label, name) => (
+    <Field
+      key={name}
+      label={label}
+      name={name}
+      numElems={5}
+      component={Rating}
+    />
+  )).toArray();
+  return (
+    <View>
+      <InfoText>
+        You have <Text style={{fontWeight: 'bold'}}>{total + '/' + TOTAL_POINTS}</Text> points.
+      </InfoText>
+      {fields}
+      {error && <FormValidationMessage>{error}</FormValidationMessage>}
+      <ActionButton
+        style={styles.actionButton}
+        disabled={total !== TOTAL_POINTS}
+        loading={submitting}
+        title={submitting ? null : buttonLabel}
+        onPress={handleSubmit(onSubmitWithReset)}
+      />
+    </View>
+  );
+}
+
+const personalitySelector = formValueSelector('onboarding-personality');
+
+const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<PersonalityFormData>>({
+  form: 'onboarding-personality',
+})(connect(state => ({
+  values: personalitySelector(state,
+    'sociable', 'hardworking', 'ambitious', 'energetic', 'carefree', 'confident'),
+}))(PersonalityForm));
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -130,7 +213,7 @@ class OnboardingView extends Component<Props> {
     this.onSubmitCohort = this.onSubmitCohort.bind(this);
   }
 
-  async onSubmitCohort(values: OnboardingFormData) {
+  async onSubmitCohort(values: CohortFormData) {
     const { programId, sequenceId, gradYear } = values;
     const cohortId = getCohortId(programId, sequenceId, gradYear);
     try {
@@ -141,7 +224,7 @@ class OnboardingView extends Component<Props> {
     this.props.setStep(Step.MY_VECTOR);
   }
 
-  async onSubmit(values: OnboardingFormData) {
+  async onSubmit(values: CohortFormData) {
     const { programId, sequenceId, gradYear } = values;
     const cohortId = getCohortId(programId, sequenceId, gradYear);
     try {
@@ -170,7 +253,7 @@ class OnboardingView extends Component<Props> {
               Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
               students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
             </InfoText>
-            <OnboardingFormWithRedux onSubmit={this.onSubmitCohort} />
+            <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
           </ScrollView>
         );
       case Step.MY_VECTOR:
@@ -182,6 +265,7 @@ class OnboardingView extends Component<Props> {
               to know you a little better, so that we can find you some lit <Emoji name="fire"/>
               noobies to mentor.
             </InfoText>
+            <PersonalityFormWithRedux onSubmit={(values: PersonalityFormData) => null as void} />
           </ScrollView>
         );
       case Step.YOUR_VECTOR:
@@ -192,6 +276,12 @@ class OnboardingView extends Component<Props> {
     }
   }
 }
+
+const styles = StyleSheet.create({
+  actionButton: {
+    marginBottom: 10,
+  },
+});
 
 export default connect(({ onboarding }: RootState) => onboarding,
   { fetchBootstrap, setStep }
