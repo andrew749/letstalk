@@ -40,7 +40,7 @@ CREATE TABLE fb_auth_data (
 
 CREATE TABLE fb_auth_token (
   user_id INT NOT NULL,
-  auth_token VARCHAR(50) NOT NULL,
+  auth_token VARCHAR(255) NOT NULL,
   expiry DATETIME(6) NOT NULL,
 
   FOREIGN KEY (user_id) REFERENCES user(user_id)

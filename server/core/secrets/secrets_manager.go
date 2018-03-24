@@ -8,9 +8,9 @@ import (
 )
 
 type Secrets struct {
-	AppId       string `json:"appId"`
-	AppSecret   string `json:"appSecret"`
-	RedirectUrl string `json:"redirectUrl"`
+	AppId       string `json:"app_id"`
+	AppSecret   string `json:"app_secret"`
+	RedirectUrl string `json:"redirect_url"`
 	SentryToken string `json:"sentry_auth_token"`
 	SentryDSN   string `json:"sentry_dsn"`
 }
