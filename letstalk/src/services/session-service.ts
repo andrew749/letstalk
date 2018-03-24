@@ -60,9 +60,13 @@ export class RemoteSessionService implements SessionService {
   }
 
   async loginWithFb(notificationToken?: string): Promise<SessionToken> {
-    const token = await fbLogin();
+    const {token, expires} = await fbLogin();
     if (token === null) return null;
-    const response = await this.requestor.post(FB_LOGIN_ROUTE, { token, notificationToken });
+    const response = await this.requestor.post(FB_LOGIN_ROUTE, {
+      token: token,
+      expiry: expires,
+      notificationToken: notificationToken
+    });
     return response.sessionId;
   }
 
