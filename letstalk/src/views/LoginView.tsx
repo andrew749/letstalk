@@ -66,6 +66,30 @@ const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
   form: 'login',
 })(LoginForm);
 
+interface FBLoginFormData {}
+
+const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
+  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
+  const onSubmitWithReset = async (values: FBLoginFormData): Promise<void> => {
+    await onSubmit(values);
+    reset();
+  };
+  return (
+    <View>
+      {error && <FormValidationMessage>{error}</FormValidationMessage>}
+      <ActionButton
+        loading={submitting}
+        title={submitting ? null : "Log in with Facebook"}
+        onPress={handleSubmit(onSubmitWithReset)}
+      />
+    </View>
+  );
+}
+
+const FBLoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
+  form: 'fblogin',
+})(FBLoginForm);
+
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
@@ -81,7 +105,7 @@ export default class LoginView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
-    this.onPressFb = this.onPressFb.bind(this);
+    this.onSubmitFb = this.onSubmitFb.bind(this);
   }
 
   async registerForPushNotificationsAsync(): Promise<string> {
@@ -108,7 +132,7 @@ export default class LoginView extends Component<Props> {
     return token;
   }
 
-  async onPressFb() {
+  async onSubmitFb() {
     try {
       let token: string = null;
       // don't fail if expo is down
@@ -117,11 +141,12 @@ export default class LoginView extends Component<Props> {
       } catch(e){
         console.log("Failed to register for notification")
       }
-      await auth.loginWithFb(token);
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Home' })]
-      }));
+      if (await auth.loginWithFb(token)) {
+        this.props.navigation.dispatch(NavigationActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'Home' })]
+        }));
+      }
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
@@ -154,7 +179,7 @@ export default class LoginView extends Component<Props> {
     return (
       <View>
         <LoginFormWithRedux onSubmit={this.onSubmit} />
-        <ActionButton onPress={this.onPressFb} title="Log in with Facebook"/>
+        <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
       </View>
     );
   }
