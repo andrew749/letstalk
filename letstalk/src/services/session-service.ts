@@ -1,10 +1,12 @@
 import { Requestor } from './requests';
-import { LOGIN_ROUTE, LOGOUT_ROUTE } from './constants';
+import { FB_LOGIN_ROUTE, LOGIN_ROUTE, LOGOUT_ROUTE } from './constants';
+import { fbLogin } from './fb';
 
-export type SessionToken = string | null;
+export type SessionToken = string;
 
 export interface SessionService {
   login(username: string, password: string, notificationToken?: string): Promise<SessionToken>;
+  loginWithFb(notificationToken?: string): Promise<SessionToken>;
   logout(sessionToken: SessionToken): Promise<void>;
 }
 
@@ -30,6 +32,10 @@ export class MockSessionService implements SessionService {
     return MockSessionService.token;
   }
 
+  async loginWithFb(): Promise<SessionToken> {
+    return this.login('foo', 'bar');
+  }
+
   async logout(sessionToken: SessionToken): Promise<void> {
     if (sessionToken !== MockSessionService.token) throw new Error('Invalid session token');
     // no-op
@@ -43,14 +49,24 @@ export class RemoteSessionService implements SessionService {
     this.requestor = requestor;
   }
 
-  async login(username: string, password: string, notificationToken?: string):
-    Promise<SessionToken> {
+  async login(username: string, password: string, notificationToken?: string): Promise<SessionToken> {
     const response = await this.requestor.post(LOGIN_ROUTE,
       {
         userId: Number(username),
         password: password,
         notificationToken: notificationToken,
       });
+    return response.sessionId;
+  }
+
+  async loginWithFb(notificationToken?: string): Promise<SessionToken> {
+    const {token, expires} = await fbLogin();
+    if (token === null) return null;
+    const response = await this.requestor.post(FB_LOGIN_ROUTE, {
+      token: token,
+      expiry: expires,
+      notificationToken: notificationToken
+    });
     return response.sessionId;
   }
 

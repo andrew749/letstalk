@@ -17,7 +17,7 @@ logger.setLevel(logging.DEBUG)
 GIN_MODE="release"
 RLOG_LOG_LEVEL="DEBUG"
 RLOG_TIME_FORMAT='2006-01-02T15:04:05'
-DB_ADDR='tcp(127.0.0.1:3306)'
+DB_ADDR='tcp(localhost:3306)'
 DB_USER='letstalk'
 DB_PASS="uwletstalk"
 
