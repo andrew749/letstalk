@@ -24,5 +24,5 @@ echo "Starting Container"
 # DEBUG
 docker run -it -p 80:3000 -v $(pwd)/server:/go/src/letstalk/server hive:latest
 
-#PRODUCTION
-#docker run -it -d --net="host" -p 80:3000 hive:latest
+# PRODUCTION
+# docker run --net="bridge" --add-host=localhost:`ip route show | grep docker0 | awk '{print \$9}'` -d -p 80:3000 hive:latest
