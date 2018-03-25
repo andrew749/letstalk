@@ -76,3 +76,7 @@
 [[constraint]]
   name = "github.com/huandu/facebook"
   version = "2.1.2"
+
+[[constraint]]
+  name = "github.com/sendgrid/sendgrid-go"
+  version = "3.4.1"

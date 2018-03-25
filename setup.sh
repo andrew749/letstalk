@@ -21,4 +21,8 @@ if ["$?" -ne 0]; then
 fi
 
 echo "Starting Container"
+# DEBUG
 docker run -it -p 80:3000 -v $(pwd)/server:/go/src/letstalk/server hive:latest
+
+#PRODUCTION
+#docker run -it -d --net="host" -p 80:3000 hive:latest

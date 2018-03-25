@@ -13,6 +13,7 @@ type Secrets struct {
 	RedirectUrl string `json:"redirectUrl"`
 	SentryToken string `json:"sentry_auth_token"`
 	SentryDSN   string `json:"sentry_dsn"`
+	SendGrid    string `json:"sendgrid"`
 }
 
 type SecretsManager struct {
