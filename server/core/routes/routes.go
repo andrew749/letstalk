@@ -49,7 +49,7 @@ func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Eng
 
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
-	v1.GET("/fb_login", hw.wrapHandler(login.FBController, false))
+	v1.POST("/fb_login", hw.wrapHandler(login.FBController, false))
 
 	// update user data
 	v1.OPTIONS("/cohort")

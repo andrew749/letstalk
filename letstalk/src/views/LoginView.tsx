@@ -66,6 +66,30 @@ const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
   form: 'login',
 })(LoginForm);
 
+interface FBLoginFormData {}
+
+const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
+  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
+  const onSubmitWithReset = async (values: FBLoginFormData): Promise<void> => {
+    await onSubmit(values);
+    reset();
+  };
+  return (
+    <View>
+      {error && <FormValidationMessage>{error}</FormValidationMessage>}
+      <ActionButton
+        loading={submitting}
+        title={submitting ? null : "Log in with Facebook"}
+        onPress={handleSubmit(onSubmitWithReset)}
+      />
+    </View>
+  );
+}
+
+const FBLoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
+  form: 'fblogin',
+})(FBLoginForm);
+
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
@@ -81,6 +105,7 @@ export default class LoginView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+    this.onSubmitFb = this.onSubmitFb.bind(this);
   }
 
   async registerForPushNotificationsAsync(): Promise<string> {
@@ -107,13 +132,33 @@ export default class LoginView extends Component<Props> {
     return token;
   }
 
+  async onSubmitFb() {
+    try {
+      let token: string = null;
+      // don't fail if expo is down
+      try {
+        token = await this.registerForPushNotificationsAsync();
+      } catch(e){
+        console.log("Failed to register for notification")
+      }
+      if (await auth.loginWithFb(token)) {
+        this.props.navigation.dispatch(NavigationActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'Home' })]
+        }));
+      }
+    } catch(e) {
+      throw new SubmissionError({_error: e.message});
+    }
+  }
+
   async onSubmit(values: LoginFormData) {
     const {
       username,
       password,
     } = values;
     try {
-      var token: string = null;
+      let token: string = null;
       // don't fail if expo is down
       try {
         token = await this.registerForPushNotificationsAsync();
@@ -131,6 +176,11 @@ export default class LoginView extends Component<Props> {
   }
 
   render() {
-    return <LoginFormWithRedux onSubmit={this.onSubmit} />;
+    return (
+      <View>
+        <LoginFormWithRedux onSubmit={this.onSubmit} />
+        <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
+      </View>
+    );
   }
 }

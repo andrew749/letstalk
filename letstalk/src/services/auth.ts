@@ -28,20 +28,28 @@ export class Auth {
     this.sessionToken = sessionToken;
   }
 
-  async login(username: string, password: string, notificationToken?: string): Promise<SessionToken> {
+  async login(username: string, password: string, notificationToken?: string): Promise<void> {
     const sessionToken = await this.sessionService.login(
         username,
         password,
         notificationToken,
     );
     await this.setSessionToken(sessionToken);
-    return this.getSessionToken();
+  }
+
+  // Returns whether the login completed.
+  async loginWithFb(notificationToken?: string): Promise<boolean> {
+    const sessionToken = await this.sessionService.loginWithFb(notificationToken);
+    console.log(sessionToken);
+    if (sessionToken === null) return false;
+    await this.setSessionToken(sessionToken);
+    return true;
   }
 
   async logout(): Promise<void> {
     const sessionToken = await this.getSessionToken();
-    await this.sessionService.logout(sessionToken);
     AsyncStorage.removeItem(Auth.tokenLocation);
+    await this.sessionService.logout(sessionToken);
   }
 };
 
