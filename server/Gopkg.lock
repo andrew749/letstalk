@@ -107,6 +107,18 @@
   version = "v2.1.2"
 
 [[projects]]
+  name = "github.com/jinzhu/gorm"
+  packages = ["."]
+  revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
+  version = "v1.9.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/jinzhu/inflection"
+  packages = ["."]
+  revision = "04140366298a54a039076d798123ffa108fff46c"
+
+[[projects]]
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   revision = "0b12d6b5"
@@ -235,6 +247,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "721c93cc22d717aa6ac09d9d2741f83aedb437478d605e9866a55de1cc528ba5"
+  inputs-digest = "309eb136fdf93b46d3c8ae9ab5bf65e740a3e212b843c9e05fb4998deae2b269"
   solver-name = "gps-cdcl"
   solver-version = 1

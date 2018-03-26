@@ -3,13 +3,11 @@ package login
 import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
-	"letstalk/server/core/db"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"time"
 
-	"github.com/mijia/modelq/gmq"
 	"github.com/romana/rlog"
 )
 
@@ -39,11 +37,11 @@ import (
 /**
  * Parse the json request and bind the parameters to a struct.
  */
-func getUserDataFromRequest(c *ctx.Context) (*api.User, errs.Error) {
+func getUserDataFromRequest(c *ctx.Context) (*api.User, error) {
 	var inputUser api.User
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
-		return nil, errs.NewClientError("%s", err)
+		return nil, err
 	}
 	rlog.Debugf("post user: %s", inputUser)
 	return &inputUser, nil
@@ -54,42 +52,44 @@ func SignupUser(c *ctx.Context) errs.Error {
 	user, err := getUserDataFromRequest(c)
 
 	if err != nil {
-		return err
+		return errs.NewClientError(err.Error())
 	}
 
-	// Check that no user exists with this email.
-	existingUser, dberr := data.UserObjs.Select().Where(data.UserObjs.FilterEmail("=", user.Email)).List(c.Db)
-
-	if dberr != nil {
+	var numUsers int
+	if err := c.Db.Model(&data.User{}).Where("email = ?", user.Email).Count(&numUsers).Error; err != nil {
 		return errs.NewDbError(err)
 	}
 
-	if len(existingUser) != 0 {
+	if numUsers > 0 {
 		return errs.NewClientError("a user already exists with email: %s", user.Email)
 	}
 
-	return writeUser(user, c)
+	err = writeUser(user, c)
+
+	if err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	return nil
 }
 
 /**
  * Create a new user given a particular request and insert in the db.
  */
-func writeUser(user *api.User, c *ctx.Context) errs.Error {
+func writeUser(user *api.User, c *ctx.Context) error {
 	// Create user data structures in the orm.
+
+	bday := time.Unix(user.Birthday, 0)
 
 	userModel := data.User{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Gender:    utility.GenderIdByName(user.Gender),
-		Birthdate: time.Unix(user.Birthday, 0),
+		Birthdate: &bday,
 	}
 
 	var err error
-
-	if userModel.UserId, err = db.NumId(c); err != nil {
-		return errs.NewDbError(err)
-	}
 
 	hashedPassword, err := utility.HashPassword(*user.Password)
 
@@ -103,18 +103,17 @@ func writeUser(user *api.User, c *ctx.Context) errs.Error {
 	}
 
 	// Insert data structures within a transaction.
-	dbErr := gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
-		if _, err := userModel.Insert(tx); err != nil {
-			return err
-		}
-		if _, err := authData.Insert(tx); err != nil {
-			return err
-		}
-		return nil
-	})
-	if dbErr != nil {
-		return errs.NewDbError(dbErr)
+	tx := c.Db.Begin()
+	if err := tx.Create(&userModel).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
+	authData.UserId = userModel.UserId
+	if err := tx.Create(&authData).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
 	c.Result = struct{ UserId int }{userModel.UserId}
 	return nil
 }

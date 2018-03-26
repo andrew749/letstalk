@@ -8,7 +8,6 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/jobs"
 
-	"github.com/mijia/modelq/gmq"
 	"github.com/romana/rlog"
 )
 
@@ -23,34 +22,38 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Bad Request: %s", err)
 	}
 
-	notification_token := data.NotificationTokens{
-		UserId: c.SessionData.UserId,
-		Token:  request.Token,
+	db := c.Db
+
+	tx := db.Begin()
+	// TODO(acod): remove hardcoded
+	var notificationToken = &data.NotificationToken{
+		Token:   request.Token,
+		Service: "expo", // hardcoded for now
+	}
+	// add the token to the
+	tx.Create(&notificationToken)
+	tx.Model(&data.Session{}).
+		Where("session_id = ?", c.SessionData.SessionId).
+		Update("notification_token", request.Token)
+	if tx.Error != nil {
+		tx.Rollback()
+		return errs.NewClientError(tx.Error.Error())
 	}
 
-	err = gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
-		// check if this token already exists
-		if _, err = notification_token.Insert(tx); err != nil {
-			return err
-		}
-		// send test notification
-		rlog.Debug("Dispatching notification lambda")
-		aws_utils.DispatchLambdaJob(
-			jobs.SendNotification,
-			Notification{
-				To:    fmt.Sprintf("ExponentPushToken[%s]", notification_token.Token),
-				Body:  "Subscribed for notifications.",
-				Title: "Hive",
-			},
-		)
-
-		return nil
-	})
-
-	if err != nil {
-		return errs.NewInternalError("Internal error: %s", err)
-	}
 	c.Result = "Ok"
+	tx.Commit()
+
+	rlog.Debug("Dispatching notification lambda")
+	if err := aws_utils.DispatchLambdaJob(
+		jobs.SendNotification,
+		Notification{
+			To:    fmt.Sprintf("ExponentPushToken[%s]", notificationToken.Token),
+			Body:  "Subscribed for notifications.",
+			Title: "Hive",
+		},
+	); err != nil {
+		rlog.Error(err)
+	}
 
 	return nil
 }

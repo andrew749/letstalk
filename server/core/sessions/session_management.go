@@ -3,7 +3,7 @@ package sessions
 import (
 	"time"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 )
 
 type ISessionStore interface {
@@ -19,7 +19,7 @@ type ISessionManagerBase interface {
 	GetUserSessions(userId int) ([]*SessionData, error)
 }
 
-func CreateSessionManager(db *gmq.Db) ISessionManagerBase {
+func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
 	return CreateCompositeSessionManager(
 		CreateInMemorySessionStore(),
 		CreateDBSessionStore(db),

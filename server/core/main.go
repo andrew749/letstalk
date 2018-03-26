@@ -8,12 +8,13 @@ import (
 	"letstalk/server/core/routes"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/sessions"
+	"letstalk/server/data"
 
 	"github.com/namsral/flag"
 
 	"github.com/getsentry/raven-go"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/romana/rlog"
 )
 
@@ -33,18 +34,39 @@ var (
 	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
 )
 
+func migrateDB(db *gorm.DB) {
+	db.AutoMigrate(&data.AuthenticationData{})
+	db.AutoMigrate(&data.UserCohort{})
+	db.AutoMigrate(&data.Cohort{})
+	data.PopulateCohort(db)
+	db.AutoMigrate(&data.User{})
+	db.AutoMigrate(&data.Session{})
+	db.AutoMigrate(&data.UserVector{})
+	db.AutoMigrate(&data.NotificationToken{})
+	db.AutoMigrate(&data.FbAuthData{})
+	db.AutoMigrate(&data.FbAuthToken{})
+}
+
 func main() {
 	rlog.Info("Starting server")
 	flag.Parse()
 
-	db, err := gmq.Open("mysql", fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr))
+	db, err := gorm.Open(
+		"mysql",
+		fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr),
+	)
+
 	if err != nil {
 		rlog.Error(err)
+		panic("Failed to connect to database.")
 	}
+
 	defer db.Close()
-	if err := db.Ping(); err != nil {
-		rlog.Error("failed to connect to database: ", err)
-	}
+
+	rlog.Info("Migrating database")
+	db.LogMode(true)
+	migrateDB(db)
+
 	sessionManager := sessions.CreateSessionManager(db)
 
 	router := routes.Register(db, &sessionManager)

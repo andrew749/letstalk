@@ -1,12 +1,12 @@
 package api
 
 import (
-	"database/sql"
+	"errors"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 )
 
 /**
@@ -27,22 +27,16 @@ func GetCohortController(c *ctx.Context) errs.Error {
  * Try to see if there is school data associated with this account.
  * If there is no data, return nil
  */
-func GetUserCohort(db *gmq.Db, userId int) (*data.Cohort, error) {
+func GetUserCohort(db *gorm.DB, userId int) (*data.Cohort, error) {
 	cohortIdMapping, err := GetUserCohortMappingById(db, userId)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errs.NewClientError("No cohort found")
-		}
 		return nil, err
 	}
 
-	cohort, err := data.CohortObjs.
-		Select().
-		Where(data.CohortObjs.FilterCohortId("=", cohortIdMapping.CohortId)).
-		One(db)
-	if err != nil {
-		return nil, err
+	var cohort data.Cohort
+	if db.Where("cohort_id = ?", cohortIdMapping.CohortId).First(&cohort).RecordNotFound() {
+		return nil, errors.New("Unable to find cohort")
 	}
 	return &cohort, nil
 }
@@ -50,26 +44,10 @@ func GetUserCohort(db *gmq.Db, userId int) (*data.Cohort, error) {
 /**
  * Get the particular cohort for a user.
  */
-func GetUserCohortMappingById(db *gmq.Db, userId int) (*data.UserCohort, error) {
-	cohortIdMapping, err := data.UserCohortObjs.
-		Select().
-		Where(data.UserCohortObjs.FilterUserId("=", userId)).
-		One(db)
-
-	if err != nil {
+func GetUserCohortMappingById(db *gorm.DB, userId int) (*data.UserCohort, error) {
+	var cohort data.UserCohort
+	if err := db.Where("user_id = ?", userId).First(&cohort).Error; err != nil {
 		return nil, err
 	}
-
-	return &cohortIdMapping, nil
-}
-
-/**
- * Get all the current cohorts known.
- */
-func GetAllCohorts(db *gmq.Db) ([]data.Cohort, error) {
-	cohorts, err := data.CohortObjs.Select().List(db)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
-	}
-	return cohorts, nil
+	return &cohort, nil
 }

@@ -6,7 +6,7 @@ import (
 	"letstalk/server/core/errs"
 	"strconv"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 )
 
 type ContactInfo struct {
@@ -17,6 +17,7 @@ type ContactInfo struct {
 
 /**
  * Get request required the requested userId data as a url parameter
+ * ?userId=<>
  */
 func GetContactInfoController(c *ctx.Context) errs.Error {
 	params := c.GinContext.Request.URL.Query()
@@ -55,44 +56,27 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 /**
  * Determine if a user is allowed to access specific information
  */
-func isAllowedToAccessContactInfo(db *gmq.Db, requestorId int, requestedId int) (bool, error) {
-	// TODO write tests for this.
-	// check if the user making the request is the persons mentor or mentee
-	stmt, err := db.Prepare(`
-		SELECT COUNT(*)
-		FROM matchings
-		WHERE
-			(matchings.mentor=?  AND matchings.mentee=?) OR
-			(matchings.mentor=?  AND matchings.mentee=?)
-	`)
-
-	if err != nil {
-		return false, err
-	}
-
-	res, err := stmt.Query(
-		requestorId,
-		requestedId,
-		requestedId,
-		requestorId,
-	)
-
-	if err != nil {
-		return false, err
-	}
-
-	// see if there are any matchings between this user and the requested user
+func isAllowedToAccessContactInfo(db *gorm.DB, requestorId int, requestedId int) (bool, error) {
 	var count int
-	res.Next()
-	err = res.Scan(&count)
-
-	if err != nil {
+	// find who this person is a mentor for
+	if err := db.Table("mentors").
+		Where("mentor_id = ? AND user_user_id = ?", requestorId, requestedId).
+		Count(&count).
+		Error; err != nil {
 		return false, err
 	}
-
 	if count > 0 {
 		return true, nil
-	} else {
-		return false, nil
 	}
+	if err := db.Table("mentees").
+		Where("mentee_id = ? AND user_user_id = ?", requestorId, requestedId).
+		Count(&count).
+		Error; err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
 }

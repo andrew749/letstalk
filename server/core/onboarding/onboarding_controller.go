@@ -1,13 +1,12 @@
 package onboarding
 
 import (
-	"database/sql"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
@@ -30,13 +29,10 @@ type OnboardingUpdateResponse struct {
 	OnboardingStatus *OnboardingStatus `json:"onboardingStatus" binding:"required"`
 }
 
-func isValidCohort(db *gmq.Db, cohortId int) bool {
-	_, err := data.CohortObjs.
-		Select().
-		Where(data.CohortObjs.FilterCohortId("=", cohortId)).
-		One(db)
-
-	return err == nil
+func isValidCohort(db *gorm.DB, cohortId int) bool {
+	var numCohorts int = 0
+	db.Model(&data.Cohort{}).Where("cohort_id = ?", cohortId).Count(&numCohorts)
+	return numCohorts > 0
 }
 
 // Update a user with new information for their school
@@ -50,16 +46,16 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 
 	newCohortId := newCohortRequest.CohortId
+
 	// check that the new cohort is valid
 	if !isValidCohort(c.Db, newCohortId) {
-		rlog.Debug("Invalid cohort.")
 		return errs.NewClientError("Unknown cohort.")
 	}
 
 	userId := c.SessionData.UserId
 	userCohort, err := api.GetUserCohortMappingById(c.Db, userId)
 
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return errs.NewDbError(err)
 	}
 
@@ -68,39 +64,31 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		successMessage string
 	)
 
+	tx := c.Db.Begin()
+
 	// if the user doesnt have a cohort
 	if userCohort == nil {
+		rlog.Debug("No cohort found for user. Adding cohort.")
 		// insert new data from the request
 		userCohort = &data.UserCohort{
 			UserId:   userId,
 			CohortId: newCohortId,
 		}
 
-		// try to insert the data
-		dbErr = gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
-			_, err = userCohort.Insert(tx)
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		successMessage = "Successfully added cohort to user."
+		dbErr = tx.Create(&userCohort).Error
 	} else {
+		rlog.Debug("Updating cohort information for user.")
 		userCohort.CohortId = newCohortId
 		// update the cohort data from the request
-		dbErr = gmq.WithinTx(c.Db, func(tx *gmq.Tx) error {
-			_, err = userCohort.Update(tx)
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		successMessage = "Successfully updated cohort for user."
+		dbErr = c.Db.Save(&userCohort).Error
 	}
 
 	if dbErr != nil {
-		return errs.NewDbError(dbErr)
+		tx.Rollback()
+		return errs.NewInternalError(dbErr.Error())
 	}
+	successMessage = "Successfully added cohort to user."
+	tx.Commit()
 
 	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)
 	if err != nil {
@@ -112,8 +100,8 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		onboardingInfo.UserType,
 	}
 	c.Result = OnboardingUpdateResponse{successMessage, onboardingStatus}
-
 	return nil
+
 }
 
 type UserVectorType string
@@ -148,37 +136,21 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 	}
 
 	// check if the user already has a vector for this
-	stmt, err := c.Db.Prepare(
-		`
-		REPLACE INTO user_vector (
-			user_id,
-			preference_type,
-			sociable,
-			hard_working,
-			ambitious,
-			energetic,
-			carefree,
-			confident
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-		`,
-	)
+	var userVector data.UserVector
+	c.Db.FirstOrInit(&userVector, &data.UserVector{
+		UserId:         c.SessionData.UserId,
+		PreferenceType: int(updateUserVectorRequest.PreferenceType),
+	})
 
-	if err != nil {
-		return errs.NewDbError(err)
-	}
+	userVector.Sociable = updateUserVectorRequest.Sociable
+	userVector.HardWorking = updateUserVectorRequest.Hard_Working
+	userVector.Ambitious = updateUserVectorRequest.Ambitious
+	userVector.Energetic = updateUserVectorRequest.Energetic
+	userVector.Carefree = updateUserVectorRequest.Carefree
+	userVector.Confident = updateUserVectorRequest.Confident
 
-	_, err = stmt.Query(
-		c.SessionData.UserId,
-		int(updateUserVectorRequest.PreferenceType),
-		updateUserVectorRequest.Sociable,
-		updateUserVectorRequest.Hard_Working,
-		updateUserVectorRequest.Ambitious,
-		updateUserVectorRequest.Energetic,
-		updateUserVectorRequest.Carefree,
-		updateUserVectorRequest.Confident,
-	)
-	if err != nil {
-		return errs.NewInternalError("Unable to insert new vector", err)
+	if err := c.Db.Save(&userVector).Error; err != nil {
+		return errs.NewClientError("Unable to insert new user vector")
 	}
 
 	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)

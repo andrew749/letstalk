@@ -1,9 +1,8 @@
 package api
 
 import (
+	"github.com/jinzhu/gorm"
 	"letstalk/server/data"
-
-	"github.com/mijia/modelq/gmq"
 )
 
 type UserVectors struct {
@@ -11,13 +10,9 @@ type UserVectors struct {
 	You *data.UserVector `json:"you"`
 }
 
-func GetUserVectorsById(db *gmq.Db, userId int) (*UserVectors, error) {
-	vectors, err := data.UserVectorObjs.
-		Select().
-		Where(data.UserVectorObjs.FilterUserId("=", userId)).
-		List(db)
-
-	if err != nil {
+func GetUserVectorsById(db *gorm.DB, userId int) (*UserVectors, error) {
+	userVectors := make([]data.UserVector, 0)
+	if err := db.Where("user_id = ?", userId).Find(&userVectors).Error; err != nil {
 		return nil, err
 	}
 
@@ -27,7 +22,7 @@ func GetUserVectorsById(db *gmq.Db, userId int) (*UserVectors, error) {
 	)
 
 	// gets the last me and you vectors from list
-	for _, vector := range vectors {
+	for _, vector := range userVectors {
 		preferenceType := UserVectorPreferenceType(vector.PreferenceType)
 		if preferenceType == MePreference {
 			me = &vector
