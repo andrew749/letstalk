@@ -5,6 +5,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/onboarding"
 	"letstalk/server/data"
 )
 
@@ -21,33 +22,31 @@ const (
 	ACCOUNT_MATCHED BootstrapState = "account_matched" // account has been matched a peer
 )
 
-type UserType string
-
-// the roles a user can take in a relationship
-const (
-	MENTOR UserType = "mentor"
-	MENTEE UserType = "mentee"
-)
-
 type BootstrapUserRelationshipDataModel struct {
-	User      int      `json:"userId" binding:"required"`
-	UserType  UserType `json:"userType" binding:"required"`
-	FirstName string   `json:"firstName" binding:"required"`
-	LastName  string   `json:"lastName" binding:"required"`
-	Email     string   `json:"email" binding:"required"`
+	User      int          `json:"userId" binding:"required"`
+	UserType  api.UserType `json:"userType" binding:"required"`
+	FirstName string       `json:"firstName" binding:"required"`
+	LastName  string       `json:"lastName" binding:"required"`
+	Email     string       `json:"email" binding:"required"`
+}
+
+type OnboardingStatus struct {
+	State    onboarding.OnboardingState `json:"state" binding:"required"`
+	UserType api.UserType               `json:"userType" binding:"required"`
 }
 
 type BootstrapResponse struct {
-	State           BootstrapState                       `json:"state" binding:"required"`
-	Relatationships []BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
-	Cohort          *data.Cohort                         `json:"cohort" binding:"required"`
-	Me              *data.User                           `json:"me" binding:"required"`
+	State            BootstrapState                       `json:"state" binding:"required"`
+	Relationships    []BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
+	Cohort           *data.Cohort                         `json:"cohort" binding:"required"`
+	Me               *data.User                           `json:"me" binding:"required"`
+	OnboardingStatus *OnboardingStatus                    `json:"onboardingStatus" binding:"required"`
 }
 
 func sqlResultToBoostrapUserRelationshipDataModel(
 	relationships *[]BootstrapUserRelationshipDataModel,
 	res *sql.Rows,
-	userType UserType,
+	userType api.UserType,
 ) error {
 	var (
 		id        int
@@ -74,9 +73,7 @@ func sqlResultToBoostrapUserRelationshipDataModel(
  * Returns what the current status of a user is
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
-	// TODO(wswiderski): Maybe for consistencies sake, always pass DB in first?
-	// Refering to the `GetUserCohort` method below
-	user, err := api.GetUserWithId(c.SessionData.UserId, c.Db)
+	user, err := api.GetUserWithId(c.Db, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
@@ -87,13 +84,25 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		Me:    user,
 	}
 
-	// check if the account has been onboarded
-	userCohort, err := api.GetUserCohort(c.Db, c.SessionData.UserId)
-
-	if err == nil {
-		response.State = ACCOUNT_SETUP
-		response.Cohort = userCohort
+	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
 	}
+	response.Cohort = onboardingInfo.UserCohort
+	response.OnboardingStatus = &OnboardingStatus{
+		onboardingInfo.State,
+		onboardingInfo.UserType,
+	}
+
+	if onboardingInfo.State != onboarding.ONBOARDING_DONE {
+		// Onboarding not done. We don't need to get relationships.
+		c.Result = response
+		return nil
+	} else {
+		response.State = ACCOUNT_SETUP
+	}
+
+	println(string(onboardingInfo.State))
 
 	relationships := make([]BootstrapUserRelationshipDataModel, 0)
 
@@ -118,7 +127,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	defer res.Close()
-	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, MENTEE)
+	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, api.USER_TYPE_MENTEE)
 	err = res.Err()
 
 	if err != nil {
@@ -146,7 +155,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	defer res.Close()
-	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, MENTOR)
+	sqlResultToBoostrapUserRelationshipDataModel(&relationships, res, api.USER_TYPE_MENTOR)
 	err = res.Err()
 
 	if err != nil {
@@ -157,7 +166,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		response.State = ACCOUNT_MATCHED
 	}
 
-	response.Relatationships = relationships
+	response.Relationships = relationships
 	c.Result = response
 
 	return nil

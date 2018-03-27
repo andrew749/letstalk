@@ -11,7 +11,7 @@ import (
 	"github.com/romana/rlog"
 )
 
-// i.e. fetch a onboarding type and the posible options
+// i.e. fetch a onboarding type and the possible options
 
 /**
 *
@@ -108,21 +108,14 @@ const (
 	Confident    UserVectorType = "Confident"
 )
 
-type UserVectorPreferenceType int
-
-const (
-	MenteePreference UserVectorPreferenceType = iota
-	MentorPreference
-)
-
 type UpdateUserVectorRequest struct {
-	PreferenceType int `json:"isMenteePreference" binding:"exists"`
-	Sociable       int `json:"sociable" binding:"exists"`
-	Hard_Working   int `json:"hardWorking" binding:"exists"`
-	Ambitious      int `json:"ambitious" binding:"exists"`
-	Energetic      int `json:"energetic" binding:"exists"`
-	Carefree       int `json:"carefree" binding:"exists"`
-	Confident      int `json:"confident" binding:"exists"`
+	PreferenceType api.UserVectorPreferenceType `json:"isMenteePreference" binding:"exists"`
+	Sociable       int                          `json:"sociable" binding:"exists"`
+	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
+	Ambitious      int                          `json:"ambitious" binding:"exists"`
+	Energetic      int                          `json:"energetic" binding:"exists"`
+	Carefree       int                          `json:"carefree" binding:"exists"`
+	Confident      int                          `json:"confident" binding:"exists"`
 }
 
 /**

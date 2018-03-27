@@ -34,6 +34,7 @@ import profileService, { PersonalityVector, MenteePreference } from '../services
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
 import {
+  Cohort,
   getCohortId,
   programOptions,
   sequenceOptions,
@@ -44,14 +45,29 @@ import {
 interface CohortFormData {
   programId: string,
   sequenceId: string;
-  gradYear: string;
+  gradYear: number;
+}
+
+interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
+  cohorts: Immutable.List<Cohort>;
 }
 
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
 
-const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormData> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting, valid, programId, sequenceId } = props;
+const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormData & CohortFormProps>
+  = props => {
+  const {
+    cohorts,
+    error,
+    handleSubmit,
+    onSubmit,
+    programId,
+    reset,
+    sequenceId,
+    submitting,
+    valid,
+  } = props;
   const onSubmitWithReset = async (values: CohortFormData): Promise<void> => {
     await onSubmit(values);
     reset();
@@ -61,9 +77,9 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormData> = props 
       return <Picker.Item key={value} label={label} value={value}/>;
     });
   };
-  const programItems = buildItems(programOptions()).toJS();
-  const sequenceItems = buildItems(sequenceOptions(programId)).toJS();
-  const gradYearItems = buildItems(gradYearOptions(programId, sequenceId)).toJS();
+  const programItems = buildItems(programOptions(cohorts)).toJS();
+  const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
+  const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   return (
     <View>
       <Field
@@ -105,10 +121,11 @@ const cohortSelector = formValueSelector('onboarding-cohort');
 
 const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   form: 'onboarding-cohort',
-})(connect(state => ({
+})(connect((state: RootState) => ({
   programId: cohortSelector(state, 'programId'),
   sequenceId: cohortSelector(state, 'sequenceId'),
   gradYear: cohortSelector(state, 'gradYear'),
+  cohorts: state.onboarding.cohorts,
 }))(CohortForm));
 
 type PersonalityFormData = PersonalityVector;
@@ -180,7 +197,7 @@ const personalitySelector = formValueSelector('onboarding-personality');
 
 const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<PersonalityFormData>>({
   form: 'onboarding-personality',
-})(connect(state => ({
+})(connect((state: RootState) => ({
   values: personalitySelector(state,
     'sociable', 'hardworking', 'ambitious', 'energetic', 'carefree', 'confident'),
 }))(PersonalityForm));
@@ -206,8 +223,9 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
+    const { cohorts } = this.props;
     const { programId, sequenceId, gradYear } = values;
-    const cohortId = getCohortId(programId, sequenceId, gradYear);
+    const cohortId = getCohortId(cohorts, programId, sequenceId, gradYear);
     try {
       await profileService.updateCohort({ cohortId });
     } catch(e) {

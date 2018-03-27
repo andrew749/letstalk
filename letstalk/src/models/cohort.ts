@@ -1,59 +1,83 @@
 import Immutable from 'immutable';
 
 const PROGRAMS: Immutable.Map<string, string> = Immutable.Map({
-  softwareEngineering: 'Software Engineering',
-  computerEngineering: 'Computer Engineering',
+  'SOFTWARE_ENGINEERING': 'Software Engineering',
+  'COMPUTER_ENGINEERING': 'Computer Engineering',
 });
 
 const SEQUENCES: Immutable.Map<string, string> = Immutable.Map({
-  stream4: 'Stream 4',
-  stream8: 'Stream 8',
+  '4STREAM': '4 Stream',
+  '8STREAM': '8 Stream',
 });
 
-const COHORTS: Immutable.List<Immutable.List<any>> = Immutable.fromJS([
-  [1, 'softwareEngineering', 'stream8', '2019'],
-  [2, 'computerEngineering', 'stream8', '2019'],
-  [3, 'computerEngineering', 'stream4', '2019'],
-]);
-
 export interface ValueLabel {
-  value: string;
-  label: string;
+  readonly value: any;
+  readonly label: string;
 }
 
-export function programOptions(): Immutable.List<ValueLabel> {
-  return PROGRAMS.map((label, value) => ({ value, label })).toList();
-}
-
-export function sequenceOptions(programId: string | null): Immutable.List<ValueLabel> {
-  const cohorts = COHORTS.filter(row => !programId || programId === row.get(1));
-  return cohorts.map(row => row.get(2)).toSet().map(sequenceId => {
-    return { value: sequenceId, label: SEQUENCES.get(sequenceId) };
-  }).toList();
-}
-
-export function gradYearOptions(programId: string | null, sequenceId: string | null)
-  : Immutable.List<ValueLabel> {
-  const preCohorts = COHORTS.filter(row => !programId || programId === row.get(1));
-  const cohorts = preCohorts.filter(row => !sequenceId || sequenceId === row.get(2));
-  return cohorts.map(row => row.get(3)).toSet().map(gradYear => {
-    return { value: gradYear, label: gradYear };
-  }).toList();
-}
-
-export function getCohortId(programId: string , sequenceId: string, gradYear: string): number {
-  const row = COHORTS.find(row => {
-    return row.get(1) === programId &&
-      row.get(2) === sequenceId &&
-      row.get(3) === gradYear;
-  });
-  if (row === null) return null;
-  return row.get(0);
-}
+type ValueLabels = Immutable.List<ValueLabel>;
 
 export interface Cohort {
   readonly cohortId: number;
   readonly programId: string;
+  readonly sequenceId: string;
   readonly gradYear: number;
-  readonly sequence: string;
+}
+
+type Cohorts = Immutable.List<Cohort>;
+
+export function programOptions(cohorts: Cohorts): ValueLabels {
+  return cohorts.map(row => row.programId).toSet().map(
+    programId => ({ value: programId, label: PROGRAMS.get(programId) })
+  ).toList();
+}
+
+function filteredCohorts(
+  cohorts: Cohorts,
+  programId?: string,
+  sequenceId?: string,
+): Cohorts {
+  return cohorts.filter(row => {
+    return (!programId || programId === row.programId) &&
+      (!sequenceId || sequenceId === row.sequenceId)
+  }).toList();
+}
+
+export function sequenceOptions(
+  cohorts: Cohorts,
+  programId: string,
+): ValueLabels {
+  return filteredCohorts(cohorts, programId).map(
+    row => row.sequenceId
+  ).toSet().map(
+    sequenceId => ({ value: sequenceId, label: SEQUENCES.get(sequenceId) })
+  ).toList();
+}
+
+export function gradYearOptions(
+  cohorts: Cohorts,
+  programId: string,
+  sequenceId: string,
+): ValueLabels {
+  return filteredCohorts(cohorts, programId, sequenceId).map(
+    row => row.gradYear
+  ).toSet().map(gradYear => {
+    const gradYearStr = String(gradYear);
+    return { value: gradYear, label: gradYearStr };
+  }).toList();
+}
+
+export function getCohortId(
+  cohorts: Cohorts,
+  programId: string,
+  sequenceId: string,
+  gradYear: number,
+): number {
+  const row = cohorts.find(row => {
+    return row.programId === programId &&
+      row.sequenceId === sequenceId &&
+      row.gradYear === gradYear;
+  });
+  if (row === null) return null;
+  return row.cohortId;
 }

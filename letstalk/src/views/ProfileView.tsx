@@ -83,7 +83,7 @@ class ProfileView extends Component<Props> {
         const {
           programId,
           gradYear,
-          sequence,
+          sequenceId,
         } = this.props.bootstrap.cohort;
 
         const {
@@ -124,7 +124,7 @@ class ProfileView extends Component<Props> {
               </View>
               <View style={styles.listItem}>
                 <Text style={styles.label}>Sequence:</Text>
-                <Text style={styles.value}>{sequence}</Text>
+                <Text style={styles.value}>{sequenceId}</Text>
               </View>
               <View style={styles.listItem}>
                 <Text style={styles.label}>Grad year:</Text>
