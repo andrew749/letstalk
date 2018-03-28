@@ -26,6 +26,11 @@ type OnboardingInfo struct {
 	UserCohort *data.Cohort    `json:"userCohort"`
 }
 
+type OnboardingStatus struct {
+	State    OnboardingState `json:"state" binding:"required"`
+	UserType api.UserType    `json:"userType" binding:"required"`
+}
+
 func GetOnboardingInfo(db *gmq.Db, userId int) (*OnboardingInfo, errs.Error) {
 	userCohort, err := api.GetUserCohort(db, userId)
 	onboardingInfo := &OnboardingInfo{ONBOARDING_DONE, api.USER_TYPE_UNKNOWN, userCohort}

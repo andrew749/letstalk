@@ -18,8 +18,20 @@ import { FormValidationMessage } from 'react-native-elements';
 import Immutable from 'immutable';
 
 import { RootState } from '../redux';
-import { State as OnboardingState } from '../redux/onboarding/reducer';
-import { setStep, SetStepAction, Step } from '../redux/onboarding/actions';
+import { State as State } from '../redux/onboarding/reducer';
+import {
+  Cohort,
+  ONBOARDING_COHORT,
+  ONBOARDING_VECTOR_ME,
+  ONBOARDING_VECTOR_YOU,
+  ONBOARDING_DONE,
+  OnboardingState,
+  OnboardingStatus,
+} from '../models';
+import {
+  setOnboardingStatusAction,
+  SetOnboardingStatusAction,
+} from '../redux/onboarding/actions';
 import {
   ActionButton,
   Emoji,
@@ -34,7 +46,6 @@ import profileService, { PersonalityVector, MenteePreference } from '../services
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
 import {
-  Cohort,
   getCohortId,
   programOptions,
   sequenceOptions,
@@ -204,10 +215,10 @@ const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<Personalit
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
-  setStep(step: Step): SetStepAction;
+  setOnboardingStatusAction(onboardingStatus: OnboardingStatus): SetOnboardingStatusAction;
 }
 
-interface Props extends OnboardingState, DispatchActions {
+interface Props extends State, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
@@ -227,25 +238,26 @@ class OnboardingView extends Component<Props> {
     const { programId, sequenceId, gradYear } = values;
     const cohortId = getCohortId(cohorts, programId, sequenceId, gradYear);
     try {
-      await profileService.updateCohort({ cohortId });
+      const onboardingStatus = await profileService.updateCohort({ cohortId });
+      this.props.setOnboardingStatusAction(onboardingStatus);
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
-    this.props.setStep(Step.MY_VECTOR);
   }
 
   async onSubmitPersonality(preference: MenteePreference, values: PersonalityFormData) {
     try {
-      await profileService.updateVector(preference, values);
+      const onboardingStatus = await profileService.updateVector(preference, values);
+      this.props.setOnboardingStatusAction(onboardingStatus);
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
   }
 
   render() {
-    const { step } = this.props;
-    switch (step) {
-      case Step.COHORT:
+    const { state } = this.props.onboardingStatus;
+    switch (state) {
+      case ONBOARDING_COHORT:
         // TODO: Gender specific emoji
         return (
           <ScrollView>
@@ -257,10 +269,9 @@ class OnboardingView extends Component<Props> {
             <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
           </ScrollView>
         );
-      case Step.MY_VECTOR:
+      case ONBOARDING_VECTOR_ME:
         const onSubmitMine = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(MenteePreference.MENTOR_PREFERENCE, values);
-          this.props.setStep(Step.YOUR_VECTOR);
+          await this.onSubmitPersonality(MenteePreference.ME_PREFERENCE, values);
         };
         return (
           <ScrollView>
@@ -273,18 +284,15 @@ class OnboardingView extends Component<Props> {
             <PersonalityFormWithRedux onSubmit={onSubmitMine} />
           </ScrollView>
         );
-      case Step.YOUR_VECTOR:
+      case ONBOARDING_VECTOR_YOU:
         const onSubmitYour = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(MenteePreference.MENTEE_PREFERENCE, values);
+          await this.onSubmitPersonality(MenteePreference.YOU_PREFERENCE, values);
           // Reload bootstrap data after updating
           await this.props.fetchBootstrap();
           this.props.navigation.dispatch(NavigationActions.reset({
             index: 0,
             actions: [NavigationActions.navigate({ routeName: 'Home' })]
           }));
-          // Reset state
-          // TODO: Maybe have an actual reset action.
-          this.props.setStep(Step.COHORT);
         };
         return (
           <ScrollView>
@@ -296,9 +304,16 @@ class OnboardingView extends Component<Props> {
             <PersonalityFormWithRedux onSubmit={onSubmitYour} />
           </ScrollView>
         );
+      case ONBOARDING_DONE:
+        // TODO: What to do in this case
+        return (
+          <ScrollView>
+            <Header>You're done</Header>
+          </ScrollView>
+        );
       default:
         // Ensure exhaustiveness of select
-        const _: never = step;
+        const _: never = state;
     }
   }
 }
@@ -310,5 +325,5 @@ const styles = StyleSheet.create({
 });
 
 export default connect(({ onboarding }: RootState) => onboarding,
-  { fetchBootstrap, setStep }
+  { fetchBootstrap, setOnboardingStatusAction }
 )(OnboardingView);

@@ -30,17 +30,12 @@ type BootstrapUserRelationshipDataModel struct {
 	Email     string       `json:"email" binding:"required"`
 }
 
-type OnboardingStatus struct {
-	State    onboarding.OnboardingState `json:"state" binding:"required"`
-	UserType api.UserType               `json:"userType" binding:"required"`
-}
-
 type BootstrapResponse struct {
 	State            BootstrapState                       `json:"state" binding:"required"`
 	Relationships    []BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort           *data.Cohort                         `json:"cohort" binding:"required"`
 	Me               *data.User                           `json:"me" binding:"required"`
-	OnboardingStatus *OnboardingStatus                    `json:"onboardingStatus" binding:"required"`
+	OnboardingStatus *onboarding.OnboardingStatus         `json:"onboardingStatus" binding:"required"`
 }
 
 func sqlResultToBoostrapUserRelationshipDataModel(
@@ -89,7 +84,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 	response.Cohort = onboardingInfo.UserCohort
-	response.OnboardingStatus = &OnboardingStatus{
+	response.OnboardingStatus = &onboarding.OnboardingStatus{
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
