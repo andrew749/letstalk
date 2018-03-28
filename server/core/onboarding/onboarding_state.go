@@ -5,7 +5,7 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 )
 
 /**
@@ -31,7 +31,7 @@ type OnboardingStatus struct {
 	UserType api.UserType    `json:"userType" binding:"required"`
 }
 
-func GetOnboardingInfo(db *gmq.Db, userId int) (*OnboardingInfo, errs.Error) {
+func GetOnboardingInfo(db *gorm.DB, userId int) (*OnboardingInfo, errs.Error) {
 	userCohort, err := api.GetUserCohort(db, userId)
 	onboardingInfo := &OnboardingInfo{ONBOARDING_DONE, api.USER_TYPE_UNKNOWN, userCohort}
 	// TODO: Should probably check what the errors here are.

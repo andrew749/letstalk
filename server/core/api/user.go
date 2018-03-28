@@ -1,9 +1,11 @@
 package api
 
 import (
+	"errors"
 	"letstalk/server/data"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 /**
@@ -40,13 +42,22 @@ const (
 	YouPreference
 )
 
-func GetUserWithId(db *gmq.Db, userId int) (*data.User, error) {
-	userObj := data.UserObjs
-	user, err := userObj.Select().Where(userObj.FilterUserId("=", userId)).One(db)
-
-	if err != nil {
-		return nil, err
+func GetUserWithId(db *gorm.DB, userId int) (*data.User, error) {
+	var user data.User
+	if db.Where("user_id = ?", userId).First(&user).RecordNotFound() {
+		return nil, errors.New("Unable to find user")
 	}
 
+	return &user, nil
+}
+
+func GetFullUserWithId(db *gorm.DB, userId int) (*data.User, error) {
+	var user data.User
+	if err := db.Where("user_id = ?", userId).
+		Preload("Mentees").
+		Preload("Mentors").First(&user).Error; err != nil {
+		rlog.Debug(err.Error())
+		return nil, err
+	}
 	return &user, nil
 }

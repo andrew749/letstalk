@@ -1,20 +1,18 @@
 package sessions
 
 import (
-	"database/sql"
 	"errors"
 	"letstalk/server/data"
-	"time"
 
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
 type DatabaseSessionStore struct {
-	DB *gmq.Db
+	DB *gorm.DB
 }
 
-func CreateDBSessionStore(db *gmq.Db) ISessionStore {
+func CreateDBSessionStore(db *gorm.DB) ISessionStore {
 	sm := DatabaseSessionStore{
 		DB: db,
 	}
@@ -22,110 +20,83 @@ func CreateDBSessionStore(db *gmq.Db) ISessionStore {
 }
 
 func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
-	sessionModel := data.Sessions{
+	sessionModel := data.Session{
 		SessionId:  *session.SessionId,
 		UserId:     session.UserId,
 		ExpiryDate: session.ExpiryDate,
 	}
-	err := gmq.WithinTx(sm.DB, func(tx *gmq.Tx) error {
-		_, e := sessionModel.Insert(tx)
-		if e != nil {
-			return e
+
+	tx := sm.DB.Begin()
+	if e := tx.Error; e != nil {
+		return e
+	}
+
+	if e := tx.Create(sessionModel).Error; e != nil {
+		return e
+	}
+
+	if session.NotificationToken != nil {
+		rlog.Debug("Storing notification data")
+		notificationModel := data.NotificationToken{
+			Token: *session.NotificationToken,
 		}
-		if session.NotificationToken != nil {
-			rlog.Debug("Storing notification data")
-			notificationModel := data.NotificationTokens{
-				Id:     *session.SessionId,
-				UserId: session.UserId,
-				Token:  *session.NotificationToken,
-			}
-			_, err := notificationModel.Insert(tx)
-			if err != nil {
-				// log the error when storing notification token
-				rlog.Error(err)
-			}
+
+		if err := tx.FirstOrCreate(&notificationModel).Error; err != nil {
+			rlog.Error(err)
+			tx.Rollback()
+			return err
 		}
-		return nil
-	})
-	return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (sm DatabaseSessionStore) GetSessionForSessionId(
 	sessionId string,
 ) (*SessionData, error) {
 
-	find_sessions_statement, err := sm.DB.Prepare(
-		`	SELECT
-				session_id, sessions.user_id, token, expiry_date
-			FROM
-				sessions
-			LEFT JOIN
-				notification_tokens ON sessions.user_id=notification_tokens.user_id
-			WHERE
-				sessions.session_id=?`,
-	)
-	if err != nil {
-		return nil, err
+	var session data.Session
+	if sm.DB.Where("session_id = ?", sessionId).First(&session).RecordNotFound() {
+		return nil, errors.New("Unable to find session.")
 	}
-	res, err := find_sessions_statement.Query(sessionId)
+	var notificationToken *string = nil
 
-	if err != nil {
-		return nil, err
+	if session.NotificationToken != nil {
+		notificationToken = &session.NotificationToken.Token
 	}
 
-	data, err := getSessionData(res)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return data[0], nil
-}
-
-func getSessionData(res *sql.Rows) ([]*SessionData, error) {
-	var (
-		sessionId         string
-		userId            int
-		notificationToken *string
-		expiryDate        time.Time
-	)
-	result := make([]*SessionData, 0)
-	for res.Next() {
-		err := res.Scan(&sessionId, &userId, &notificationToken, &expiryDate)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, &SessionData{&sessionId, userId, notificationToken, expiryDate})
-	}
-
-	return result, nil
+	return &SessionData{
+		SessionId:         &session.SessionId,
+		UserId:            session.UserId,
+		NotificationToken: notificationToken,
+		ExpiryDate:        session.ExpiryDate,
+	}, nil
 }
 
 func (sm DatabaseSessionStore) GetUserSessions(
 	userId int,
 ) ([]*SessionData, error) {
-	find_sessions_statement, err := sm.DB.Prepare(
-		`	SELECT
-				session_id, sessions.user_id, token, expiry_date
-			FROM
-				sessions
-			LEFT JOIN
-				notification_tokens ON sessions.user_id=notification_tokens.user_id
-			WHERE
-				sessions.user_id=?`,
-	)
-	if err != nil {
-		return nil, errors.New("Unable to perform session search operation")
-	}
-	sessionData, err := find_sessions_statement.Query(userId)
-
-	if err != nil {
-		return nil, errors.New("Could not get session for user")
+	sessions := make([]data.Session, 0)
+	if err := sm.DB.Where("user_id = ?", userId).
+		Find(&sessions).Error; err != nil {
+		return nil, err
 	}
 
-	transformedSessions, err := getSessionData(sessionData)
-	if err != nil {
-		return nil, errors.New("Unable to parse result")
+	transformedSessions := make([]*SessionData, 0)
+	for _, session := range sessions {
+		transformedSessions = append(
+			transformedSessions,
+			&SessionData{
+				&session.SessionId,
+				session.UserId,
+				&session.NotificationToken.Token,
+				session.ExpiryDate,
+			},
+		)
 	}
 
 	return transformedSessions, nil

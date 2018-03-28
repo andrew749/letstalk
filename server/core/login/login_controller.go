@@ -38,17 +38,13 @@ func LoginUser(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Bad login request data %s", err)
 	}
 
-	authenticationEntry, err := data.AuthenticationDataObjs.
-		Select().
-		Where(data.AuthenticationDataObjs.FilterUserId("=", req.UserId)).
-		List(c.Db)
-
-	if len(authenticationEntry) == 0 {
+	var authData data.AuthenticationData
+	if c.Db.Where("user_id = ?", req.UserId).First(&authData).RecordNotFound() {
 		return errs.NewClientError("Couldn't find an account")
 	}
 
 	// check if the password is correct
-	if !utility.CheckPasswordHash(req.Password, authenticationEntry[0].PasswordHash) {
+	if !utility.CheckPasswordHash(req.Password, authData.PasswordHash) {
 		return errs.NewClientError("Bad password")
 	}
 

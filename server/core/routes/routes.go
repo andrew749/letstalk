@@ -15,18 +15,18 @@ import (
 
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
 type handlerWrapper struct {
-	db *gmq.Db
+	db *gorm.DB
 	sm *sessions.ISessionManagerBase
 }
 
 type handlerFunc func(*ctx.Context) errs.Error
 
-func Register(db *gmq.Db, sessionManager *sessions.ISessionManagerBase) *gin.Engine {
+func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.Engine {
 	hw := handlerWrapper{db, sessionManager}
 
 	router := gin.Default()

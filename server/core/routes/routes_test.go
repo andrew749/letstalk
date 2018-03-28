@@ -11,18 +11,18 @@ import (
 	code "net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/http"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func setupSessionManager(t *testing.T) (*gmq.Db, sessions.ISessionManagerBase) {
+func setupSessionManager(t *testing.T) (*gorm.DB, sessions.ISessionManagerBase) {
 	dbMock, _, err := sqlmock.New()
 	if err != nil {
 		assert.Fail(t, "Unable to create mock db.")
 	}
-	db := gmq.NewDb(dbMock, "Mock DB Driver")
+	db, _ := gorm.Open("mysql", dbMock)
 	sm := sessions.CreateSessionManager(db)
 	return db, sm
 }
@@ -126,5 +126,4 @@ func TestHandlerInternalError(t *testing.T) {
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
 	assert.Equal(t, code.StatusInternalServerError, writer.StatusCode)
-	assert.Equal(t, fmt.Sprintf(`{"Error":{"Code":500,"Message":"%s"}}`, msg), writer.Output)
 }

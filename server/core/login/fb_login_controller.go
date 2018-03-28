@@ -5,6 +5,7 @@ package login
  */
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -12,10 +13,10 @@ import (
 	fb "github.com/huandu/facebook"
 	"github.com/romana/rlog"
 	"letstalk/server/core/ctx"
-	"letstalk/server/core/db"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
+	"letstalk/server/data"
 )
 
 /**
@@ -29,6 +30,9 @@ type FBLoginRequestData struct {
 
 func FBController(c *ctx.Context) errs.Error {
 	var loginRequest FBLoginRequestData
+	var fbAuthRecord data.FbAuthData
+	var userId int
+
 	err := c.GinContext.BindJSON(&loginRequest)
 
 	if err != nil {
@@ -39,128 +43,60 @@ func FBController(c *ctx.Context) errs.Error {
 	expiry := time.Unix(loginRequest.Expiry, 0)
 
 	user, err := getFBUser(authToken)
+	db := c.Db
 
 	if err != nil {
 		return errs.NewClientError("%s", err)
 	}
 
-	tx, err := c.Db.Beginx()
+	tx := c.Db.Begin()
 
-	if err != nil {
-		return errs.NewDbError(err)
-	}
+	// check if the user already has facebook
+	if tx.Where("fb_user_id = ?", user.Id).First(&fbAuthRecord).RecordNotFound() {
 
-	// check if the user id exist in our mappings
-	stmt, err := tx.Prepare(
-		`
-		SELECT fb_auth_data.user_id
-		FROM fb_auth_data
-		INNER JOIN user ON user.user_id=fb_auth_data.user_id
-		WHERE fb_auth_data.fb_user_id = ?
-		`,
-	)
-
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-
-	rows, err := stmt.Query(user.Id)
-
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-
-	// the user Id for this application
-	var userId int
-
-	// if the user doesn't have an account
-	if !rows.Next() {
-		stmt, err = tx.Prepare(
-			`
-			INSERT INTO user
-				(user_id, first_name, last_name, email, gender, birthdate)
-			VALUES (?, ?, ?, ?, ?, ?)
-			`,
-		)
-
-		if err != nil {
-			tx.Rollback()
-			rlog.Error("Unable to prepare db.", userId)
-			return errs.NewDbError(err)
+		appUser := data.User{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+			Gender:    user.Gender,
+			Birthdate: user.Birthdate,
 		}
 
-		// get a unique id
-		// TODO change db.NumId interface to not take a context and to use a transaction instead
-		if userId, err = db.NumId(c); err != nil {
-			tx.Rollback()
-			rlog.Error("Unable to generate id.", userId)
-			return errs.NewDbError(err)
-		}
-		rlog.Info("Registering user with id: ", userId)
-
-		_, err = stmt.Exec(
-			userId,
-			user.FirstName,
-			user.LastName,
-			user.Email,
-			user.Gender,
-			user.Birthdate,
-		)
-
-		// if there was an issue inserting this user
-		if err != nil {
+		if err := tx.Where(&appUser).FirstOrCreate(&appUser).Error; err != nil {
 			tx.Rollback()
 			rlog.Error("Unable to insert new user")
-			return errs.NewDbError(err)
+			return errs.NewClientError("Unable to create user")
 		}
 
-		// insert the fb auth data
-		fb_auth_token_stmt, err := tx.Prepare(
-			`
-			INSERT INTO fb_auth_token
-				(user_id, auth_token, expiry)
-			VALUES (?, ?, ?)
-			`,
-		)
-		if err != nil {
+		userId = appUser.UserId
+		rlog.Debug("Created new user with id: ", userId)
+
+		fbAuthRecord.FbUserId = &user.Id
+		fbAuthRecord.UserId = &userId
+		// insert the user's fb auth data
+		if err := tx.Create(&fbAuthRecord).Error; err != nil {
+			rlog.Error(err)
+			return errs.NewClientError("Unable to create user")
+		}
+		rlog.Debug("created auth record")
+
+		// the user Id for this application
+
+		fbAuthToken := data.FbAuthToken{
+			UserId:    userId,
+			AuthToken: authToken,
+			Expiry:    expiry,
+		}
+		if err := tx.Create(&fbAuthToken).Error; err != nil {
 			tx.Rollback()
-			rlog.Error("Unable to prepare auth token")
-			errs.NewDbError(err)
-		}
-
-		// initially insert with blank expiry indicating that
-		// this is a short lived token
-		_, err = fb_auth_token_stmt.Exec(userId, authToken, expiry)
-
-		if err != nil {
-			tx.Rollback()
-			rlog.Error("Unable to insert auth token")
+			rlog.Error(err)
 			return errs.NewDbError(err)
 		}
 
-		fb_mapping_stmt, err := tx.Prepare(
-			`
-			INSERT INTO fb_auth_data
-				(user_id, fb_user_id)
-			VALUES(?, ?)
-			`,
-		)
-
-		// insert a new user mapping
-		_, err = fb_mapping_stmt.Exec(userId, user.Id)
-
-		if err != nil {
-			tx.Rollback()
-			rlog.Error("Unable to insert facebook token")
+		if err := tx.Commit().Error; err != nil {
+			rlog.Error(err)
 			return errs.NewDbError(err)
 		}
-
-		err = tx.Commit()
-		if err != nil {
-			rlog.Error("Unable to commit everything")
-			return errs.NewDbError(err)
-		}
-
 		// get a long lived access token from this short term token
 		// do not fail if we cant do this
 		go func() {
@@ -190,24 +126,27 @@ func FBController(c *ctx.Context) errs.Error {
 				raven.CaptureError(err, nil)
 				return
 			}
-
-			// insert the non-stale fb auth data
-			fb_auth_token_stmt, err := c.Db.Prepare(
-				`
-				REPLACE INTO fb_auth_token
-					(user_id, auth_token, expiry)
-				VALUES (?, ?, ?)
-				`,
-			)
-
-			_, err = fb_auth_token_stmt.Exec(
-				userId,
-				res["access_token"].(string),
-				res["expires_in"].(string),
-			)
-
+			expiresIn, err := res["expires_in"].(json.Number).Int64()
 			if err != nil {
-				rlog.Error("Unable to insert newer token in db.")
+				rlog.Error("Malformed date")
+				raven.CaptureError(err, nil)
+				return
+			}
+
+			convertedTime := time.Unix(expiresIn, 0)
+			if err != nil {
+				rlog.Error("Unable to get new token from facebook")
+				raven.CaptureError(err, nil)
+				return
+			}
+
+			fbAuthToken := data.FbAuthToken{
+				UserId:    userId,
+				AuthToken: res["access_token"].(string),
+				Expiry:    convertedTime,
+			}
+
+			if err := db.Save(&fbAuthToken).Error; err != nil {
 				raven.CaptureError(err, nil)
 				return
 			}
@@ -216,15 +155,11 @@ func FBController(c *ctx.Context) errs.Error {
 			// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
 		}()
 	} else {
-		err := rows.Scan(&userId)
-		if err != nil {
-			return errs.NewDbError(err)
-		}
+		userId = *fbAuthRecord.UserId
 	}
 
-	sm := c.SessionManager
 	// create new session for user id
-	session, err := (*sm).CreateNewSessionForUserId(userId, &loginRequest.NotificationToken)
+	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId, &loginRequest.NotificationToken)
 
 	if err != nil {
 		rlog.Error("Unable to create a new session")

@@ -4,12 +4,12 @@ import (
 	"letstalk/server/core/sessions"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mijia/modelq/gmq"
+	"github.com/jinzhu/gorm"
 )
 
 type Context struct {
 	GinContext     *gin.Context
-	Db             *gmq.Db
+	Db             *gorm.DB
 	SessionData    *sessions.SessionData
 	SessionManager *sessions.ISessionManagerBase
 	Result         interface{}
@@ -17,7 +17,7 @@ type Context struct {
 
 func NewContext(
 	g *gin.Context,
-	db *gmq.Db,
+	db *gorm.DB,
 	sessionData *sessions.SessionData,
 	sm *sessions.ISessionManagerBase,
 ) *Context {
