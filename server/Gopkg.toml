@@ -35,10 +35,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/mijia/modelq"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/romana/rlog"
 
 [[constraint]]

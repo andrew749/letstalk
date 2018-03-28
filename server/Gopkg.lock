@@ -136,12 +136,6 @@
   version = "v0.0.3"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/mijia/modelq"
-  packages = ["gmq"]
-  revision = "4f1eeb750b3f7f7d032169ef433fd60461680d88"
-
-[[projects]]
   name = "github.com/namsral/flag"
   packages = ["."]
   revision = "71ceffbeb0ba60fccc853971bb3ed4d7d90bfd04"
