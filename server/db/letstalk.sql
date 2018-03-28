@@ -118,7 +118,7 @@ CREATE TABLE notification_tokens (
 );
 
 CREATE TABLE user_vector (
-  user_id INT PRIMARY KEY NOT NULL,
+  user_id INT PRIMARY KEY NOT NULL, -- TODO: Add preference_type to primary key. This is broken
   preference_type INT NOT NULL, -- indicate if this is their preferences for a mentee or for a mentor
   sociable  INT NOT NULL,
   hard_working INT NOT NULL,
