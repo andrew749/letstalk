@@ -11,7 +11,7 @@ const fbLogin = async (): Promise<AccessToken> => {
     permissions: PERMISSIONS,
   });
 
-  if (type === 'success') return {token, expires};
+  if (type === 'success') return { token, expires };
   else return null;
 }
 

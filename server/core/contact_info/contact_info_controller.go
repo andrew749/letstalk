@@ -39,7 +39,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 		c.SessionData.UserId,
 		userId,
 	); err == nil && res == true {
-		user, err := api.GetUserWithId(userId, c.Db)
+		user, err := api.GetUserWithId(c.Db, userId)
 		if err != nil {
 			return errs.NewClientError("Unable to get user: %s", err)
 		}

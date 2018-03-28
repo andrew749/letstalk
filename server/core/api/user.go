@@ -24,7 +24,23 @@ type User struct {
 	Password *string `json:"password" binding:"required"`
 }
 
-func GetUserWithId(userId int, db *gmq.Db) (*data.User, error) {
+type UserType string
+
+// the roles a user can take in a relationship
+const (
+	USER_TYPE_MENTOR  UserType = "user_type_mentor"
+	USER_TYPE_MENTEE  UserType = "user_type_mentee"
+	USER_TYPE_UNKNOWN UserType = "user_type_unknown"
+)
+
+type UserVectorPreferenceType int
+
+const (
+	MePreference UserVectorPreferenceType = iota
+	YouPreference
+)
+
+func GetUserWithId(db *gmq.Db, userId int) (*data.User, error) {
 	userObj := data.UserObjs
 	user, err := userObj.Select().Where(userObj.FilterUserId("=", userId)).One(db)
 

@@ -1,7 +1,15 @@
 import Immutable from 'immutable';
 
 import requestor, { Requestor } from './requests';
-import { BootstrapData, Cohort, Relationship, UserData, UserState } from '../models';
+import {
+  BootstrapData,
+  Cohort,
+  OnboardingStatus,
+  Relationship,
+  UserData,
+  UserState,
+  UserType,
+} from '../models';
 import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
@@ -34,12 +42,12 @@ export interface PersonalityVector {
 }
 
 export enum MenteePreference {
-  MENTEE_PREFERENCE = 0,
-  MENTOR_PREFERENCE
+  ME_PREFERENCE = 0,
+  YOU_PREFERENCE
 }
 
 type UpdateVectorRequest = PersonalityVector & {
-  isMenteePreference: MenteePreference;
+  readonly isMenteePreference: MenteePreference;
 };
 
 export interface BootstrapResponse {
@@ -47,7 +55,13 @@ export interface BootstrapResponse {
   readonly state: UserState;
   readonly cohort: Cohort;
   readonly me: UserData;
+  readonly onboardingStatus: OnboardingStatus;
 };
+
+interface OnboardingUpdateResponse {
+  readonly message: string;
+  readonly onboardingStatus: OnboardingStatus;
+}
 
 export interface ProfileService {
   signup(request: SignupRequest): Promise<number>;
@@ -67,19 +81,25 @@ export class RemoteProfileService implements ProfileService {
     return response.userId;
   }
 
-  async updateCohort(request: UpdateCohortRequest): Promise<void> {
+  async updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus> {
     const sessionToken = await auth.getSessionToken();
-    await this.requestor.post(COHORT_ROUTE, request, sessionToken);
+    const response: OnboardingUpdateResponse = await this.requestor.post(
+      COHORT_ROUTE, request, sessionToken);
+    return response.onboardingStatus;
   }
 
-  async updateVector(preference: MenteePreference, vector: PersonalityVector) {
+  async updateVector(
+    preference: MenteePreference,
+    vector: PersonalityVector
+  ): Promise<OnboardingStatus> {
     const sessionToken = await auth.getSessionToken();
     const request: UpdateVectorRequest = {
       ...vector,
       isMenteePreference: preference,
     };
-    console.log(request);
-    await this.requestor.post(USER_VECTOR_ROUTE, request, sessionToken);
+    const response: OnboardingUpdateResponse = await this.requestor.post(
+      USER_VECTOR_ROUTE, request, sessionToken);
+    return response.onboardingStatus;
   }
 
   async bootstrap(): Promise<BootstrapData> {

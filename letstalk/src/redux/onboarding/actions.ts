@@ -1,26 +1,24 @@
 import { Action } from 'redux'
 
-export enum Step {
-  COHORT = 0,
-  MY_VECTOR,
-  YOUR_VECTOR,
-}
+import { OnboardingStatus } from '../../models';
 
 export enum TypeKeys {
-  SET_STEP = 'ONBOARDING/SET_STEP',
+  SET_ONBOARDING_STATUS = 'ONBOARDING/SET_ONBOARDING_STATUS',
 }
 
-export interface SetStepAction extends Action {
-  readonly type: TypeKeys.SET_STEP;
-  readonly step: Step;
+export interface SetOnboardingStatusAction extends Action {
+  readonly type: TypeKeys.SET_ONBOARDING_STATUS;
+  readonly onboardingStatus: OnboardingStatus;
 }
 
-export function setStep(step: Step): SetStepAction {
+export function setOnboardingStatusAction(
+  onboardingStatus: OnboardingStatus
+): SetOnboardingStatusAction {
   return {
-    type: TypeKeys.SET_STEP,
-    step,
+    type: TypeKeys.SET_ONBOARDING_STATUS,
+    onboardingStatus,
   };
 }
 
 export type ActionTypes =
-  | SetStepAction;
+  | SetOnboardingStatusAction

@@ -11,7 +11,7 @@ import (
 	"github.com/romana/rlog"
 )
 
-// i.e. fetch a onboarding type and the posible options
+// i.e. fetch a onboarding type and the possible options
 
 /**
 *
@@ -21,8 +21,13 @@ import (
  }
 */
 
-type CohortUpdateRequest struct {
+type UpdateCohortRequest struct {
 	CohortId int `json:"cohortId" binding:"required"`
+}
+
+type OnboardingUpdateResponse struct {
+	Message          string            `json:"message" binding:"required"`
+	OnboardingStatus *OnboardingStatus `json:"onboardingStatus" binding:"required"`
 }
 
 func isValidCohort(db *gmq.Db, cohortId int) bool {
@@ -37,7 +42,7 @@ func isValidCohort(db *gmq.Db, cohortId int) bool {
 // Update a user with new information for their school
 // try to match this data to an existing sequence.
 func UpdateUserCohort(c *ctx.Context) errs.Error {
-	var newCohortRequest CohortUpdateRequest
+	var newCohortRequest UpdateCohortRequest
 	err := c.GinContext.BindJSON(&newCohortRequest)
 
 	if err != nil {
@@ -58,7 +63,10 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	var dbErr error
+	var (
+		dbErr          error
+		successMessage string
+	)
 
 	// if the user doesnt have a cohort
 	if userCohort == nil {
@@ -76,7 +84,7 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 			}
 			return nil
 		})
-		c.Result = "Successfully added cohort to user."
+		successMessage = "Successfully added cohort to user."
 	} else {
 		userCohort.CohortId = newCohortId
 		// update the cohort data from the request
@@ -87,12 +95,23 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 			}
 			return nil
 		})
-		c.Result = "Successfully updated cohort for user."
+		successMessage = "Successfully updated cohort for user."
 	}
 
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
+
+	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	onboardingStatus := &OnboardingStatus{
+		onboardingInfo.State,
+		onboardingInfo.UserType,
+	}
+	c.Result = OnboardingUpdateResponse{successMessage, onboardingStatus}
 
 	return nil
 }
@@ -108,21 +127,14 @@ const (
 	Confident    UserVectorType = "Confident"
 )
 
-type UserVectorPreferenceType int
-
-const (
-	MenteePreference UserVectorPreferenceType = iota
-	MentorPreference
-)
-
 type UpdateUserVectorRequest struct {
-	PreferenceType int `json:"isMenteePreference" binding:"exists"`
-	Sociable       int `json:"sociable" binding:"exists"`
-	Hard_Working   int `json:"hardWorking" binding:"exists"`
-	Ambitious      int `json:"ambitious" binding:"exists"`
-	Energetic      int `json:"energetic" binding:"exists"`
-	Carefree       int `json:"carefree" binding:"exists"`
-	Confident      int `json:"confident" binding:"exists"`
+	PreferenceType api.UserVectorPreferenceType `json:"isMenteePreference" binding:"exists"`
+	Sociable       int                          `json:"sociable" binding:"exists"`
+	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
+	Ambitious      int                          `json:"ambitious" binding:"exists"`
+	Energetic      int                          `json:"energetic" binding:"exists"`
+	Carefree       int                          `json:"carefree" binding:"exists"`
+	Confident      int                          `json:"confident" binding:"exists"`
 }
 
 /**
@@ -169,7 +181,16 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 		return errs.NewInternalError("Unable to insert new vector", err)
 	}
 
-	c.Result = struct{ Status string }{"Ok"}
+	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	onboardingStatus := &OnboardingStatus{
+		onboardingInfo.State,
+		onboardingInfo.UserType,
+	}
+	c.Result = OnboardingUpdateResponse{"Ok", onboardingStatus}
 
 	return nil
 }

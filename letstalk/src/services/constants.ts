@@ -1,4 +1,7 @@
-export const BASE_URL = 'http://54.175.152.141';
+// DEV
+export const BASE_URL = 'http://192.168.0.6:3000';
+// PROD
+// export const BASE_URL = 'http://54.175.152.141';
 
 // Routes
 export const BOOTSTRAP_ROUTE   = '/v1/bootstrap';

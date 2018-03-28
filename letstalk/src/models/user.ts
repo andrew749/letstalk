@@ -17,6 +17,12 @@ export function genderIdToString(genderId: GenderId): string {
   }
 }
 
+export const USER_TYPE_MENTOR  = 'user_type_mentor';
+export const USER_TYPE_MENTEE  = 'user_type_mentee';
+export const USER_TYPE_UNKNOWN = 'user_type_unknown';
+
+export type UserType = 'user_type_mentor' | 'user_type_mentee' | 'user_type_unknown';
+
 export interface UserData {
 	readonly userId: number
 	readonly firstName: string

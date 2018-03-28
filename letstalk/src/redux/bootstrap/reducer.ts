@@ -3,13 +3,16 @@ import { ActionCreator, Dispatch } from 'redux'
 import { ThunkAction } from 'redux-thunk';
 
 import {
+  fetchStateReducer,
   FetchTypeKeys,
   FetchState,
+  getDataOrCur,
   initialFetchState,
 } from '../actions';
 import {
   BootstrapData
 } from '../../models/bootstrap';
+import { setOnboardingStatusAction } from '../onboarding/actions';
 import {
   fetch,
   ActionTypes,
@@ -29,28 +32,11 @@ const initialState: State = {
 export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
     case TypeKeys.FETCH:
-      switch (action.fetchType) {
-        case FetchTypeKeys.RECEIVE:
-          return {
-            ...state,
-            fetchState: { state: 'success' },
-            bootstrap: action.data,
-          };
-        case FetchTypeKeys.ERROR:
-          return {
-            ...state,
-            fetchState: { state: 'error', errorMsg: action.errorMsg },
-          };
-        case FetchTypeKeys.START:
-          return {
-            ...state,
-            fetchState: { state: 'fetching' },
-          };
-        default:
-          // Ensure exhaustiveness of select
-          const _: never = action;
-          return state;
-        }
+      return {
+        ...state,
+        fetchState: fetchStateReducer(action),
+        bootstrap: getDataOrCur(action, state.bootstrap),
+      };
     default:
       // Ensure exhaustiveness of select
       const _: never = action.type;
@@ -64,11 +50,12 @@ const fetchBootstrap: ActionCreator<
     dispatch(fetch.start());
     try {
       const data = await profileService.bootstrap();
+      dispatch(setOnboardingStatusAction(data.onboardingStatus));
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e.message));
     }
   };
 }
-export { fetchBootstrap };
 
+export { fetchBootstrap };
