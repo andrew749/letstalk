@@ -85,7 +85,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		response.State = ACCOUNT_SETUP
 	}
 
-	if len(user.Mentors) > 0 {
+	if len(user.Mentors) > 0 || len(user.Mentees) > 0 {
 		response.State = ACCOUNT_MATCHED
 	}
 

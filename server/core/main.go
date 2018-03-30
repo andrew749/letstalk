@@ -36,15 +36,16 @@ var (
 
 func migrateDB(db *gorm.DB) {
 	db.AutoMigrate(&data.AuthenticationData{})
-	db.AutoMigrate(&data.UserCohort{})
 	db.AutoMigrate(&data.Cohort{})
 	data.PopulateCohort(db)
 	db.AutoMigrate(&data.User{})
 	db.AutoMigrate(&data.Session{})
 	db.AutoMigrate(&data.UserVector{})
+	db.AutoMigrate(&data.UserCohort{})
 	db.AutoMigrate(&data.NotificationToken{})
 	db.AutoMigrate(&data.FbAuthData{})
 	db.AutoMigrate(&data.FbAuthToken{})
+	db.AutoMigrate(&data.Matchings{})
 }
 
 func main() {

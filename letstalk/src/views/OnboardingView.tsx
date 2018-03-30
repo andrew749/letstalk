@@ -44,7 +44,10 @@ import {
   ModalPicker,
   Rating,
 } from '../components';
-import profileService, { PersonalityVector, MenteePreference } from '../services/profile-service';
+import profileService, {
+  PersonalityVector,
+  UserVectorPreferenceType,
+} from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
 import {
@@ -247,9 +250,9 @@ class OnboardingView extends Component<Props> {
     }
   }
 
-  async onSubmitPersonality(preference: MenteePreference, values: PersonalityFormData) {
+  async onSubmitPersonality(preferenceType: UserVectorPreferenceType, values: PersonalityFormData) {
     try {
-      const onboardingStatus = await profileService.updateVector(preference, values);
+      const onboardingStatus = await profileService.updateVector(preferenceType, values);
       this.props.setOnboardingStatusAction(onboardingStatus);
     } catch(e) {
       throw new SubmissionError({_error: e.message});
@@ -273,7 +276,7 @@ class OnboardingView extends Component<Props> {
         );
       case ONBOARDING_VECTOR_ME:
         const onSubmitMine = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(MenteePreference.ME_PREFERENCE, values);
+          await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_ME, values);
         };
         return (
           <ScrollView>
@@ -288,7 +291,7 @@ class OnboardingView extends Component<Props> {
         );
       case ONBOARDING_VECTOR_YOU:
         const onSubmitYour = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(MenteePreference.YOU_PREFERENCE, values);
+          await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_YOU, values);
           // Reload bootstrap data after updating
           await this.props.fetchBootstrap();
           this.props.navigation.dispatch(NavigationActions.reset({

@@ -41,13 +41,13 @@ export interface PersonalityVector {
   confident: number;
 }
 
-export enum MenteePreference {
-  ME_PREFERENCE = 0,
-  YOU_PREFERENCE
+export enum UserVectorPreferenceType {
+  PREFERENCE_TYPE_ME = 0,
+  PREFERENCE_TYPE_YOU
 }
 
 type UpdateVectorRequest = PersonalityVector & {
-  readonly isMenteePreference: MenteePreference;
+  readonly preferenceType: UserVectorPreferenceType;
 };
 
 export interface BootstrapResponse {
@@ -89,13 +89,13 @@ export class RemoteProfileService implements ProfileService {
   }
 
   async updateVector(
-    preference: MenteePreference,
+    preferenceType: UserVectorPreferenceType,
     vector: PersonalityVector
   ): Promise<OnboardingStatus> {
     const sessionToken = await auth.getSessionToken();
     const request: UpdateVectorRequest = {
       ...vector,
-      isMenteePreference: preference,
+      preferenceType,
     };
     const response: OnboardingUpdateResponse = await this.requestor.post(
       USER_VECTOR_ROUTE, request, sessionToken);

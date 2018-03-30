@@ -24,9 +24,9 @@ func GetUserVectorsById(db *gorm.DB, userId int) (*UserVectors, error) {
 	// gets the last me and you vectors from list
 	for _, vector := range userVectors {
 		preferenceType := UserVectorPreferenceType(vector.PreferenceType)
-		if preferenceType == MePreference {
+		if preferenceType == PREFERENCE_TYPE_ME {
 			me = &vector
-		} else if preferenceType == YouPreference {
+		} else if preferenceType == PREFERENCE_TYPE_YOU {
 			you = &vector
 		}
 	}

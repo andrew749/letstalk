@@ -1,13 +1,8 @@
 package data
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
 type UserCohort struct {
-	gorm.Model
 	User     User   `gorm:"foreignkey:UserId"`
-	UserId   int    `json:"userId"`
+	UserId   int    `json:"userId" gorm:"not null;primary_key;auto_increment:false"`
 	Cohort   Cohort `gorm:"foreignkey:CohortId"`
-	CohortId int    `json:"cohortId"`
+	CohortId int    `json:"cohortId" gorm:"not null"`
 }

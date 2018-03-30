@@ -38,8 +38,8 @@ const (
 type UserVectorPreferenceType int
 
 const (
-	MePreference UserVectorPreferenceType = iota
-	YouPreference
+	PREFERENCE_TYPE_ME UserVectorPreferenceType = iota
+	PREFERENCE_TYPE_YOU
 )
 
 func GetUserWithId(db *gorm.DB, userId int) (*data.User, error) {

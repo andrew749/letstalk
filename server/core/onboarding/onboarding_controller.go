@@ -116,7 +116,7 @@ const (
 )
 
 type UpdateUserVectorRequest struct {
-	PreferenceType api.UserVectorPreferenceType `json:"isMenteePreference" binding:"exists"`
+	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"exists"`
 	Sociable       int                          `json:"sociable" binding:"exists"`
 	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
 	Ambitious      int                          `json:"ambitious" binding:"exists"`
@@ -136,20 +136,19 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 	}
 
 	// check if the user already has a vector for this
-	var userVector data.UserVector
-	c.Db.FirstOrInit(&userVector, &data.UserVector{
+	err = c.Db.Where(&data.UserVector{
 		UserId:         c.SessionData.UserId,
 		PreferenceType: int(updateUserVectorRequest.PreferenceType),
-	})
+	}).Assign(data.UserVector{
+		Sociable:    updateUserVectorRequest.Sociable,
+		HardWorking: updateUserVectorRequest.Hard_Working,
+		Ambitious:   updateUserVectorRequest.Ambitious,
+		Energetic:   updateUserVectorRequest.Energetic,
+		Carefree:    updateUserVectorRequest.Carefree,
+		Confident:   updateUserVectorRequest.Confident,
+	}).FirstOrCreate(&data.UserVector{}).Error
 
-	userVector.Sociable = updateUserVectorRequest.Sociable
-	userVector.HardWorking = updateUserVectorRequest.Hard_Working
-	userVector.Ambitious = updateUserVectorRequest.Ambitious
-	userVector.Energetic = updateUserVectorRequest.Energetic
-	userVector.Carefree = updateUserVectorRequest.Carefree
-	userVector.Confident = updateUserVectorRequest.Confident
-
-	if err := c.Db.Save(&userVector).Error; err != nil {
+	if err != nil {
 		return errs.NewClientError("Unable to insert new user vector")
 	}
 
