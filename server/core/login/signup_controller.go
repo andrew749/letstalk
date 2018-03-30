@@ -8,6 +8,7 @@ import (
 	"letstalk/server/data"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
@@ -55,17 +56,14 @@ func SignupUser(c *ctx.Context) errs.Error {
 		return errs.NewClientError(err.Error())
 	}
 
-	var numUsers int
-	if err := c.Db.Model(&data.User{}).Where("email = ?", user.Email).Count(&numUsers).Error; err != nil {
+	err = c.Db.Model(&data.User{}).Where("email = ?", user.Email).First(&data.User{}).Error
+	if err == nil {
+		return errs.NewClientError("a user already exists with email: %s", user.Email)
+	} else if err != nil && !gorm.IsRecordNotFoundError(err) { // Some other db error
 		return errs.NewDbError(err)
 	}
 
-	if numUsers > 0 {
-		return errs.NewClientError("a user already exists with email: %s", user.Email)
-	}
-
 	err = writeUser(user, c)
-
 	if err != nil {
 		return errs.NewInternalError(err.Error())
 	}

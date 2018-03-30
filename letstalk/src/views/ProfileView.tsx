@@ -17,10 +17,11 @@ import { NavigationScreenProp, NavigationStackAction, NavigationActions } from '
 
 import auth from '../services/auth';
 import { ActionButton, Card, Header } from '../components';
-import { genderIdToString } from '../models';
+import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
+import { programById, sequenceById } from '../models/cohort';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -97,39 +98,41 @@ class ProfileView extends Component<Props> {
         const genderStr = capitalize(genderIdToString(gender));
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         const birthdayStr = birthdate.toLocaleDateString('en-US', options);
+        const sequence = sequenceById(sequenceId);
+        const program = programById(programId);
+
+        const buildItems = (name_values: Array<[string, string]>) => {
+          return name_values.map(([label, value]) => {
+            return (
+              <View key={label} style={styles.listItem}>
+                <Text style={styles.label}>{label}:</Text>
+                <Text style={styles.value}>{value}</Text>
+              </View>
+            )
+          });
+        };
+
+        const profileItems = buildItems([
+          ['Gender', genderStr],
+          ['Email', email],
+          ['Birthday', birthdayStr],
+        ]);
+        const cohortItems = buildItems([
+          ['Program', program],
+          ['Sequence', sequence],
+          ['Grad year', String(gradYear)],
+        ]);
 
         return (
           <View style={styles.contentContainer} >
             <Image style={styles.image} source={require('../img/profile.jpg')} />
             <Card>
               <Text style={styles.sectionHeader}>Profile</Text>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Gender:</Text>
-                <Text style={styles.value}>{genderStr}</Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{email}</Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Birthday:</Text>
-                <Text style={styles.value}>{birthdayStr}</Text>
-              </View>
+              {profileItems}
             </Card>
             <Card>
               <Text style={styles.sectionHeader}>Cohort</Text>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Program:</Text>
-                <Text style={styles.value}>{programId}</Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Sequence:</Text>
-                <Text style={styles.value}>{sequenceId}</Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text style={styles.label}>Grad year:</Text>
-                <Text style={styles.value}>{gradYear}</Text>
-              </View>
+              {cohortItems}
             </Card>
           </View>
         );

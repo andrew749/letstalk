@@ -7,7 +7,7 @@ import (
 type UserCohort struct {
 	gorm.Model
 	User     User   `gorm:"foreignkey:UserId"`
-	UserId   int    `json:"user_id"`
+	UserId   int    `json:"userId"`
 	Cohort   Cohort `gorm:"foreignkey:CohortId"`
-	CohortId int    `json:"cohort_id"`
+	CohortId int    `json:"cohortId"`
 }

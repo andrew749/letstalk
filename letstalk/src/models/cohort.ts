@@ -5,10 +5,18 @@ const PROGRAMS: Immutable.Map<string, string> = Immutable.Map({
   'COMPUTER_ENGINEERING': 'Computer Engineering',
 });
 
+export function programById(programId: string): string {
+  return PROGRAMS.get(programId, programId);
+}
+
 const SEQUENCES: Immutable.Map<string, string> = Immutable.Map({
   '4STREAM': '4 Stream',
   '8STREAM': '8 Stream',
 });
+
+export function sequenceById(sequenceId: string): string {
+  return SEQUENCES.get(sequenceId, sequenceId);
+}
 
 export interface ValueLabel {
   readonly value: any;

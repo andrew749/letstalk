@@ -5,34 +5,41 @@ import (
 )
 
 type Cohort struct {
-	CohortId  int     `json:"cohort_id" gorm:"not null;auto_increment;primary_key"`
-	Program   Program `gorm:"foreignkey:ProgramId;"`
-	ProgramId string  `json:"program_id" gorm:"not null;unique_index:cohort_index"`
-	GradYear  int     `json:"grad_year" gorm:"not null;unique_index:cohort_index"`
-	Sequence  string  `json:"sequence" gorm:"not null;unique_index:cohort_index"`
+	CohortId   int     `json:"cohortId" gorm:"not null;auto_increment;primary_key"`
+	ProgramId  string  `json:"programId" gorm:"not null;unique_index:cohort_index"`
+	Program    Program `gorm:"foreignkey:ProgramId;"`
+	GradYear   int     `json:"gradYear" gorm:"not null;unique_index:cohort_index"`
+	SequenceId string  `json:"sequenceId" gorm:"not null;unique_index:cohort_index"`
 }
 
 func PopulateCohort(db *gorm.DB) {
 	cohorts := []*Cohort{
 		&Cohort{
-			ProgramId: "SOFTWARE_ENGINEERING",
-			GradYear:  2019,
-			Sequence:  "8STREAM",
+			ProgramId:  "SOFTWARE_ENGINEERING",
+			GradYear:   2019,
+			SequenceId: "8STREAM",
 		},
 		&Cohort{
-			ProgramId: "COMPUTER_ENGINEERING",
-			GradYear:  2019,
-			Sequence:  "8STREAM",
+			ProgramId:  "COMPUTER_ENGINEERING",
+			GradYear:   2019,
+			SequenceId: "8STREAM",
 		},
 		&Cohort{
-			ProgramId: "COMPUTER_ENGINEERING",
-			GradYear:  2019,
-			Sequence:  "4STREAM",
+			ProgramId:  "COMPUTER_ENGINEERING",
+			GradYear:   2019,
+			SequenceId: "4STREAM",
 		},
 	}
 
 	// add cohorts
 	for _, cohort := range cohorts {
-		db.FirstOrCreate(&cohort, Cohort{ProgramId: cohort.ProgramId, GradYear: cohort.GradYear, Sequence: cohort.Sequence})
+		db.FirstOrCreate(
+			&cohort,
+			Cohort{
+				ProgramId:  cohort.ProgramId,
+				GradYear:   cohort.GradYear,
+				SequenceId: cohort.SequenceId,
+			},
+		)
 	}
 }

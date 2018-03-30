@@ -6,7 +6,7 @@ import (
 
 type FbAuthToken struct {
 	User      User      `gorm:"foreignkey:UserId"`
-	UserId    int       `json:"user_id" gorm:"primary_key"`
-	AuthToken string    `json:"auth_token"`
+	UserId    int       `json:"userId" gorm:"primary_key"`
+	AuthToken string    `json:"authToken"`
 	Expiry    time.Time `json:"expiry"`
 }

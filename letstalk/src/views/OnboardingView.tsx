@@ -20,11 +20,13 @@ import Immutable from 'immutable';
 import { RootState } from '../redux';
 import { State as State } from '../redux/onboarding/reducer';
 import {
-  Cohort,
   ONBOARDING_COHORT,
   ONBOARDING_VECTOR_ME,
   ONBOARDING_VECTOR_YOU,
   ONBOARDING_DONE,
+} from '../models/onboarding';
+import {
+  Cohort,
   OnboardingState,
   OnboardingStatus,
 } from '../models';

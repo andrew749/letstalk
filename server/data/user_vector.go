@@ -1,11 +1,11 @@
 package data
 
 type UserVector struct {
+	UserId         int  `json:"userId"`
 	User           User `gorm:"foreignkey:UserId"`
-	UserId         int  `json:"user_id"`
-	PreferenceType int  `json:"preference_type"`
+	PreferenceType int  `json:"preferenceType"`
 	Sociable       int  `json:"sociable"`
-	HardWorking    int  `json:"hard_working"`
+	HardWorking    int  `json:"hardworking"`
 	Ambitious      int  `json:"ambitious"`
 	Energetic      int  `json:"energetic"`
 	Carefree       int  `json:"carefree"`

@@ -6,7 +6,7 @@ import (
 
 type Matchings struct {
 	gorm.Model
-	MatchingId int  `json:"matching_id"`
+	MatchingId int  `json:"matchingId"`
 	MentorUser User `gorm:"foreignkey:Mentor"`
 	Mentor     int  `json:"mentor"`
 	MenteeUser User `gorm:"foreignkey:Mentee"`

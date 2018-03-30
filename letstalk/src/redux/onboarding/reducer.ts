@@ -4,11 +4,11 @@ import {
   ActionTypes,
   TypeKeys,
 } from './actions';
+import { ONBOARDING_DONE } from '../../models/onboarding';
+import { USER_TYPE_UNKNOWN } from '../../models/user';
 import {
   Cohort,
-  ONBOARDING_DONE,
   OnboardingStatus,
-  USER_TYPE_UNKNOWN,
 } from '../../models';
 
 export interface State {
