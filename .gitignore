@@ -9,6 +9,7 @@ vendor.orig
 bin/
 lib/
 include/
+share/
 pip-selfcheck.json
 .Python
 __pycache__
