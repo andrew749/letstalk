@@ -1,6 +1,6 @@
 // NB: This is meant for iOS only.
 // TODO: Rename to .ios.tsx
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Component } from 'react';
 import {
   Dimensions,
   Modal,
@@ -34,7 +34,7 @@ interface State {
   labels: Array<string>;
 };
 
-class StatefulModalPicker extends React.Component<Props, State> {
+class StatefulModalPicker extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 

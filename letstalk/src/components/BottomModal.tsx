@@ -1,6 +1,6 @@
 // NB: This is meant for iOS only.
 // TODO: Rename to .ios.tsx
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Component } from 'react';
 import {
   Dimensions,
   Modal,
@@ -97,7 +97,7 @@ interface State {
   modalVisible: boolean;
 };
 
-class StatefulBottomModal extends React.Component<Props, State> {
+class StatefulBottomModal extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
