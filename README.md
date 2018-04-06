@@ -18,3 +18,7 @@ Build a docker container and launch the container.
 ```
 
 See the respective project folders for installation instructions.
+
+# Infrastructure
+## Push new files to server
+```python infra/push_files.py FILES --destination="~" --username=andrew --private_key=~/.ssh/id_rsa```
