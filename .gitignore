@@ -3,6 +3,7 @@
 .idea
 secrets.json
 vendor/
+share/
 credentials.csv
 vendor.orig
 bin/
