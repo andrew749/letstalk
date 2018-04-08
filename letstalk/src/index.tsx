@@ -8,6 +8,7 @@ import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
+import Sentry from 'sentry-expo';
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -18,6 +19,8 @@ import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
+
+Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
 interface TabBarIcon {
   tintColor: (string | null),
