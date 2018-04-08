@@ -35,7 +35,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	router.GET("/test", hw.wrapHandler(GetTest, false))
 
 	router.OPTIONS("/testAuth")
-	router.GET("/testAuth", hw.wrapHandler(GetTest, true))
+	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
 
 	v1 := router.Group("/v1")
 
