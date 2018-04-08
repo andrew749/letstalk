@@ -20,9 +20,6 @@ import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 
-// Remove this once Sentry is correctly setup.
-Sentry.enableInExpoDevelopment = true;
-
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
 interface TabBarIcon {
