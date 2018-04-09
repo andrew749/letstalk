@@ -9,6 +9,7 @@ import (
 	"letstalk/server/core/login"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/request_to_match"
 	"letstalk/server/core/sessions"
 	"net/http"
 	"time"
@@ -92,6 +93,14 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.GET(
 		"/bootstrap",
 		hw.wrapHandler(bootstrap.GetCurrentUserBoostrapStatusController, true),
+	)
+
+	// request-to-match endpoints
+
+	v1.OPTIONS("/credential_options")
+	v1.GET(
+		"/credential_options",
+		hw.wrapHandler(request_to_match.GetCredentialOptionsController, false),
 	)
 
 	return router
