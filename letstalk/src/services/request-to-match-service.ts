@@ -39,3 +39,6 @@ export class RemoteRequestToMatchService implements RequestToMatchService {
     };
   }
 }
+
+const requestToMatchService = new RemoteRequestToMatchService(requestor, auth);
+export default requestToMatchService;

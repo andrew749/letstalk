@@ -20,6 +20,11 @@ export enum CredentialOrganizationType {
   COHORT,
 }
 
+export interface CredentialElement {
+  readonly id: [number, number]; // [positionId, organizationId]
+  readonly value: string;
+}
+
 export interface CredentialOrganization {
   readonly id: number;
   readonly name: string;

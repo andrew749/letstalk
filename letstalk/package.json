@@ -71,6 +71,7 @@
     "@types/redux-logger": "^3.0.5",
     "babel-preset-expo": "^4.0.0",
     "expo": "^22.0.4",
+    "fuzzysearch": "^1.0.3",
     "immutable": "^3.8.2",
     "jest-preset-typescript-react-native": "^1.2.0",
     "node-emoji": "^1.8.1",

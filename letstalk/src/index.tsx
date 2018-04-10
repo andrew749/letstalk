@@ -19,6 +19,7 @@ import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
+import RequestToMatchView from './views/RequestToMatchView';
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
@@ -47,7 +48,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: HomeView,
   },
   Profile: {
-    screen: ProfileView,
+    screen: RequestToMatchView,
   },
   Onboarding: {
     screen: OnboardingView,

@@ -25,7 +25,6 @@ export class Requestor {
     fetchParams.headers.append('sessionId', sessionToken);
     const response = await fetch(route, fetchParams);
     if (!response.ok) return response.json().then((data: any) => {
-      console.log(data);
       throw new Error(data.Error.Message);
     });
     const data = await response.json();

@@ -126,5 +126,5 @@ export class RemoteProfileService implements ProfileService {
   }
 }
 
-const profileService = new RemoteProfileService(requestor, auth);
+export const profileService = new RemoteProfileService(requestor, auth);
 export default profileService;

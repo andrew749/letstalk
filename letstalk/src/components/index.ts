@@ -1,3 +1,4 @@
+import Autocomplete from './Autocomplete';
 import ActionButton from './ActionButton';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
@@ -12,6 +13,7 @@ import Rating from './Rating';
 
 export {
   ActionButton,
+  Autocomplete,
   ButtonPicker,
   Card,
   Emoji,

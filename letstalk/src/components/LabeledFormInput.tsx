@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { SFC } from 'react';
 import { View } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput, FormLabel } from 'react-native-elements';
 
 type Props = FormInputProps & WrappedFieldProps & { label: string }
 
-const LabeledFormInput: React.SFC<Props> = props => {
+const LabeledFormInput: SFC<Props> = props => {
   const { label } = props;
   const { onChange, onBlur, value } = props.input;
   const { error, touched, warning } = props.meta;
