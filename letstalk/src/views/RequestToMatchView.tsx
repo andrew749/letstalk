@@ -25,7 +25,7 @@ import {
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
 import { ActionTypes } from '../redux/credential-options/actions';
-import { ActionButton, Autocomplete, Card, Header } from '../components';
+import { ActionButton, Card, FilterListModal, Header } from '../components';
 import { CredentialElement } from '../models/credential';
 
 interface DispatchActions {
@@ -38,10 +38,8 @@ interface Props extends CredentialOptionsState, DispatchActions {
 }
 
 class RequestToMatchView extends Component<Props> {
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'Home',
-    headerRight: <ReactNativeButton title="Profile"
-      onPress={() => navigation.navigate('Profile')} />,
+  static navigationOptions = () => ({
+    headerTitle: 'Request To Match',
   })
 
   constructor(props: Props) {
@@ -64,7 +62,7 @@ class RequestToMatchView extends Component<Props> {
 
   private renderSearch(data: Immutable.List<CredentialElement>) {
     return (
-      <Autocomplete
+      <FilterListModal
         data={data}
         onSelect={this.onSelect}
         placeholder="Find someone who is a..."

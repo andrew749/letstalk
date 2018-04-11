@@ -32,6 +32,9 @@ interface Props extends BootstrapState, DispatchActions {
 }
 
 class ProfileView extends Component<Props> {
+  static navigationOptions = () => ({
+    headerTitle: 'Profile',
+  })
 
   constructor(props: Props) {
     super(props);

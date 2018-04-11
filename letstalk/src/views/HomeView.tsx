@@ -63,6 +63,10 @@ class HomeView extends Component<Props> {
     await this.props.fetchBootstrap();
   }
 
+  private requestToMatch() {
+    this.props.navigation.navigate('RequestToMatch');
+  }
+
   private renderMatches() {
     const { relationships } = this.props.bootstrap;
     const matchCards = relationships.map(relationship => {
@@ -113,7 +117,13 @@ class HomeView extends Component<Props> {
           </View>
         );
       case 'account_matched':
-        return this.renderMatches();
+        const matches = this.renderMatches();
+        return (
+          <View>
+            { matches }
+            <ActionButton onPress={() => this.requestToMatch()} title="Request To Match" />
+          </View>
+        );
       default:
         // Ensure exhaustiveness of select
         const _: never = state;

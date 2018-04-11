@@ -40,7 +40,7 @@ function filterElements(
   }).toList();
 }
 
-class Autocomplete extends Component<Props, State> {
+class FilterListModal extends Component<Props, State> {
   private ds: ListViewDataSource;
   private textInputRef: TextInput;
 
@@ -137,7 +137,7 @@ class Autocomplete extends Component<Props, State> {
   }
 }
 
-export default Autocomplete;
+export default FilterListModal;
 
 const styles = StyleSheet.create({
   container: {

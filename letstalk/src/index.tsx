@@ -48,6 +48,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: HomeView,
   },
   Profile: {
+    screen: ProfileView,
+  },
+  RequestToMatch: {
     screen: RequestToMatchView,
   },
   Onboarding: {

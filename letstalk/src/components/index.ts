@@ -1,8 +1,8 @@
-import Autocomplete from './Autocomplete';
 import ActionButton from './ActionButton';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
 import Emoji from './Emoji';
+import FilterListModal from './FilterListModal';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
 import InfoText from './InfoText';
@@ -13,10 +13,10 @@ import Rating from './Rating';
 
 export {
   ActionButton,
-  Autocomplete,
   ButtonPicker,
   Card,
   Emoji,
+  FilterListModal,
   FormP,
   FormProps,
   Header,
