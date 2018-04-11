@@ -58,9 +58,17 @@ class RequestToMatchView extends Component<Props> {
     await this.props.fetchCredentialOptions();
   }
 
+  private onSelect(elem: CredentialElement) {
+    console.log(elem);
+  }
+
   private renderSearch(data: Immutable.List<CredentialElement>) {
     return (
-      <Autocomplete data={data} />
+      <Autocomplete
+        data={data}
+        onSelect={this.onSelect}
+        placeholder="Find someone who is a..."
+      />
     );
   }
 
