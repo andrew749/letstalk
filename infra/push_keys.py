@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
+from infra.ssh_client_proxy import SSHClientProxy
+from infra.scp_client_proxy import SCPClientProxy
 import boto3
-from paramiko import SSHClient
-from scp import SCPClient
-
-import paramiko
 
 import os
 import logging
@@ -14,7 +12,7 @@ import sys
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler(sys.stdout)
+ch = logging.StreamHandler(sys.stderr)
 logger.addHandler(ch)
 
 def get_args():
@@ -48,52 +46,28 @@ def get_args():
 
     return parser.parse_args()
 
-def load_private_key(private_key_path: str, password: str):
-    return paramiko.RSAKey.from_private_key_file(
-        private_key_path,
-        password=password,
-    )
-
-def createSSHClient(server: str, username: str, private_key, port=22):
-    client = SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(server, port, username, pkey=private_key)
-    return client
-
-def createSCPClient(ssh: SSHClient):
-    return SCPClient(ssh.get_transport())
-
-def create_user_if_not_exists(username: str, ssh_client: SSHClient):
+def create_user_if_not_exists(username: str, ssh_client: SSHClientProxy):
     # need password so we can do sudo
     password = getpass.getpass()
-    (stdin, stdout, stderr) = execute_server_cmd(
-        "sudo useradd -m {}".format(username),
-        ssh_client,
-    )
+    (stdin, stdout, stderr) = ssh_client.run(["sudo","useradd","-m", username])
     stdin.write(password)
     # add directory for ssh
-    (stdin, stdout, stderr) = execute_server_cmd(
-        "sudo mkdir -p {}".format(os.path.join("/home", username, ".ssh")),
-        ssh_client,
+    (stdin, stdout, stderr) = ssh_client.run(
+        ["sudo", "mkdir", "-p", os.path.join("/home", username, ".ssh")]
     )
     stdin.write(password)
 
-
-def execute_server_cmd(command: str, ssh_client: SSHClient):
-    logger.debug(command)
-    return ssh_client.exec_command(command)
-
 def provision_server(username_to_push, admin_username, server, private_key, public_key):
-    ssh_client = createSSHClient(server, admin_username, private_key)
-    with createSCPClient(ssh_client) as scp_client:
-        # add user if it doesnt exist
-        create_user_if_not_exists(username_to_push, ssh_client)
+    with SSHClientProxy(server, admin_username, private_key) as ssh_client_proxy:
+        with SCPClientProxy(ssh_client) as scp_client:
+            # add user if it doesnt exist
+            create_user_if_not_exists(username_to_push, ssh_client_proxy)
 
-        # add user directory
-        scp_client.put(
-            public_key,
-            remote_path=os.path.join("/home", username_to_push, ".ssh", 'authorized_keys'),
-        )
+            # add user directory
+            scp_client.put(
+                public_key,
+                remote_path=os.path.join("/home", username_to_push, ".ssh", 'authorized_keys'),
+            )
 
 def main():
     logger.debug("Adding keys...")

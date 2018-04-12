@@ -18,3 +18,7 @@ Build a docker container and launch the container.
 ```
 
 See the respective project folders for installation instructions.
+
+# Infrastructure
+## Add new SSH Key to server
+```python push_keys.py --username_to_push=test --admin_username=andrew --public_key=~/.ssh/id_rsa.pub --private_key=~/.ssh/id_rsa```
