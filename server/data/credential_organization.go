@@ -13,11 +13,13 @@ const (
 	CREDENTIAL_ORGANIZATION_TYPE_COHORT
 )
 
+type CredentialOrganizationId int
+
 // Right now, the entire contents of this table can be stored in memory since it's not super big,
 // but we can transition to a DB table in the future if need be. Just doing this for performance
 // reasons and to get this feature out quickly.
 type CredentialOrganization struct {
-	Id   int                        `json:"id"`
+	Id   CredentialOrganizationId   `json:"id"`
 	Name string                     `json:"name"`
 	Type CredentialOrganizationType `json:"type"`
 }
@@ -57,7 +59,8 @@ func buildOrganizationTypeSlice(
 ) []CredentialOrganization {
 	orgs := make([]CredentialOrganization, len(orgList))
 	for i, pair := range orgList {
-		orgs[i] = CredentialOrganization{pair.id, pair.name, tpe}
+		id := CredentialOrganizationId(pair.id)
+		orgs[i] = CredentialOrganization{id, pair.name, tpe}
 	}
 	return orgs
 }
@@ -88,18 +91,15 @@ func BuildOrganizations() []CredentialOrganization {
 
 // Mapping from organization id to CredentialOrganizationType using slice created by
 // BuildOrganizations.
-func BuildInverseOrganizationTypeMap(
-	orgTypeMap map[CredentialOrganizationType][]CredentialOrganization,
-) map[int]CredentialOrganizationType {
-	orgInverseTypeMap := map[int]CredentialOrganizationType{}
+func BuildInverseOrganizationTypeMap() map[CredentialOrganizationId]CredentialOrganizationType {
+	orgs := BuildOrganizations()
+	orgInverseTypeMap := map[CredentialOrganizationId]CredentialOrganizationType{}
 
-	for orgType, orgs := range orgTypeMap {
-		for _, org := range orgs {
-			if _, ok := orgInverseTypeMap[org.Id]; ok {
-				panic(fmt.Sprintf("Duplicate org id %d\n", org.Id))
-			}
-			orgInverseTypeMap[org.Id] = orgType
+	for _, org := range orgs {
+		if _, ok := orgInverseTypeMap[org.Id]; ok {
+			panic(fmt.Sprintf("Duplicate org id %d\n", org.Id))
 		}
+		orgInverseTypeMap[org.Id] = org.Type
 	}
 
 	return orgInverseTypeMap

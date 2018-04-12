@@ -13,11 +13,13 @@ const (
 	CREDENTIAL_POSITION_TYPE_COHORT
 )
 
+type CredentialPositionId int
+
 // Right now, the entire contents of this table can be stored in memory since it's not super big,
 // but we can transition to a DB table in the future if need be. Just doing this for performance
 // reasons and to get this feature out quickly.
 type CredentialPosition struct {
-	Id   int                    `json:"id"`
+	Id   CredentialPositionId   `json:"id"`
 	Name string                 `json:"name"`
 	Type CredentialPositionType `json:"type"`
 }
@@ -60,7 +62,8 @@ func buildPositionTypeSlice(
 ) []CredentialPosition {
 	orgs := make([]CredentialPosition, len(orgList))
 	for i, pair := range orgList {
-		orgs[i] = CredentialPosition{pair.id, pair.name, tpe}
+		id := CredentialPositionId(pair.id)
+		orgs[i] = CredentialPosition{id, pair.name, tpe}
 	}
 	return orgs
 }
@@ -90,19 +93,16 @@ func BuildPositions() []CredentialPosition {
 }
 
 // Mapping from position id to CredentialPositionType using slice created by BuildPositions.
-func BuildInversePositionTypeMap(
-	positionTypeMap map[CredentialPositionType][]CredentialPosition,
-) map[int]CredentialPositionType {
-	positionInverseTypeMap := map[int]CredentialPositionType{}
+func BuildInversePositionTypeMap() map[CredentialPositionId]CredentialPositionType {
+	positions := BuildPositions()
+	posInverseTypeMap := map[CredentialPositionId]CredentialPositionType{}
 
-	for positionType, positions := range positionTypeMap {
-		for _, position := range positions {
-			if _, ok := positionInverseTypeMap[position.Id]; ok {
-				panic(fmt.Sprintf("Duplicate position id %d\n", position.Id))
-			}
-			positionInverseTypeMap[position.Id] = positionType
+	for _, pos := range positions {
+		if _, ok := posInverseTypeMap[pos.Id]; ok {
+			panic(fmt.Sprintf("Duplicate pos id %d\n", pos.Id))
 		}
+		posInverseTypeMap[pos.Id] = pos.Type
 	}
 
-	return positionInverseTypeMap
+	return posInverseTypeMap
 }

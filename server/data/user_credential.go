@@ -6,8 +6,8 @@ import (
 
 type UserCredential struct {
 	gorm.Model
-	User           User `gorm:"foreignkey:UserId"`
-	UserId         int  `json:"userId" gorm:"not null"`
-	PositionId     int  `json:"positionId" gorm:"not null"`
-	OrganizationId int  `json:"organizationId" gorm:"not null"`
+	User           User                     `gorm:"foreignkey:UserId"`
+	UserId         int                      `json:"userId" gorm:"not null"`
+	PositionId     CredentialPositionId     `json:"positionId" gorm:"not null"`
+	OrganizationId CredentialOrganizationId `json:"organizationId" gorm:"not null"`
 }

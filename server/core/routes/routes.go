@@ -103,6 +103,22 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(request_to_match.GetCredentialOptionsController, false),
 	)
 
+	v1.OPTIONS("/credential")
+	v1.POST(
+		"/credential",
+		hw.wrapHandler(request_to_match.AddUserCredentialController, true),
+	)
+	v1.DELETE(
+		"/credential",
+		hw.wrapHandler(request_to_match.RemoveUserCredentialController, true),
+	)
+
+	v1.OPTIONS("/credentials")
+	v1.GET(
+		"/credentials",
+		hw.wrapHandler(request_to_match.GetUserCredentialsController, true),
+	)
+
 	return router
 }
 
