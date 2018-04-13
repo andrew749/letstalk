@@ -91,16 +91,16 @@ func BuildOrganizations() []CredentialOrganization {
 
 // Mapping from organization id to CredentialOrganizationType using slice created by
 // BuildOrganizations.
-func BuildInverseOrganizationTypeMap() map[CredentialOrganizationId]CredentialOrganizationType {
+func BuildOrganizationIdIndex() map[CredentialOrganizationId]CredentialOrganization {
 	orgs := BuildOrganizations()
-	orgInverseTypeMap := map[CredentialOrganizationId]CredentialOrganizationType{}
+	orgMap := map[CredentialOrganizationId]CredentialOrganization{}
 
 	for _, org := range orgs {
-		if _, ok := orgInverseTypeMap[org.Id]; ok {
+		if _, ok := orgMap[org.Id]; ok {
 			panic(fmt.Sprintf("Duplicate org id %d\n", org.Id))
 		}
-		orgInverseTypeMap[org.Id] = org.Type
+		orgMap[org.Id] = org
 	}
 
-	return orgInverseTypeMap
+	return orgMap
 }

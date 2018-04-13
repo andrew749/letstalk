@@ -3,12 +3,13 @@ import Immutable from 'immutable';
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
 import {
+  Credential,
   CredentialOptions,
   CredentialOrganization,
   CredentialPosition,
   ValidCredentialPair,
 } from '../models/credential';
-import { CREDENTIAL_OPTIONS_ROUTE } from './constants';
+import { CREDENTIAL_OPTIONS_ROUTE, CREDENTIALS_ROUTE } from './constants';
 
 export interface RequestToMatchService {
   getCredentialOptions(): Promise<CredentialOptions>;
@@ -19,6 +20,8 @@ interface GetCredentialOptionsResponse {
   readonly organizations: Array<CredentialOrganization>;
   readonly positions: Array<CredentialPosition>;
 }
+
+type GetCredentialsResponse = Array<Credential>
 
 export class RemoteRequestToMatchService implements RequestToMatchService {
   private requestor: Requestor;
@@ -37,6 +40,13 @@ export class RemoteRequestToMatchService implements RequestToMatchService {
       organizations: Immutable.List(response.organizations),
       positions: Immutable.List(response.positions),
     };
+  }
+
+  async getCredentials(): Promise<Immutable.List<Credential>> {
+    const sessionToken = await auth.getSessionToken();
+    const response: GetCredentialsResponse =
+      await this.requestor.get(CREDENTIALS_ROUTE, sessionToken);
+    return Immutable.List(response);
   }
 }
 

@@ -18,7 +18,7 @@ type AddUserCredentialResponse struct {
 }
 
 func AddUserCredentialController(c *ctx.Context) errs.Error {
-	var credential api.Credential
+	var credential api.CredentialPair
 
 	if err := c.GinContext.BindJSON(&credential); err != nil {
 		return errs.NewClientError("Unable to parse request %s", err)

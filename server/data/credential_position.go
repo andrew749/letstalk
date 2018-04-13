@@ -93,16 +93,16 @@ func BuildPositions() []CredentialPosition {
 }
 
 // Mapping from position id to CredentialPositionType using slice created by BuildPositions.
-func BuildInversePositionTypeMap() map[CredentialPositionId]CredentialPositionType {
+func BuildPositionIdIndex() map[CredentialPositionId]CredentialPosition {
 	positions := BuildPositions()
-	posInverseTypeMap := map[CredentialPositionId]CredentialPositionType{}
+	posMap := map[CredentialPositionId]CredentialPosition{}
 
 	for _, pos := range positions {
-		if _, ok := posInverseTypeMap[pos.Id]; ok {
+		if _, ok := posMap[pos.Id]; ok {
 			panic(fmt.Sprintf("Duplicate pos id %d\n", pos.Id))
 		}
-		posInverseTypeMap[pos.Id] = pos.Type
+		posMap[pos.Id] = pos
 	}
 
-	return posInverseTypeMap
+	return posMap
 }

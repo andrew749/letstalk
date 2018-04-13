@@ -12,3 +12,4 @@ export const LOGOUT_ROUTE             = '/v1/logout';
 export const SIGNUP_ROUTE             = '/v1/signup';
 export const USER_VECTOR_ROUTE        = '/v1/user_vector';
 export const CREDENTIAL_OPTIONS_ROUTE = '/v1/credential_options';
+export const CREDENTIALS_ROUTE        = '/v1/credentials';

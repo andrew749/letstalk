@@ -10,7 +10,7 @@ import {
   initialFetchState,
 } from '../actions';
 import {
-  CredentialElement,
+  CredentialFilterableElement,
   CredentialOptions,
   CredentialOrganization,
   CredentialOrganizationType,
@@ -26,11 +26,13 @@ import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
   readonly credentialOptions?: CredentialOptions;
-  readonly credentialElements?: Immutable.List<CredentialElement>;
+  readonly credentialElements?: Immutable.List<CredentialFilterableElement>;
   readonly fetchState: FetchState;
 }
 
-function buildCredentialElements(options: CredentialOptions): Immutable.List<CredentialElement> {
+function buildCredentialElements(
+  options: CredentialOptions
+): Immutable.List<CredentialFilterableElement> {
   function reduceOrganizations(
     map: Immutable.Map<CredentialOrganizationType, Immutable.List<CredentialOrganization>>,
     org: CredentialOrganization,

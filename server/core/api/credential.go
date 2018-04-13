@@ -40,9 +40,16 @@ var validPairs = []ValidCredentialPair{
 	},
 }
 
-type Credential struct {
+type CredentialPair struct {
 	PositionId     data.CredentialPositionId     `json:"positionId"`
 	OrganizationId data.CredentialOrganizationId `json:"organizationId"`
+}
+
+type Credential struct {
+	PositionId       data.CredentialPositionId     `json:"positionId"`
+	PositionName     string                        `json:"positionName"`
+	OrganizationId   data.CredentialOrganizationId `json:"organizationId"`
+	OrganizationName string                        `json:"organizationName"`
 }
 
 // Returns a struct contain all info required to generate all possible credential options, where
@@ -56,44 +63,81 @@ func GetCredentialOptions() CredentialOptions {
 	}
 }
 
-func validateCredential(credential Credential) error {
-	orgInverseTypeMap := data.BuildInverseOrganizationTypeMap()
-	posInverseTypeMap := data.BuildInversePositionTypeMap()
-
-	orgType, orgOk := orgInverseTypeMap[credential.OrganizationId]
+func validateCredential(
+	credential CredentialPair,
+	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
+	posMap map[data.CredentialPositionId]data.CredentialPosition,
+) error {
+	org, orgOk := orgMap[credential.OrganizationId]
 	if !orgOk {
 		return errors.New(fmt.Sprintf("Invalid organization id %d",
 			credential.OrganizationId))
 	}
 
-	posType, posOk := posInverseTypeMap[credential.PositionId]
+	pos, posOk := posMap[credential.PositionId]
 	if !posOk {
 		return errors.New(fmt.Sprintf("Invalid position id %d", credential.PositionId))
 	}
 
 	for _, pair := range validPairs {
-		if pair.PositionType == posType && pair.OrganizationType == orgType {
+		if pair.PositionType == pos.Type && pair.OrganizationType == org.Type {
 			return nil
 		}
 	}
 	return errors.New(fmt.Sprintf("Invalid organization type, position type pair (%d, %d)",
-		orgType, posType))
+		org.Type, pos.Type))
 }
 
-func GetUserCredentials(db *gorm.DB, userId int) ([]data.UserCredential, errs.Error) {
+func getUserCredentialsInner(
+	db *gorm.DB,
+	userId int,
+	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
+	posMap map[data.CredentialPositionId]data.CredentialPosition,
+) ([]Credential, errs.Error) {
 	var userCredentials []data.UserCredential
 	if err := db.Where("user_id = ?", userId).Find(&userCredentials).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
-	return userCredentials, nil
+
+	credentials := make([]Credential, len(userCredentials))
+	for i, userCredential := range userCredentials {
+		org, orgOk := orgMap[userCredential.OrganizationId]
+		if !orgOk {
+			return nil, errs.NewClientError(fmt.Sprintf("Invalid organization id %d",
+				userCredential.OrganizationId))
+		}
+
+		pos, posOk := posMap[userCredential.PositionId]
+		if !posOk {
+			return nil, errs.NewClientError(fmt.Sprintf("Invalid position id %d",
+				userCredential.PositionId))
+		}
+
+		credentials[i] = Credential{
+			PositionId:       userCredential.PositionId,
+			PositionName:     pos.Name,
+			OrganizationId:   userCredential.OrganizationId,
+			OrganizationName: org.Name,
+		}
+	}
+	return credentials, nil
 }
 
-func AddUserCredential(db *gorm.DB, userId int, credential Credential) (*uint, errs.Error) {
-	if err := validateCredential(credential); err != nil {
+func GetUserCredentials(db *gorm.DB, userId int) ([]Credential, errs.Error) {
+	orgMap := data.BuildOrganizationIdIndex()
+	posMap := data.BuildPositionIdIndex()
+	return getUserCredentialsInner(db, userId, orgMap, posMap)
+}
+
+func AddUserCredential(db *gorm.DB, userId int, credential CredentialPair) (*uint, errs.Error) {
+	orgMap := data.BuildOrganizationIdIndex()
+	posMap := data.BuildPositionIdIndex()
+
+	if err := validateCredential(credential, orgMap, posMap); err != nil {
 		return nil, errs.NewClientError(err.Error())
 	}
 
-	userCredentials, err := GetUserCredentials(db, userId)
+	userCredentials, err := getUserCredentialsInner(db, userId, orgMap, posMap)
 	if err != nil {
 		return nil, err
 	}

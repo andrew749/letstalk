@@ -26,7 +26,7 @@ import {
 } from '../redux/credential-options/reducer';
 import { ActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Card, FilterListModal, Header } from '../components';
-import { CredentialElement } from '../models/credential';
+import { CredentialFilterableElement } from '../models/credential';
 
 interface DispatchActions {
   fetchCredentialOptions: ActionCreator<
@@ -56,11 +56,11 @@ class RequestToMatchView extends Component<Props> {
     await this.props.fetchCredentialOptions();
   }
 
-  private onSelect(elem: CredentialElement) {
+  private onSelect(elem: CredentialFilterableElement) {
     console.log(elem);
   }
 
-  private renderSearch(data: Immutable.List<CredentialElement>) {
+  private renderSearch(data: Immutable.List<CredentialFilterableElement>) {
     return (
       <FilterListModal
         data={data}
