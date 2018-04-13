@@ -13,3 +13,4 @@ share/
 pip-selfcheck.json
 .Python
 __pycache__
+.mypy_cache

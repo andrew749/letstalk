@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
-from infra.ssh_client_proxy import SSHClientProxy
-from infra.scp_client_proxy import SCPClientProxy
+from ssh_client_proxy import SSHClientProxy
+from scp_client_proxy import SCPClientProxy
 import boto3
 
 import os
@@ -38,6 +38,7 @@ def get_args():
         required=True,
         help="The username to use to authenticate with the server."
     )
+
     parser.add_argument(
         "--private_key_path",
         required=True,
@@ -59,7 +60,7 @@ def create_user_if_not_exists(username: str, ssh_client: SSHClientProxy):
 
 def provision_server(username_to_push, admin_username, server, private_key, public_key):
     with SSHClientProxy(server, admin_username, private_key) as ssh_client_proxy:
-        with SCPClientProxy(ssh_client) as scp_client:
+        with SCPClientProxy(ssh_client_proxy) as scp_client:
             # add user if it doesnt exist
             create_user_if_not_exists(username_to_push, ssh_client_proxy)
 
@@ -79,8 +80,8 @@ def main():
     private_key_path = os.path.abspath(os.path.expanduser(args.private_key_path))
     public_key_path = os.path.abspath(os.path.expanduser(args.public_key_path))
     # load private key from local filesystem
-    password = getpass.getpass()
-    private_key = load_private_key(private_key_path, password)
+    password = getpass.getpass("Private Key Password to push with")
+    private_key = SSHClientProxy.load_private_key(private_key_path, password)
 
     # for each instance
     for instance in client.instances.all():

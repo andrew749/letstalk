@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
 from scp import SCPClient
-from infra.ssh_client_proxy import SSHClientProxy
+from ssh_client_proxy import SSHClientProxy
 
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.debug)
+logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stderr)
 logger.addHandler(ch)
 
@@ -19,12 +20,12 @@ class SCPClientProxy(object):
         )
 
     def put(self, *args, **kwargs):
-        self.scp_client(*args, **kwargs)
+        self.scp_client.put(*args, **kwargs)
 
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, *args):
         self.scp_client.close()
 
     def get_scp_client(self):
