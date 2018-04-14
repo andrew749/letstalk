@@ -18,12 +18,13 @@ logger=logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 # server configuration
-GIN_MODE="release"
+GIN_MODE_DEBUG="debug"
+GIN_MODE_PROD="release"
 RLOG_LOG_LEVEL="DEBUG"
 RLOG_TIME_FORMAT='2006-01-02T15:04:05'
 
 # default database parameters
-DB_ADDR='tcp(localhost:3306)'
+DB_ADDR='tcp(db:3306)'
 DB_USER='letstalk'
 DB_PASS="uwletstalk"
 
@@ -71,6 +72,7 @@ def main():
         "DB_PASS": args.db_pass,
         "RLOG_LOG_LEVEL": RLOG_LOG_LEVEL,
         "GOPATH": GOPATH,
+        "GIN_MODE": GIN_MODE_PROD if args.prod else GIN_MODE_DEBUG,
     })
 
     # install dependencies
