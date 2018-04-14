@@ -67,9 +67,6 @@ def provision_nginx():
     # restart nginx
     run(["service" "nginx", "restart"])
 
-def provision(is_prod=False):
-    provision_nginx()
-
 def main():
     args = get_args()
     env = os.environ.update({
@@ -80,7 +77,6 @@ def main():
         "GOPATH": GOPATH,
     })
 
-    provision()
     # install dependencies
     if args.prod:
         logger.info("Running Production server")

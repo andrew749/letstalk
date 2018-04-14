@@ -1,0 +1,18 @@
+version: '2'
+services:
+  lb:
+    image: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./server/load_balancer/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./server/dev_certs:/etc/nginx/ssl/hiveapp
+    links:
+      - webapp
+  webapp:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/go/src/letstalk/server
