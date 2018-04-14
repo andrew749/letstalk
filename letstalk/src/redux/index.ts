@@ -3,6 +3,7 @@ import { reducer as form, FormState } from 'redux-form';
 
 import { reducer as bootstrap, State as BootstrapState } from './bootstrap/reducer';
 import { reducer as onboarding, State as OnboardingState } from './onboarding/reducer';
+import { reducer as credentials, State as CredentialsState } from './credentials/reducer';
 import {
   reducer as credentialOptions,
   State as CredentialOptionsState,
@@ -10,7 +11,8 @@ import {
 
 export interface RootState {
   bootstrap: BootstrapState;
-  credentialOptions:CredentialOptionsState
+  credentialOptions: CredentialOptionsState,
+  credentials: CredentialsState,
   form: FormState;
   onboarding: OnboardingState;
 };
@@ -18,6 +20,7 @@ export interface RootState {
 const reducers = {
   bootstrap,
   credentialOptions,
+  credentials,
   form,
   onboarding,
 };

@@ -13,6 +13,7 @@ import Sentry from 'sentry-expo';
 import appReducer from './redux';
 import auth from './services/auth';
 import AchievementsView from './views/AchievementsView';
+import CredentialEditView from './views/CredentialEditView';
 import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
@@ -52,6 +53,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   RequestToMatch: {
     screen: RequestToMatchView,
+  },
+  CredentialEdit: {
+    screen: CredentialEditView,
   },
   Onboarding: {
     screen: OnboardingView,

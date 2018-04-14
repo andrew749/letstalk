@@ -22,7 +22,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
-import { ActionButton, Card, Header } from '../components';
+import { ActionButton, Card, Header, Loading } from '../components';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -43,6 +43,7 @@ class HomeView extends Component<Props> {
     super(props);
 
     this.load = this.load.bind(this);
+    this.renderHome = this.renderHome.bind(this);
   }
 
   async componentDidMount() {
@@ -65,6 +66,10 @@ class HomeView extends Component<Props> {
 
   private requestToMatch() {
     this.props.navigation.navigate('RequestToMatch');
+  }
+
+  private credentialEdit() {
+    this.props.navigation.navigate('CredentialEdit');
   }
 
   private renderMatches() {
@@ -122,6 +127,7 @@ class HomeView extends Component<Props> {
           <View>
             { matches }
             <ActionButton onPress={() => this.requestToMatch()} title="Request To Match" />
+            <ActionButton onPress={() => this.credentialEdit()} title="Edit Credentials" />
           </View>
         );
       default:
@@ -135,31 +141,14 @@ class HomeView extends Component<Props> {
       state,
       errorMsg,
     } = this.props.fetchState;
-    switch (state) {
-      case 'prefetch':
-      case 'fetching':
-        // TODO: Separate component for loading pages
-        return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Soon...</Text>
-            <ActivityIndicator size="large" />
-          </View>
-        );
-      case 'error':
-        // TODO: Separate component for error pages
-        return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Something went wrong :(</Text>
-            <Text style={styles.error}>{errorMsg}</Text>
-            <ActionButton onPress={() => this.load()} title="Retry" />
-          </View>
-        );
-      case 'success':
-        return this.renderHome();
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = state;
-    }
+    return (
+      <Loading
+        state={state}
+        errorMsg={errorMsg}
+        load={this.load}
+        renderBody={this.renderHome}
+      />
+    );
   }
 }
 
@@ -175,12 +164,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 10,
-  },
-  error: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
   },
   name: {
     fontWeight: 'bold',

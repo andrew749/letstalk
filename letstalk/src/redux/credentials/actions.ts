@@ -10,7 +10,7 @@ import {
 } from '../actions';
 
 export enum TypeKeys {
-  FETCH = 'CREDENTIAL_OPTIONS/FETCH',
+  FETCH = 'CREDENTIALS/FETCH',
 }
 
 type Credentials = Immutable.List<Credential>;

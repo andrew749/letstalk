@@ -7,6 +7,7 @@ import { FormP, FormProps } from './Form';
 import Header from './Header';
 import InfoText from './InfoText';
 import LabeledFormInput from './LabeledFormInput';
+import Loading from './Loading';
 import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
 import Rating from './Rating';
@@ -22,6 +23,7 @@ export {
   Header,
   InfoText,
   LabeledFormInput,
+  Loading,
   ModalDatePicker,
   ModalPicker,
   Rating,

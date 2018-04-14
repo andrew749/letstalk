@@ -53,7 +53,7 @@ function buildCredentialElements(
         return {
           id: [pos.id, org.id] as [number, number],
           value: `${pos.name} at ${org.name}`,
-        }
+        };
       });
     });
   });

@@ -25,7 +25,7 @@ import {
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
 import { ActionTypes } from '../redux/credential-options/actions';
-import { ActionButton, Card, FilterListModal, Header } from '../components';
+import { ActionButton, Card, FilterListModal, Header, Loading } from '../components';
 import { CredentialFilterableElement } from '../models/credential';
 
 interface DispatchActions {
@@ -46,6 +46,7 @@ class RequestToMatchView extends Component<Props> {
     super(props);
 
     this.load = this.load.bind(this);
+    this.renderSearch = this.renderSearch.bind(this);
   }
 
   async componentDidMount() {
@@ -60,10 +61,10 @@ class RequestToMatchView extends Component<Props> {
     console.log(elem);
   }
 
-  private renderSearch(data: Immutable.List<CredentialFilterableElement>) {
+  private renderSearch() {
     return (
       <FilterListModal
-        data={data}
+        data={this.props.credentialElements}
         onSelect={this.onSelect}
         placeholder="Find someone who is a..."
       />
@@ -75,31 +76,14 @@ class RequestToMatchView extends Component<Props> {
       state,
       errorMsg,
     } = this.props.fetchState;
-    switch (state) {
-      case 'prefetch':
-      case 'fetching':
-        // TODO: Separate component for loading pages
-        return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Soon...</Text>
-            <ActivityIndicator size="large" />
-          </View>
-        );
-      case 'error':
-        // TODO: Separate component for error pages
-        return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Something went wrong :(</Text>
-            <Text style={styles.error}>{errorMsg}</Text>
-            <ActionButton onPress={() => this.load()} title="Retry" />
-          </View>
-        );
-      case 'success':
-        return this.renderSearch(this.props.credentialElements);
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = state;
-    }
+    return (
+      <Loading
+        state={state}
+        errorMsg={errorMsg}
+        load={this.load}
+        renderBody={this.renderSearch}
+      />
+    );
   }
 }
 
@@ -117,29 +101,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 10,
-  },
-  error: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-  },
-  name: {
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  relationshipType: {
-    fontSize: 12,
-    color: 'gray',
-    marginBottom: 5,
-  },
-  emailContainer: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  email: {
-    paddingTop: 2,
-    marginLeft: 5,
-    fontSize: 16,
   },
 })
