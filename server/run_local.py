@@ -9,6 +9,10 @@ import subprocess
 import os
 import logging
 
+"""
+TO BE RUN INSIDE DOCKER CONTAINER
+"""
+
 #logging
 logger=logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -41,11 +45,14 @@ def get_args():
     parser.add_argument(
         "--prod",
         action="store_true",
-        help="whether to run the server in production mode",
+        help="Whether to run the server in production mode",
     )
     return parser.parse_args()
 
 def provision_nginx():
+    """
+    Install nginx ssl certs and restart the server
+    """
     template_file(
         file_path=os.path.join(NGINX_CONFIG_PATH, NGINX_CONFIG_FILE),
         out_path=os.path.join(NGINX_INSTALL_PATH, NGINX_CONFIG_FILE),
@@ -53,17 +60,15 @@ def provision_nginx():
         },
     )
 
-    #copy certs to folder
+    # copy ssl certs to folder
     os.makedirs("/etc/nginx/ssl/hiveapp")
     copytree("dev_certs/", "/etc/nginx/ssl/hiveapp/")
 
-    #restart nginx
+    # restart nginx
     run(["service" "nginx", "restart"])
 
-
 def provision(is_prod=False):
-    if is_prod:
-        provision_nginx()
+    provision_nginx()
 
 def main():
     args = get_args()
@@ -78,7 +83,7 @@ def main():
     provision()
     # install dependencies
     if args.prod:
-        logger.info("Running production server")
+        logger.info("Running Production server")
         logger.debug(env)
         process = subprocess.Popen(
             [f'{GO_BINARY}', 'run', 'core/main.go'],
