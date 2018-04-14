@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 MAINTAINER Andrew Codispoti
 
 RUN apt-get update --fix-missing -y
-RUN apt-get install -y vim curl golang git python3 nginx
+RUN apt-get install -y vim curl golang git python3
 
 # gopath in root
 ENV GOPATH /go
@@ -24,5 +24,5 @@ RUN dep ensure
 
 # fetch dependencies
 ENV SECRETS_PATH secrets.json
-CMD ./run_local.py
+CMD ./run_remote.sh
 EXPOSE 3000

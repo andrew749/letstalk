@@ -9,7 +9,7 @@
     "lambda/messages",
     "lambdacontext"
   ]
-  revision = "64efb26269cc5d9c363a143a936a7c75b053e06d"
+  revision = "ea03c2814414b2223eff860ed2286a83ed8a195c"
 
 [[projects]]
   branch = "master"
@@ -31,6 +31,7 @@
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/sdkio",
     "internal/sdkrand",
     "internal/shareddefaults",
     "private/protocol",
@@ -46,7 +47,7 @@
     "service/sqs",
     "service/sts"
   ]
-  revision = "8a0e4eacaec13849a4177fa293f5e908760056a9"
+  revision = "57564ea051fab8ccbb8cac2aff285647a1aeefd1"
 
 [[projects]]
   name = "github.com/certifi/gocertifi"
@@ -64,7 +65,7 @@
   branch = "master"
   name = "github.com/getsentry/raven-go"
   packages = ["."]
-  revision = "563b81fc02b75d664e54da31f787c2cc2186780b"
+  revision = "d1470f50d3a3a38533355a9fab7393e25a3b4226"
 
 [[projects]]
   branch = "master"
@@ -85,8 +86,8 @@
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
-  version = "v1.32.0"
+  revision = "ace140f73450505f33e8b8418216792275ae82a7"
+  version = "v1.35.0"
 
 [[projects]]
   name = "github.com/go-sql-driver/mysql"
@@ -129,14 +130,26 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "0ac74bba4a81211b28e32ef260c0f16ae41f1377"
-  version = "1.1.1"
+  revision = "ca39e5af3ece67bbcda3d0f4f56a8e24d9f2dad4"
+  version = "1.1.3"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
   version = "v0.0.3"
+
+[[projects]]
+  name = "github.com/modern-go/concurrent"
+  packages = ["."]
+  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
+  version = "1.0.3"
+
+[[projects]]
+  name = "github.com/modern-go/reflect2"
+  packages = ["."]
+  revision = "1df9eeb2bb81f327b96228865c5687bc2194af3f"
+  version = "1.0.0"
 
 [[projects]]
   name = "github.com/namsral/flag"
@@ -165,8 +178,8 @@
 [[projects]]
   name = "github.com/sendgrid/rest"
   packages = ["."]
-  revision = "80b39aaf5a30edab5bf2f99d56052abe01a0d41d"
-  version = "v2.4.0"
+  revision = "306b9bef57dc36f3435ccfcc08fe6ae2c6920344"
+  version = "v2.4.1"
 
 [[projects]]
   name = "github.com/sendgrid/sendgrid-go"
@@ -196,17 +209,8 @@
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
-  version = "v1.1"
-
-[[projects]]
-  name = "github.com/v2pro/plz"
-  packages = [
-    "concurrent",
-    "reflect2"
-  ]
-  revision = "10fc95fad3224a032229e59f6e7023137d82b526"
-  version = "0.9.1"
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -215,13 +219,13 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
+  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "88d2dcc510266da9f7f8c7f34e1940716cab5f5c"
+  revision = "2281fa97ef7b0c26324634d5a22f04babdac8713"
 
 [[projects]]
   name = "gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -238,8 +242,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
-  version = "v2.1.1"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"

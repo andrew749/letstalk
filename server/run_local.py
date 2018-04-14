@@ -21,6 +21,8 @@ logger.setLevel(logging.DEBUG)
 GIN_MODE="release"
 RLOG_LOG_LEVEL="DEBUG"
 RLOG_TIME_FORMAT='2006-01-02T15:04:05'
+
+# default database parameters
 DB_ADDR='tcp(localhost:3306)'
 DB_USER='letstalk'
 DB_PASS="uwletstalk"
@@ -29,9 +31,6 @@ DB_PASS="uwletstalk"
 GOPATH = os.environ['GOPATH']
 GO_BINARY = "/usr/bin/go"
 SERVER=f"{GOPATH}/src/letstalk/server"
-NGINX_CONFIG_FILE="hiveapp.nginx.conf"
-NGINX_CONFIG_PATH=""
-NGINX_INSTALL_PATH="/etc/nginx/sites-available/"
 
 def usage():
   print (
@@ -47,32 +46,29 @@ def get_args():
         action="store_true",
         help="Whether to run the server in production mode",
     )
-    return parser.parse_args()
-
-def provision_nginx():
-    """
-    Install nginx ssl certs and restart the server
-    """
-    template_file(
-        file_path=os.path.join(NGINX_CONFIG_PATH, NGINX_CONFIG_FILE),
-        out_path=os.path.join(NGINX_INSTALL_PATH, NGINX_CONFIG_FILE),
-        fill_in_dict={
-        },
+    parser.add_argument(
+        "--db_addr",
+        default=DB_ADDR,
+        help="The address of the db to connect to",
     )
-
-    # copy ssl certs to folder
-    os.makedirs("/etc/nginx/ssl/hiveapp")
-    copytree("dev_certs/", "/etc/nginx/ssl/hiveapp/")
-
-    # restart nginx
-    run(["service" "nginx", "restart"])
+    parser.add_argument(
+        "--db_user",
+        default=DB_USER,
+        help="Username to connect to db with",
+    )
+    parser.add_argument(
+        "--db_pass",
+        default=DB_PASS,
+        help="Password to connect to db with",
+    )
+    return parser.parse_args()
 
 def main():
     args = get_args()
     env = os.environ.update({
-        "DB_ADDR": DB_ADDR,
-        "DB_USER": DB_USER,
-        "DB_PASS": DB_PASS,
+        "DB_ADDR": args.db_addr,
+        "DB_USER": args.db_user,
+        "DB_PASS": args.db_pass,
         "RLOG_LOG_LEVEL": RLOG_LOG_LEVEL,
         "GOPATH": GOPATH,
     })
