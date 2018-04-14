@@ -14,15 +14,15 @@ This is the main messenger service. All backend code lives here.
 Scripts to help with administration of servers
 
 ## Quickstart
-Build a docker container and launch the container.
+Build a docker container and launch the container. Note this will rebuild the server on each file change.
 ```
 ./dev.sh
 ```
 
-See the respective project folders for installation instructions.
+## Infrastructure
 
-# Infrastructure
 ## Build and startup server on ec2
+Run the following command on ec2 server.
 ```
 docker-compose up --build
 ```
@@ -35,4 +35,5 @@ docker push andrewcodispoti/hive
 ```
 
 ## Push new files to server
+The following script provides an easy way to push files to ec2 in the event we dont want to keep a git repo on the server.
 ```python infra/push_files.py FILES --destination="~" --username=andrew --private_key=~/.ssh/id_rsa```
