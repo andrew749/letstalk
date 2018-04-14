@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TO BE RUN ON SERVER RUNNING DOCKER
+# Used for development environment.
 
 # setup latest git hooks
 cp hooks/* .git/hooks
@@ -15,5 +15,5 @@ if [$? -ne 0]; then
     exit 1
 fi
 
-echo "Starting Container"
+echo "Building and Watching"
 docker run -it -p 80:3000 -v $(pwd)/server:/go/src/letstalk/server hive:latest
