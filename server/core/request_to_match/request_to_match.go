@@ -34,7 +34,7 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 }
 
 type RemoveUserCredentialRequest struct {
-	CredentialId uint `json:"credentialId"`
+	CredentialId api.CredentialId `json:"credentialId"`
 }
 
 func RemoveUserCredentialController(c *ctx.Context) errs.Error {

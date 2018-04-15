@@ -1,6 +1,7 @@
 import Immutable from 'immutable';
+import { Action } from 'redux'
 
-import { Credential } from '../../models/credential';
+import { CredentialWithId } from '../../models/credential';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -10,16 +11,28 @@ import {
 } from '../actions';
 
 export enum TypeKeys {
-  FETCH = 'CREDENTIALS/FETCH',
+  FETCH            = 'CREDENTIALS/FETCH',
+  ADD_CREDENTIAL   = 'CREDENTIALS/ADD_CREDENTIAL',
 }
 
-type Credentials = Immutable.List<Credential>;
+export type CredentialStates = 'normal' | 'deleting';
 
-type CredentialEditReceiveAction = FetchReceiveAction<TypeKeys.FETCH, Credentials>;
+export interface CredentialWithState extends CredentialWithId {
+  readonly state: CredentialStates;
+}
+
+export type CredentialsWithState = Immutable.List<CredentialWithState>;
+
+type CredentialEditReceiveAction = FetchReceiveAction<TypeKeys.FETCH, CredentialsWithState>;
 type CredentialEditErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type CredentialEditStartAction = FetchStartAction<TypeKeys.FETCH>;
 
-function receive(data: Credentials): CredentialEditReceiveAction {
+export interface CredentialAddAction extends Action {
+  readonly type: TypeKeys.ADD_CREDENTIAL;
+  readonly credentialWithId: CredentialWithId;
+}
+
+function receive(data: CredentialsWithState): CredentialEditReceiveAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.RECEIVE,
@@ -42,7 +55,14 @@ function start(): CredentialEditStartAction {
   };
 }
 
-const fetch: FetchActionCreators<TypeKeys.FETCH, Credentials> = {
+export function credentialAdd(credentialWithId: CredentialWithId): CredentialAddAction {
+  return {
+    type: TypeKeys.ADD_CREDENTIAL,
+    credentialWithId,
+  };
+}
+
+const fetch: FetchActionCreators<TypeKeys.FETCH, CredentialsWithState> = {
   receive,
   error,
   start,
@@ -54,3 +74,4 @@ export type ActionTypes =
   | CredentialEditReceiveAction
   | CredentialEditErrorAction
   | CredentialEditStartAction
+  | CredentialAddAction

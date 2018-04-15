@@ -40,6 +40,8 @@ var validPairs = []ValidCredentialPair{
 	},
 }
 
+type CredentialId int
+
 type CredentialPair struct {
 	PositionId     data.CredentialPositionId     `json:"positionId"`
 	OrganizationId data.CredentialOrganizationId `json:"organizationId"`
@@ -50,6 +52,11 @@ type Credential struct {
 	PositionName     string                        `json:"positionName"`
 	OrganizationId   data.CredentialOrganizationId `json:"organizationId"`
 	OrganizationName string                        `json:"organizationName"`
+}
+
+type CredentialWithId struct {
+	Credential
+	CredentialId CredentialId `json:"credentialId"`
 }
 
 // Returns a struct contain all info required to generate all possible credential options, where
@@ -93,13 +100,13 @@ func getUserCredentialsInner(
 	userId int,
 	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
 	posMap map[data.CredentialPositionId]data.CredentialPosition,
-) ([]Credential, errs.Error) {
+) ([]CredentialWithId, errs.Error) {
 	var userCredentials []data.UserCredential
 	if err := db.Where("user_id = ?", userId).Find(&userCredentials).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
-	credentials := make([]Credential, len(userCredentials))
+	credentials := make([]CredentialWithId, len(userCredentials))
 	for i, userCredential := range userCredentials {
 		org, orgOk := orgMap[userCredential.OrganizationId]
 		if !orgOk {
@@ -113,17 +120,20 @@ func getUserCredentialsInner(
 				userCredential.PositionId))
 		}
 
-		credentials[i] = Credential{
-			PositionId:       userCredential.PositionId,
-			PositionName:     pos.Name,
-			OrganizationId:   userCredential.OrganizationId,
-			OrganizationName: org.Name,
+		credentials[i] = CredentialWithId{
+			CredentialId: CredentialId(userCredential.ID),
+			Credential: Credential{
+				PositionId:       userCredential.PositionId,
+				PositionName:     pos.Name,
+				OrganizationId:   userCredential.OrganizationId,
+				OrganizationName: org.Name,
+			},
 		}
 	}
 	return credentials, nil
 }
 
-func GetUserCredentials(db *gorm.DB, userId int) ([]Credential, errs.Error) {
+func GetUserCredentials(db *gorm.DB, userId int) ([]CredentialWithId, errs.Error) {
 	orgMap := data.BuildOrganizationIdIndex()
 	posMap := data.BuildPositionIdIndex()
 	return getUserCredentialsInner(db, userId, orgMap, posMap)
@@ -161,7 +171,7 @@ func AddUserCredential(db *gorm.DB, userId int, credential CredentialPair) (*uin
 	return &newUserCred.ID, nil
 }
 
-func RemoveUserCredential(db *gorm.DB, userId int, credentialId uint) errs.Error {
+func RemoveUserCredential(db *gorm.DB, userId int, credentialId CredentialId) errs.Error {
 	err := db.Where("id = ? AND user_id = ?", credentialId, userId).Delete(
 		data.UserCredential{}).Error
 	if err != nil {

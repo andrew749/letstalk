@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   Button as ReactNativeButton,
   Linking,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -57,7 +56,7 @@ class RequestToMatchView extends Component<Props> {
     await this.props.fetchCredentialOptions();
   }
 
-  private onSelect(elem: CredentialFilterableElement) {
+  private async onSelect(elem: CredentialFilterableElement): Promise<void> {
     console.log(elem);
   }
 

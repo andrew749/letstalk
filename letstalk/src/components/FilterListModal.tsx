@@ -20,7 +20,7 @@ interface FilterableElement {
 
 interface Props {
   data: Immutable.List<FilterableElement>;
-  onSelect(elem: FilterableElement): void;
+  onSelect(elem: FilterableElement): Promise<void>;
   placeholder: string;
 }
 

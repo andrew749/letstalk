@@ -1,5 +1,5 @@
 // DEV
-export const BASE_URL = 'http://192.168.0.6:3000';
+export const BASE_URL = 'http://192.168.0.12:3000';
 // PROD
 // export const BASE_URL = 'http://54.175.152.141';
 
@@ -13,3 +13,4 @@ export const SIGNUP_ROUTE             = '/v1/signup';
 export const USER_VECTOR_ROUTE        = '/v1/user_vector';
 export const CREDENTIAL_OPTIONS_ROUTE = '/v1/credential_options';
 export const CREDENTIALS_ROUTE        = '/v1/credentials';
+export const CREDENTIAL_ROUTE         = '/v1/credential';

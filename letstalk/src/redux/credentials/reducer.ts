@@ -9,18 +9,20 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credential } from '../../models/credential';
+import { Credential, CredentialWithId } from '../../models/credential';
 import {
+  credentialAdd,
+  CredentialStates,
+  CredentialWithState,
+  CredentialsWithState,
   fetch,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import requestToMatchService from '../../services/request-to-match-service';
 
-type Credentials = Immutable.List<Credential>
-
 export interface State {
-  readonly credentials?: Credentials;
+  readonly credentialsWithState?: CredentialsWithState;
   readonly fetchState: FetchState;
 }
 
@@ -34,11 +36,24 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       return {
         ...state,
         fetchState: fetchStateReducer(action),
-        credentials: getDataOrCur(action, state.credentials),
+        credentialsWithState: getDataOrCur(action, state.credentialsWithState),
+      };
+    case TypeKeys.ADD_CREDENTIAL:
+      const newCredentialWithState: CredentialWithState = {
+        ...action.credentialWithId,
+        state: 'normal',
+      };
+      const credentialsWithState = state.credentialsWithState ?
+        state.credentialsWithState.push(newCredentialWithState) :
+        Immutable.List([newCredentialWithState]);
+
+      return {
+        ...state,
+        credentialsWithState,
       };
     default:
       // Ensure exhaustiveness of select
-      const _: never = action.type;
+      const _: never = action;
       return state;
   }
 };
@@ -49,11 +64,26 @@ const fetchCredentials: ActionCreator<
     dispatch(fetch.start());
     try {
       const data = await requestToMatchService.getCredentials();
-      return dispatch(fetch.receive(data));
+      const credentialsWithState = data.map(credentialWithId => {
+        return {
+          ...credentialWithId,
+          state: 'normal' as CredentialStates,
+        };
+      }).toList();
+      return dispatch(fetch.receive(credentialsWithState));
     } catch(e) {
       return dispatch(fetch.error(e.message));
     }
   };
 }
 
-export { fetchCredentials };
+// TODO: Make your own ActionCreator type, since this never checks the types of the param.
+const addCredential: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (credential: Credential) => {
+  return async (dispatch: Dispatch<State>) => {
+    const credentialId = await requestToMatchService.addCredential(credential);
+    return dispatch(credentialAdd({ ...credential, credentialId }));
+  };
+}
+
+export { addCredential, fetchCredentials };
