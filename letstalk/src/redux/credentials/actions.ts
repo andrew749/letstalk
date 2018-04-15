@@ -11,8 +11,10 @@ import {
 } from '../actions';
 
 export enum TypeKeys {
-  FETCH            = 'CREDENTIALS/FETCH',
-  ADD_CREDENTIAL   = 'CREDENTIALS/ADD_CREDENTIAL',
+  FETCH                = 'CREDENTIALS/FETCH',
+  ADD_CREDENTIAL       = 'CREDENTIALS/ADD_CREDENTIAL',
+  SET_STATE_CREDENTIAL = 'CREDENTIALS/SET_STATE_CREDENTIAL',
+  REMOVE_CREDENTIAL    = 'CREDENTIALS/REMOVE_CREDENTIAL',
 }
 
 export type CredentialStates = 'normal' | 'deleting';
@@ -30,6 +32,17 @@ type CredentialEditStartAction = FetchStartAction<TypeKeys.FETCH>;
 export interface CredentialAddAction extends Action {
   readonly type: TypeKeys.ADD_CREDENTIAL;
   readonly credentialWithId: CredentialWithId;
+}
+
+export interface CredentialSetStateAction extends Action {
+  readonly type: TypeKeys.SET_STATE_CREDENTIAL;
+  readonly credentialId: number;
+  readonly state: CredentialStates;
+}
+
+export interface CredentialRemoveAction extends Action {
+  readonly type: TypeKeys.REMOVE_CREDENTIAL;
+  readonly credentialId: number;
 }
 
 function receive(data: CredentialsWithState): CredentialEditReceiveAction {
@@ -62,6 +75,24 @@ export function credentialAdd(credentialWithId: CredentialWithId): CredentialAdd
   };
 }
 
+export function credentialSetState(
+  credentialId: number,
+  state: CredentialStates,
+): CredentialSetStateAction {
+  return {
+    type: TypeKeys.SET_STATE_CREDENTIAL,
+    credentialId,
+    state,
+  };
+}
+
+export function credentialRemove(credentialId: number): CredentialRemoveAction {
+  return {
+    type: TypeKeys.REMOVE_CREDENTIAL,
+    credentialId,
+  };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, CredentialsWithState> = {
   receive,
   error,
@@ -75,3 +106,5 @@ export type ActionTypes =
   | CredentialEditErrorAction
   | CredentialEditStartAction
   | CredentialAddAction
+  | CredentialRemoveAction
+  | CredentialSetStateAction

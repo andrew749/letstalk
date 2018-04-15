@@ -81,8 +81,8 @@ class FilterListModal extends Component<Props, State> {
   }
 
   private renderElement(elem: FilterableElement) {
-    const onPress = () => {
-      this.props.onSelect(elem);
+    const onPress = async () => {
+      await this.props.onSelect(elem);
       this.setState({
         curValue: '',
         filteredElements: this.props.data,

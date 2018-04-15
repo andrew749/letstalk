@@ -25,6 +25,7 @@ import {
   State as CredentialsState,
   addCredential,
   fetchCredentials,
+  removeCredential,
 } from '../redux/credentials/reducer';
 import {
   State as CredentialOptionsState,
@@ -37,6 +38,8 @@ import { CredentialPair, CredentialFilterableElement } from '../models/credentia
 
 interface DispatchActions {
   addCredential: ActionCreator<
+    ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
+  removeCredential: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   fetchCredentials: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
@@ -78,24 +81,40 @@ class CredentialEditView extends Component<Props> {
     }
     return credentialsWithState.map(credentialWithState => {
       const {
+        state,
         credentialId,
         organizationName,
         positionName,
       } = credentialWithState;
-      const name = `${positionName} at ${organizationName}`;
-      return (
-        <Card key={credentialId} style={styles.credentialCard}>
-          <Text style={styles.credential}>{name}</Text>
-          <TouchableOpacity style={styles.delete}>
-            <MaterialIcons name="delete" size={24} />
-          </TouchableOpacity>
-        </Card>
-      );
+      switch (state) {
+        case 'normal':
+          const name = `${positionName} at ${organizationName}`;
+          const onPress = async () => {
+            this.props.removeCredential(credentialId);
+          };
+          return (
+            <Card key={credentialId} style={styles.credentialCard}>
+              <Text style={styles.credential}>{name}</Text>
+              <TouchableOpacity onPress={onPress} style={styles.delete}>
+                <MaterialIcons name="delete" size={24} />
+              </TouchableOpacity>
+            </Card>
+          );
+        case 'deleting':
+          return (
+            <Card key={credentialId} style={styles.deletingCard}>
+              <ActivityIndicator />
+            </Card>
+          );
+        default:
+          // Ensure exhaustiveness of select
+          const _: never = state;
+      }
     });
   }
 
   private async onSelect(elem: CredentialFilterableElement): Promise<void> {
-    this.props.addCredential(elem);
+    await this.props.addCredential(elem);
   }
 
   private renderBody() {
@@ -139,7 +158,7 @@ export default connect(
   ({ credentials, credentialOptions }: RootState) => {
     return { credentials, credentialOptions };
   },
-  { addCredential, fetchCredentials, fetchCredentialOptions }
+  { addCredential, fetchCredentials, fetchCredentialOptions, removeCredential },
 )(CredentialEditView);
 
 const styles = StyleSheet.create({
@@ -154,6 +173,9 @@ const styles = StyleSheet.create({
   },
   credentialCard: {
     flexDirection: 'row',
+  },
+  deletingCard: {
+    alignItems: 'center',
   },
   credential: {
     fontWeight: 'bold',

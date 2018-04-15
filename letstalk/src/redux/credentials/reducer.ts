@@ -12,6 +12,8 @@ import {
 import { Credential, CredentialWithId } from '../../models/credential';
 import {
   credentialAdd,
+  credentialSetState,
+  credentialRemove,
   CredentialStates,
   CredentialWithState,
   CredentialsWithState,
@@ -31,6 +33,7 @@ const initialState: State = {
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
+  let newCredentialsWithState: CredentialsWithState = null;
   switch (action.type) {
     case TypeKeys.FETCH:
       return {
@@ -43,13 +46,34 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...action.credentialWithId,
         state: 'normal',
       };
-      const credentialsWithState = state.credentialsWithState ?
+      newCredentialsWithState = state.credentialsWithState ?
         state.credentialsWithState.push(newCredentialWithState) :
         Immutable.List([newCredentialWithState]);
 
       return {
         ...state,
-        credentialsWithState,
+        credentialsWithState: newCredentialsWithState,
+      };
+    case TypeKeys.SET_STATE_CREDENTIAL:
+      newCredentialsWithState = state.credentialsWithState ?
+        state.credentialsWithState.map(credentialWithState => {
+          return credentialWithState.credentialId === action.credentialId ?
+            { ...credentialWithState, state: action.state } : credentialWithState;
+        }).toList() : state.credentialsWithState;
+
+      return {
+        ...state,
+        credentialsWithState: newCredentialsWithState,
+      };
+    case TypeKeys.REMOVE_CREDENTIAL:
+      newCredentialsWithState = state.credentialsWithState ?
+        state.credentialsWithState.filter(credentialWithState => {
+          return credentialWithState.credentialId !== action.credentialId;
+        }).toList() : state.credentialsWithState;
+
+      return {
+        ...state,
+        credentialsWithState: newCredentialsWithState,
       };
     default:
       // Ensure exhaustiveness of select
@@ -86,4 +110,13 @@ const addCredential: ActionCreator<
   };
 }
 
-export { addCredential, fetchCredentials };
+const removeCredential: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (credentialId: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    dispatch(credentialSetState(credentialId, 'deleting'));
+    await requestToMatchService.removeCredential(credentialId);
+    return dispatch(credentialRemove(credentialId));
+  };
+}
+
+export { addCredential, fetchCredentials, removeCredential };
