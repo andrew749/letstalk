@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect, ActionCreator } from 'react-redux';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
@@ -18,6 +18,7 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
+import { ToastActionsCreators } from 'react-native-redux-toast';
 
 import { RootState } from '../redux';
 import { combineFetchStates } from '../redux/actions';
@@ -36,9 +37,17 @@ import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential
 import { ActionButton, Card, FilterListModal, Header, Loading } from '../components';
 import { CredentialPair, CredentialFilterableElement } from '../models/credential';
 
+// TODO: Move elsewhere
+function errorToast(message: string) {
+  return (dispatch: Dispatch<RootState>): Promise<void> => {
+    return dispatch(ToastActionsCreators.displayError(message, 2000));
+  };
+}
+
 interface DispatchActions {
   addCredential: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   removeCredential: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   fetchCredentials: ActionCreator<
@@ -90,7 +99,11 @@ class CredentialEditView extends Component<Props> {
         case 'normal':
           const name = `${positionName} at ${organizationName}`;
           const onPress = async () => {
-            this.props.removeCredential(credentialId);
+            try {
+              await this.props.removeCredential(credentialId);
+            } catch(e) {
+              await this.props.errorToast(e.message);
+            }
           };
           return (
             <Card key={credentialId} style={styles.credentialCard}>
@@ -114,7 +127,11 @@ class CredentialEditView extends Component<Props> {
   }
 
   private async onSelect(elem: CredentialFilterableElement): Promise<void> {
-    await this.props.addCredential(elem);
+    try {
+      await this.props.addCredential(elem);
+    } catch (e) {
+      await this.props.errorToast(e.message);
+    }
   }
 
   private renderBody() {
@@ -158,8 +175,13 @@ export default connect(
   ({ credentials, credentialOptions }: RootState) => {
     return { credentials, credentialOptions };
   },
-  { addCredential, fetchCredentials, fetchCredentialOptions, removeCredential },
-)(CredentialEditView);
+  {
+    addCredential,
+    errorToast,
+    fetchCredentials,
+    fetchCredentialOptions,
+    removeCredential,
+  })(CredentialEditView);
 
 const styles = StyleSheet.create({
   credentialContainer: {

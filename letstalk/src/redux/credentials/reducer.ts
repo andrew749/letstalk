@@ -24,12 +24,13 @@ import {
 import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
-  readonly credentialsWithState?: CredentialsWithState;
+  readonly credentialsWithState: CredentialsWithState;
   readonly fetchState: FetchState;
 }
 
 const initialState: State = {
   fetchState: initialFetchState,
+  credentialsWithState: Immutable.List(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -55,21 +56,19 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         credentialsWithState: newCredentialsWithState,
       };
     case TypeKeys.SET_STATE_CREDENTIAL:
-      newCredentialsWithState = state.credentialsWithState ?
-        state.credentialsWithState.map(credentialWithState => {
-          return credentialWithState.credentialId === action.credentialId ?
-            { ...credentialWithState, state: action.state } : credentialWithState;
-        }).toList() : state.credentialsWithState;
+      newCredentialsWithState = state.credentialsWithState.map(credentialWithState => {
+        return credentialWithState.credentialId === action.credentialId ?
+          { ...credentialWithState, state: action.state } : credentialWithState;
+      }).toList();
 
       return {
         ...state,
         credentialsWithState: newCredentialsWithState,
       };
     case TypeKeys.REMOVE_CREDENTIAL:
-      newCredentialsWithState = state.credentialsWithState ?
-        state.credentialsWithState.filter(credentialWithState => {
-          return credentialWithState.credentialId !== action.credentialId;
-        }).toList() : state.credentialsWithState;
+      newCredentialsWithState = state.credentialsWithState.filter(credentialWithState => {
+        return credentialWithState.credentialId !== action.credentialId;
+      }).toList();
 
       return {
         ...state,
@@ -113,7 +112,7 @@ const addCredential: ActionCreator<
 const removeCredential: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = (credentialId: number) => {
   return async (dispatch: Dispatch<State>) => {
-    dispatch(credentialSetState(credentialId, 'deleting'));
+    await dispatch(credentialSetState(credentialId, 'deleting'));
     await requestToMatchService.removeCredential(credentialId);
     return dispatch(credentialRemove(credentialId));
   };

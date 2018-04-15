@@ -26,7 +26,7 @@ import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
   readonly credentialOptions?: CredentialOptions;
-  readonly credentialElements?: Immutable.List<CredentialFilterableElement>;
+  readonly credentialElements: Immutable.List<CredentialFilterableElement>;
   readonly fetchState: FetchState;
 }
 
@@ -66,6 +66,7 @@ function buildCredentialElements(
 
 const initialState: State = {
   fetchState: initialFetchState,
+  credentialElements: Immutable.List(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -91,7 +92,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
 const fetchCredentialOptions: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = () => {
   return async (dispatch: Dispatch<State>) => {
-    dispatch(fetch.start());
+    await dispatch(fetch.start());
     try {
       const data = await requestToMatchService.getCredentialOptions();
       return dispatch(fetch.receive(data));

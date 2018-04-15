@@ -1,5 +1,6 @@
 import { combineReducers, Reducer } from 'redux';
 import { reducer as form, FormState } from 'redux-form';
+import { toastReducer as toast } from 'react-native-redux-toast';
 
 import { reducer as bootstrap, State as BootstrapState } from './bootstrap/reducer';
 import { reducer as onboarding, State as OnboardingState } from './onboarding/reducer';
@@ -22,6 +23,7 @@ const reducers = {
   credentialOptions,
   credentials,
   form,
+  toast,
   onboarding,
 };
 

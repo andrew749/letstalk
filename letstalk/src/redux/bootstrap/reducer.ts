@@ -47,10 +47,10 @@ export function reducer(state: State = initialState, action: ActionTypes): State
 const fetchBootstrap: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = () => {
   return async (dispatch: Dispatch<State>) => {
-    dispatch(fetch.start());
+    await dispatch(fetch.start());
     try {
       const data = await profileService.bootstrap();
-      dispatch(setOnboardingStatusAction(data.onboardingStatus));
+      await dispatch(setOnboardingStatusAction(data.onboardingStatus));
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e.message));

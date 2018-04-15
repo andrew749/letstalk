@@ -9,6 +9,7 @@ import thunk from 'redux-thunk';
 import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
+import { Toast } from 'react-native-redux-toast';
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -35,7 +36,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  toastMessageStyle: {
+    color: 'white',
+  },
 });
 
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
@@ -107,6 +111,7 @@ class App extends React.Component<Props, AppState> {
         <View style={{ flex: 1 }}>
           <AppNavigation />
           <Notification ref={(ref: any) => { this.notification = ref; }} />
+          <Toast messageStyle={styles.toastMessageStyle} />
         </View>
       </Provider>
     );
