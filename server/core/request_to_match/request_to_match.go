@@ -13,8 +13,10 @@ func GetCredentialOptionsController(c *ctx.Context) errs.Error {
 	return nil
 }
 
+// Credential CRUD
+
 type AddUserCredentialResponse struct {
-	CredentialId uint `json:"credentialId"`
+	CredentialId api.CredentialId `json:"credentialId"`
 }
 
 func AddUserCredentialController(c *ctx.Context) errs.Error {
@@ -58,5 +60,59 @@ func GetUserCredentialsController(c *ctx.Context) errs.Error {
 		return err
 	}
 	c.Result = userCredentials
+	return nil
+}
+
+// Credential Request CRUD
+
+type AddUserCredentialRequestResponse struct {
+	CredentialRequestId api.CredentialRequestId `json:"credentialRequestId"`
+}
+
+func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
+	var credential api.CredentialPair
+
+	if err := c.GinContext.BindJSON(&credential); err != nil {
+		return errs.NewClientError("Unable to parse request %s", err)
+	}
+
+	credentialId, err := api.AddUserCredentialRequest(c.Db, c.SessionData.UserId, credential)
+	if err != nil {
+		return err
+	}
+
+	c.Result = AddUserCredentialRequestResponse{*credentialId}
+	return nil
+}
+
+type RemoveUserCredentialRequestRequest struct {
+	CredentialRequestId api.CredentialRequestId `json:"credentialRequestId"`
+}
+
+func RemoveUserCredentialRequestController(c *ctx.Context) errs.Error {
+	var req RemoveUserCredentialRequestRequest
+
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewClientError("Unable to parse request %s", err)
+	}
+
+	if err := api.RemoveUserCredentialRequest(
+		c.Db,
+		c.SessionData.UserId,
+		req.CredentialRequestId,
+	); err != nil {
+		return err
+	}
+	c.Result = "Removed"
+
+	return nil
+}
+
+func GetUserCredentialRequestsController(c *ctx.Context) errs.Error {
+	userCredentialRequests, err := api.GetUserCredentialRequests(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return err
+	}
+	c.Result = userCredentialRequests
 	return nil
 }
