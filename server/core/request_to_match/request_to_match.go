@@ -26,7 +26,8 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Unable to parse request %s", err)
 	}
 
-	credentialId, err := api.AddUserCredential(c.Db, c.SessionData.UserId, credential)
+	s := api.UserCredentialStrategy{c.Db, c.SessionData.UserId}
+	credentialId, err := api.AddCredentialWithStrategy(s, credential)
 	if err != nil {
 		return err
 	}
@@ -46,7 +47,8 @@ func RemoveUserCredentialController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Unable to parse request %s", err)
 	}
 
-	if err := api.RemoveUserCredential(c.Db, c.SessionData.UserId, req.CredentialId); err != nil {
+	s := api.UserCredentialStrategy{c.Db, c.SessionData.UserId}
+	if err := s.DeleteCredentialForUser(req.CredentialId); err != nil {
 		return err
 	}
 	c.Result = "Removed"
@@ -55,7 +57,8 @@ func RemoveUserCredentialController(c *ctx.Context) errs.Error {
 }
 
 func GetUserCredentialsController(c *ctx.Context) errs.Error {
-	userCredentials, err := api.GetUserCredentials(c.Db, c.SessionData.UserId)
+	s := api.UserCredentialStrategy{c.Db, c.SessionData.UserId}
+	userCredentials, err := api.GetCredentialsWithStrategy(s)
 	if err != nil {
 		return err
 	}
@@ -76,12 +79,13 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Unable to parse request %s", err)
 	}
 
-	credentialId, err := api.AddUserCredentialRequest(c.Db, c.SessionData.UserId, credential)
+	s := api.UserCredentialRequestStrategy{c.Db, c.SessionData.UserId}
+	credentialId, err := api.AddCredentialWithStrategy(s, credential)
 	if err != nil {
 		return err
 	}
 
-	c.Result = AddUserCredentialRequestResponse{*credentialId}
+	c.Result = AddUserCredentialRequestResponse{api.CredentialRequestId(*credentialId)}
 	return nil
 }
 
@@ -96,11 +100,8 @@ func RemoveUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Unable to parse request %s", err)
 	}
 
-	if err := api.RemoveUserCredentialRequest(
-		c.Db,
-		c.SessionData.UserId,
-		req.CredentialRequestId,
-	); err != nil {
+	s := api.UserCredentialRequestStrategy{c.Db, c.SessionData.UserId}
+	if err := s.DeleteCredentialForUser(api.CredentialId(req.CredentialRequestId)); err != nil {
 		return err
 	}
 	c.Result = "Removed"
@@ -109,10 +110,20 @@ func RemoveUserCredentialRequestController(c *ctx.Context) errs.Error {
 }
 
 func GetUserCredentialRequestsController(c *ctx.Context) errs.Error {
-	userCredentialRequests, err := api.GetUserCredentialRequests(c.Db, c.SessionData.UserId)
+	s := api.UserCredentialRequestStrategy{c.Db, c.SessionData.UserId}
+	credentials, err := api.GetCredentialsWithStrategy(s)
 	if err != nil {
 		return err
 	}
-	c.Result = userCredentialRequests
+
+	credentialRequests := make([]api.CredentialRequestWithId, len(credentials))
+	for i, credential := range credentials {
+		credentialRequests[i] = api.CredentialRequestWithId{
+			Credential:          credential.Credential,
+			CredentialRequestId: api.CredentialRequestId(credential.CredentialId),
+		}
+	}
+
+	c.Result = credentialRequests
 	return nil
 }

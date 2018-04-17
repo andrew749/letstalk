@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 
 	"letstalk/server/core/errs"
@@ -55,8 +54,6 @@ func GetCredentialOptions() CredentialOptions {
 
 // Credentials
 
-type CredentialId int
-
 type CredentialPair struct {
 	PositionId     data.CredentialPositionId     `json:"positionId"`
 	OrganizationId data.CredentialOrganizationId `json:"organizationId"`
@@ -65,6 +62,15 @@ type CredentialPair struct {
 type CredentialPairWithId struct {
 	CredentialPair
 	CredentialId CredentialId `json:"credentialId"`
+}
+
+type CredentialId int
+
+type CredentialStrategy interface {
+	GetCredentialsForUser() ([]CredentialPairWithId, errs.Error)
+	CreateCredentialForUser(credentialPair CredentialPair) (*CredentialId, errs.Error)
+	DeleteCredentialForUser(credentialId CredentialId) errs.Error
+	NewDuplicateError() errs.Error
 }
 
 type Credential struct {
@@ -83,16 +89,15 @@ func validateCredential(
 	credential CredentialPair,
 	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
 	posMap map[data.CredentialPositionId]data.CredentialPosition,
-) error {
+) errs.Error {
 	org, orgOk := orgMap[credential.OrganizationId]
 	if !orgOk {
-		return errors.New(fmt.Sprintf("Invalid organization id %d",
-			credential.OrganizationId))
+		return errs.NewClientError(fmt.Sprintf("Invalid organization id %d", credential.OrganizationId))
 	}
 
 	pos, posOk := posMap[credential.PositionId]
 	if !posOk {
-		return errors.New(fmt.Sprintf("Invalid position id %d", credential.PositionId))
+		return errs.NewClientError(fmt.Sprintf("Invalid position id %d", credential.PositionId))
 	}
 
 	for _, pair := range validPairs {
@@ -100,7 +105,7 @@ func validateCredential(
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprintf("Invalid organization type, position type pair (%d, %d)",
+	return errs.NewClientError(fmt.Sprintf("Invalid organization type, position type pair (%d, %d)",
 		org.Type, pos.Type))
 }
 
@@ -136,14 +141,14 @@ func resolveCredentialNames(
 	return credentials, nil
 }
 
-func getUserCredentialsInner(
-	db *gorm.DB,
-	userId int,
-	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
-	posMap map[data.CredentialPositionId]data.CredentialPosition,
-) ([]CredentialWithId, errs.Error) {
+type UserCredentialStrategy struct {
+	Db     *gorm.DB
+	UserId int
+}
+
+func (s UserCredentialStrategy) GetCredentialsForUser() ([]CredentialPairWithId, errs.Error) {
 	var userCredentials []data.UserCredential
-	if err := db.Where("user_id = ?", userId).Find(&userCredentials).Error; err != nil {
+	if err := s.Db.Where("user_id = ?", s.UserId).Find(&userCredentials).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
@@ -157,18 +162,61 @@ func getUserCredentialsInner(
 			CredentialId: CredentialId(userCredential.ID),
 		}
 	}
+
+	return credentialPairs, nil
+}
+
+func (s UserCredentialStrategy) CreateCredentialForUser(
+	credentialPair CredentialPair,
+) (*CredentialId, errs.Error) {
+	newUserCred := data.UserCredential{
+		UserId:         s.UserId,
+		PositionId:     credentialPair.PositionId,
+		OrganizationId: credentialPair.OrganizationId,
+	}
+	if err := s.Db.Create(&newUserCred).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	credentialId := CredentialId(newUserCred.ID)
+	return &credentialId, nil
+}
+
+func (s UserCredentialStrategy) DeleteCredentialForUser(
+	credentialId CredentialId,
+) errs.Error {
+	err := s.Db.Where("id = ? AND user_id = ?", credentialId, s.UserId).Delete(
+		data.UserCredential{}).Error
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	return nil
+}
+
+func (s UserCredentialStrategy) NewDuplicateError() errs.Error {
+	return errs.NewClientError("You already have this credential")
+}
+
+func getCredentialsWithStrategyInner(
+	s CredentialStrategy,
+	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
+	posMap map[data.CredentialPositionId]data.CredentialPosition,
+) ([]CredentialWithId, errs.Error) {
+	credentialPairs, err := s.GetCredentialsForUser()
+	if err != nil {
+		return nil, err
+	}
 	return resolveCredentialNames(credentialPairs, orgMap, posMap)
 }
 
-func GetUserCredentials(db *gorm.DB, userId int) ([]CredentialWithId, errs.Error) {
+func GetCredentialsWithStrategy(s CredentialStrategy) ([]CredentialWithId, errs.Error) {
 	orgMap := data.BuildOrganizationIdIndex()
 	posMap := data.BuildPositionIdIndex()
-	return getUserCredentialsInner(db, userId, orgMap, posMap)
+	return getCredentialsWithStrategyInner(s, orgMap, posMap)
 }
 
-func AddUserCredential(
-	db *gorm.DB,
-	userId int,
+func AddCredentialWithStrategy(
+	s CredentialStrategy,
 	credential CredentialPair,
 ) (*CredentialId, errs.Error) {
 	orgMap := data.BuildOrganizationIdIndex()
@@ -178,43 +226,22 @@ func AddUserCredential(
 		return nil, errs.NewClientError(err.Error())
 	}
 
-	userCredentials, err := getUserCredentialsInner(db, userId, orgMap, posMap)
+	existingCreds, err := getCredentialsWithStrategyInner(s, orgMap, posMap)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, userCred := range userCredentials {
-		if userCred.OrganizationId == credential.OrganizationId &&
-			userCred.PositionId == credential.PositionId {
-			return nil, errs.NewClientError("You already have this credential")
+	for _, existingCred := range existingCreds {
+		if existingCred.OrganizationId == credential.OrganizationId &&
+			existingCred.PositionId == credential.PositionId {
+			return nil, s.NewDuplicateError()
 		}
 	}
 
-	newUserCred := data.UserCredential{
-		UserId:         userId,
-		PositionId:     credential.PositionId,
-		OrganizationId: credential.OrganizationId,
-	}
-	if err := db.Create(&newUserCred).Error; err != nil {
-		return nil, errs.NewDbError(err)
-	}
-
-	credentialId := CredentialId(newUserCred.ID)
-	return &credentialId, nil
-}
-
-func RemoveUserCredential(db *gorm.DB, userId int, credentialId CredentialId) errs.Error {
-	err := db.Where("id = ? AND user_id = ?", credentialId, userId).Delete(
-		data.UserCredential{}).Error
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	return nil
+	return s.CreateCredentialForUser(credential)
 }
 
 // Credential Requests
-
-// TODO: Get rid of duplicate code by using interfaces
 
 type CredentialRequestId int
 
@@ -223,14 +250,17 @@ type CredentialRequestWithId struct {
 	CredentialRequestId CredentialRequestId `json:"credentialRequestId"`
 }
 
-func getUserCredentialRequestsInner(
-	db *gorm.DB,
-	userId int,
-	orgMap map[data.CredentialOrganizationId]data.CredentialOrganization,
-	posMap map[data.CredentialPositionId]data.CredentialPosition,
-) ([]CredentialRequestWithId, errs.Error) {
+type UserCredentialRequestStrategy struct {
+	Db     *gorm.DB
+	UserId int
+}
+
+func (s UserCredentialRequestStrategy) GetCredentialsForUser() (
+	[]CredentialPairWithId,
+	errs.Error,
+) {
 	var userRequests []data.UserCredentialRequest
-	if err := db.Where("user_id = ?", userId).Find(&userRequests).Error; err != nil {
+	if err := s.Db.Where("user_id = ?", s.UserId).Find(&userRequests).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
@@ -244,76 +274,36 @@ func getUserCredentialRequestsInner(
 			CredentialId: CredentialId(userRequest.ID),
 		}
 	}
-	credentials, err := resolveCredentialNames(credentialPairs, orgMap, posMap)
-	if err != nil {
-		return nil, err
-	}
-
-	credentialRequests := make([]CredentialRequestWithId, len(credentials))
-	for i, credential := range credentials {
-		credentialRequests[i] = CredentialRequestWithId{
-			Credential:          credential.Credential,
-			CredentialRequestId: CredentialRequestId(credential.CredentialId),
-		}
-	}
-	return credentialRequests, nil
+	return credentialPairs, nil
 }
 
-func GetUserCredentialRequests(
-	db *gorm.DB,
-	userId int,
-) ([]CredentialRequestWithId, errs.Error) {
-	orgMap := data.BuildOrganizationIdIndex()
-	posMap := data.BuildPositionIdIndex()
-	return getUserCredentialRequestsInner(db, userId, orgMap, posMap)
-}
-
-func AddUserCredentialRequest(
-	db *gorm.DB,
-	userId int,
-	credential CredentialPair,
-) (*CredentialRequestId, errs.Error) {
-	orgMap := data.BuildOrganizationIdIndex()
-	posMap := data.BuildPositionIdIndex()
-
-	if err := validateCredential(credential, orgMap, posMap); err != nil {
-		return nil, errs.NewClientError(err.Error())
-	}
-
-	userRequests, err := getUserCredentialRequestsInner(db, userId, orgMap, posMap)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, userRequest := range userRequests {
-		if userRequest.OrganizationId == credential.OrganizationId &&
-			userRequest.PositionId == credential.PositionId {
-			return nil, errs.NewClientError("You have already requested this credential")
-		}
-	}
-
+func (s UserCredentialRequestStrategy) CreateCredentialForUser(
+	credentialPair CredentialPair,
+) (*CredentialId, errs.Error) {
 	newReq := data.UserCredentialRequest{
-		UserId:         userId,
-		PositionId:     credential.PositionId,
-		OrganizationId: credential.OrganizationId,
+		UserId:         s.UserId,
+		PositionId:     credentialPair.PositionId,
+		OrganizationId: credentialPair.OrganizationId,
 	}
-	if err := db.Create(&newReq).Error; err != nil {
+	if err := s.Db.Create(&newReq).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
-	credentialRequestId := CredentialRequestId(newReq.ID)
-	return &credentialRequestId, nil
+	credentialId := CredentialId(newReq.ID)
+	return &credentialId, nil
 }
 
-func RemoveUserCredentialRequest(
-	db *gorm.DB,
-	userId int,
-	credentialRequestId CredentialRequestId,
+func (s UserCredentialRequestStrategy) DeleteCredentialForUser(
+	credentialId CredentialId,
 ) errs.Error {
-	err := db.Where("id = ? AND user_id = ?", credentialRequestId, userId).Delete(
+	err := s.Db.Where("id = ? AND user_id = ?", credentialId, s.UserId).Delete(
 		data.UserCredentialRequest{}).Error
 	if err != nil {
 		return errs.NewDbError(err)
 	}
 	return nil
+}
+
+func (s UserCredentialRequestStrategy) NewDuplicateError() errs.Error {
+	return errs.NewClientError("You have already requested this credential")
 }
