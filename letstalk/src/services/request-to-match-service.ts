@@ -9,12 +9,15 @@ import {
   CredentialOrganization,
   CredentialPosition,
   CredentialFilterableElement,
+  CredentialRequest,
   ValidCredentialPair,
 } from '../models/credential';
 import {
   CREDENTIAL_OPTIONS_ROUTE,
   CREDENTIAL_ROUTE,
   CREDENTIALS_ROUTE,
+  CREDENTIAL_REQUEST_ROUTE,
+  CREDENTIAL_REQUESTS_ROUTE,
 } from './constants';
 
 export interface RequestToMatchService {
@@ -35,6 +38,16 @@ interface AddCredentialResponse {
 
 interface RemoveCredentialRequest {
   credentialId: number;
+}
+
+type GetCredentialRequestsResponse = Array<CredentialRequest>
+
+interface AddCredentialRequestResponse {
+  credentialRequestId: number;
+}
+
+interface RemoveCredentialRequestRequest {
+  credentialRequestId: number;
 }
 
 export class RemoteRequestToMatchService implements RequestToMatchService {
@@ -74,6 +87,26 @@ export class RemoteRequestToMatchService implements RequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const request: RemoveCredentialRequest = { credentialId };
     await this.requestor.delete(CREDENTIAL_ROUTE, request, sessionToken);
+  }
+
+  async getCredentialRequests(): Promise<Immutable.List<CredentialRequest>> {
+    const sessionToken = await auth.getSessionToken();
+    const response: GetCredentialRequestsResponse =
+      await this.requestor.get(CREDENTIAL_REQUESTS_ROUTE, sessionToken);
+    return Immutable.List(response);
+  }
+
+  async addCredentialRequest(credential: CredentialPair): Promise<number> {
+    const sessionToken = await auth.getSessionToken();
+    const response: AddCredentialRequestResponse =
+      await this.requestor.post(CREDENTIAL_REQUEST_ROUTE, credential, sessionToken);
+    return response.credentialRequestId;
+  }
+
+  async removeCredentialRequest(credentialRequestId: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const request: RemoveCredentialRequestRequest = { credentialRequestId };
+    await this.requestor.delete(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
   }
 }
 

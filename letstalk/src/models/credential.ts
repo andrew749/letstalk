@@ -39,6 +39,10 @@ export interface CredentialWithId extends Credential {
   readonly credentialId: number;
 }
 
+export interface CredentialRequest extends Credential {
+  readonly credentialRequestId: number;
+}
+
 export interface CredentialOrganization {
   readonly id: number;
   readonly name: string;

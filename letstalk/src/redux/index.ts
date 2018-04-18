@@ -6,6 +6,10 @@ import { reducer as bootstrap, State as BootstrapState } from './bootstrap/reduc
 import { reducer as onboarding, State as OnboardingState } from './onboarding/reducer';
 import { reducer as credentials, State as CredentialsState } from './credentials/reducer';
 import {
+  reducer as credentialRequests,
+  State as CredentialRequestsState,
+} from './credential-requests/reducer';
+import {
   reducer as credentialOptions,
   State as CredentialOptionsState,
 } from './credential-options/reducer';
@@ -13,6 +17,7 @@ import {
 export interface RootState {
   bootstrap: BootstrapState;
   credentialOptions: CredentialOptionsState,
+  credentialRequests: CredentialRequestsState,
   credentials: CredentialsState,
   form: FormState;
   onboarding: OnboardingState;
@@ -21,6 +26,7 @@ export interface RootState {
 const reducers = {
   bootstrap,
   credentialOptions,
+  credentialRequests,
   credentials,
   form,
   toast,

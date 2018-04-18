@@ -18,9 +18,9 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ToastActionsCreators } from 'react-native-redux-toast';
 
 import { RootState } from '../redux';
+import { errorToast } from '../redux/toast';
 import { combineFetchStates } from '../redux/actions';
 import {
   State as CredentialsState,
@@ -36,13 +36,6 @@ import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/acti
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Card, FilterListModal, Header, Loading } from '../components';
 import { CredentialPair, CredentialFilterableElement } from '../models/credential';
-
-// TODO: Move elsewhere
-function errorToast(message: string) {
-  return (dispatch: Dispatch<RootState>): Promise<void> => {
-    return dispatch(ToastActionsCreators.displayError(message, 2000));
-  };
-}
 
 interface DispatchActions {
   addCredential: ActionCreator<
@@ -174,8 +167,7 @@ class CredentialEditView extends Component<Props> {
 export default connect(
   ({ credentials, credentialOptions }: RootState) => {
     return { credentials, credentialOptions };
-  },
-  {
+  }, {
     addCredential,
     errorToast,
     fetchCredentials,
