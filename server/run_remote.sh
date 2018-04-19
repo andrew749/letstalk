@@ -26,7 +26,7 @@ if [[ -z "$DB_USER" ]]; then
 fi
 
 if [[ -z $PROD ]]; then
-    python3 run_local.py --db_addr="$DB_ADDR" --db_user="$DB_USER" --db_pass="$DB_PASS"
-else
     python3 run_local.py
+else
+    python3 run_local.py --db_addr="$DB_ADDR" --db_user="$DB_USER" --db_pass="$DB_PASS"
 fi
