@@ -9,6 +9,7 @@ import (
 	"letstalk/server/core/login"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/request_to_match"
 	"letstalk/server/core/sessions"
 	"net/http"
 	"time"
@@ -92,6 +93,46 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.GET(
 		"/bootstrap",
 		hw.wrapHandler(bootstrap.GetCurrentUserBoostrapStatusController, true),
+	)
+
+	// request-to-match endpoints
+
+	v1.OPTIONS("/credential_options")
+	v1.GET(
+		"/credential_options",
+		hw.wrapHandler(request_to_match.GetCredentialOptionsController, false),
+	)
+
+	v1.OPTIONS("/credential")
+	v1.POST(
+		"/credential",
+		hw.wrapHandler(request_to_match.AddUserCredentialController, true),
+	)
+	v1.DELETE(
+		"/credential",
+		hw.wrapHandler(request_to_match.RemoveUserCredentialController, true),
+	)
+
+	v1.OPTIONS("/credentials")
+	v1.GET(
+		"/credentials",
+		hw.wrapHandler(request_to_match.GetUserCredentialsController, true),
+	)
+
+	v1.OPTIONS("/credential_request")
+	v1.POST(
+		"/credential_request",
+		hw.wrapHandler(request_to_match.AddUserCredentialRequestController, true),
+	)
+	v1.DELETE(
+		"/credential_request",
+		hw.wrapHandler(request_to_match.RemoveUserCredentialRequestController, true),
+	)
+
+	v1.OPTIONS("/credential_requests")
+	v1.GET(
+		"/credential_requests",
+		hw.wrapHandler(request_to_match.GetUserCredentialRequestsController, true),
 	)
 
 	return router

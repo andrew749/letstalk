@@ -1,7 +1,9 @@
 import { Action } from 'redux';
 
+type States = 'prefetch' | 'fetching' | 'error' | 'success';
+
 export type FetchState = {
-  state: 'prefetch' | 'fetching' | 'error' | 'success';
+  state: States;
   errorMsg?: string;
 }
 
@@ -68,6 +70,21 @@ export function fetchStateReducer<P, D>(action: FetchActions<P, D>): FetchState 
       // Ensure exhaustiveness of select
       const _: never = action;
   }
+}
+
+export function combineFetchStates(fst: FetchState, snd: FetchState): FetchState {
+  const errorMsg = snd.errorMsg ?
+    (fst.errorMsg ? fst.errorMsg + ', ' + snd.errorMsg : snd.errorMsg) :
+    fst.errorMsg;
+  const possibleStates = ['prefetch', 'fetching', 'error', 'success'] as Array<States>;
+  const fstIdx = possibleStates.indexOf(fst.state);
+  const sndIdx = possibleStates.indexOf(snd.state);
+  const idx = fstIdx < sndIdx ? fstIdx : sndIdx;
+  const state = possibleStates[idx];
+  return {
+    errorMsg,
+    state,
+  };
 }
 
 const initialFetchState: FetchState = { state: 'prefetch' };

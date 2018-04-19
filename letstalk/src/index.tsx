@@ -9,16 +9,19 @@ import thunk from 'redux-thunk';
 import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
+import { Toast } from 'react-native-redux-toast';
 
 import appReducer from './redux';
 import auth from './services/auth';
 import AchievementsView from './views/AchievementsView';
+import CredentialEditView from './views/CredentialEditView';
 import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
+import RequestToMatchView from './views/RequestToMatchView';
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
@@ -33,7 +36,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f',
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  toastMessageStyle: {
+    color: 'white',
+  },
 });
 
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
@@ -48,6 +54,12 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Profile: {
     screen: ProfileView,
+  },
+  RequestToMatch: {
+    screen: RequestToMatchView,
+  },
+  CredentialEdit: {
+    screen: CredentialEditView,
   },
   Onboarding: {
     screen: OnboardingView,
@@ -99,6 +111,7 @@ class App extends React.Component<Props, AppState> {
         <View style={{ flex: 1 }}>
           <AppNavigation />
           <Notification ref={(ref: any) => { this.notification = ref; }} />
+          <Toast messageStyle={styles.toastMessageStyle} />
         </View>
       </Provider>
     );
