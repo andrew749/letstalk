@@ -51,7 +51,7 @@ type UpdateVectorRequest = PersonalityVector & {
 };
 
 export interface BootstrapResponse {
-  readonly relationships: Immutable.List<Relationship>;
+  readonly relationships: Array<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
   readonly me: UserData;
@@ -65,6 +65,12 @@ interface OnboardingUpdateResponse {
 
 export interface ProfileService {
   signup(request: SignupRequest): Promise<number>;
+  updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus>;
+  updateVector(
+    preferenceType: UserVectorPreferenceType,
+    vector: PersonalityVector
+  ): Promise<OnboardingStatus>;
+  bootstrap(): Promise<BootstrapData>;
 }
 
 export class RemoteProfileService implements ProfileService {
@@ -120,5 +126,5 @@ export class RemoteProfileService implements ProfileService {
   }
 }
 
-const profileService = new RemoteProfileService(requestor, auth);
+export const profileService = new RemoteProfileService(requestor, auth);
 export default profileService;

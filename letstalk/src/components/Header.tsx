@@ -1,11 +1,11 @@
-import React, { Component, ReactNode } from 'react';
+import React, { SFC, ReactNode } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 interface Props {
   children: ReactNode;
 }
 
-const Header: React.SFC<Props> = props => {
+const Header: SFC<Props> = props => {
   const { children } = props
   return (
     <Text style={styles.text}>{children}</Text>
