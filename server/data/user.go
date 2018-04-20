@@ -16,4 +16,6 @@ type User struct {
 	Cohort    *UserCohort `gorm:"null"`
 	Mentees   []*User     `gorm:"many2many:mentees;association_jointable_foreignkey:mentee_id"`
 	Mentors   []*User     `gorm:"many2many:mentors;association_jointable_foreignkey:mentor_id"`
+	Answerers []*User     `gorm:"many2many:answerers;association_jointable_foreignkey:answerer_id"`
+	Askers    []*User     `gorm:"many2many:askers;association_jointable_foreignkey:asker_id"`
 }
