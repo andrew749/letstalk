@@ -10,6 +10,7 @@ import (
 	"letstalk/server/core/sessions"
 	"letstalk/server/data"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/namsral/flag"
 
 	"github.com/getsentry/raven-go"
@@ -32,6 +33,7 @@ var (
 // Authentication flags
 var (
 	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
+	profiling   = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
 )
 
 func migrateDB(db *gorm.DB) {
@@ -71,8 +73,12 @@ func main() {
 	migrateDB(db)
 
 	sessionManager := sessions.CreateSessionManager(db)
-
 	router := routes.Register(db, &sessionManager)
+	if *profiling {
+		// add cpu profiling
+		pprof.Register(router, nil)
+	}
+
 	secrets.LoadSecrets(*secretsPath)
 
 	// setup sentry
