@@ -1,8 +1,7 @@
 {
 	"info": {
-		"name": "LetsTalk",
 		"_postman_id": "447164e3-c9d0-d589-5965-ef1b44fc2ede",
-		"description": "",
+		"name": "LetsTalk",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -18,14 +17,13 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"firstName\": \"Andrew\",\n    \"lastName\": \"Codispoti\",\n    \"email\": \"test@acod.me\",\n    \"phoneNumber\": \"123-555-5555\",\n\t\"gender\": \"male\",\n\t\"birthday\": 1095379198,\n\t\"password\": \"testPassword\"\n}"
+					"raw": "{\n  \"firstName\": \"Andrew\",\n  \"lastName\": \"Codispoti\",\n  \"email\": \"test@acod.me\",\n  \"phoneNumber\": \"123-555-5555\",\n  \"gender\": \"male\",\n  \"birthday\": 1095379198,\n  \"password\": \"testPassword\"\n}"
 				},
 				"url": {
-					"raw": "localhost:3000/v1/signup",
+					"raw": "{{server_ip}}/v1/signup",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"signup"
@@ -47,20 +45,49 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"userId\": 3,\n\t\"password\": \"testPassword\"\n}"
+					"raw": "{\n  \"userId\": 1,\n  \"password\": \"testPassword\"\n}"
 				},
 				"url": {
-					"raw": "localhost:3000/v1/login",
+					"raw": "{{server_ip}}/v1/login",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"login"
 					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "kdBXgW_WqTv_9h4yqXOeM52XprYw2P1r0n9aZjpbPxM="
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
 				},
-				"description": ""
+				"url": {
+					"raw": "{{server_ip}}/v1/logout",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"logout"
+					]
+				}
 			},
 			"response": []
 		},
@@ -71,11 +98,10 @@
 				"header": [],
 				"body": {},
 				"url": {
-					"raw": "localhost:3000/test",
+					"raw": "{{server_ip}}/test",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"test"
 					]
@@ -91,16 +117,15 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
+						"value": "Iirc1tDmCvOw33uu65Zapki8FEaj2EVsn0sl4tiD2H0="
 					}
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:3000/testAuth",
+					"raw": "{{server_ip}}/testAuth",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"testAuth"
 					]
@@ -116,7 +141,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
+						"value": "tdnMImsqPgj_qgKixMLQOye07sRTgBHQxM-LvMl7lx0="
 					},
 					{
 						"key": "Content-Type",
@@ -125,20 +150,18 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"cohortId\": 2\n}"
+					"raw": "{\n  \"cohortId\": 5\n}"
 				},
 				"url": {
-					"raw": "localhost:3000/v1/cohort",
+					"raw": "{{server_ip}}/v1/cohort",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"cohort"
 					]
-				},
-				"description": ""
+				}
 			},
 			"response": []
 		},
@@ -149,22 +172,20 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
+						"value": "tdnMImsqPgj_qgKixMLQOye07sRTgBHQxM-LvMl7lx0="
 					}
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:3000/v1/cohort",
+					"raw": "{{server_ip}}/v1/cohort",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"cohort"
 					]
-				},
-				"description": ""
+				}
 			},
 			"response": []
 		},
@@ -180,17 +201,15 @@
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:3000/v1/bootstrap",
+					"raw": "{{server_ip}}/v1/bootstrap",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"bootstrap"
 					]
-				},
-				"description": ""
+				}
 			},
 			"response": []
 		},
@@ -206,11 +225,10 @@
 				],
 				"body": {},
 				"url": {
-					"raw": "localhost:3000/v1/contact_info?userId=3",
+					"raw": "{{server_ip}}/v1/contact_info?userId=3",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"contact_info"
@@ -218,12 +236,10 @@
 					"query": [
 						{
 							"key": "userId",
-							"value": "3",
-							"equals": true
+							"value": "3"
 						}
 					]
-				},
-				"description": ""
+				}
 			},
 			"response": []
 		},
@@ -234,7 +250,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "zgKosFuK6YY9kj3-sexznYOElhBu9wenSzyXE9sotu4="
+						"value": "y3_g4MXVF7Jf2dRT8GZB1mRFmMT2XWWVIHy9WxS9nQs="
 					},
 					{
 						"key": "Content-Type",
@@ -243,20 +259,144 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"token\":\"iHZUndEkmdGwEIziwGhtNt\"\n}"
+					"raw": "{\n  \"token\":\"iHZUndEkmdGwEIziwGhtNt\"\n}"
 				},
 				"url": {
-					"raw": "localhost:3000/v1/register_notification",
+					"raw": "{{server_ip}}/v1/register_notification",
 					"host": [
-						"localhost"
+						"{{server_ip}}"
 					],
-					"port": "3000",
 					"path": [
 						"v1",
 						"register_notification"
 					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Vector",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "nmFHINoBY38JqDTae5fSecdH3Mw1xhxy8F4cmkpezss="
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"sociable\": 1,\n\t\"hardWorking\": 1,\n\t\"ambitious\": 1,\n\t\"energetic\": 1,\n\t\"carefree\": 1,\n\t\"confident\": 1,\n\t\"isMenteePreference\": 1\n}"
 				},
-				"description": ""
+				"url": {
+					"raw": "{{server_ip}}/v1/user_vector",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"user_vector"
+					]
+				},
+				"description": "Update the user vector"
+			},
+			"response": []
+		},
+		{
+			"name": "Facebook Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"token\": \"EAAFv3bWvEIABAD0q05tPp8yXD8OxIbUIyekMnrqNsyaRQkV7y63KgRQrr6J6Jnm5Y6VM08Pp9I3jTOl85bmDbrVTxhU2CMXZCEBtqUc6KFYnJZBVNJzD4S4RYGplPkiiBqgZBZCiHthLsFZAswBMNUr71HelxxrYHXp9HuMhZCyV4YJVfOWuEXqrlK3Gl7gK4MXtkUcwZBD6K1aZBLTBKzg6\",\n\t\"expiry\": 1527098236,\n\t\"notificationToken\": \"iHZUndEkmdGwEIziwGhtNt\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/fb_login",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"fb_login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload profile pic",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "b_AGBuoU_uenfMftN41H26mbiEFQtwVWCVrHxS-ZTVo="
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {}
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/upload_profile_pic",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"upload_profile_pic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "heap profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{server_ip}}/debug/pprof/heap",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"debug",
+						"pprof",
+						"heap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CPU Profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{server_ip}}/debug/pprof/profile",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"debug",
+						"pprof",
+						"profile"
+					]
+				}
 			},
 			"response": []
 		}
