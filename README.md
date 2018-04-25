@@ -24,7 +24,7 @@ Build a docker container and launch the container. Note this will rebuild the se
 ## Build and startup server on ec2
 Run the following command on ec2 server.
 ```
-docker-compose up --build
+./prod.sh
 ```
 
 ## Push new image to docker registry (COMING)
