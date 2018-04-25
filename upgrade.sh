@@ -11,7 +11,7 @@ ORIG_EXISTING_SERVERS=$EXISTING_SERVERS
 echo "Found existing servers: ${ORIG_EXISTING_SERVERS}"
 
 # build new instance of webapp
-#docker-compose build webapp
+docker-compose build webapp
 
 NUM_SERVERS=${#ORIG_EXISTING_SERVERS[@]}
 
