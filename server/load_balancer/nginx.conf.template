@@ -8,7 +8,7 @@ http {
         # server SERVER_NAME:3000;
         #
         # Template that gets filled out
-        server letstalk_webapp_1:3000;
+        {{SERVERS}}
     }
 
     server {
