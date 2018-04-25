@@ -1,4 +1,4 @@
-version: '2'
+version: "3"
 services:
   lb:
     image: nginx
@@ -8,9 +8,15 @@ services:
     volumes:
       - ./server/load_balancer/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./server/dev_certs:/etc/nginx/ssl/hiveapp
-    links:
+    depends_on:
       - webapp
+    networks:
+      - lb_net
   webapp:
     build: .
     ports:
-      - "3000:3000"
+      - "3000"
+    networks:
+      - lb_net
+networks:
+  lb_net:

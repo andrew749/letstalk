@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "Starting cluster"
-docker-compose up --build -d
+docker-compose up -f docker-compose.yml --build -d
