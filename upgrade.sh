@@ -11,7 +11,7 @@ ORIG_EXISTING_SERVERS=$EXISTING_SERVERS
 echo "Found existing servers: ${ORIG_EXISTING_SERVERS}"
 
 # build new instance of webapp
-docker-compose build webapp
+#docker-compose build webapp
 
 NUM_SERVERS=${#ORIG_EXISTING_SERVERS[@]}
 
@@ -20,7 +20,7 @@ for server in $ORIG_EXISTING_SERVERS; do
 
     # scale up to have one new node
     echo "Scaling up"
-    docker-compose up -d --scale webapp=$((NUM_SERVERS + 1))
+    docker-compose -f docker-compose.yml -f docker-compose-debug.yml up -d --scale webapp=$((NUM_SERVERS + 1))
 
     # remove old container
     docker stop $server
@@ -38,6 +38,5 @@ for server in $ORIG_EXISTING_SERVERS; do
     cat server/load_balancer/nginx.conf
 
     echo "Restarting lb"
-    # reload lb
-    docker exec letstalk_lb_1 nginx -s reload
+    ./reload_lb.sh
 done
