@@ -7,6 +7,7 @@ import {
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
+import Colors from '../services/colors';
 
 import {
   ActionButton,
@@ -110,6 +111,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        backgroundColor={Colors.HIVE_MAIN_BG}
         style={styles.submitButton}
         disabled={!valid}
         loading={submitting}
@@ -131,6 +133,9 @@ interface Props {
 export default class SignupView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'Signup',
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    }
   }
 
   constructor(props: Props) {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button as ReactNativeButton, View } from 'react-native';
+import { Button as ReactNativeButton, View, StyleSheet, Platform } from 'react-native';
 import { FormValidationMessage } from 'react-native-elements';
 import { reduxForm, Field, SubmissionError } from 'redux-form';
 import {
@@ -18,6 +18,7 @@ import {
 } from '../components';
 import { InvalidCredentialsError } from '../services/session-service';
 import auth from '../services/auth';
+import Colors from '../services/colors';
 
 interface LoginFormData {
   username: string;
@@ -52,6 +53,8 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        buttonStyle={{backgroundColor: Colors.HIVE_MAIN_BG}}
+        textStyle={{color: Colors.HIVE_MAIN_FONT}}
         disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Log in"}
@@ -78,6 +81,7 @@ const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
     <View>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        backgroundColor={Colors.FB_BG}
         loading={submitting}
         title={submitting ? null : "Log in with Facebook"}
         onPress={handleSubmit(onSubmitWithReset)}
@@ -97,8 +101,11 @@ interface Props {
 export default class LoginView extends Component<Props> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Log in',
-    headerRight: <ReactNativeButton title="Sign up"
-      onPress={() => navigation.navigate('Signup')} />,
+    headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Sign up"
+      onPress={() => navigation.navigate('Signup')} /> : null,
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {
@@ -176,9 +183,18 @@ export default class LoginView extends Component<Props> {
   }
 
   render() {
+    const signupButton = Platform.OS === 'android' ?
+      <ActionButton
+        title="Sign up"
+        buttonStyle={{backgroundColor: Colors.HIVE_MAIN_BG}}
+        textStyle={{color: Colors.HIVE_MAIN_FONT}}
+        onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'Signup'}))} />
+      : null;
+
     return (
       <View>
         <LoginFormWithRedux onSubmit={this.onSubmit} />
+        {signupButton}
         <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
       </View>
     );

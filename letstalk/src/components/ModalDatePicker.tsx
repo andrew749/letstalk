@@ -60,7 +60,7 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
   const pickerButtonStyle = {
     buttonStyle: {
       width: SCREEN_WIDTH - 40,
-      borderRadius: 30,
+      borderRadius: 5,
     },
     textStyle: {
       color:'#000'

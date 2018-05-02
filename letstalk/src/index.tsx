@@ -23,6 +23,8 @@ import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 
+import Colors from './services/colors';
+
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
 interface TabBarIcon {
@@ -33,7 +35,7 @@ interface TabBarIcon {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f',
+    backgroundColor: Colors.HIVE_MAIN_BG,
     alignItems: 'center',
     justifyContent: 'center'
   },

@@ -24,6 +24,8 @@ import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/redu
 import { ActionTypes } from '../redux/bootstrap/actions';
 import { ActionButton, Card, Header, Loading } from '../components';
 
+import Colors from '../services/colors';
+
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
 }
