@@ -15,24 +15,39 @@ Scripts to help with administration of servers
 
 
 ## Prerequisites
+Install the following packages.
 ```
 docker
 docker-compose
-godep
+go-dep
 ```
 
-Start a new docker vm if you are on mac. If you are running linux, you should be good to go.
+### MAC ONLY
 
-### Start new docker vm
+#### Start new docker vm
 ```
 docker-machine start default
 ```
 
-### Setup shell environment for docker
+#### Setup shell environment for docker
 Run this in each shell you want to use docker commands from.
 ```
 eval $(docker-machine env)
 ```
+
+#### Setup port forwarding to your docker container
+
+```
+VBoxManage modifyvm "default" --natpf1 "hive,tcp,,8000,,80"
+```
+
+Restart machine with updated options.
+```
+docker-machine restart
+```
+
+### LINUX
+Things should be good to go
 
 ## Installation
 See `server/` for server specific installation instruction. See `letstalk/` for client installation instructions.
