@@ -8,6 +8,7 @@ import {
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
 import Colors from '../services/colors';
+import {AnalyticsHelper} from '../services/analytics';
 
 import {
   ActionButton,
@@ -131,6 +132,8 @@ interface Props {
 }
 
 export default class SignupView extends Component<Props> {
+  SIGNUP_VIEW_IDENTIFIER = "SignupView";
+
   static navigationOptions = {
     headerTitle: 'Signup',
     headerStyle: {
@@ -142,6 +145,10 @@ export default class SignupView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.SIGNUP_VIEW_IDENTIFIER);
   }
 
   async onSubmit(values: SignupFormData) {

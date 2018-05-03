@@ -4,6 +4,7 @@
   "private": true,
   "devDependencies": {
     "flow-bin": "0.53.0",
+    "jest": "^22.4.1",
     "jest-expo": "^21.0.0",
     "react-native-scripts": "^1.7.0",
     "react-native-typescript-transformer": "^1.1.4",
@@ -11,7 +12,6 @@
     "redux-logger": "^3.0.6",
     "rimraf": "^2.6.2",
     "ts-jest": "^22.4.1",
-    "jest": "^22.4.1",
     "tslint": "^5.8.0",
     "typescript": "^2.8.1"
   },
@@ -72,6 +72,7 @@
     "@types/redux-logger": "^3.0.5",
     "babel-preset-expo": "^4.0.0",
     "expo": "^22.0.4",
+    "expo-analytics": "^1.0.7",
     "fuzzysearch": "^1.0.3",
     "immutable": "^3.8.2",
     "jest-preset-typescript-react-native": "^1.2.0",

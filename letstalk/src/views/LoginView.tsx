@@ -19,6 +19,8 @@ import {
 import { InvalidCredentialsError } from '../services/session-service';
 import auth from '../services/auth';
 import Colors from '../services/colors';
+import {AnalyticsHelper} from '../services/analytics';
+
 
 interface LoginFormData {
   username: string;
@@ -99,6 +101,8 @@ interface Props {
 }
 
 export default class LoginView extends Component<Props> {
+  LOGIN_VIEW_IDENTIFIER = "LoginView";
+
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Log in',
     headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Sign up"
@@ -110,9 +114,12 @@ export default class LoginView extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
-
     this.onSubmit = this.onSubmit.bind(this);
     this.onSubmitFb = this.onSubmitFb.bind(this);
+  }
+
+  async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.LOGIN_VIEW_IDENTIFIER);
   }
 
   async registerForPushNotificationsAsync(): Promise<string> {
@@ -160,6 +167,7 @@ export default class LoginView extends Component<Props> {
   }
 
   async onSubmit(values: LoginFormData) {
+    AnalyticsHelper.getInstance().recordAction(this.LOGIN_VIEW_IDENTIFIER, "login", "", 1);
     const {
       username,
       password,
