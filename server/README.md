@@ -1,6 +1,6 @@
 # LetsTalk
 
-This is the main server for the UW Let's Talk app.
+This is the main server for the Hive app.
 
 ## Go Development Setup
 
@@ -26,22 +26,3 @@ dep ensure
 dep ensure -add github.com/pkg/errors
 ```
 
-## MySQL
-
-### Development setup
-
-Install mysql, and create database `letstalk`.
-```
-sudo apt-get install mysql-client mysql-server
-mysql -u root -p
-
-CREATE USER letstalk IDENTIFIED BY 'uwletstalk';
-CREATE DATABASE letstalk;
-GRANT ALL PRIVILEGES ON letstalk . * TO letstalk;
-```
-
-## Running the server (development)
-
-```
-SECRETS_PATH="secrets.json" ./run_local.sh
-```

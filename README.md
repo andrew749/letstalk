@@ -13,11 +13,37 @@ This is the main messenger service. All backend code lives here.
 `infra/`
 Scripts to help with administration of servers
 
+
+## Prerequisites
+```
+docker
+docker-compose
+godep
+```
+
+Start a new docker vm if you are on mac. If you are running linux, you should be good to go.
+
+### Start new docker vm
+```
+docker-machine start default
+```
+
+### Setup shell environment for docker
+Run this in each shell you want to use docker commands from.
+```
+eval $(docker-machine env)
+```
+
+## Installation
+See `server/` for server specific installation instruction. See `letstalk/` for client installation instructions.
+
 ## Quickstart
 Build a docker container and launch the container. Note this will rebuild the server on each file change.
 ```
 ./dev.sh
 ```
+NOTE: because of a bug you might have to run `dep ensure` ON YOUR LOCAL MACHINE
+since in development mode, the downloaded dependencies will get clobbered.
 
 ## Infrastructure
 
