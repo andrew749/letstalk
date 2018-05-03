@@ -25,6 +25,7 @@ import { ActionTypes } from '../redux/bootstrap/actions';
 import { ActionButton, Card, Header, Loading } from '../components';
 
 import Colors from '../services/colors';
+import {AnalyticsHelper} from '../services/analytics';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -35,6 +36,8 @@ interface Props extends BootstrapState, DispatchActions {
 }
 
 class HomeView extends Component<Props> {
+  HOME_VIEW_IDENTIFIER = "HomeView";
+
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Home',
     headerRight: <ReactNativeButton title="Profile"
@@ -49,6 +52,7 @@ class HomeView extends Component<Props> {
   }
 
   async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     this.load();
   }
 
