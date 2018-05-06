@@ -10,6 +10,13 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type ResolveType int
+
+const (
+	RESOLVE_TYPE_ASKER ResolveType = iota
+	RESOLVE_TYPE_ANSWERER
+)
+
 func Shuffle(vals []data.UserCredential) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	for len(vals) > 0 {
@@ -20,20 +27,27 @@ func Shuffle(vals []data.UserCredential) {
 	}
 }
 
+func getPotentialMatchUserIds(
+	db *gorm.DB,
+	userId int,
+	isAsker ResolveType,
+	credentialId CredentialId,
+) ([]int, errs.Error) {
+	return nil, nil
+}
+
 // TODO: This should run in a job
 func ResolveRequestToMatch(
 	db *gorm.DB,
 	userId int,
-	isAsker bool,
-	credentialRequestId CredentialRequestId,
+	isAsker ResolveType,
+	credentialId CredentialId,
 ) (bool, errs.Error) {
-	// TODO: gorm and the relational mapping to creates makes this really tedious. Maybe raw sql
-	// might be better in this scenario.
 	var (
 		userRequest data.UserCredentialRequest
 		err         error
 	)
-	err = db.Where("id = ? and user_id = ?", credentialRequestId, userId).First(
+	err = db.Where("id = ? and user_id = ?", credentialId, userId).First(
 		&userRequest).Error
 	if err != nil {
 		return false, errs.NewDbError(err)
@@ -55,7 +69,7 @@ func ResolveRequestToMatch(
 
 		tx := db.Begin()
 
-		err = tx.Where("id = ? and user_id = ?", credentialRequestId, userId).Delete(
+		err = tx.Where("id = ? and user_id = ?", credentialId, userId).Delete(
 			data.UserCredentialRequest{}).Error
 		if err != nil {
 			tx.Rollback()
@@ -88,5 +102,4 @@ func ResolveRequestToMatch(
 	} else {
 		return false, nil
 	}
-
 }
