@@ -11,6 +11,7 @@ import Loading from './Loading';
 import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
 import Rating from './Rating';
+import ProfileAvatar from './ProfileAvatar';
 
 export {
   ActionButton,
@@ -27,4 +28,5 @@ export {
   ModalDatePicker,
   ModalPicker,
   Rating,
+  ProfileAvatar,
 };

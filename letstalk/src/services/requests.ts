@@ -45,19 +45,40 @@ export class Requestor {
     endpoint: string,
     data: object,
     sessionToken?: SessionToken,
+    headers?: Headers,
+    isJson: boolean = false,
   ): Promise<any> {
+    if (isJson && !headers) {
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+      });
+    } else if (isJson && headers)  {
+        headers.set('Content-Type', 'application/json');
+    }
+
     const fetchParams: FetchOptions = {
       method,
       body: JSON.stringify(data),
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
+      headers: headers,
     };
     return this.makeRequest(this.serverUrl + endpoint, fetchParams, sessionToken);
   }
 
-  async post(endpoint: string, data: object, sessionToken?: SessionToken): Promise<any> {
-    return this.withData('POST', endpoint, data, sessionToken);
+  async post(
+    endpoint: string,
+    data: object,
+    sessionToken?: SessionToken,
+  ): Promise<any> {
+    return this.withData('POST', endpoint, data, sessionToken, undefined, true);
+  }
+
+  async postBinary(
+    endpoint: string,
+    data: object,
+    headers: Headers,
+    sessionToken?: SessionToken,
+  ) {
+    return this.withData('POST', endpoint, data, sessionToken, headers, false)
   }
 
   async delete(endpoint: string, data: object, sessionToken?: SessionToken): Promise<any> {
@@ -69,4 +90,3 @@ export class Requestor {
 const requestor = new Requestor(BASE_URL);
 
 export default requestor;
-

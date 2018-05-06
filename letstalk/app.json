@@ -2,7 +2,7 @@
   "name": "letsTalk",
   "displayName": "letsTalk",
   "expo": {
-    "sdkVersion": "22.0.0",
+    "sdkVersion": "25.0.1",
     "packagerOpts": {
       "sourceExts": [
         "ts",
