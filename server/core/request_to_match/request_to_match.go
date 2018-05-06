@@ -86,8 +86,8 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 	}
 
 	var isAdded bool
-	credentialRequestId := api.CredentialRequestId(*credentialId)
-	isAdded, err = api.ResolveRequestToMatch(c.Db, c.SessionData.UserId, credentialRequestId)
+	credentialRequestId := query.CredentialRequestId(*credentialId)
+	isAdded, err = query.ResolveRequestToMatch(c.Db, c.SessionData.UserId, credentialRequestId)
 	if err != nil {
 		return err
 	}
