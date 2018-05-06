@@ -117,7 +117,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "Iirc1tDmCvOw33uu65Zapki8FEaj2EVsn0sl4tiD2H0="
+						"value": "87d4bTatzriXoAZKDz9nwP5H6LYp6FzL4Lf_j5c0QjA="
 					}
 				],
 				"body": {},
@@ -196,7 +196,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "6J_ZQYdjFA7b1O-sK-BPuyjnsJ_ffxAbL6i9X2Kuz0s="
+						"value": "87d4bTatzriXoAZKDz9nwP5H6LYp6FzL4Lf_j5c0QjA="
 					}
 				],
 				"body": {},
@@ -341,11 +341,21 @@
 					{
 						"key": "sessionId",
 						"value": "b_AGBuoU_uenfMftN41H26mbiEFQtwVWCVrHxS-ZTVo="
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
 					}
 				],
 				"body": {
-					"mode": "file",
-					"file": {}
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "photo",
+							"description": "",
+							"type": "file"
+						}
+					]
 				},
 				"url": {
 					"raw": "{{server_ip}}/v1/upload_profile_pic",
@@ -397,6 +407,34 @@
 						"profile"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "Subscribe Email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"classYear\":2019,\n\t\"programName\":\"SE\",\n\t\"firstName\": \"Andrew\",\n\t\"lastName\": \"Codispoti\",\n\t\"emailAddress\": \"andrewcod749@gmail.com\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/subscribe_email",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"subscribe_email"
+					]
+				},
+				"description": "Subscribe new user to mailing list."
 			},
 			"response": []
 		}
