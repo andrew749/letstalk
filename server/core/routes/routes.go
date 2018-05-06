@@ -5,6 +5,7 @@ import (
 	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/contact_info"
 	"letstalk/server/core/ctx"
+	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
 	"letstalk/server/core/notifications"
@@ -139,6 +140,12 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.POST(
 		"/upload_profile_pic",
 		hw.wrapHandler(onboarding.ProfilePicController, true),
+	)
+
+	v1.OPTIONS("/subscribe_email")
+	v1.POST(
+		"/subscribe_email",
+		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
 	return router

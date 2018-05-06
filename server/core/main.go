@@ -50,6 +50,7 @@ func migrateDB(db *gorm.DB) {
 	db.AutoMigrate(&data.Matchings{})
 	db.AutoMigrate(&data.UserCredential{})
 	db.AutoMigrate(&data.UserCredentialRequest{})
+	db.AutoMigrate(&data.Subscriber{})
 }
 
 func main() {
