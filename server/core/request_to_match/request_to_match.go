@@ -1,9 +1,9 @@
 package request_to_match
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 )
 
 type GetCredentialOptionsResponse query.CredentialOptions
@@ -87,7 +87,7 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 
 	var isAdded bool
 	credentialRequestId := query.CredentialRequestId(*credentialId)
-	isAdded, err = query.ResolveRequestToMatch(c.Db, c.SessionData.UserId, credentialRequestId)
+	isAdded, err = query.ResolveRequestToMatch(c.Db, c.SessionData.UserId, true, *credentialId)
 	if err != nil {
 		return err
 	}

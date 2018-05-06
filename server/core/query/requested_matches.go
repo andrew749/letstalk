@@ -24,6 +24,7 @@ func Shuffle(vals []data.UserCredential) {
 func ResolveRequestToMatch(
 	db *gorm.DB,
 	userId int,
+	isAsker bool,
 	credentialRequestId CredentialRequestId,
 ) (bool, errs.Error) {
 	// TODO: gorm and the relational mapping to creates makes this really tedious. Maybe raw sql
