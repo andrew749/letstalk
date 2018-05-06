@@ -1,4 +1,4 @@
-package api
+package query
 
 type Error struct {
 	Code    int

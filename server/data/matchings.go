@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Matchings struct {
+type Matching struct {
 	gorm.Model
 	MentorUser User `gorm:"foreignkey:Mentor"`
 	Mentor     int  `json:"mentor" gorm:"not null"`

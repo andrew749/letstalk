@@ -1,8 +1,9 @@
-package api
+package query
 
 import (
 	"github.com/jinzhu/gorm"
 	"letstalk/server/data"
+	"letstalk/server/core/api"
 )
 
 type UserVectors struct {
@@ -23,10 +24,10 @@ func GetUserVectorsById(db *gorm.DB, userId int) (*UserVectors, error) {
 
 	// gets the last me and you vectors from list
 	for _, vector := range userVectors {
-		preferenceType := UserVectorPreferenceType(vector.PreferenceType)
-		if preferenceType == PREFERENCE_TYPE_ME {
+		preferenceType := api.UserVectorPreferenceType(vector.PreferenceType)
+		if preferenceType == api.PREFERENCE_TYPE_ME {
 			me = &vector
-		} else if preferenceType == PREFERENCE_TYPE_YOU {
+		} else if preferenceType == api.PREFERENCE_TYPE_YOU {
 			you = &vector
 		}
 	}

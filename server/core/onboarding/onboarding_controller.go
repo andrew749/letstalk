@@ -1,13 +1,14 @@
 package onboarding
 
 import (
-	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"letstalk/server/core/api"
 )
 
 // i.e. fetch a onboarding type and the possible options
@@ -20,15 +21,6 @@ import (
  }
 */
 
-type UpdateCohortRequest struct {
-	CohortId int `json:"cohortId" binding:"required"`
-}
-
-type OnboardingUpdateResponse struct {
-	Message          string            `json:"message" binding:"required"`
-	OnboardingStatus *OnboardingStatus `json:"onboardingStatus" binding:"required"`
-}
-
 func isValidCohort(db *gorm.DB, cohortId int) bool {
 	var numCohorts int = 0
 	db.Model(&data.Cohort{}).Where("cohort_id = ?", cohortId).Count(&numCohorts)
@@ -38,7 +30,7 @@ func isValidCohort(db *gorm.DB, cohortId int) bool {
 // Update a user with new information for their school
 // try to match this data to an existing sequence.
 func UpdateUserCohort(c *ctx.Context) errs.Error {
-	var newCohortRequest UpdateCohortRequest
+	var newCohortRequest api.UpdateCohortRequest
 	err := c.GinContext.BindJSON(&newCohortRequest)
 
 	if err != nil {
@@ -53,7 +45,7 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 
 	userId := c.SessionData.UserId
-	userCohort, err := api.GetUserCohortMappingById(c.Db, userId)
+	userCohort, err := query.GetUserCohortMappingById(c.Db, userId)
 
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return errs.NewDbError(err)
@@ -95,11 +87,11 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	onboardingStatus := &OnboardingStatus{
+	onboardingStatus := &api.OnboardingStatus{
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
-	c.Result = OnboardingUpdateResponse{successMessage, onboardingStatus}
+	c.Result = api.OnboardingUpdateResponse{successMessage, onboardingStatus}
 	return nil
 
 }
@@ -116,13 +108,13 @@ const (
 )
 
 type UpdateUserVectorRequest struct {
-	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"exists"`
-	Sociable       int                          `json:"sociable" binding:"exists"`
-	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
-	Ambitious      int                          `json:"ambitious" binding:"exists"`
-	Energetic      int                          `json:"energetic" binding:"exists"`
-	Carefree       int                          `json:"carefree" binding:"exists"`
-	Confident      int                          `json:"confident" binding:"exists"`
+	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"required"`
+	Sociable       int                            `json:"sociable" binding:"exists"`
+	Hard_Working   int                            `json:"hardWorking" binding:"exists"`
+	Ambitious      int                            `json:"ambitious" binding:"exists"`
+	Energetic      int                            `json:"energetic" binding:"exists"`
+	Carefree       int                            `json:"carefree" binding:"exists"`
+	Confident      int                            `json:"confident" binding:"exists"`
 }
 
 /**
@@ -157,11 +149,11 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	onboardingStatus := &OnboardingStatus{
+	onboardingStatus := &api.OnboardingStatus{
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
-	c.Result = OnboardingUpdateResponse{"Ok", onboardingStatus}
+	c.Result = api.OnboardingUpdateResponse{"Ok", onboardingStatus}
 
 	return nil
 }

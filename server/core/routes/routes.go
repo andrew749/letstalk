@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/contact_info"
 	"letstalk/server/core/ctx"
@@ -61,7 +61,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	)
 	v1.GET(
 		"/cohort",
-		hw.wrapHandler(api.GetCohortController, true),
+		hw.wrapHandler(query.GetCohortController, true),
 	)
 
 	v1.OPTIONS("/contact_info")
@@ -171,7 +171,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 				rlog.Info("No session id provided.")
 				c.GinContext.JSON(
 					401,
-					gin.H{"Error": api.Error{Code: 401, Message: "No session id provided. This is required."}},
+					gin.H{"Error": query.Error{Code: 401, Message: "No session id provided. This is required."}},
 				)
 				return
 			}
@@ -181,14 +181,14 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 			// check that the session Id corresponds to an existing session
 			if err != nil {
 				rlog.Infof("%s", err)
-				c.GinContext.JSON(401, gin.H{"Error": api.Error{Code: 401, Message: "Bad session Id."}})
+				c.GinContext.JSON(401, gin.H{"Error": query.Error{Code: 401, Message: "Bad session Id."}})
 				return
 			}
 
 			// check that the session token is not expired.
 			if session.ExpiryDate.Before(time.Now()) {
 				rlog.Error("Session token expired.")
-				c.GinContext.JSON(401, gin.H{"Error": api.Error{Code: 401, Message: "Session token expired."}})
+				c.GinContext.JSON(401, gin.H{"Error": query.Error{Code: 401, Message: "Session token expired."}})
 				return
 			}
 			c.SessionData = session
@@ -210,8 +210,8 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 	}
 }
 
-func convertError(e errs.Error) api.Error {
-	return api.Error{
+func convertError(e errs.Error) query.Error {
+	return query.Error{
 		Code:    e.GetHTTPCode(),
 		Message: e.Error(),
 	}
