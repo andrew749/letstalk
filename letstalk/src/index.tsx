@@ -92,8 +92,8 @@ class App extends React.Component<Props, AppState> {
 
   handleNotification(notification: any) {
     this.notification.show({
-      title: 'Got a notification',
-      message: '' + notification.data.yo,
+      title: notification.data.title,
+      message: notification.data.message,
     });
   }
 
