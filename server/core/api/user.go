@@ -43,6 +43,7 @@ const (
 )
 
 func GetUserWithId(db *gorm.DB, userId int) (*data.User, error) {
+	// TODO: Error handling here could be better. i.e. distinguish b/w db error and user not found.
 	var user data.User
 	if db.Where("user_id = ?", userId).First(&user).RecordNotFound() {
 		return nil, errors.New("Unable to find user")
@@ -54,6 +55,8 @@ func GetUserWithId(db *gorm.DB, userId int) (*data.User, error) {
 func GetFullUserWithId(db *gorm.DB, userId int) (*data.User, error) {
 	var user data.User
 	if err := db.Where("user_id = ?", userId).
+		Preload("Askers").
+		Preload("Answerers").
 		Preload("Mentees").
 		Preload("Mentors").First(&user).Error; err != nil {
 		rlog.Debug(err.Error())

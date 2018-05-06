@@ -85,7 +85,18 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	c.Result = AddUserCredentialRequestResponse{api.CredentialRequestId(*credentialId)}
+	var isAdded bool
+	credentialRequestId := api.CredentialRequestId(*credentialId)
+	isAdded, err = api.ResolveRequestToMatch(c.Db, c.SessionData.UserId, credentialRequestId)
+	if err != nil {
+		return err
+	}
+
+	if isAdded {
+		return errs.NewClientError("Found a match right away", err)
+	}
+
+	c.Result = AddUserCredentialRequestResponse{credentialRequestId}
 	return nil
 }
 
