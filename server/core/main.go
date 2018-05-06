@@ -34,6 +34,7 @@ var (
 var (
 	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
 	profiling   = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
+	production  = flag.Bool("production", false, "Whether to run in debug mode.")
 )
 
 func migrateDB(db *gorm.DB) {
@@ -82,8 +83,14 @@ func main() {
 
 	secrets.LoadSecrets(*secretsPath)
 
-	// setup sentry
-	raven.SetDSN(secrets.GetSecrets().SentryDSN)
+	// production specific setup
+	if *production {
+		rlog.Debug("Running in Production")
+		// setup sentry
+		raven.SetDSN(secrets.GetSecrets().SentryDSN)
+	} else {
+		rlog.Debug("Running in Development mode")
+	}
 
 	// Start server
 	rlog.Info("Serving on port ", *port)

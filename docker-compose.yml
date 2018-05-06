@@ -18,5 +18,7 @@ services:
       - "3000"
     networks:
       - lb_net
+    environment:
+      - production=true
 networks:
   lb_net:
