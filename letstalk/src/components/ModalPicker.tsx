@@ -4,8 +4,10 @@ import React, { ReactNode, Component } from 'react';
 import {
   Dimensions,
   Modal,
+  Picker,
   PickerIOS,
   PickerProperties,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -61,9 +63,10 @@ class StatefulModalPicker extends Component<Props, State> {
   }
 
   render() {
-    const { label } = this.props;
+    const { children, label } = this.props;
     const { onChange, value } = this.props.input;
     const { values, labels } = this.state;
+    const { error, touched, warning } = this.props.meta;
     const valueLabel = value ? labels[values.indexOf(value)] : null;
     const onSubmitPress = () => {
       onChange(value || this.state.values[0]);
@@ -71,21 +74,34 @@ class StatefulModalPicker extends Component<Props, State> {
 
     // TODO: Maybe hold state about what the value is using another onChange, and only call the
     // passed in onChange when the user presses submit.
-    return (
-      <BottomModal {...this.props} onSubmitPress={onSubmitPress} valueLabel={valueLabel}>
-        <PickerIOS
-          style={styles.bottomPicker}
-          selectedValue={value}
-          onValueChange={onChange}
-        >
-          {this.props.children}
-        </PickerIOS>
-      </BottomModal>
-    );
+    return Platform.select({
+      'ios':(
+        <BottomModal {...this.props} onSubmitPress={onSubmitPress} valueLabel={valueLabel}>
+          <PickerIOS
+            style={styles.bottomPicker}
+            selectedValue={value}
+            onValueChange={onChange}
+          >
+            {this.props.children}
+          </PickerIOS>
+        </BottomModal>
+      ),
+      'android': (
+        <View>
+          <Picker {...this.props} onValueChange={onChange} selectedValue={value} prompt={label}>
+            {children}
+          </Picker>
+          {touched && (
+            (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
+            (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}
+        </View>
+      ),
+    });
   }
 }
 
 const ModalPicker: React.SFC<Props> = props => {
   return <StatefulModalPicker {...props} />;
 }
+
 export default ModalPicker;
