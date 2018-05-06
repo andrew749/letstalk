@@ -1,50 +1,22 @@
 package bootstrap
 
 import (
-	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/data"
+	"letstalk/server/core/api"
 )
 
-type BootstrapState string
-
-/**
- * These states will likely change.
- * Current a later state implies that the previous states are satisfied
- * This is currently a linear state hierarchy
- */
-const (
-	ACCOUNT_CREATED BootstrapState = "account_created" // first state
-	ACCOUNT_SETUP   BootstrapState = "account_setup"   // the account has enough information to proceed
-	ACCOUNT_MATCHED BootstrapState = "account_matched" // account has been matched a peer
-)
-
-type BootstrapUserRelationshipDataModel struct {
-	User      int          `json:"userId" binding:"required"`
-	UserType  api.UserType `json:"userType" binding:"required"`
-	FirstName string       `json:"firstName" binding:"required"`
-	LastName  string       `json:"lastName" binding:"required"`
-	Email     string       `json:"email" binding:"required"`
-}
-
-type BootstrapResponse struct {
-	State            BootstrapState                        `json:"state" binding:"required"`
-	Relationships    []*BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
-	Cohort           *data.Cohort                          `json:"cohort" binding:"required"`
-	Me               *data.User                            `json:"me" binding:"required"`
-	OnboardingStatus *onboarding.OnboardingStatus          `json:"onboardingStatus" binding:"required"`
-}
-
-func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *BootstrapUserRelationshipDataModel {
+func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *api.BootstrapUserRelationshipDataModel {
 	var userType api.UserType
 	if isMentor == true {
 		userType = api.USER_TYPE_MENTOR
 	} else {
 		userType = api.USER_TYPE_MENTEE
 	}
-	return &BootstrapUserRelationshipDataModel{
+	return &api.BootstrapUserRelationshipDataModel{
 		User:      user.UserId,
 		UserType:  userType,
 		FirstName: user.FirstName,
@@ -57,13 +29,13 @@ func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *Bootstr
  * Returns what the current status of a user is
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
-	user, err := api.GetFullUserWithId(c.Db, c.SessionData.UserId)
+	user, err := query.GetUserById(c.Db, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewInternalError("Unable to get user data.")
 	}
 	// since this method is authenticated the account needs to exist.
-	var response = BootstrapResponse{
-		State: ACCOUNT_CREATED,
+	var response = api.BootstrapResponse{
+		State: api.ACCOUNT_CREATED,
 		Me:    user,
 	}
 
@@ -72,38 +44,45 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 	response.Cohort = onboardingInfo.UserCohort
-	response.OnboardingStatus = &onboarding.OnboardingStatus{
+	response.OnboardingStatus = &api.OnboardingStatus{
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
 
-	if onboardingInfo.State != onboarding.ONBOARDING_DONE {
+	if onboardingInfo.State != api.ONBOARDING_DONE {
 		// Onboarding not done. We don't need to get relationships.
 		c.Result = response
 		return nil
 	} else {
-		response.State = ACCOUNT_SETUP
+		response.State = api.ACCOUNT_SETUP
 	}
 
-	if len(user.Mentors) > 0 || len(user.Mentees) > 0 {
-		response.State = ACCOUNT_MATCHED
+	// Fetch mentors and mentees.
+	mentors, err := query.GetMentorsByMenteeId(c.Db, user.UserId) // Matchings where user is the mentee.
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	mentees, err := query.GetMenteesByMentorId(c.Db, user.UserId) // Matchings where user is the mentor.
+	if err != nil {
+		return errs.NewDbError(err)
 	}
 
-	relationships := make([]*BootstrapUserRelationshipDataModel, 0)
-	// get all mentors
-	for _, mentor := range user.Mentors {
+	// Construct relationship api objects.
+	relationships := make([]*api.BootstrapUserRelationshipDataModel, 0, len(mentors) + len(mentees))
+	for _, mentor := range mentors {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(mentor, true),
+			convertUserToRelationshipDataModel(&mentor.MentorUser, true),
 		)
 	}
-
-	// get all mentees
-	for _, mentee := range user.Mentees {
+	for _, mentee := range mentees {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(mentee, false),
+			convertUserToRelationshipDataModel(&mentee.MenteeUser, false),
 		)
+	}
+	if len(relationships) > 0 {
+		response.State = api.ACCOUNT_MATCHED
 	}
 
 	response.Relationships = relationships
