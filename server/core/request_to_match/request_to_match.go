@@ -1,9 +1,9 @@
 package request_to_match
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 )
 
 type GetCredentialOptionsResponse query.CredentialOptions
@@ -28,6 +28,16 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 
 	s := query.UserCredentialStrategy{c.Db, c.SessionData.UserId}
 	credentialId, err := query.AddCredentialWithStrategy(s, credential)
+	if err != nil {
+		return err
+	}
+
+	err = query.ResolveRequestToMatch(
+		c,
+		c.SessionData.UserId,
+		query.RESOLVE_TYPE_ANSWERER,
+		*credentialId,
+	)
 	if err != nil {
 		return err
 	}
@@ -85,15 +95,15 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	var isAdded bool
 	credentialRequestId := query.CredentialRequestId(*credentialId)
-	isAdded, err = query.ResolveRequestToMatch(c.Db, c.SessionData.UserId, credentialRequestId)
+	err = query.ResolveRequestToMatch(
+		c,
+		c.SessionData.UserId,
+		query.RESOLVE_TYPE_ASKER,
+		*credentialId,
+	)
 	if err != nil {
 		return err
-	}
-
-	if isAdded {
-		return errs.NewClientError("Found a match right away", err)
 	}
 
 	c.Result = AddUserCredentialRequestResponse{credentialRequestId}

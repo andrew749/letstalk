@@ -7,7 +7,7 @@ import (
 type Matching struct {
 	gorm.Model
 	MentorUser User `gorm:"foreignkey:Mentor"`
-	Mentor     int  `json:"mentor" gorm:"not null"`
+	Mentor     int  `gorm:"not null"`
 	MenteeUser User `gorm:"foreignkey:Mentee"`
-	Mentee     int  `json:"mentee" gorm:"not null"`
+	Mentee     int  `gorm:"not null"`
 }

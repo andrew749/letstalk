@@ -102,10 +102,10 @@ class HomeView extends Component<Props> {
       );
     });
     return (
-      <ScrollView>
+      <View>
         <Header>Matches</Header>
         {matchCards}
-      </ScrollView>
+      </View>
     );
   }
 
@@ -130,11 +130,11 @@ class HomeView extends Component<Props> {
       case 'account_matched':
         const matches = this.renderMatches();
         return (
-          <View>
+          <ScrollView>
             { matches }
             <ActionButton onPress={() => this.requestToMatch()} title="Request To Match" />
             <ActionButton onPress={() => this.credentialEdit()} title="Edit Credentials" />
-          </View>
+          </ScrollView>
         );
       default:
         // Ensure exhaustiveness of select

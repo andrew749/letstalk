@@ -14,6 +14,4 @@ type User struct {
 	Birthdate *time.Time  `json:"birthdate" gorm:"type:date;not null"`
 	Sessions  []Session   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	Cohort    *UserCohort `gorm:"null"`
-	Answerers []*User     `gorm:"many2many:answerers;association_jointable_foreignkey:answerer_id"`
-	Askers    []*User     `gorm:"many2many:askers;association_jointable_foreignkey:asker_id"`
 }

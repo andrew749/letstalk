@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 	"letstalk/server/jobs"
+	"letstalk/server/notifications"
 
 	"github.com/romana/rlog"
 )
@@ -46,7 +47,7 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 	rlog.Debug("Dispatching notification lambda")
 	if err := aws_utils.DispatchLambdaJob(
 		jobs.SendNotification,
-		Notification{
+		notifications.Notification{
 			To:    fmt.Sprintf("ExponentPushToken[%s]", notificationToken.Token),
 			Body:  "Subscribed for notifications.",
 			Title: "Hive",
