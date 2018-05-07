@@ -32,6 +32,16 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 		return err
 	}
 
+	err = query.ResolveRequestToMatch(
+		c,
+		c.SessionData.UserId,
+		query.RESOLVE_TYPE_ANSWERER,
+		*credentialId,
+	)
+	if err != nil {
+		return err
+	}
+
 	c.Result = AddUserCredentialResponse{*credentialId}
 	return nil
 }
@@ -85,20 +95,15 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	var isAdded bool
 	credentialRequestId := query.CredentialRequestId(*credentialId)
-	isAdded, err = query.ResolveRequestToMatch(
-		c.Db,
+	err = query.ResolveRequestToMatch(
+		c,
 		c.SessionData.UserId,
 		query.RESOLVE_TYPE_ASKER,
 		*credentialId,
 	)
 	if err != nil {
 		return err
-	}
-
-	if isAdded {
-		return errs.NewClientError("Found a match right away", err)
 	}
 
 	c.Result = AddUserCredentialRequestResponse{credentialRequestId}

@@ -1,12 +1,12 @@
 package bootstrap
 
 import (
-	"letstalk/server/core/query"
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"letstalk/server/core/api"
 )
 
 func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *api.BootstrapUserRelationshipDataModel {
@@ -66,9 +66,21 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewDbError(err)
 	}
+	askers, err := query.GetAskersByAnswererId(c.Db, user.UserId) // Request matchings where user is answerer.
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	answerers, err := query.GetAnswerersByAskerId(c.Db, user.UserId) // Request matchings where user is asker.
+	if err != nil {
+		return errs.NewDbError(err)
+	}
 
 	// Construct relationship api objects.
-	relationships := make([]*api.BootstrapUserRelationshipDataModel, 0, len(mentors) + len(mentees))
+	relationships := make(
+		[]*api.BootstrapUserRelationshipDataModel,
+		0,
+		len(mentors)+len(mentees)+len(askers)+len(answerers),
+	)
 	for _, mentor := range mentors {
 		relationships = append(
 			relationships,
@@ -79,6 +91,18 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		relationships = append(
 			relationships,
 			convertUserToRelationshipDataModel(&mentee.MenteeUser, false),
+		)
+	}
+	for _, asker := range askers {
+		relationships = append(
+			relationships,
+			convertUserToRelationshipDataModel(&asker.AskerUser, true),
+		)
+	}
+	for _, answerer := range answerers {
+		relationships = append(
+			relationships,
+			convertUserToRelationshipDataModel(&answerer.AnswererUser, false),
 		)
 	}
 	if len(relationships) > 0 {

@@ -88,12 +88,16 @@ func (sm DatabaseSessionStore) GetUserSessions(
 
 	transformedSessions := make([]*SessionData, 0)
 	for _, session := range sessions {
+		var token *string
+		if session.NotificationToken != nil {
+			token = &session.NotificationToken.Token
+		}
 		transformedSessions = append(
 			transformedSessions,
 			&SessionData{
 				&session.SessionId,
 				session.UserId,
-				&session.NotificationToken.Token,
+				token,
 				session.ExpiryDate,
 			},
 		)
