@@ -26,7 +26,9 @@ if [[ -z "$DB_USER" ]]; then
 fi
 
 if [[ -z $PROD ]]; then
+    echo "REMOTE: running dev"
     python3 run_local.py
 else
+    echo "REMOTE: running prod"
     python3 run_local.py --db_addr="$DB_ADDR" --db_user="$DB_USER" --db_pass="$DB_PASS" --prod
 fi

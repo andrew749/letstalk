@@ -77,14 +77,14 @@ def main():
 
     # install dependencies
     if args.prod:
-        logger.info("Running Production server")
+        logger.info("LOCAL: Running Production server")
         logger.debug(env)
         process = subprocess.Popen(
             [f'{GO_BINARY}', 'run', 'core/main.go'],
             env=env,
         )
     else:
-        logger.info("Running Debug Server")
+        logger.info("LOCAL: Running Debug Server")
         process = subprocess.Popen(
             [f"{GOPATH}/bin/gin", '--build', 'core', '--excludeDir', 'vendor'],
             env=env,
