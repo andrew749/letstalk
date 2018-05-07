@@ -14,8 +14,8 @@ TO BE RUN INSIDE DOCKER CONTAINER
 """
 
 #logging
-logger=logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # server configuration
 GIN_MODE_DEBUG="debug"
@@ -94,4 +94,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

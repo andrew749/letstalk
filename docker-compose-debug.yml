@@ -8,8 +8,6 @@ services:
       - ./server:/go/src/letstalk/server
     depends_on:
       - db
-    environment:
-      - production=false
     networks:
       - db_net
   db:
