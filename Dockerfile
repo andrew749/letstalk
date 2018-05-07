@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 MAINTAINER Andrew Codispoti
 
 RUN apt-get update --fix-missing -y
-RUN apt-get install -y vim curl golang git python3 jq
+RUN apt-get install -y vim curl golang git python3 jq npm gulp
 
 # gopath in root
 ENV GOPATH /go

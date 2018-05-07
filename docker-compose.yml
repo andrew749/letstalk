@@ -8,6 +8,7 @@ services:
       - "443:443"
     volumes:
       - ./server/load_balancer/nginx.debug.conf:/etc/nginx/nginx.conf:ro
+      - ./server/load_balancer/mime.types:/etc/nginx/mime.types
       - ./server/dev_certs:/etc/nginx/ssl/hiveapp
     depends_on:
       - webapp
