@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Hive - Launching Soon</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,200i,300,300i,400,400i,600,600i,700,700i,900,900i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link type="text/css" href="css/coming-soon.min.css" rel="stylesheet">
+
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+  </head>
+
+  <body>
+
+    <div class="overlay"></div>
+
+    <div id="navbar">
+      <div class="logo"> 
+        <img class="mx-4 my-3" src="img/name.png" alt="Hive" height="30px">
+      </div>
+      <div class="my-2 mx-2 navbar-links">
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+      </div>
+    </div>
+
+    <div class="single-page">
+      <div class="masthead">
+        <div class="masthead-bg"></div>
+        <div class="container h-100">
+          <div class="row h-100">
+            <div class="col-12 my-auto">
+              <div class="masthead-content text-white py-5 py-md-0">
+                <img class="mb-3 mx-auto" src="img/logo.png" alt="Hive" height="200px" width:"200px">
+                <h1 class="mb-3">Launching Soon!</h1>
+                <p class="mb-5">We're working hard to finish the development of Hive. Our target launch date is
+                  <strong>September 2018</strong>! Sign up for updates and closed beta access!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container h-100">
+        <div class="row h-100">
+            <div class="col-12 my-auto">
+              <div class="masthead-form text-white mx-auto">
+                <div class="input-group-newsletter px-5 py-5">
+                  <form class="container" id="signupForm">
+                    <div class="row my-3">
+                        <div class="col-12 my-auto px-1">
+                            <h2>Join the Beta</h2>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                      <div class="col-6 my-auto px-1">
+                        <input name="firstName" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required>
+                      </div>
+                      <div class="col-6 my-auto px-1">
+                        <input name="lastName" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required>
+                      </div>
+                    </div>
+                    <div class="row my-2">
+                      <div class="col-9 my-auto px-1">
+                        <!-- <input name="programName" type="text" class="form-control" placeholder="Program Name" aria-label="Program Name"> -->
+
+                        <select onchange="formColor(this)" name="programName" class="form-control" aria-label="Program Name" required>
+                            <option value="" disabled selected>Program Name</option>
+                            <option>Software Engineering</option>
+                            <option>Systems Design Engineering</option>
+                            <option>Nanotechnology Engineering</option>
+                            <option>Mechantronics Engineering</option>
+                          </select>
+                      </div>
+                      <div class="col-3 my-auto px-1">
+                        <!-- <input name="classYear" type="text" class="form-control" placeholder="Year" aria-label="Year"> -->
+                        <select type="number" onchange="formColor(this)" name="classYear" class="form-control" aria-label="Year" required>
+                            <option value="" disabled selected>Year</option>
+                            <option value=2017>2017</option>
+                            <option>2018</option>
+                            <option>2019</option>
+                            <option>2020</option>
+                            <option>2021</option>
+                            <option>2022</option>
+                            <option>2023</option>
+                          </select>
+                      </div>
+                    </div>
+                    <div class="row my-2">
+                      <div class="col-12 my-auto px-1">
+                        <input name="emailAddress" type="email" class="form-control" placeholder="Email Address" aria-label="Email Address" required>
+                      </div>
+                    </div>
+                    <div class="row mt-4">
+                      <div class="col-12 my-auto px-1">
+                        <button class="btn btn-secondary" type="submit" id="signupBtn">Sign up</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- 
+    <div class="social-icons">
+      <ul class="list-unstyled text-center mb-0">
+        <li class="list-unstyled-item">
+          <a href="#">
+            <i class="fa fa-twitter"></i>
+          </a>
+        </li>
+        <li class="list-unstyled-item">
+          <a href="#">
+            <i class="fa fa-facebook"></i>
+          </a>
+        </li>
+        <li class="list-unstyled-item">
+          <a href="#">
+            <i class="fa fa-instagram"></i>
+          </a>
+        </li>
+      </ul>
+    </div> -->
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="vendor/vide/jquery.vide.min.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src="js/coming-soon.min.js"></script>
+    <script src="js/form-submit.min.js"></script>
+
+    <script type="text/javascript">
+      function formColor(sel)
+      {
+        sel.style.color = "#000";              
+      }
+    </script>
+
+    <script>
+      // Example starter JavaScript for disabling form submissions if there are invalid fields
+      // (function() {
+      //   'use strict';
+      //   window.addEventListener('load', function() {
+      //     // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      //     var forms = document.getElementById('signupForm')
+      //     // Loop over them and prevent submission
+      //     var validation = Array.prototype.filter.call(forms, function(form) {
+      //       console.log(form);
+      //       form.addEventListener('submit', function(event) {
+      //         if (form.checkValidity() === false) {
+      //           event.preventDefault();
+      //           event.stopPropagation();
+      //         }
+      //         form.classList.add('was-validated');
+      //       }, false);
+      //     });
+      //   }, false);
+      // })();
+    </script>
+
+  </body>
+
+</html>

@@ -1,0 +1,23 @@
+.about {
+  display: flex;
+  border-radius: 5px;
+  width: 60vw;
+  background-color: $primary;
+  justify-content: center;
+
+  p {
+    font-size: .8rem;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .about {
+    p {
+      font-size: 1.2rem;
+    }
+  }
+}
