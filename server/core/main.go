@@ -34,7 +34,7 @@ var (
 var (
 	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
 	profiling   = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
-	production  = flag.Bool("production", false, "Whether to run in debug mode.")
+	production  = flag.Bool("PROD", false, "Whether to run in debug mode.")
 )
 
 func migrateDB(db *gorm.DB) {

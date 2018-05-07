@@ -1,0 +1,16 @@
+version: "3"
+services:
+  webapp:
+    environment:
+      - SECRETS_PATH=secrets.json
+      - PROD=true
+  lb:
+    restart: always
+    ports:
+      - "443:443"
+    depends_on:
+      - webapp
+    volumes:
+      - ./server/load_balancer/nginx.prod.conf:/etc/nginx/nginx.conf
+      - "./landing:/var/app/hiveapp"
+      - /etc/letsencrypt:/etc/letsencrypt
