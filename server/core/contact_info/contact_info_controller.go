@@ -1,7 +1,7 @@
 package contact_info
 
 import (
-	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"strconv"
@@ -40,7 +40,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 		c.SessionData.UserId,
 		userId,
 	); err == nil && res == true {
-		user, err := api.GetUserWithId(c.Db, userId)
+		user, err := query.GetUserById(c.Db, userId)
 		if err != nil {
 			return errs.NewClientError("Unable to get user: %s", err)
 		}

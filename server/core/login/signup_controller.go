@@ -1,7 +1,6 @@
 package login
 
 import (
-	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/utility"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"letstalk/server/core/api"
 )
 
 /**
