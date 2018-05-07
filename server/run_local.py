@@ -66,7 +66,7 @@ def get_args():
 
 def main():
     args = get_args()
-    env = os.environ.update({
+    os.environ.update({
         "DB_ADDR": args.db_addr,
         "DB_USER": args.db_user,
         "DB_PASS": args.db_pass,
@@ -78,16 +78,15 @@ def main():
     # install dependencies
     if args.prod:
         logger.info("LOCAL: Running Production server")
-        logger.debug(env)
         process = subprocess.Popen(
             [f'{GO_BINARY}', 'run', 'core/main.go'],
-            env=env,
+            env=os.environ,
         )
     else:
         logger.info("LOCAL: Running Debug Server")
         process = subprocess.Popen(
             [f"{GOPATH}/bin/gin", '--build', 'core', '--excludeDir', 'vendor'],
-            env=env,
+            env=os.environ,
         )
     # wait for program to finish
     process.communicate()
