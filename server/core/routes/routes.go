@@ -8,6 +8,7 @@ import (
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
+	"letstalk/server/core/matching"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/request_to_match"
@@ -147,6 +148,12 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		"/subscribe_email",
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
+
+	// Debug route group.
+	debug := router.Group("/debug")
+
+	debug.OPTIONS("/matching")
+	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
 
 	return router
 }

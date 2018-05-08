@@ -1,0 +1,72 @@
+package matching
+
+import (
+	"letstalk/server/core/ctx"
+	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
+	"letstalk/server/core/api"
+	"letstalk/server/data"
+	"letstalk/server/core/onboarding"
+	"letstalk/server/core/utility"
+)
+
+/**
+ * PostMatchingController creates a new matching between two users, in an "unverified" state.
+ * Only used for debugging!
+ * TODO(aklen): only allow administrators to do this.
+ */
+func PostMatchingController(c *ctx.Context) errs.Error {
+	var input api.PostMatchingRequest
+	if err := c.GinContext.BindJSON(&input); err != nil {
+		return errs.NewClientError("Failed to parse input")
+	}
+
+	// Ensure both users are unique and exist.
+	if input.Mentee == input.Mentor {
+		return errs.NewClientError("User cannot match with themselves")
+	}
+	var mentor, mentee *data.User
+	var err error
+	if mentee, err = query.GetUserById(c.Db, input.Mentee); err != nil {
+		return errs.NewClientError("Mentee not found")
+	}
+	if mentor, err = query.GetUserById(c.Db, input.Mentor); err != nil {
+		return errs.NewClientError("Mentor not found")
+	}
+
+	// TODO ensure matching doesn't already exist
+
+	// Ensure users have finished onboarding.
+	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentor.UserId); err != nil {
+		return err
+	} else if onboardingStatus.State != api.ONBOARDING_DONE {
+		return errs.NewClientError("Mentor is not finished onboarding")
+	}
+	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentee.UserId); err != nil {
+		return err
+	} else if onboardingStatus.State != api.ONBOARDING_DONE {
+		return errs.NewClientError("Mentee is not finished onboarding")
+	}
+
+	// Insert new matching.
+	matching := &data.Matching{
+		Mentee: mentee.UserId,
+		Mentor: mentor.UserId,
+		State: data.MATCHING_STATE_UNVERIFIED,
+		MenteeSecret: getNewMatchingSecret(),
+		MentorSecret: getNewMatchingSecret(),
+	}
+	if err := c.Db.Create(matching).Error; err != nil {
+		return errs.NewDbError(err)
+	}
+
+	// TODO add a proper result
+	c.Result = input
+
+	return nil
+}
+
+func getNewMatchingSecret() string {
+	str, _ := utility.GenerateRandomString(20)
+	return str
+}
