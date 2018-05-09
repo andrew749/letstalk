@@ -187,5 +187,5 @@ func updateMatchingObject(c *ctx.Context, matching *data.Matching) error {
 	// Strip composite fields from matching struct.
 	matching.MenteeUser = nil
 	matching.MentorUser = nil
-	return c.Db.Update(matching).Error
+	return c.Db.Model(&data.Matching{}).UpdateColumns(matching).Error
 }
