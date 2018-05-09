@@ -71,8 +71,8 @@ func FBController(c *ctx.Context) errs.Error {
 		userId = appUser.UserId
 		rlog.Debug("Created new user with id: ", userId)
 
-		fbAuthRecord.FbUserId = &user.Id
-		fbAuthRecord.UserId = &userId
+		fbAuthRecord.FbUserId = user.Id
+		fbAuthRecord.UserId = userId
 		// insert the user's fb auth data
 		if err := tx.Create(&fbAuthRecord).Error; err != nil {
 			rlog.Error(err)
@@ -155,7 +155,7 @@ func FBController(c *ctx.Context) errs.Error {
 			// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
 		}()
 	} else {
-		userId = *fbAuthRecord.UserId
+		userId = fbAuthRecord.UserId
 	}
 
 	// create new session for user id

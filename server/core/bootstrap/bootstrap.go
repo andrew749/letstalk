@@ -9,8 +9,17 @@ import (
 	"letstalk/server/data"
 )
 
-func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *api.BootstrapUserRelationshipDataModel {
-	var userType api.UserType
+func convertUserToRelationshipDataModel(
+	user *data.User,
+	isMentor bool,
+) *api.BootstrapUserRelationshipDataModel {
+	var (
+		userType api.UserType
+		fbId     *string
+	)
+	if len(user.FbAuthDatas) > 0 {
+		fbId = &user.FbAuthDatas[0].FbUserId
+	}
 	if isMentor == true {
 		userType = api.USER_TYPE_MENTOR
 	} else {
@@ -22,6 +31,7 @@ func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *api.Boo
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
+		FbId:      fbId,
 	}
 }
 
