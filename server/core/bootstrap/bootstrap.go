@@ -14,11 +14,13 @@ func convertUserToRelationshipDataModel(
 	isMentor bool,
 ) *api.BootstrapUserRelationshipDataModel {
 	var (
-		userType api.UserType
-		fbId     *string
+		userType    api.UserType
+		fbId        *string
+		phoneNumber *string
 	)
-	if len(user.FbAuthDatas) > 0 {
-		fbId = &user.FbAuthDatas[0].FbUserId
+	if user.ExternalAuthData != nil {
+		fbId = user.ExternalAuthData.FbUserId
+		phoneNumber = user.ExternalAuthData.PhoneNumber
 	}
 	if isMentor == true {
 		userType = api.USER_TYPE_MENTOR
@@ -26,12 +28,13 @@ func convertUserToRelationshipDataModel(
 		userType = api.USER_TYPE_MENTEE
 	}
 	return &api.BootstrapUserRelationshipDataModel{
-		User:      user.UserId,
-		UserType:  userType,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		FbId:      fbId,
+		User:        user.UserId,
+		UserType:    userType,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		Email:       user.Email,
+		FbId:        fbId,
+		PhoneNumber: phoneNumber,
 	}
 }
 

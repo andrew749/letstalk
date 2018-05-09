@@ -87,17 +87,37 @@ class HomeView extends Component<Props> {
         firstName,
         lastName,
         email,
+        fbId,
+        phoneNumber,
       } = relationship;
+
+      const fbLink = "fb-messenger://user-thread/" + fbId;
+      const emailLink = 'mailto:' + email;
+      const smsLink = 'sms:' + phoneNumber;
+      const fb = fbId === null ? null : (
+        <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(fbLink)}>
+          <MaterialIcons name="email" size={24} />
+          <Text style={styles.email}>Talk on Messenger</Text>
+        </TouchableOpacity>
+      );
+      const sms = phoneNumber === null ? null : (
+        <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(smsLink)}>
+          <MaterialIcons name="email" size={24} />
+          <Text style={styles.email}>Talk on SMS</Text>
+        </TouchableOpacity>
+      );
       // TODO: Handle errors for links
-      const link = 'mailto:' + email;
       return (
         <Card key={userId}>
           <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
           <Text style={styles.relationshipType}>{userType}</Text>
-          <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(link)}>
+          <TouchableOpacity style={styles.emailContainer}
+            onPress={() => Linking.openURL(emailLink)}
+          >
             <MaterialIcons name="email" size={24} />
             <Text style={styles.email}>{email}</Text>
           </TouchableOpacity>
+          {fb}
         </Card>
       );
     });

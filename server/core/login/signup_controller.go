@@ -111,6 +111,17 @@ func writeUser(user *api.User, c *ctx.Context) error {
 		tx.Rollback()
 		return err
 	}
+
+	if user.PhoneNumber != nil {
+		externalAuthRecord := data.ExternalAuthData{
+			UserId:      userModel.UserId,
+			PhoneNumber: user.PhoneNumber,
+		}
+		if err := tx.Create(&externalAuthRecord).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
 	tx.Commit()
 	c.Result = struct{ UserId int }{userModel.UserId}
 	return nil

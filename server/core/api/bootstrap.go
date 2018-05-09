@@ -18,12 +18,13 @@ const (
 )
 
 type BootstrapUserRelationshipDataModel struct {
-	User      int      `json:"userId" binding:"required"`
-	UserType  UserType `json:"userType" binding:"required"`
-	FirstName string   `json:"firstName" binding:"required"`
-	LastName  string   `json:"lastName" binding:"required"`
-	Email     string   `json:"email" binding:"required"`
-	FbId      *string  `json:"fbId"`
+	User        int      `json:"userId" binding:"required"`
+	UserType    UserType `json:"userType" binding:"required"`
+	FirstName   string   `json:"firstName" binding:"required"`
+	LastName    string   `json:"lastName" binding:"required"`
+	Email       string   `json:"email" binding:"required"`
+	FbId        *string  `json:"fbId"`
+	PhoneNumber *string  `json:"phoneNumber"`
 }
 
 type BootstrapResponse struct {
