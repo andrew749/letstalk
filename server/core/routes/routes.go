@@ -149,6 +149,9 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
+	v1.OPTIONS("/matching/:user_id")
+	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, false))
+
 	// Debug route group.
 	debug := router.Group("/debug")
 

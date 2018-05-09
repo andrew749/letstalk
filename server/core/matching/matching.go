@@ -8,6 +8,7 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
+	"strconv"
 )
 
 /**
@@ -34,7 +35,14 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Mentor not found")
 	}
 
-	// TODO ensure matching doesn't already exist
+	// Ensure a matching doesn't already exist between these users.
+	existingMatching, err := query.GetMatchingByUserIds(c.Db, mentor.UserId, mentee.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	if existingMatching != nil {
+		return errs.NewClientError("Matching already exists between these users")
+	}
 
 	// Ensure users have finished onboarding.
 	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentor.UserId); err != nil {
@@ -52,21 +60,61 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	matching := &data.Matching{
 		Mentee: mentee.UserId,
 		Mentor: mentor.UserId,
-		State: data.MATCHING_STATE_UNVERIFIED,
-		MenteeSecret: getNewMatchingSecret(),
-		MentorSecret: getNewMatchingSecret(),
+		State: api.MATCHING_STATE_UNVERIFIED,
 	}
+
+	if matching.MenteeSecret, err = getNewMatchingSecret(); err != nil {
+		return errs.NewInternalError("Error generating matching secret: %v", err)
+	}
+	if matching.MentorSecret, err = getNewMatchingSecret(); err != nil {
+		return errs.NewInternalError("Error generating matching secret: %v", err)
+	}
+
 	if err := c.Db.Create(matching).Error; err != nil {
 		return errs.NewDbError(err)
 	}
 
-	// TODO add a proper result
-	c.Result = input
+	result := api.MatchingResult{
+		Mentee: matching.Mentee,
+		Mentor: matching.Mentor,
+		State: matching.State,
+	}
+	c.Result = &result
 
 	return nil
 }
 
-func getNewMatchingSecret() string {
-	str, _ := utility.GenerateRandomString(20)
-	return str
+func getNewMatchingSecret() (string, error) {
+	return utility.GenerateRandomString(20)
+}
+
+// GetMatchingController gets details for a match with the authenticated user.
+func GetMatchingController(c *ctx.Context) errs.Error {
+	inputUserId := c.GinContext.Param("user_id")
+	if len(inputUserId) == 0 {
+		return errs.NewClientError("No user id given")
+	}
+	matchUserId, err := strconv.Atoi(inputUserId)
+	if err != nil {
+		return errs.NewClientError("User id in unexpected format")
+	}
+	authUserId := c.SessionData.UserId
+	matchingObj, err := query.GetMatchingByUserIds(c.Db, authUserId, matchUserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	result := &api.MatchingResult{
+		Mentor: matchingObj.Mentor,
+		Mentee: matchingObj.Mentee,
+		State: matchingObj.State,
+	}
+	if matchingObj.Mentor == authUserId {
+		// Auth user is the mentor.
+		result.Secret = matchingObj.MentorSecret
+	} else {
+		// Auth user is the mentee.
+		result.Secret = matchingObj.MenteeSecret
+	}
+	c.Result = result
+	return nil
 }

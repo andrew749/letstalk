@@ -2,14 +2,7 @@ package data
 
 import (
 	"github.com/jinzhu/gorm"
-)
-
-type MatchingState int
-
-const (
-	MATCHING_STATE_UNVERIFIED MatchingState = iota
-	MATCHING_STATE_VERIFIED
-	MATCHING_STATE_EXPIRED
+	"letstalk/server/core/api"
 )
 
 type Matching struct {
@@ -20,5 +13,5 @@ type Matching struct {
 	MenteeUser User `gorm:"foreignkey:Mentee"`
 	Mentee     int  `gorm:"not null"`
 	MenteeSecret string  `gorm:"not null"`
-	State MatchingState `gorm:"not null"`
+	State api.MatchingState `gorm:"not null"`
 }
