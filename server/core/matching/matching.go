@@ -9,6 +9,7 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
 	"strconv"
+	"github.com/romana/rlog"
 )
 
 /**
@@ -22,6 +23,7 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("Failed to parse input")
 	}
 
+	rlog.Info("Received input: ", input)
 	// Ensure both users are unique and exist.
 	if input.Mentee == input.Mentor {
 		return errs.NewClientError("User cannot match with themselves")
@@ -60,7 +62,7 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	matching := &data.Matching{
 		Mentee: mentee.UserId,
 		Mentor: mentor.UserId,
-		State: api.MATCHING_STATE_UNVERIFIED,
+		State: data.MATCHING_STATE_UNVERIFIED,
 	}
 
 	if matching.MenteeSecret, err = getNewMatchingSecret(); err != nil {
@@ -127,11 +129,11 @@ func PutMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewClientError("No such matching found")
 	}
 	switch input.State {
-	case api.MATCHING_STATE_UNVERIFIED:
+	case data.MATCHING_STATE_UNVERIFIED:
 		fallthrough
-	case api.MATCHING_STATE_EXPIRED:
+	case data.MATCHING_STATE_EXPIRED:
 		return errs.NewClientError("Invalid state transition")
-	case api.MATCHING_STATE_VERIFIED:
+	case data.MATCHING_STATE_VERIFIED:
 		return verifyMatching(c, &input, matchingObj)
 	}
 	return errs.NewInternalError("Unexpected input state")
@@ -140,26 +142,26 @@ func PutMatchingController(c *ctx.Context) errs.Error {
 // Updates the matching to Verified state in database and sets the result on c.
 func verifyMatching(c *ctx.Context, input *api.Matching, matching *data.Matching) errs.Error {
 	authUserId := c.SessionData.UserId
-	if matching.State == api.MATCHING_STATE_VERIFIED {
+	if matching.State == data.MATCHING_STATE_VERIFIED {
 		// Already verified, do nothing.
 		return nil
 	}
-	if matching.State != api.MATCHING_STATE_UNVERIFIED {
+	if matching.State != data.MATCHING_STATE_UNVERIFIED {
 		return errs.NewClientError("Invalid state transition")
 	}
 	var expectedSecret string
 	if authUserId == matching.Mentor {
-		expectedSecret = matching.MentorSecret
-	} else {
 		expectedSecret = matching.MenteeSecret
+	} else {
+		expectedSecret = matching.MentorSecret
 	}
 	if input.Secret != expectedSecret {
 		return errs.NewClientError("Incorrect code scanned")
 	}
 	// Checks passed, update the matching state to Verified.
-	matching.State = api.MATCHING_STATE_VERIFIED
-	if err := c.Db.Update(*matching).Error; err != nil {
-		return errs.NewInternalError("Failed to update matching")
+	matching.State = data.MATCHING_STATE_VERIFIED
+	if err := updateMatchingObject(c, matching); err != nil {
+		return errs.NewDbError(err)
 	}
 	c.Result = convertMatchingDataToApi(matching)
 	return nil
@@ -175,4 +177,15 @@ func convertMatchingDataToApi(matching *data.Matching) *api.Matching {
 		Mentee: matching.Mentee,
 		State: matching.State,
 	}
+}
+
+// Update the matching object in database.
+func updateMatchingObject(c *ctx.Context, matching *data.Matching) error {
+	if matching == nil {
+		return nil
+	}
+	// Strip composite fields from matching struct.
+	matching.MenteeUser = nil
+	matching.MentorUser = nil
+	return c.Db.Update(matching).Error
 }

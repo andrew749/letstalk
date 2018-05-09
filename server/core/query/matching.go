@@ -8,17 +8,20 @@ import (
 
 // GetMatchingByUserIds returns details on a matching between two users.
 func GetMatchingByUserIds(db *gorm.DB, firstUser int, secondUser int) (*data.Matching, error) {
-	var matching *data.Matching = nil
+	matchings := make([]data.Matching, 0)
 	err := db.
 		Where(&data.Matching{Mentor: firstUser, Mentee: secondUser}).
 		Or(&data.Matching{Mentor: secondUser, Mentee: firstUser}).
 		Preload("MenteeUser").
 		Preload("MentorUser").
-		First(matching).Error
+		First(&matchings).Error
 	if err != nil {
 		return nil, err
 	}
-	return matching, nil
+	if len(matchings) == 0 {
+		return nil, nil
+	}
+	return &matchings[0], nil
 }
 
 func GetMenteesByMentorId(db *gorm.DB, mentorId int) ([]data.Matching, error) {

@@ -149,14 +149,17 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
+	// User matching
+	v1.OPTIONS("/matching")
+	v1.PUT("/matching", hw.wrapHandler(matching.PutMatchingController, true /* auth required */))
 	v1.OPTIONS("/matching/:user_id")
-	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, false))
+	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, true /* auth required */))
 
 	// Debug route group.
 	debug := router.Group("/debug")
 
 	debug.OPTIONS("/matching")
-	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
+	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, true /* auth required */))
 
 	return router
 }
