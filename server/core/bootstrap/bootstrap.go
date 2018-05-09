@@ -84,13 +84,13 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	for _, mentor := range mentors {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(&mentor.MentorUser, true),
+			convertUserToRelationshipDataModel(mentor.MentorUser, true),
 		)
 	}
 	for _, mentee := range mentees {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(&mentee.MenteeUser, false),
+			convertUserToRelationshipDataModel(mentee.MenteeUser, false),
 		)
 	}
 	for _, asker := range askers {

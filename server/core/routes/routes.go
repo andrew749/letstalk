@@ -8,6 +8,7 @@ import (
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
+	"letstalk/server/core/matching"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/request_to_match"
@@ -148,6 +149,18 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
+	// User matching
+	v1.OPTIONS("/matching")
+	v1.PUT("/matching", hw.wrapHandler(matching.PutMatchingController, true /* auth required */))
+	v1.OPTIONS("/matching/:user_id")
+	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, true /* auth required */))
+
+	// Debug route group.
+	debug := router.Group("/debug")
+
+	debug.OPTIONS("/matching")
+	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, true /* auth required */))
+
 	return router
 }
 
@@ -205,7 +218,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 			return
 		}
-		rlog.Infof("Returning result: %s\n", c.Result)
+		rlog.Infof("Returning result: %v\n", c.Result)
 		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
 	}
 }
