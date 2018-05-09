@@ -34,3 +34,13 @@ func NewInternalError(msg string, args ...interface{}) Error {
 func NewDbError(err error) Error {
 	return NewInternalError("encountered database error: %s", err)
 }
+
+type UnauthorizedError struct {
+	error
+}
+
+func (e *UnauthorizedError) GetHTTPCode() int { return http.StatusUnauthorized }
+
+func NewUnauthorizedError(msg string, args ...interface{}) Error {
+	return &UnauthorizedError{errors.New(fmt.Sprintf(msg, args...))}
+}

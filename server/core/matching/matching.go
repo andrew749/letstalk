@@ -17,7 +17,7 @@ import (
  * TODO(aklen): only allow administrators to do this.
  */
 func PostMatchingController(c *ctx.Context) errs.Error {
-	var input api.PostMatchingRequest
+	var input api.Matching
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewClientError("Failed to parse input")
 	}
@@ -74,13 +74,7 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	result := api.MatchingResult{
-		Mentee: matching.Mentee,
-		Mentor: matching.Mentor,
-		State: matching.State,
-	}
-	c.Result = &result
-
+	c.Result = convertMatchingDataToApi(matching)
 	return nil
 }
 
@@ -103,11 +97,7 @@ func GetMatchingController(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	result := &api.MatchingResult{
-		Mentor: matchingObj.Mentor,
-		Mentee: matchingObj.Mentee,
-		State: matchingObj.State,
-	}
+	result := convertMatchingDataToApi(matchingObj)
 	if matchingObj.Mentor == authUserId {
 		// Auth user is the mentor.
 		result.Secret = matchingObj.MentorSecret
@@ -117,4 +107,72 @@ func GetMatchingController(c *ctx.Context) errs.Error {
 	}
 	c.Result = result
 	return nil
+}
+
+// PutMatchingController lets users update matching status.
+func PutMatchingController(c *ctx.Context) errs.Error {
+	authUserId := c.SessionData.UserId
+	var input api.Matching
+	if err := c.GinContext.BindJSON(&input); err != nil {
+		return errs.NewClientError("Failed to parse input")
+	}
+	if input.Mentor != authUserId && input.Mentee != authUserId {
+		return errs.NewUnauthorizedError("Not authorized to edit this matching")
+	}
+	matchingObj, err := query.GetMatchingByUserIds(c.Db, input.Mentor, input.Mentee)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	if matchingObj == nil {
+		return errs.NewClientError("No such matching found")
+	}
+	switch input.State {
+	case api.MATCHING_STATE_UNVERIFIED:
+		fallthrough
+	case api.MATCHING_STATE_EXPIRED:
+		return errs.NewClientError("Invalid state transition")
+	case api.MATCHING_STATE_VERIFIED:
+		return verifyMatching(c, &input, matchingObj)
+	}
+	return errs.NewInternalError("Unexpected input state")
+}
+
+// Updates the matching to Verified state in database and sets the result on c.
+func verifyMatching(c *ctx.Context, input *api.Matching, matching *data.Matching) errs.Error {
+	authUserId := c.SessionData.UserId
+	if matching.State == api.MATCHING_STATE_VERIFIED {
+		// Already verified, do nothing.
+		return nil
+	}
+	if matching.State != api.MATCHING_STATE_UNVERIFIED {
+		return errs.NewClientError("Invalid state transition")
+	}
+	var expectedSecret string
+	if authUserId == matching.Mentor {
+		expectedSecret = matching.MentorSecret
+	} else {
+		expectedSecret = matching.MenteeSecret
+	}
+	if input.Secret != expectedSecret {
+		return errs.NewClientError("Incorrect code scanned")
+	}
+	// Checks passed, update the matching state to Verified.
+	matching.State = api.MATCHING_STATE_VERIFIED
+	if err := c.Db.Update(*matching).Error; err != nil {
+		return errs.NewInternalError("Failed to update matching")
+	}
+	c.Result = convertMatchingDataToApi(matching)
+	return nil
+}
+
+// Does not populate secret field.
+func convertMatchingDataToApi(matching *data.Matching) *api.Matching {
+	if matching == nil {
+		return nil
+	}
+	return &api.Matching{
+		Mentor: matching.Mentor,
+		Mentee: matching.Mentee,
+		State: matching.State,
+	}
 }

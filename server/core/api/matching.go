@@ -1,10 +1,5 @@
 package api
 
-type PostMatchingRequest struct {
-	Mentor int
-	Mentee int
-}
-
 type MatchingState int
 
 const (
@@ -13,9 +8,9 @@ const (
 	MATCHING_STATE_EXPIRED
 )
 
-type MatchingResult struct {
-	Mentor int
-	Mentee int
+type Matching struct {
+	Mentor int `json:"required"`
+	Mentee int `json:"required"`
 	Secret string
 	State MatchingState
 }
