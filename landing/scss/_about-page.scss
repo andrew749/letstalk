@@ -1,3 +1,16 @@
+.about {
+  display: flex;
+  border-radius: 5px;
+  height: 70vh;
+  width: 60vw;
+  background-color: $primary;
+  justify-content: center;
+}
+
+.center {
+  text-align: center;
+}
+
 .masthead {
   position: relative;
   overflow: hidden;
@@ -11,7 +24,7 @@
     width: 100%;
     min-height: 35rem;
     height: 100%;
-    background-color: $primary;
+    background-color: fade-out($primary, 0.2);
     transform: skewY(4deg);
     transform-origin: bottom right;
   }
