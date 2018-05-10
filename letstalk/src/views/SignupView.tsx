@@ -18,8 +18,11 @@ import {
   LabeledFormInput,
   ModalPicker,
   ModalDatePicker,
+  ProfileAvatar,
 } from '../components';
-import profileService from '../services/profile-service';
+import profileService, {SignupRequest} from '../services/profile-service';
+import photoService, {PhotoResult} from '../services/photo_service';
+import {FileSystem} from 'expo';
 
 interface SignupFormData {
   firstName: string;
@@ -29,6 +32,7 @@ interface SignupFormData {
   password: string;
   gender: string;
   birthday: Date;
+  profilePic: PhotoResult;
 }
 
 // TODO: move elsewhere
@@ -50,6 +54,12 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   };
   return (
     <ScrollView>
+      <Field
+        name="profilePic"
+        component={ProfileAvatar}
+        containerStyle={styles.profilePicContainerStyle}
+        editable={true}
+      />
       <Field
         label="First name"
         name="firstName"
@@ -154,7 +164,15 @@ export default class SignupView extends Component<Props> {
   async onSubmit(values: SignupFormData) {
     try {
       await profileService.signup({
-        ...values,
+        ...{
+          "firstName": values.firstName,
+          "lastName": values.lastName,
+          "email": values.email,
+          "phoneNumber": values.phoneNumber,
+          "gender": values.gender,
+          "password": values.password,
+          "profilePic": values.profilePic.data,
+        },
         birthday: Math.round(values.birthday.getTime() / 1000),
       });
       // TODO: have a prompt saying successfully signed up
@@ -182,4 +200,10 @@ const styles = StyleSheet.create({
   submitButton: {
     marginBottom: 100,
   },
+  profilePicContainerStyle: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    marginLeft: 20,
+  }
 });

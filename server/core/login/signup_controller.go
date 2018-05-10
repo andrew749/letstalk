@@ -1,15 +1,19 @@
 package login
 
 import (
+	"bytes"
+	"encoding/base64"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"time"
 
+	"letstalk/server/core/api"
+
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"letstalk/server/core/api"
 )
 
 /**
@@ -118,6 +122,18 @@ func writeUser(user *api.User, c *ctx.Context) error {
 			PhoneNumber: user.PhoneNumber,
 		}
 		if err := tx.Create(&externalAuthRecord).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if user.ProfilePic != nil {
+		var photoData []byte
+		if photoData, err = base64.StdEncoding.DecodeString(*user.ProfilePic); err != nil {
+			return err
+		}
+		reader := bytes.NewReader(photoData)
+		if err = onboarding.UploadProfilePic(userModel.UserId, reader); err != nil {
 			tx.Rollback()
 			return err
 		}

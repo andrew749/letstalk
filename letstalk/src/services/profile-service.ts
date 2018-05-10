@@ -18,7 +18,7 @@ import {
   USER_VECTOR_ROUTE,
 } from './constants';
 
-interface SignupRequest {
+export interface SignupRequest {
   firstName: string;
   lastName: string;
   email: string;
@@ -26,6 +26,7 @@ interface SignupRequest {
   gender: string;
   birthday: number; // unix time
   password: string;
+  profilePic?: string;
 }
 
 interface UpdateCohortRequest {
@@ -124,6 +125,8 @@ export class RemoteProfileService implements ProfileService {
       },
     };
   }
+
+
 }
 
 export const profileService = new RemoteProfileService(requestor, auth);
