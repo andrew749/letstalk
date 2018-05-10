@@ -74,108 +74,22 @@ body {
 .about {
   display: flex;
   border-radius: 5px;
-  height: 70vh;
   width: 60vw;
   background-color: #FFBB25;
   justify-content: center;
+}
+
+.about p {
+  font-size: .8rem;
 }
 
 .center {
   text-align: center;
 }
 
-.masthead {
-  position: relative;
-  overflow: hidden;
-  padding-bottom: 3rem;
-}
-
-.masthead .masthead-bg {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  width: 100%;
-  min-height: 35rem;
-  height: 100%;
-  background-color: rgba(255, 187, 37, 0.8);
-  transform: skewY(4deg);
-  transform-origin: bottom right;
-}
-
-.masthead .masthead-content {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.masthead .masthead-content h1 {
-  font-size: 2.0rem;
-}
-
-.masthead .masthead-content p {
-  font-size: 1.2rem;
-}
-
-.masthead .masthead-content p strong {
-  font-weight: 700;
-}
-
-.masthead-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.masthead-form .input-group-newsletter {
-  background-color: rgba(52, 58, 64, 0.8);
-  border-radius: 7px;
-  overflow: hidden;
-}
-
-.masthead-form .input-group-newsletter input + select {
-  font-size: 1rem;
-  padding: .5rem;
-}
-
-.masthead-form .input-group-newsletter select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  color: rgba(53, 68, 95, 0.8);
-}
-
-.masthead-form .input-group-newsletter button {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 1rem;
-}
-
 @media (min-width: 768px) {
-  .masthead {
-    height: 100%;
-    min-height: 0;
-    padding-bottom: 0;
-  }
-  .masthead .masthead-bg {
-    min-height: 0;
-    transform: skewX(-8deg);
-    transform-origin: top right;
-  }
-  .masthead .masthead-content {
-    padding-left: 3rem;
-    padding-right: 10rem;
-  }
-  .masthead .masthead-content h1 {
-    font-size: 2.5rem;
-  }
-  .masthead .masthead-content p {
-    font-size: 1.3rem;
-  }
-  .masthead-form {
-    width: 30rem;
+  .about p {
+    font-size: 1.2rem;
   }
 }
 
