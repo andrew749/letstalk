@@ -72,9 +72,6 @@ export class RemoteSessionService implements SessionService {
   }
 
   async logout(sessionToken: SessionToken): Promise<void> {
-    await this.requestor.post(
-      LOGOUT_ROUTE,
-      { sessionToken }
-    );
+    await this.requestor.post(LOGOUT_ROUTE, {}, sessionToken);
   }
 }

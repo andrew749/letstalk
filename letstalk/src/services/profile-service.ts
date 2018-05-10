@@ -88,7 +88,7 @@ export class RemoteProfileService implements ProfileService {
   }
 
   async updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus> {
-    const sessionToken = await auth.getSessionToken();
+    const sessionToken = await this.auth.getSessionToken();
     const response: OnboardingUpdateResponse = await this.requestor.post(
       COHORT_ROUTE, request, sessionToken);
     return response.onboardingStatus;
@@ -98,7 +98,7 @@ export class RemoteProfileService implements ProfileService {
     preferenceType: UserVectorPreferenceType,
     vector: PersonalityVector
   ): Promise<OnboardingStatus> {
-    const sessionToken = await auth.getSessionToken();
+    const sessionToken = await this.auth.getSessionToken();
     const request: UpdateVectorRequest = {
       ...vector,
       preferenceType,
@@ -109,7 +109,7 @@ export class RemoteProfileService implements ProfileService {
   }
 
   async bootstrap(): Promise<BootstrapData> {
-    const sessionToken = await auth.getSessionToken();
+    const sessionToken = await this.auth.getSessionToken();
     const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
     const {
       relationships,
