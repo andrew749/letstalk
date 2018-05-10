@@ -4,6 +4,7 @@ services:
     environment:
       - SECRETS_PATH=secrets.json
       - PROD=true
+      - PORT=3000
   lb:
     restart: always
     ports:
