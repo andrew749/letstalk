@@ -28,9 +28,9 @@ export class Auth {
     this.sessionToken = sessionToken;
   }
 
-  async login(username: string, password: string, notificationToken?: string): Promise<void> {
+  async login(email: string, password: string, notificationToken?: string): Promise<void> {
     const sessionToken = await this.sessionService.login(
-        username,
+        email,
         password,
         notificationToken,
     );

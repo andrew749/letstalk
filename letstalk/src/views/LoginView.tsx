@@ -23,12 +23,16 @@ import {AnalyticsHelper} from '../services/analytics';
 
 
 interface LoginFormData {
-  username: string;
+  email: string;
   password: string;
 }
 
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
+const email = (value: string) =>
+  value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
+    ? 'Invalid email address'
+    : undefined
 
 const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
@@ -39,12 +43,12 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
   return (
     <View>
       <Field
-        label="Username"
-        name="username"
+        label="Email"
+        name="email"
         component={LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
-        validate={required}
+        validate={[required, email]}
       />
       <Field
         label="Password"
@@ -169,7 +173,7 @@ export default class LoginView extends Component<Props> {
   async onSubmit(values: LoginFormData) {
     AnalyticsHelper.getInstance().recordAction(this.LOGIN_VIEW_IDENTIFIER, "login", "", 1);
     const {
-      username,
+      email,
       password,
     } = values;
     try {
@@ -180,7 +184,7 @@ export default class LoginView extends Component<Props> {
       } catch(e){
         console.log("Failed to register for notification")
       }
-      await auth.login(username, password, token);
+      await auth.login(email, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Home' })]
