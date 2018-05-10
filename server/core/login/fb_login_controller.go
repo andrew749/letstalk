@@ -30,7 +30,7 @@ type FBLoginRequestData struct {
 
 func FBController(c *ctx.Context) errs.Error {
 	var loginRequest FBLoginRequestData
-	var fbAuthRecord data.FbAuthData
+	var externalAuthRecord data.ExternalAuthData
 	var userId int
 
 	err := c.GinContext.BindJSON(&loginRequest)
@@ -52,7 +52,7 @@ func FBController(c *ctx.Context) errs.Error {
 	tx := c.Db.Begin()
 
 	// check if the user already has facebook
-	if tx.Where("fb_user_id = ?", user.Id).First(&fbAuthRecord).RecordNotFound() {
+	if tx.Where("fb_user_id = ?", user.Id).First(&externalAuthRecord).RecordNotFound() {
 
 		appUser := data.User{
 			FirstName: user.FirstName,
@@ -71,10 +71,10 @@ func FBController(c *ctx.Context) errs.Error {
 		userId = appUser.UserId
 		rlog.Debug("Created new user with id: ", userId)
 
-		fbAuthRecord.FbUserId = &user.Id
-		fbAuthRecord.UserId = &userId
+		externalAuthRecord.FbUserId = &user.Id
+		externalAuthRecord.UserId = userId
 		// insert the user's fb auth data
-		if err := tx.Create(&fbAuthRecord).Error; err != nil {
+		if err := tx.Create(&externalAuthRecord).Error; err != nil {
 			rlog.Error(err)
 			return errs.NewClientError("Unable to create user")
 		}
@@ -155,7 +155,7 @@ func FBController(c *ctx.Context) errs.Error {
 			// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
 		}()
 	} else {
-		userId = *fbAuthRecord.UserId
+		userId = externalAuthRecord.UserId
 	}
 
 	// create new session for user id
@@ -200,6 +200,8 @@ func getFBUser(accessToken string) (*FBUser, error) {
 	if err != nil {
 		return nil, errors.New("Unable to parse birthday")
 	}
+
+	rlog.Debug(res)
 
 	return &FBUser{
 		Id:        res["id"].(string),

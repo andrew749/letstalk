@@ -10,6 +10,8 @@ export interface Relationship {
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
+  readonly fbId: string | null;
+  readonly phoneNumber: string | null;
 }
 
 export type UserState =

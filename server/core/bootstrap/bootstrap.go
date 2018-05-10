@@ -9,19 +9,32 @@ import (
 	"letstalk/server/data"
 )
 
-func convertUserToRelationshipDataModel(user *data.User, isMentor bool) *api.BootstrapUserRelationshipDataModel {
-	var userType api.UserType
+func convertUserToRelationshipDataModel(
+	user *data.User,
+	isMentor bool,
+) *api.BootstrapUserRelationshipDataModel {
+	var (
+		userType    api.UserType
+		fbId        *string
+		phoneNumber *string
+	)
+	if user.ExternalAuthData != nil {
+		fbId = user.ExternalAuthData.FbUserId
+		phoneNumber = user.ExternalAuthData.PhoneNumber
+	}
 	if isMentor == true {
 		userType = api.USER_TYPE_MENTOR
 	} else {
 		userType = api.USER_TYPE_MENTEE
 	}
 	return &api.BootstrapUserRelationshipDataModel{
-		User:      user.UserId,
-		UserType:  userType,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
+		User:        user.UserId,
+		UserType:    userType,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		Email:       user.Email,
+		FbId:        fbId,
+		PhoneNumber: phoneNumber,
 	}
 }
 
