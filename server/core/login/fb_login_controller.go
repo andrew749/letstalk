@@ -201,6 +201,8 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, errors.New("Unable to parse birthday")
 	}
 
+	rlog.Debug(res)
+
 	return &FBUser{
 		Id:        res["id"].(string),
 		FirstName: res["first_name"].(string),

@@ -91,18 +91,18 @@ class HomeView extends Component<Props> {
         phoneNumber,
       } = relationship;
 
-      const fbLink = "fb-messenger://user-thread/" + fbId;
+      const fbLink = 'fb://profile/' + fbId;
       const emailLink = 'mailto:' + email;
       const smsLink = 'sms:' + phoneNumber;
       const fb = fbId === null ? null : (
         <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(fbLink)}>
-          <MaterialIcons name="email" size={24} />
+          <MaterialIcons name="face" size={24} />
           <Text style={styles.email}>Talk on Messenger</Text>
         </TouchableOpacity>
       );
       const sms = phoneNumber === null ? null : (
         <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(smsLink)}>
-          <MaterialIcons name="email" size={24} />
+          <MaterialIcons name="textsms" size={24} />
           <Text style={styles.email}>Talk on SMS</Text>
         </TouchableOpacity>
       );
@@ -118,6 +118,7 @@ class HomeView extends Component<Props> {
             <Text style={styles.email}>{email}</Text>
           </TouchableOpacity>
           {fb}
+          {sms}
         </Card>
       );
     });
