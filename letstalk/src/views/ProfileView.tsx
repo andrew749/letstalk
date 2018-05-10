@@ -1,19 +1,25 @@
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
-  ScrollView,
   AppRegistry,
+  Button as ReactNativeButton,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
-  FlatList,
-  StyleSheet,
-  Image,
 } from 'react-native';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
-import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
+import {
+  NavigationScreenDetails,
+  NavigationScreenProp,
+  NavigationStackAction,
+  NavigationActions,
+} from 'react-navigation';
 
 import auth from '../services/auth';
 import { ActionButton, Card, Header, Loading } from '../components';
@@ -32,8 +38,10 @@ interface Props extends BootstrapState, DispatchActions {
 }
 
 class ProfileView extends Component<Props> {
-  static navigationOptions = () => ({
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Profile',
+    headerRight: <ReactNativeButton title="Edit"
+      onPress={() => navigation.navigate('ProfileEdit')} />,
   })
 
   constructor(props: Props) {
