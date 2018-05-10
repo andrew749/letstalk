@@ -49,13 +49,9 @@ export class RemoteSessionService implements SessionService {
     this.requestor = requestor;
   }
 
-  async login(username: string, password: string, notificationToken?: string): Promise<SessionToken> {
+  async login(email: string, password: string, notificationToken?: string): Promise<SessionToken> {
     const response = await this.requestor.post(LOGIN_ROUTE,
-      {
-        userId: Number(username),
-        password: password,
-        notificationToken: notificationToken,
-      });
+      { email, password, notificationToken });
     return response.sessionId;
   }
 
@@ -72,9 +68,6 @@ export class RemoteSessionService implements SessionService {
   }
 
   async logout(sessionToken: SessionToken): Promise<void> {
-    await this.requestor.post(
-      LOGOUT_ROUTE,
-      { sessionToken }
-    );
+    await this.requestor.post(LOGOUT_ROUTE, {}, sessionToken);
   }
 }
