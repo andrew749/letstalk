@@ -1,3 +1,4 @@
+import {FileSystem} from 'expo';
 import React, { Component } from 'react';
 import { Picker, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native';
 import {
@@ -7,8 +8,6 @@ import {
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
-import Colors from '../services/colors';
-import {AnalyticsHelper} from '../services/analytics';
 
 import {
   ActionButton,
@@ -22,7 +21,8 @@ import {
 } from '../components';
 import profileService, {SignupRequest} from '../services/profile-service';
 import photoService, {PhotoResult} from '../services/photo_service';
-import {FileSystem} from 'expo';
+import Colors from '../services/colors';
+import {AnalyticsHelper} from '../services/analytics';
 
 interface SignupFormData {
   firstName: string;
