@@ -42,8 +42,8 @@ import (
 /**
  * Parse the json request and bind the parameters to a struct.
  */
-func getUserDataFromRequest(c *ctx.Context) (*api.User, error) {
-	var inputUser api.User
+func getUserDataFromRequest(c *ctx.Context) (*api.UserWithPassword, error) {
+	var inputUser api.UserWithPassword
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func SignupUser(c *ctx.Context) errs.Error {
 /**
  * Create a new user given a particular request and insert in the db.
  */
-func writeUser(user *api.User, c *ctx.Context) error {
+func writeUser(user *api.UserWithPassword, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
 	bday := time.Unix(user.Birthday, 0)
@@ -87,13 +87,13 @@ func writeUser(user *api.User, c *ctx.Context) error {
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		Gender:    utility.GenderIdByName(user.Gender),
+		Gender:    user.Gender,
 		Birthdate: &bday,
 	}
 
 	var err error
 
-	hashedPassword, err := utility.HashPassword(*user.Password)
+	hashedPassword, err := utility.HashPassword(user.Password)
 
 	if err != nil {
 		return errs.NewInternalError("Unable to hash password")

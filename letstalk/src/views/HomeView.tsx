@@ -97,7 +97,7 @@ class HomeView extends Component<Props> {
       const fb = fbId === null ? null : (
         <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(fbLink)}>
           <MaterialIcons name="face" size={24} />
-          <Text style={styles.email}>Talk on Messenger</Text>
+          <Text style={styles.email}>Facebook profile</Text>
         </TouchableOpacity>
       );
       const sms = phoneNumber === null ? null : (

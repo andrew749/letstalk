@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/contact_info"
+	"letstalk/server/core/controller"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
@@ -11,6 +11,7 @@ import (
 	"letstalk/server/core/matching"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/query"
 	"letstalk/server/core/request_to_match"
 	"letstalk/server/core/sessions"
 	"net/http"
@@ -64,6 +65,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		"/cohort",
 		hw.wrapHandler(query.GetCohortController, true),
 	)
+
+	// gets profile data about signed in user
+	v1.OPTIONS("/me")
+	v1.GET("/me", hw.wrapHandler(controller.GetMyProfileController, true))
 
 	v1.OPTIONS("/contact_info")
 	v1.GET("/contact_info", hw.wrapHandler(

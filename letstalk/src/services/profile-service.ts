@@ -23,7 +23,7 @@ export interface SignupRequest {
   lastName: string;
   email: string;
   phoneNumber: string;
-  gender: string;
+  gender: number;
   birthday: number; // unix time
   password: string;
   profilePic?: string;

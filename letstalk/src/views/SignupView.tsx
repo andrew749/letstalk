@@ -30,7 +30,7 @@ interface SignupFormData {
   email: string;
   phoneNumber: string;
   password: string;
-  gender: string;
+  gender: number;
   birthday: Date;
   profilePic: PhotoResult;
 }
@@ -105,11 +105,11 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       >
         <Picker.Item
           label="Male"
-          value="male"
+          value={2}
         />
         <Picker.Item
           label="Female"
-          value="female"
+          value={1}
         />
       </Field>
       <Field
