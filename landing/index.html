@@ -29,7 +29,7 @@
     <div class="overlay"></div>
 
     <div id="navbar">
-      <div class="logo"> 
+      <div class="logo">
         <img class="mx-4 my-3" src="img/name.png" alt="Hive" height="30px">
       </div>
       <div class="my-2 mx-2 navbar-links">
@@ -68,16 +68,14 @@
                     </div>
                     <div class="row my-2">
                       <div class="col-6 my-auto px-1">
-                        <input name="firstName" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required>
+                        <input autocomplete="given-name" name="firstName" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required>
                       </div>
                       <div class="col-6 my-auto px-1">
-                        <input name="lastName" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required>
+                        <input autocomplete="family-name" name="lastName" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required>
                       </div>
                     </div>
                     <div class="row my-2">
                       <div class="col-9 my-auto px-1">
-                        <!-- <input name="programName" type="text" class="form-control" placeholder="Program Name" aria-label="Program Name"> -->
-
                         <select onchange="formColor(this)" name="programName" class="form-control" aria-label="Program Name" required>
                             <option value="" disabled selected>Program Name</option>
                             <option>Software Engineering</option>
@@ -87,7 +85,6 @@
                           </select>
                       </div>
                       <div class="col-3 my-auto px-1">
-                        <!-- <input name="classYear" type="text" class="form-control" placeholder="Year" aria-label="Year"> -->
                         <select type="number" onchange="formColor(this)" name="classYear" class="form-control" aria-label="Year" required>
                             <option value="" disabled selected>Year</option>
                             <option value=2017>2017</option>
@@ -102,7 +99,7 @@
                     </div>
                     <div class="row my-2">
                       <div class="col-12 my-auto px-1">
-                        <input name="emailAddress" type="email" class="form-control" placeholder="Email Address" aria-label="Email Address" required>
+                        <input autocomplete="email" name="emailAddress" type="email" class="form-control" placeholder="Email Address" aria-label="Email Address" required>
                       </div>
                     </div>
                     <div class="row mt-4">
@@ -118,7 +115,7 @@
         </div>
       </div>
     </div>
-<!-- 
+<!--
     <div class="social-icons">
       <ul class="list-unstyled text-center mb-0">
         <li class="list-unstyled-item">
@@ -153,7 +150,7 @@
     <script type="text/javascript">
       function formColor(sel)
       {
-        sel.style.color = "#000";              
+        sel.style.color = "#000";
       }
     </script>
 
