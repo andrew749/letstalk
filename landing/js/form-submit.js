@@ -13,10 +13,8 @@ $(document).ready(function() {
             });
 
             $.ajax({
-                type: "POST",
-                // url: "https://api.hiveapp.org/v1/subscribe_email",
-                url: "http://localhost:3000/v1/subscribe_email",
-                // url: "v1/subscribe_email",
+                method: "POST",
+                url: "https://api.hiveapp.org/v1/subscribe_email",
                 headers: {
                     'Access-Control-Allow-Origin': '*'
                 },
@@ -27,6 +25,5 @@ $(document).ready(function() {
             });
             e.preventDefault();
         }
-    }); 
+    });
 });
-
