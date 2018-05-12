@@ -1,8 +1,8 @@
 {
-    "title": "Coming Soon",
-    "name": "startbootstrap-coming-soon",
+    "title": "Hive - Coming Soon",
+    "name": "hive-landing-page",
     "version": "4.1.1",
-    "description": "Coming Soon is a Bootstrap 4 coming soon page theme.",
+    "description": "Landing page for Hive.",
     "keywords": [
         "css",
         "sass",
@@ -11,20 +11,8 @@
         "theme",
         "template"
     ],
-    "homepage": "https://startbootstrap.com/template-overviews/coming-soon",
-    "bugs": {
-        "url": "https://github.com/BlackrockDigital/startbootstrap-coming-soon/issues",
-        "email": "feedback@startbootstrap.com"
-    },
     "license": "MIT",
-    "author": "Start Bootstrap",
-    "contributors": [
-        "David Miller (http://davidmiller.io/)"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/BlackrockDigital/startbootstrap-coming-soon.git"
-    },
+    "author": "Let's Talk",
     "dependencies": {
         "bootstrap": "4.1.1",
         "font-awesome": "4.7.0",

@@ -5,15 +5,21 @@ $(document).ready(function() {
             var formObj = {};
 
             $.map(formData, function(n, i){
-                formObj[n['name']] = n['value'];
+                if (n['name'] === 'classYear') {
+                    formObj[n['name']] = parseInt(n['value']);
+                } else {
+                    formObj[n['name']] = n['value'];
+                }
             });
-
-            console.log(formObj);
 
             $.ajax({
                 type: "POST",
-                // PROD: url: "api.hiveapp.org/v1/subscribe_email",
-                url: "v1/subscribe_email",
+                // url: "https://api.hiveapp.org/v1/subscribe_email",
+                url: "http://localhost:3000/v1/subscribe_email",
+                // url: "v1/subscribe_email",
+                headers: {
+                    'Access-Control-Allow-Origin': '*'
+                },
                 data: JSON.stringify(formObj),
                 success: function(){},
                 dataType: "json",
