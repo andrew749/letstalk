@@ -44,7 +44,6 @@ export function reducer(state: State = initialState, action: ActionTypes): State
 const fetchProfile: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = () => {
   return async (dispatch: Dispatch<State>) => {
-    console.log("Hellow");
     await dispatch(fetch.start());
     try {
       const data = await profileService.me();

@@ -134,7 +134,6 @@ export class RemoteProfileService implements ProfileService {
   async me(): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
-    console.log(response);
     return {
       ...response,
       birthdate: new Date(response.birthdate),
