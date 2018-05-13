@@ -17,4 +17,5 @@ export const CREDENTIALS_ROUTE         = '/v1/credentials';
 export const CREDENTIAL_ROUTE          = '/v1/credential';
 export const CREDENTIAL_REQUESTS_ROUTE = '/v1/credential_requests';
 export const CREDENTIAL_REQUEST_ROUTE  = '/v1/credential_request';
-export const PROFILE_PIC_UPLOAD_ROUTE  =  '/v1/profile_pic_upload';
+export const PROFILE_PIC_UPLOAD_ROUTE  = '/v1/profile_pic_upload';
+export const MATCHING_ROUTE            = '/v1/matching';
