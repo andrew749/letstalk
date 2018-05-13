@@ -7,8 +7,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/data"
 	"letstalk/server/core/onboarding"
-	"letstalk/server/core/utility"
-	"strconv"
+
 	"github.com/romana/rlog"
 )
 

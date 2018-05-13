@@ -18,7 +18,7 @@ type User struct {
 	// Logistical information
 	Secret     string `json:"secret"`
 	Password   *string `json:"password" binding:"required"`
-	ProfilePic *string `json:"profilePic" binding:"required"`
+	ProfilePic *string `json:"profilePic"`
 }
 
 type UserType string
