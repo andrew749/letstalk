@@ -5,15 +5,19 @@ import {
   BootstrapData,
   Cohort,
   OnboardingStatus,
+  ProfileData,
   Relationship,
-  UserData,
   UserState,
   UserType,
 } from '../models';
+import {
+  UserPersonalInfo,
+} from '../models/user';
 import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
   COHORT_ROUTE,
+  ME_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
 } from './constants';
@@ -24,7 +28,7 @@ export interface SignupRequest {
   email: string;
   phoneNumber: string;
   gender: number;
-  birthday: number; // unix time
+  birthdate: number; // unix time
   password: string;
   profilePic?: string;
 }
@@ -55,7 +59,7 @@ export interface BootstrapResponse {
   readonly relationships: Array<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
-  readonly me: UserData;
+  readonly me: UserPersonalInfo;
   readonly onboardingStatus: OnboardingStatus;
 };
 
@@ -112,6 +116,7 @@ export class RemoteProfileService implements ProfileService {
   async bootstrap(): Promise<BootstrapData> {
     const sessionToken = await this.auth.getSessionToken();
     const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
+
     const {
       relationships,
       me,
@@ -126,7 +131,15 @@ export class RemoteProfileService implements ProfileService {
     };
   }
 
-
+  async me(): Promise<ProfileData> {
+    const sessionToken = await this.auth.getSessionToken();
+    const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
+    console.log(response);
+    return {
+      ...response,
+      birthdate: new Date(response.birthdate),
+    };
+  }
 }
 
 export const profileService = new RemoteProfileService(requestor, auth);

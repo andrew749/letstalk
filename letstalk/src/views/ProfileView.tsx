@@ -3,12 +3,15 @@ import {
   ActivityIndicator,
   AppRegistry,
   Button as ReactNativeButton,
+  Dimensions,
   FlatList,
   Image,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { connect, ActionCreator } from 'react-redux';
@@ -20,24 +23,31 @@ import {
   NavigationStackAction,
   NavigationActions,
 } from 'react-navigation';
+import { MaterialIcons } from '@expo/vector-icons';
+import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import { ActionButton, Card, Header, Loading } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
-import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
-import { ActionTypes } from '../redux/bootstrap/actions';
+import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
+import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
+import {AnalyticsHelper} from '../services/analytics';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
 }
 
-interface Props extends BootstrapState, DispatchActions {
+interface Props extends ProfileState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
 class ProfileView extends Component<Props> {
+  PROFILE_VIEW_IDENTIFIER = "ProfileView";
+
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Profile',
     headerRight: <ReactNativeButton title="Edit"
@@ -63,8 +73,13 @@ class ProfileView extends Component<Props> {
     }));
   }
 
+  async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.PROFILE_VIEW_IDENTIFIER);
+    this.load();
+  }
+
   private async load() {
-    await this.props.fetchBootstrap();
+    await this.props.fetchProfile();
   }
 
   private renderInner() {
@@ -72,13 +87,15 @@ class ProfileView extends Component<Props> {
       programId,
       gradYear,
       sequenceId,
-    } = this.props.bootstrap.cohort;
+    } = this.props.profile;
 
     const {
       gender,
       email,
       birthdate,
-    } = this.props.bootstrap.me;
+      phoneNumber,
+      fbId,
+    } = this.props.profile;
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -88,22 +105,52 @@ class ProfileView extends Component<Props> {
     const sequence = sequenceById(sequenceId);
     const program = programById(programId);
 
+    const hr = <View
+      style={{
+        borderBottomColor: '#555555',
+        borderBottomWidth: 1,
+      }}
+    />;
+
+    const buildItem = (label: string, value: string) => {
+      return (
+        <View key={label} style={styles.listItem}>
+          <Text style={styles.label}>{label}:</Text>
+          <Text style={styles.value}>{value}</Text>
+        </View>
+      );
+    };
+
     const buildItems = (name_values: Array<[string, string]>) => {
-      return name_values.map(([label, value]) => {
-        return (
-          <View key={label} style={styles.listItem}>
-            <Text style={styles.label}>{label}:</Text>
-            <Text style={styles.value}>{value}</Text>
-          </View>
-        )
+      const items = name_values.map(([label, value]) => {
+        return [buildItem(label, value), hr];
       });
+      const flatItems = [].concat(...items);
+      return flatItems.length > 0 ? flatItems.slice(0, flatItems.length - 1) : flatItems;
     };
 
     const profileItems = buildItems([
       ['Gender', genderStr],
-      ['Email', email],
       ['Birthday', birthdayStr],
+      ['Email', email],
     ]);
+
+    if (phoneNumber !== null) {
+      profileItems.push(hr);
+      profileItems.push(buildItem('Phone Number', phoneNumber));
+    }
+
+    if (fbId !== null) {
+      const fbLink = 'fb://profile/' + fbId;
+      profileItems.push(hr);
+      profileItems.push(
+        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+          <MaterialIcons name="face" size={24} />
+          <Text style={styles.value}>Facebook profile</Text>
+        </TouchableOpacity>
+      );
+    }
+
     const cohortItems = buildItems([
       ['Program', program],
       ['Sequence', sequence],
@@ -112,15 +159,14 @@ class ProfileView extends Component<Props> {
 
     return (
       <View style={styles.contentContainer} >
-        <Image style={styles.image} source={require('../img/profile.jpg')} />
-        <Card>
-          <Text style={styles.sectionHeader}>Profile</Text>
+        <Text style={styles.sectionHeader}>Personal Info</Text>
+        <View style={styles.sectionContainer}>
           {profileItems}
-        </Card>
-        <Card>
-          <Text style={styles.sectionHeader}>Cohort</Text>
+        </View>
+        <Text style={styles.sectionHeader}>Cohort</Text>
+        <View style={styles.sectionContainer}>
           {cohortItems}
-        </Card>
+        </View>
       </View>
     );
   }
@@ -142,11 +188,14 @@ class ProfileView extends Component<Props> {
 
   render() {
     const body = this.renderBody();
-    const headerText = this.props.bootstrap ?
-      this.props.bootstrap.me.firstName + ' ' + this.props.bootstrap.me.lastName : 'Profile';
+    const headerText = this.props.profile ?
+      this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Header>{headerText}</Header>
+        <View style={styles.headerContainer}>
+          <Image style={styles.image} source={require('../img/profile.jpg')} />
+          <Header>{headerText}</Header>
+        </View>
         {body}
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
@@ -154,7 +203,7 @@ class ProfileView extends Component<Props> {
   }
 }
 
-export default connect(({bootstrap}: RootState) => bootstrap, { fetchBootstrap })(ProfileView);
+export default connect(({profile}: RootState) => profile, { fetchProfile })(ProfileView);
 
 const styles = StyleSheet.create({
   container: {
@@ -165,25 +214,39 @@ const styles = StyleSheet.create({
     marginHorizontal: 25
   },
   image: {
-    width: 150,
-    height: 150,
-    borderRadius: 75
+    width: 60,
+    height: 60,
+    margin: 10,
+    borderRadius: 30,
+  },
+  headerContainer: {
+    flex: 1,
+    flexDirection: 'row',
   },
   listItem: {
     flex: 1,
     flexDirection: 'row',
+    marginTop: 8,
+    marginBottom: 8,
   },
   sectionHeader: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 24,
     marginBottom: 5,
+    marginTop: 10,
+    alignSelf: 'flex-start',
+  },
+  sectionContainer: {
+    width: SCREEN_WIDTH,
+    padding: 10,
+    backgroundColor: 'white',
   },
   label: {
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 18,
   },
   value: {
-    fontSize: 12,
+    fontSize: 18,
     marginLeft: 10,
   },
 });

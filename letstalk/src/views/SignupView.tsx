@@ -31,7 +31,7 @@ interface SignupFormData {
   phoneNumber: string;
   password: string;
   gender: number;
-  birthday: Date;
+  birthdate: Date;
   profilePic: PhotoResult;
 }
 
@@ -114,7 +114,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       </Field>
       <Field
         label="Birthday"
-        name="birthday"
+        name="birthdate"
         mode={'date' as 'date'}
         defaultDate={new Date('1996-11-07T00:00:00.000Z')}
         component={ModalDatePicker}
@@ -173,7 +173,7 @@ export default class SignupView extends Component<Props> {
           "password": values.password,
           "profilePic": values.profilePic.data,
         },
-        birthday: Math.round(values.birthday.getTime() / 1000),
+        birthdate: Math.round(values.birthdate.getTime() / 1000),
       });
       // TODO: have a prompt saying successfully signed up
       this.props.navigation.dispatch(NavigationActions.reset({

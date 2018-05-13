@@ -42,8 +42,8 @@ import (
 /**
  * Parse the json request and bind the parameters to a struct.
  */
-func getUserDataFromRequest(c *ctx.Context) (*api.UserWithPassword, error) {
-	var inputUser api.UserWithPassword
+func getUserDataFromRequest(c *ctx.Context) (*api.SignupRequest, error) {
+	var inputUser api.SignupRequest
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
 		return nil, err
@@ -78,10 +78,10 @@ func SignupUser(c *ctx.Context) errs.Error {
 /**
  * Create a new user given a particular request and insert in the db.
  */
-func writeUser(user *api.UserWithPassword, c *ctx.Context) error {
+func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
-	bday := time.Unix(user.Birthday, 0)
+	bday := time.Unix(user.Birthdate, 0)
 
 	userModel := data.User{
 		Email:     user.Email,
@@ -104,6 +104,11 @@ func writeUser(user *api.UserWithPassword, c *ctx.Context) error {
 		PasswordHash: hashedPassword,
 	}
 
+	externalAuthRecord := data.ExternalAuthData{
+		UserId:      userModel.UserId,
+		PhoneNumber: &user.PhoneNumber,
+	}
+
 	// Insert data structures within a transaction.
 	tx := c.Db.Begin()
 	if err := tx.Create(&userModel).Error; err != nil {
@@ -115,16 +120,9 @@ func writeUser(user *api.UserWithPassword, c *ctx.Context) error {
 		tx.Rollback()
 		return err
 	}
-
-	if user.PhoneNumber != nil {
-		externalAuthRecord := data.ExternalAuthData{
-			UserId:      userModel.UserId,
-			PhoneNumber: user.PhoneNumber,
-		}
-		if err := tx.Create(&externalAuthRecord).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
+	if err := tx.Create(&externalAuthRecord).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	if user.ProfilePic != nil {

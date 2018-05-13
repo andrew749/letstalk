@@ -12,18 +12,34 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewClientError("Unable to get user data.")
 	}
+	userCohort, err := query.GetUserCohort(c.Db, c.SessionData.UserId)
+	if err != nil {
+		// TODO: Should probably check what the errors here are. Right now assume that cohort does not
+		// exist
+	}
 
-	userModel := api.User{
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Gender:    user.Gender,
-		Birthday:  user.Birthdate.Unix(),
-		Email:     user.Email,
+	userModel := api.MyProfileResponse{
+		UserPersonalInfo: api.UserPersonalInfo{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Gender:    user.Gender,
+			Birthdate: user.Birthdate.Unix(),
+		},
+		UserContactInfo: api.UserContactInfo{
+			Email: user.Email,
+		},
 	}
 
 	if user.ExternalAuthData != nil {
-		userModel.PhoneNumber = user.ExternalAuthData.PhoneNumber
-		userModel.FbId = user.ExternalAuthData.FbUserId
+		userModel.UserContactInfo.PhoneNumber = user.ExternalAuthData.PhoneNumber
+		userModel.UserContactInfo.FbId = user.ExternalAuthData.FbUserId
+	}
+
+	if userCohort != nil {
+		userModel.Cohort.CohortId = userCohort.CohortId
+		userModel.Cohort.ProgramId = userCohort.ProgramId
+		userModel.Cohort.GradYear = userCohort.GradYear
+		userModel.Cohort.SequenceId = userCohort.SequenceId
 	}
 
 	c.Result = userModel
