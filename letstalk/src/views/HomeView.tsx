@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {
@@ -18,6 +19,7 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
+import Menu, { MenuOptions, MenuOption, MenuTrigger } from 'react-native-menu';
 
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
@@ -26,6 +28,7 @@ import { ActionButton, Card, Header, Loading } from '../components';
 
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
+import navigate = NavigationActions.navigate;
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -49,6 +52,8 @@ class HomeView extends Component<Props> {
 
     this.load = this.load.bind(this);
     this.renderHome = this.renderHome.bind(this);
+    // TODO(aklen): remove this.menu when QR code moves to a different page
+    this.menu = {};
   }
 
   async componentDidMount() {
@@ -76,6 +81,10 @@ class HomeView extends Component<Props> {
 
   private credentialEdit() {
     this.props.navigation.navigate('CredentialEdit');
+  }
+
+  private static openQrCodePage(userId: number) {
+    navigate('QrCode', { userId: userId });
   }
 
   private renderMatches() {
@@ -108,18 +117,29 @@ class HomeView extends Component<Props> {
       );
       // TODO: Handle errors for links
       return (
-        <Card key={userId}>
-          <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
-          <Text style={styles.relationshipType}>{userType}</Text>
-          <TouchableOpacity style={styles.emailContainer}
-            onPress={() => Linking.openURL(emailLink)}
-          >
-            <MaterialIcons name="email" size={24} />
-            <Text style={styles.email}>{email}</Text>
-          </TouchableOpacity>
-          {fb}
-          {sms}
-        </Card>
+        // TODO(ajklen): remove this TouchableWithoutFeedback and Menu when QR code moves to a different page
+        <TouchableWithoutFeedback onLongPress={()=>this.menu[userId].open()}>
+          <Card key={userId}>
+            <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
+            <Text style={styles.relationshipType}>{userType}</Text>
+            <TouchableOpacity style={styles.emailContainer}
+              onPress={() => Linking.openURL(emailLink)}
+            >
+              <MaterialIcons name="email" size={24} />
+              <Text style={styles.email}>{email}</Text>
+            </TouchableOpacity>
+            {fb}
+            {sms}
+          </Card>
+          <Menu ref={c => (this.menu[userId] = c)} onSelect={callback => callback(userId)}>
+            <MenuTrigger>
+              <Text style={{ fontSize: 20 }}>&#8942;</Text>
+            </MenuTrigger>
+            <MenuOptions value={HomeView.openQrCodePage}>
+              <Text>Open QR Code</Text>
+            </MenuOptions>
+          </Menu>
+        </TouchableWithoutFeedback>
       );
     });
     return (
