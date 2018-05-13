@@ -52,6 +52,8 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		Me:    user,
 	}
 
+	response.Secret = getSecretForUser(user)
+
 	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewDbError(err)
@@ -126,4 +128,9 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	c.Result = response
 
 	return nil
+}
+
+// getSecretForUser gets a unique secret for a user, showable as a QR code.
+func getSecretForUser(user *data.User) string {
+	
 }

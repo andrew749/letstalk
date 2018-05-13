@@ -15,6 +15,8 @@ type User struct {
 	Gender   string `json:"gender" binding:"required"`
 	Birthday int64  `json:"birthday" binding:"required"` // unix time
 
+	// Logistical information
+	Secret     string `json:"secret"`
 	Password   *string `json:"password" binding:"required"`
 	ProfilePic *string `json:"profilePic" binding:"required"`
 }
