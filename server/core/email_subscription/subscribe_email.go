@@ -32,16 +32,29 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 		return errs.NewClientError(err.Error())
 	}
 
+	var subscribers []data.Subscriber
+
+	// if there is already a subscription
+	if err = ctx.Db.Where(
+		"email = ?",
+		request.EmailAddress,
+	).Find(&subscribers).Error; err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	if len(subscribers) > 0 {
+		return errs.NewClientError("Subscription already created")
+	}
+
 	var subscriber data.Subscriber
-
-	subscriber.ClassYear = request.ClassYear
-	subscriber.Email = request.EmailAddress
-	subscriber.ProgramName = request.ProgramName
-	subscriber.FirstName = request.FirstName
-	subscriber.LastName = request.LastName
-
 	// create new subscription
-	if err = ctx.Db.Create(subscriber).Error; err != nil {
+	if err = ctx.Db.FirstOrCreate(&subscriber, data.Subscriber{
+		ClassYear:   request.ClassYear,
+		Email:       request.EmailAddress,
+		ProgramName: request.ProgramName,
+		FirstName:   request.FirstName,
+		LastName:    request.LastName,
+	}).Error; err != nil {
 		return errs.NewClientError("Unable to create new subscription")
 	}
 
