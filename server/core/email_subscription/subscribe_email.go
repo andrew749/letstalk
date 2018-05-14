@@ -1,11 +1,14 @@
 package email_subscription
 
 import (
+	"fmt"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/push"
 
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 type SubscriptionRequest struct {
@@ -23,10 +26,9 @@ type SubscriptionResponse struct {
 func AddSubscription(ctx *ctx.Context) errs.Error {
 	var request SubscriptionRequest
 
-	err := ctx.GinContext.BindJSON(&request)
-	rlog.Debug(ctx.GinContext.GetRawData())
+	var err error
 
-	if err != nil {
+	if err = ctx.GinContext.BindJSON(&request); err != nil {
 		return errs.NewClientError(err.Error())
 	}
 
@@ -39,8 +41,19 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 	subscriber.LastName = request.LastName
 
 	// create new subscription
-	if err := ctx.Db.Create(subscriber).Error; err != nil {
+	if err = ctx.Db.Create(subscriber).Error; err != nil {
 		return errs.NewClientError("Unable to create new subscription")
+	}
+
+	// send verification email
+	to := mail.NewEmail(
+		fmt.Sprintf("%s %s", subscriber.FirstName, subscriber.LastName),
+		subscriber.Email,
+	)
+
+	err = push.SendSubscribeEmail(to, subscriber.FirstName)
+	if err != nil {
+		rlog.Error("Unable to send email to ", subscriber.Email)
 	}
 
 	ctx.Result = SubscriptionResponse{"Ok"}
