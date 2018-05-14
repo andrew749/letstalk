@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker exec letstalk_lb_1 nginx -s reload
+docker exec -it nginx nginx -s reload

@@ -10,7 +10,8 @@ type UserPersonalInfo struct {
 	Birthdate int64  `json:"birthdate" binding:"required"` // unix time
 
 	// TODO: Does this belong here?
-	ProfilePic *string `json:"profilePic"`
+	Secret     string `json:"secret"`
+  ProfilePic *string `json:"profilePic"`
 }
 
 type UserContactInfo struct {

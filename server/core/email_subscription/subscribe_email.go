@@ -1,11 +1,14 @@
 package email_subscription
 
 import (
+	"fmt"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/push"
 
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 type SubscriptionRequest struct {
@@ -23,24 +26,47 @@ type SubscriptionResponse struct {
 func AddSubscription(ctx *ctx.Context) errs.Error {
 	var request SubscriptionRequest
 
-	err := ctx.GinContext.BindJSON(&request)
-	rlog.Debug(ctx.GinContext.GetRawData())
+	var err error
 
-	if err != nil {
+	if err = ctx.GinContext.BindJSON(&request); err != nil {
 		return errs.NewClientError(err.Error())
 	}
 
+	var subscribers []data.Subscriber
+
+	// if there is already a subscription
+	if err = ctx.Db.Where(
+		"email = ?",
+		request.EmailAddress,
+	).Find(&subscribers).Error; err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	if len(subscribers) > 0 {
+		return errs.NewClientError("Subscription already created")
+	}
+
 	var subscriber data.Subscriber
-
-	subscriber.ClassYear = request.ClassYear
-	subscriber.Email = request.EmailAddress
-	subscriber.ProgramName = request.ProgramName
-	subscriber.FirstName = request.FirstName
-	subscriber.LastName = request.LastName
-
 	// create new subscription
-	if err := ctx.Db.Create(subscriber).Error; err != nil {
+	if err = ctx.Db.FirstOrCreate(&subscriber, data.Subscriber{
+		ClassYear:   request.ClassYear,
+		Email:       request.EmailAddress,
+		ProgramName: request.ProgramName,
+		FirstName:   request.FirstName,
+		LastName:    request.LastName,
+	}).Error; err != nil {
 		return errs.NewClientError("Unable to create new subscription")
+	}
+
+	// send verification email
+	to := mail.NewEmail(
+		fmt.Sprintf("%s %s", subscriber.FirstName, subscriber.LastName),
+		subscriber.Email,
+	)
+
+	err = push.SendSubscribeEmail(to, subscriber.FirstName)
+	if err != nil {
+		rlog.Error("Unable to send email to ", subscriber.Email)
 	}
 
 	ctx.Result = SubscriptionResponse{"Ok"}

@@ -21,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"letstalk/server/core/meeting"
 )
 
 type handlerWrapper struct {
@@ -158,11 +159,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
-	// User matching
-	v1.OPTIONS("/matching")
-	v1.PUT("/matching", hw.wrapHandler(matching.PutMatchingController, true /* auth required */))
-	v1.OPTIONS("/matching/:user_id")
-	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, true /* auth required */))
+	// Meetings
+	v1.OPTIONS("/meeting/confirm")
+	v1.POST( "/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */),
+	)
 
 	// Debug route group.
 	debug := router.Group("/debug")
