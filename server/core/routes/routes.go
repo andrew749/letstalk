@@ -70,6 +70,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/me")
 	v1.GET("/me", hw.wrapHandler(controller.GetMyProfileController, true))
 
+	// updates profile data for signed in user
+	v1.OPTIONS("/profile_edit")
+	v1.POST("/profile_edit", hw.wrapHandler(controller.ProfileEditController, true))
+
 	v1.OPTIONS("/contact_info")
 	v1.GET("/contact_info", hw.wrapHandler(
 		contact_info.GetContactInfoController,

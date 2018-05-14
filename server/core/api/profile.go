@@ -12,3 +12,9 @@ type MyProfileResponse struct {
 	UserContactInfo
 	Cohort
 }
+
+type ProfileEditRequest struct {
+	UserPersonalInfo
+	PhoneNumber *string `json:"phoneNumber"`
+	CohortId    int     `json:"cohortId" binding:"required"`
+}

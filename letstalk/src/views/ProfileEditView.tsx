@@ -21,6 +21,7 @@ import { NavigationScreenProp, NavigationStackAction, NavigationActions } from '
 import Immutable from 'immutable';
 
 import auth from '../services/auth';
+import profileService from '../services/profile-service';
 import {
   ActionButton,
   ButtonPicker,
@@ -36,8 +37,8 @@ import {
 } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
-import { State as ProfileState } from '../redux/profile/reducer';
-import { ActionTypes } from '../redux/bootstrap/actions';
+import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
+import { ActionTypes } from '../redux/profile/actions';
 import photoService, {PhotoResult} from '../services/photo_service';
 import {
   Cohort,
@@ -54,7 +55,7 @@ interface EditFormData {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  gender: string;
+  gender: number;
   birthdate: Date;
   programId: string,
   sequenceId: string;
@@ -124,11 +125,11 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
       >
         <Picker.Item
           label="Male"
-          value="male"
+          value={2}
         />
         <Picker.Item
           label="Female"
-          value="female"
+          value={1}
         />
       </Field>
       <Field
@@ -191,6 +192,7 @@ const EditFormWithReduxBuilder = (initialValues: EditFormData) => {
 }
 
 interface DispatchActions {
+  fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
 }
 
 interface Props extends ProfileState, DispatchActions {
@@ -209,7 +211,30 @@ class ProfileEditView extends Component<Props> {
   }
 
   async onSubmit(values: EditFormData) {
-    console.log(values);
+    try {
+      const {
+        firstName,
+        lastName,
+        phoneNumber,
+        gender,
+        programId,
+        sequenceId,
+        gradYear,
+      } = values;
+      const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
+      await profileService.profileEdit({
+        firstName,
+        lastName,
+        phoneNumber,
+        gender,
+        cohortId,
+        birthdate: Math.round(values.birthdate.getTime() / 1000),
+      });
+      await this.props.fetchProfile();
+      this.props.navigation.goBack();
+    } catch(e) {
+      throw new SubmissionError({_error: e.message});
+    }
   }
 
   render() {
@@ -226,7 +251,7 @@ class ProfileEditView extends Component<Props> {
     const EditFormWithRedux = EditFormWithReduxBuilder({
       firstName,
       lastName,
-      gender: genderIdToString(gender),
+      gender,
       birthdate,
       phoneNumber,
       programId,
@@ -241,7 +266,7 @@ class ProfileEditView extends Component<Props> {
   }
 }
 
-export default connect(({profile}: RootState) => profile)(ProfileEditView);
+export default connect(({profile}: RootState) => profile, { fetchProfile })(ProfileEditView);
 
 const styles = StyleSheet.create({
   submitButton: {

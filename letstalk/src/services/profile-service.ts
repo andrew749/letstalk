@@ -20,30 +20,31 @@ import {
   ME_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
+  PROFILE_EDIT_ROUTE,
 } from './constants';
 
 export interface SignupRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  gender: number;
-  birthdate: number; // unix time
-  password: string;
-  profilePic?: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+  readonly phoneNumber: string;
+  readonly gender: number;
+  readonly birthdate: number; // unix time
+  readonly password: string;
+  readonly profilePic?: string;
 }
 
 interface UpdateCohortRequest {
-  cohortId: number;
+  readonly cohortId: number;
 }
 
 export interface PersonalityVector {
-  sociable: number;
-  hardworking: number;
-  ambitious: number;
-  energetic: number;
-  carefree: number;
-  confident: number;
+  readonly sociable: number;
+  readonly hardworking: number;
+  readonly ambitious: number;
+  readonly energetic: number;
+  readonly carefree: number;
+  readonly confident: number;
 }
 
 export enum UserVectorPreferenceType {
@@ -62,6 +63,15 @@ export interface BootstrapResponse {
   readonly me: UserPersonalInfo;
   readonly onboardingStatus: OnboardingStatus;
 };
+
+export interface ProfileEditRequest {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly gender: number;
+  readonly birthdate: number; // unix time
+  readonly phoneNumber: string | null;
+  readonly cohortId: number;
+}
 
 interface OnboardingUpdateResponse {
   readonly message: string;
@@ -90,6 +100,11 @@ export class RemoteProfileService implements ProfileService {
   async signup(request: SignupRequest): Promise<number> {
     const response = await this.requestor.post(SIGNUP_ROUTE, request);
     return response.userId;
+  }
+
+  async profileEdit(request: ProfileEditRequest): Promise<void> {
+    const sessionToken = await this.auth.getSessionToken();
+    await this.requestor.post(PROFILE_EDIT_ROUTE, request, sessionToken);
   }
 
   async updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus> {
