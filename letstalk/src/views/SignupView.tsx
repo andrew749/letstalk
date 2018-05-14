@@ -17,7 +17,7 @@ import {
   LabeledFormInput,
   ModalPicker,
   ModalDatePicker,
-  ProfileAvatar,
+  ProfileAvatarEditableFormElement,
 } from '../components';
 import profileService, {SignupRequest} from '../services/profile-service';
 import photoService, {PhotoResult} from '../services/photo_service';
@@ -56,9 +56,8 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
     <ScrollView>
       <Field
         name="profilePic"
-        component={ProfileAvatar}
+        component={ProfileAvatarEditableFormElement}
         containerStyle={styles.profilePicContainerStyle}
-        editable={true}
       />
       <Field
         label="First name"

@@ -33,7 +33,7 @@ import {
   Loading,
   ModalDatePicker,
   ModalPicker,
-  ProfileAvatar,
+  ProfileAvatarEditableFormElement,
 } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';

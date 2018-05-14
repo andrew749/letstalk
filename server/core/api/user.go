@@ -4,14 +4,15 @@ package api
  * Holds all the data that we currently associate with a user.
  */
 type UserPersonalInfo struct {
+	UserId    int    `json:"userId"`
 	FirstName string `json:"firstName" binding:"required"`
 	LastName  string `json:"lastName" binding:"required"`
 	Gender    int    `json:"gender" binding:"required"`
 	Birthdate int64  `json:"birthdate" binding:"required"` // unix time
 
 	// TODO: Does this belong here?
-	Secret     string `json:"secret"`
-  ProfilePic *string `json:"profilePic"`
+	Secret     string  `json:"secret"`
+	ProfilePic *string `json:"profilePic"`
 }
 
 type UserContactInfo struct {

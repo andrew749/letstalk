@@ -154,6 +154,21 @@ export class RemoteProfileService implements ProfileService {
       birthdate: new Date(response.birthdate),
     };
   }
+
+  static getProfilePicUrl(userId: string): string {
+      return `https://s3.amazonaws.com/hive-user-profile-pictures/${userId}`;
+  }
+
+  static async getProfilePicForUser(userId: string): Promise<Blob> {
+    const profilePicUrl = this.getProfilePicUrl(userId);
+    // not a standard get
+    const response = await fetch(profilePicUrl);
+    console.log(response);
+    const data = await response.body;
+    const blob = (await data.getReader().read() as Blob);
+    return blob;
+  }
+
 }
 
 export const profileService = new RemoteProfileService(requestor, auth);

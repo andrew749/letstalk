@@ -34,6 +34,7 @@ import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
 import {AnalyticsHelper} from '../services/analytics';
+import {ProfileAvatar} from '../components';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -188,12 +189,17 @@ class ProfileView extends Component<Props> {
 
   render() {
     const body = this.renderBody();
+
+    let userId;
+    if (this.props.profile) {
+        userId = this.props.profile.userId.toString();
+    }
     const headerText = this.props.profile ?
       this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerContainer}>
-          <Image style={styles.image} source={require('../img/profile.jpg')} />
+          <ProfileAvatar userId={userId} />
           <Header>{headerText}</Header>
         </View>
         {body}

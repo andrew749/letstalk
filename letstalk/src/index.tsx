@@ -109,7 +109,6 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-    if (loggedIn === null) return <View><Text>Splash</Text></View>;
 
     const AppNavigation = createAppNavigation(loggedIn);
     return (

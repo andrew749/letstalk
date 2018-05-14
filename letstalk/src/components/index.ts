@@ -11,7 +11,7 @@ import Loading from './Loading';
 import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
 import Rating from './Rating';
-import ProfileAvatar from './ProfileAvatar';
+import ProfileAvatar, {ProfileAvatarEditableFormElement} from './ProfileAvatar';
 
 export {
   ActionButton,
@@ -29,4 +29,5 @@ export {
   ModalPicker,
   Rating,
   ProfileAvatar,
+  ProfileAvatarEditableFormElement,
 };

@@ -70,6 +70,7 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 
 	userModel := api.MyProfileResponse{
 		UserPersonalInfo: api.UserPersonalInfo{
+			UserId:    c.SessionData.UserId,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Gender:    user.Gender,
