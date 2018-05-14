@@ -14,6 +14,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/google/uuid"
 )
 
 /**
@@ -91,7 +92,12 @@ func writeUser(user *api.User, c *ctx.Context) error {
 		Birthdate: &bday,
 	}
 
-	var err error
+	// Generate UUID for each user.
+	secret, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+	userModel.Secret = secret.String()
 
 	hashedPassword, err := utility.HashPassword(*user.Password)
 
