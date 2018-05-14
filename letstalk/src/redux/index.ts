@@ -5,6 +5,7 @@ import { toastReducer as toast } from 'react-native-redux-toast';
 import { reducer as bootstrap, State as BootstrapState } from './bootstrap/reducer';
 import { reducer as onboarding, State as OnboardingState } from './onboarding/reducer';
 import { reducer as credentials, State as CredentialsState } from './credentials/reducer';
+import { reducer as profile, State as ProfileState } from './profile/reducer';
 import {
   reducer as credentialRequests,
   State as CredentialRequestsState,
@@ -21,6 +22,7 @@ export interface RootState {
   credentials: CredentialsState,
   form: FormState;
   onboarding: OnboardingState;
+  profile: ProfileState;
 };
 
 const reducers = {
@@ -31,6 +33,7 @@ const reducers = {
   form,
   toast,
   onboarding,
+  profile,
 };
 
 const appReducer: Reducer<RootState> = combineReducers<RootState>(reducers);

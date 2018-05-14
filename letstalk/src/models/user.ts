@@ -23,11 +23,15 @@ export const USER_TYPE_UNKNOWN = 'user_type_unknown';
 
 export type UserType = 'user_type_mentor' | 'user_type_mentee' | 'user_type_unknown';
 
-export interface UserData {
-	readonly userId: number
+export interface UserPersonalInfo {
 	readonly firstName: string
 	readonly lastName: string
-	readonly email: string
 	readonly gender: GenderId
 	readonly birthdate: Date
+}
+
+export interface UserContactInfo {
+	readonly email: string
+  readonly phoneNumber: string | null;
+  readonly fbId: string | null;
 }

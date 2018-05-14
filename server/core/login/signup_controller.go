@@ -43,8 +43,8 @@ import (
 /**
  * Parse the json request and bind the parameters to a struct.
  */
-func getUserDataFromRequest(c *ctx.Context) (*api.User, error) {
-	var inputUser api.User
+func getUserDataFromRequest(c *ctx.Context) (*api.SignupRequest, error) {
+	var inputUser api.SignupRequest
 	err := c.GinContext.BindJSON(&inputUser)
 	if err != nil {
 		return nil, err
@@ -79,16 +79,16 @@ func SignupUser(c *ctx.Context) errs.Error {
 /**
  * Create a new user given a particular request and insert in the db.
  */
-func writeUser(user *api.User, c *ctx.Context) error {
+func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
-	bday := time.Unix(user.Birthday, 0)
+	bday := time.Unix(user.Birthdate, 0)
 
 	userModel := data.User{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		Gender:    utility.GenderIdByName(user.Gender),
+		Gender:    user.Gender,
 		Birthdate: &bday,
 	}
 
@@ -99,7 +99,7 @@ func writeUser(user *api.User, c *ctx.Context) error {
 	}
 	userModel.Secret = secret.String()
 
-	hashedPassword, err := utility.HashPassword(*user.Password)
+	hashedPassword, err := utility.HashPassword(user.Password)
 
 	if err != nil {
 		return errs.NewInternalError("Unable to hash password")
@@ -108,6 +108,11 @@ func writeUser(user *api.User, c *ctx.Context) error {
 	authData := data.AuthenticationData{
 		UserId:       userModel.UserId,
 		PasswordHash: hashedPassword,
+	}
+
+	externalAuthRecord := data.ExternalAuthData{
+		UserId:      userModel.UserId,
+		PhoneNumber: &user.PhoneNumber,
 	}
 
 	// Insert data structures within a transaction.
@@ -121,16 +126,9 @@ func writeUser(user *api.User, c *ctx.Context) error {
 		tx.Rollback()
 		return err
 	}
-
-	if user.PhoneNumber != nil {
-		externalAuthRecord := data.ExternalAuthData{
-			UserId:      userModel.UserId,
-			PhoneNumber: user.PhoneNumber,
-		}
-		if err := tx.Create(&externalAuthRecord).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
+	if err := tx.Create(&externalAuthRecord).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	if user.ProfilePic != nil {

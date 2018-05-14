@@ -1,8 +1,8 @@
 import { BootstrapData, Relationship, UserState } from './bootstrap';
 import { Cohort } from './cohort';
+import { ProfileData } from './profile';
 import {
   GenderId,
-  UserData,
   UserType,
 } from './user';
 import {
@@ -16,8 +16,8 @@ export {
   GenderId,
   OnboardingState,
   OnboardingStatus,
+  ProfileData,
   Relationship,
-  UserData,
   UserState,
   UserType,
 };
