@@ -152,9 +152,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// Meetings
 	v1.OPTIONS("/meeting/confirm")
-	v1.POST(
-		"/meeting/confirm",
-		hw.wrapHandler(meeting.PostMeetingConfirmation, false),
+	v1.POST( "/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */),
 	)
 
 	// Debug route group.

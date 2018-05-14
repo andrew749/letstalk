@@ -108,7 +108,7 @@ const (
 )
 
 type UpdateUserVectorRequest struct {
-	PreferenceType api.UserVectorPreferenceType `json:"preferenceType"`
+	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"exists"`
 	Sociable       int                          `json:"sociable" binding:"exists"`
 	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
 	Ambitious      int                          `json:"ambitious" binding:"exists"`
