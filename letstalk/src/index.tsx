@@ -10,7 +10,6 @@ import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
-import { MenuContext } from 'react-native-menu';
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -23,7 +22,6 @@ import ProfileView from './views/ProfileView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
-import QrCodeView from './views/QrCodeView';
 
 import Colors from './services/colors';
 
@@ -67,9 +65,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Onboarding: {
     screen: OnboardingView,
-  },
-  QrCode: {
-    screen: QrCodeView,
   },
 }, {
   initialRouteName: loggedIn ? "Home" : "Login",
@@ -115,13 +110,11 @@ class App extends React.Component<Props, AppState> {
     const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>
-        <MenuContext style={{ flex: 1 }}>
-          <View style={{ flex: 1 }}>
-            <AppNavigation />
-            <Notification ref={(ref: any) => { this.notification = ref; }} />
-            <Toast messageStyle={styles.toastMessageStyle} />
-          </View>
-        </MenuContext>
+        <View style={{ flex: 1 }}>
+          <AppNavigation />
+          <Notification ref={(ref: any) => { this.notification = ref; }} />
+          <Toast messageStyle={styles.toastMessageStyle} />
+        </View>
       </Provider>
     );
   }
