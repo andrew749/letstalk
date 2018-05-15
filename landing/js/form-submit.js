@@ -33,17 +33,10 @@ $(document).ready(function() {
                 },
                 data: JSON.stringify(formObj),
                 success: function(response){
-                  console.log(response);
-                  if (response.status !== 200) {
-                    var message = errorMessage();
-                    $("#messageContainer").append(message);
-                    return;
-                  }
                   var message = successMessage();
                   $("#messageContainer").append(message);
                 },
                 error: function(obj){
-                  console.log(obj);
                   var message = errorMessage();
                   $("#messageContainer").append(message);
                 },
