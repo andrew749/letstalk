@@ -9,6 +9,7 @@ import {
   FlatList,
   StyleSheet,
   Image,
+  Button as ReactNativeButton,
 } from 'react-native';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
@@ -105,6 +106,8 @@ class ProfileView extends Component<Props> {
     return (
       <View style={styles.contentContainer} >
         <Image style={styles.image} source={require('../img/profile.jpg')} />
+        <ReactNativeButton title="View QR Code"
+              onPress={this.openQrView} />
         <Card>
           <Text style={styles.sectionHeader}>Profile</Text>
           {profileItems}
@@ -143,6 +146,10 @@ class ProfileView extends Component<Props> {
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
+  }
+
+  private async openQrView() {
+    this.props.navigation.navigate('QrCode');
   }
 }
 

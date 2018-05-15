@@ -30,4 +30,5 @@ export interface UserData {
 	readonly email: string
 	readonly gender: GenderId
 	readonly birthdate: Date
+  readonly secret: string
 }

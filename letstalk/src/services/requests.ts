@@ -72,14 +72,6 @@ export class Requestor {
     return this.withData('POST', endpoint, data, sessionToken, undefined, true);
   }
 
-  async put(
-      endpoint: string,
-      data: object,
-      sessionToken?: SessionToken,
-  ): Promise<any> {
-      return this.withData('PUT', endpoint, data, sessionToken, undefined, true);
-  }
-
   async postBinary(
     endpoint: string,
     data: object,

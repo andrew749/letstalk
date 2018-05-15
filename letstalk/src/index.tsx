@@ -24,6 +24,7 @@ import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 
 import Colors from './services/colors';
+import QrCodeView from "./views/QrCodeView";
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
@@ -65,6 +66,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Onboarding: {
     screen: OnboardingView,
+  },
+  QrCode: {
+    screen: QrCodeView,
   },
 }, {
   initialRouteName: loggedIn ? "Home" : "Login",
