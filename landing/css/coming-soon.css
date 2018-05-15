@@ -20,14 +20,31 @@ body {
   font-weight: 300;
 }
 
+.background {
+  position: absolute;
+  z-index: -1;
+  top: 0px;
+  left: 0px;
+  bottom: -900px;
+  right: 0px;
+  width: 100%;
+  overflow: hidden;
+  background-size: cover;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-image: url(../img/e7_render_small.jpg);
+}
+
 .overlay {
   position: absolute;
-  height: 100%;
+  height: 200%;
   min-height: 35rem;
   width: 100%;
   background-color: #256FFF;
   opacity: 0.75;
   z-index: -1;
+  bottom: -900px;
 }
 
 @media (min-width: 768px) {
@@ -38,9 +55,12 @@ body {
 
 .single-page {
   display: flex;
-  height: 100%;
   width: 100%;
-  flex-direction: row;
+  flex-direction: column;
+}
+
+.img_highres {
+  display: none;
 }
 
 #navbar {
@@ -71,10 +91,30 @@ body {
   text-decoration: none;
 }
 
+@media (min-width: 1000px) {
+  .overlay {
+    bottom: 0;
+  }
+  .background {
+    bottom: -700px;
+    height: 100%;
+  }
+  .single-page {
+    height: 100%;
+    align-items: center;
+    flex-direction: row;
+  }
+}
+
 .masthead {
   position: relative;
   overflow: hidden;
   padding-bottom: 3rem;
+  padding-top: 8rem;
+}
+
+.masthead .landing {
+  display: flex;
 }
 
 .masthead .masthead-bg {
@@ -95,14 +135,15 @@ body {
   display: flex;
   justify-content: center;
   flex-direction: column;
+  margin: 30px;
 }
 
 .masthead .masthead-content h1 {
-  font-size: 2.0rem;
+  font-size: 1.6rem;
 }
 
 .masthead .masthead-content p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .masthead .masthead-content p strong {
@@ -112,6 +153,8 @@ body {
 .masthead-form {
   display: flex;
   flex-direction: column;
+  margin-top: 30px;
+  text-align: center;
 }
 
 .masthead-form .input-group-newsletter {
@@ -140,7 +183,21 @@ body {
   padding: 1rem;
 }
 
-#messageContainer {
+.masthead-form .input-group-newsletter h1 {
+  font-size: 1.6rem;
+}
+
+.masthead-form .input-group-newsletter p {
+  font-size: 1.2rem;
+}
+
+.masthead-form .input-group-newsletter p strong {
+  font-weight: 700;
+}
+
+@media (min-width: 1000px) {
+
+  #messageContainer {
   margin-top: 10px;
 }
 
@@ -149,6 +206,8 @@ body {
     height: 100%;
     min-height: 0;
     padding-bottom: 0;
+    align-items: center;
+    margin: 0px;
   }
   .masthead .masthead-bg {
     min-height: 0;
@@ -158,6 +217,7 @@ body {
   .masthead .masthead-content {
     padding-left: 3rem;
     padding-right: 10rem;
+    margin: 0;
   }
   .masthead .masthead-content h1 {
     font-size: 2.5rem;
@@ -167,6 +227,7 @@ body {
   }
   .masthead-form {
     width: 30rem;
+    text-align: left;
   }
 }
 
