@@ -12,6 +12,7 @@ $(document).ready(function() {
     };
 
     $("#signupBtn").click(function(e){
+        $("#messageContainer").empty();
         if($("#signupForm")[0].checkValidity()) {
             var formData = $("#signupForm").serializeArray();
             var formObj = {};
@@ -32,6 +33,7 @@ $(document).ready(function() {
                 },
                 data: JSON.stringify(formObj),
                 success: function(response){
+                  console.log(response);
                   if (response.status !== 200) {
                     var message = errorMessage();
                     $("#messageContainer").append(message);
@@ -40,9 +42,9 @@ $(document).ready(function() {
                   var message = successMessage();
                   $("#messageContainer").append(message);
                 },
-                error: function(){
+                error: function(obj){
+                  console.log(obj);
                   var message = errorMessage();
-                  var message = successMessage();
                   $("#messageContainer").append(message);
                 },
                 dataType: "json",
