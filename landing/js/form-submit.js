@@ -1,4 +1,16 @@
 $(document).ready(function() {
+    var createMessage = function(contents, messageClass) {
+      return $("<div/>").addClass("alert").addClass(messageClass).text(contents);
+    };
+
+    var errorMessage = function() {
+      return createMessage("Error, unable to create subscription", "alert-danger");
+    };
+
+    var successMessage = function() {
+      return createMessage("Succesfully subscribed for updates!", "alert-success");
+    };
+
     $("#signupBtn").click(function(e){
         if($("#signupForm")[0].checkValidity()) {
             var formData = $("#signupForm").serializeArray();
@@ -19,7 +31,20 @@ $(document).ready(function() {
                     'Access-Control-Allow-Origin': '*'
                 },
                 data: JSON.stringify(formObj),
-                success: function(){},
+                success: function(response){
+                  if (response.status !== 200) {
+                    var message = errorMessage();
+                    $("#messageContainer").append(message);
+                    return;
+                  }
+                  var message = successMessage();
+                  $("#messageContainer").append(message);
+                },
+                error: function(){
+                  var message = errorMessage();
+                  var message = successMessage();
+                  $("#messageContainer").append(message);
+                },
                 dataType: "json",
                 contentType : "application/json"
             });

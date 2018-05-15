@@ -1,9 +1,9 @@
 package onboarding
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -108,13 +108,13 @@ const (
 )
 
 type UpdateUserVectorRequest struct {
-	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"required"`
-	Sociable       int                            `json:"sociable" binding:"exists"`
-	Hard_Working   int                            `json:"hardWorking" binding:"exists"`
-	Ambitious      int                            `json:"ambitious" binding:"exists"`
-	Energetic      int                            `json:"energetic" binding:"exists"`
-	Carefree       int                            `json:"carefree" binding:"exists"`
-	Confident      int                            `json:"confident" binding:"exists"`
+	PreferenceType api.UserVectorPreferenceType `json:"preferenceType" binding:"exists"`
+	Sociable       int                          `json:"sociable" binding:"exists"`
+	Hard_Working   int                          `json:"hardWorking" binding:"exists"`
+	Ambitious      int                          `json:"ambitious" binding:"exists"`
+	Energetic      int                          `json:"energetic" binding:"exists"`
+	Carefree       int                          `json:"carefree" binding:"exists"`
+	Confident      int                          `json:"confident" binding:"exists"`
 }
 
 /**

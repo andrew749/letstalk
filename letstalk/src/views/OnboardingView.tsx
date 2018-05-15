@@ -30,6 +30,7 @@ import {
   OnboardingState,
   OnboardingStatus,
 } from '../models';
+import { COHORTS } from '../models/cohort';
 import {
   setOnboardingStatusAction,
   SetOnboardingStatusAction,
@@ -71,7 +72,7 @@ interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
 
-const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormData & CohortFormProps>
+const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
   = props => {
   const {
     cohorts,
@@ -141,7 +142,7 @@ const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   programId: cohortSelector(state, 'programId'),
   sequenceId: cohortSelector(state, 'sequenceId'),
   gradYear: cohortSelector(state, 'gradYear'),
-  cohorts: state.onboarding.cohorts,
+  cohorts: COHORTS,
 }))(CohortForm));
 
 type PersonalityFormData = PersonalityVector;
@@ -239,9 +240,8 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
-    const { cohorts } = this.props;
     const { programId, sequenceId, gradYear } = values;
-    const cohortId = getCohortId(cohorts, programId, sequenceId, gradYear);
+    const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
     try {
       const onboardingStatus = await profileService.updateCohort({ cohortId });
       this.props.setOnboardingStatusAction(onboardingStatus);

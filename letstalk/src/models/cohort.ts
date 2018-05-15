@@ -89,3 +89,11 @@ export function getCohortId(
   if (row === null) return null;
   return row.cohortId;
 }
+
+const COHORTS = Immutable.List([
+  { cohortId: 1, programId: 'SOFTWARE_ENGINEERING', sequenceId: '8STREAM', gradYear: 2018},
+  { cohortId: 2, programId: 'COMPUTER_ENGINEERING', sequenceId: '8STREAM', gradYear: 2018},
+  { cohortId: 3, programId: 'COMPUTER_ENGINEERING', sequenceId: '4STREAM', gradYear: 2018},
+]);
+
+export { COHORTS };

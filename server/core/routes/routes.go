@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/contact_info"
+	"letstalk/server/core/controller"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
@@ -11,6 +11,7 @@ import (
 	"letstalk/server/core/matching"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/query"
 	"letstalk/server/core/request_to_match"
 	"letstalk/server/core/sessions"
 	"net/http"
@@ -20,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"letstalk/server/core/meeting"
 )
 
 type handlerWrapper struct {
@@ -64,6 +66,14 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		"/cohort",
 		hw.wrapHandler(query.GetCohortController, true),
 	)
+
+	// gets profile data about signed in user
+	v1.OPTIONS("/me")
+	v1.GET("/me", hw.wrapHandler(controller.GetMyProfileController, true))
+
+	// updates profile data for signed in user
+	v1.OPTIONS("/profile_edit")
+	v1.POST("/profile_edit", hw.wrapHandler(controller.ProfileEditController, true))
 
 	v1.OPTIONS("/contact_info")
 	v1.GET("/contact_info", hw.wrapHandler(
@@ -149,11 +159,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 		hw.wrapHandler(email_subscription.AddSubscription, false),
 	)
 
-	// User matching
-	v1.OPTIONS("/matching")
-	v1.PUT("/matching", hw.wrapHandler(matching.PutMatchingController, true /* auth required */))
-	v1.OPTIONS("/matching/:user_id")
-	v1.GET("/matching/:user_id", hw.wrapHandler(matching.GetMatchingController, true /* auth required */))
+	// Meetings
+	v1.OPTIONS("/meeting/confirm")
+	v1.POST( "/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */),
+	)
 
 	// Debug route group.
 	debug := router.Group("/debug")

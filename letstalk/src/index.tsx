@@ -19,6 +19,7 @@ import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
+import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
@@ -56,6 +57,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Profile: {
     screen: ProfileView,
+  },
+  ProfileEdit: {
+    screen: ProfileEditView,
   },
   RequestToMatch: {
     screen: RequestToMatchView,

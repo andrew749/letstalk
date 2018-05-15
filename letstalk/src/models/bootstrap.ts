@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
 import { Cohort } from './cohort';
-import { UserData, UserType } from './user';
+import { UserPersonalInfo, UserType } from './user';
 import { OnboardingStatus } from './onboarding';
 
 export interface Relationship {
@@ -23,6 +23,6 @@ export interface BootstrapData {
   readonly relationships: Immutable.List<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
-  readonly me: UserData;
+  readonly me: UserPersonalInfo;
   readonly onboardingStatus: OnboardingStatus;
 };
