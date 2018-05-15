@@ -31,7 +31,12 @@ $(document).ready(function() {
                     'Access-Control-Allow-Origin': '*'
                 },
                 data: JSON.stringify(formObj),
-                success: function(){
+                success: function(response){
+                  if (response.status !== 200) {
+                    var message = errorMessage();
+                    $("#messageContainer").append(message);
+                    return;
+                  }
                   var message = successMessage();
                   $("#messageContainer").append(message);
                 },
