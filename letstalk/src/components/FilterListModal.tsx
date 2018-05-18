@@ -1,5 +1,6 @@
 import Immutable from 'immutable';
 import fuzzysearch from 'fuzzysearch';
+import Fuse from 'fuse-js-latest';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import React, { Component } from 'react';
@@ -24,6 +25,7 @@ export interface FilterableElement {
 
 interface FilterableElementType extends FilterableElement {
   readonly type: 'FILTERABLE_ELEMENT',
+  readonly searchValue: string,
 }
 
 interface GapType extends FilterableElement {
@@ -52,9 +54,19 @@ function filterElements(
   value: string,
   elements: Immutable.List<FilterableElement>,
 ): Immutable.List<FilterableElement> {
+  const options = {
+    threshold: 0.6,
+    location: 0,
+    distance: 100,
+    maxPatternLength: 32,
+    minMatchCharLength: 1,
+  };
+
   const lowerVal = value.toLowerCase();
   return elements.filter((elem: FilterableElement) => {
-    return fuzzysearch(lowerVal, elem.value.toLowerCase());
+    const fuse = new Fuse([elem.value.toLowerCase()], options);
+    const result = fuse.search(lowerVal);
+    return result.length !== 0;
   }).toList();
 }
 
@@ -99,7 +111,6 @@ class FilterListModal extends Component<Props, State> {
   }
 
   private renderElement(elem: Element) {
-    console.log(elem);
     switch (elem.type) {
       case 'FILTERABLE_ELEMENT':
         const onPress = async () => {
@@ -110,6 +121,36 @@ class FilterListModal extends Component<Props, State> {
             modalVisible: false,
           });
         };
+        const options = {
+          includeMatches: true,
+          threshold: 0.6,
+          location: 0,
+          distance: 100,
+          maxPatternLength: 32,
+          minMatchCharLength: 1,
+        };
+
+        const lowerVal = elem.searchValue;
+        const fuse = new Fuse([elem.value.toLowerCase()], options);
+        const result: any = fuse.search(lowerVal);
+        if (result.length > 0 && result[0].matches.length > 0 &&
+          result[0].matches[0].indices.length > 0
+        ) {
+          const [start_idx, end_idx] = result[0].matches[0].indices[0]
+          const start = elem.value.slice(0, start_idx);
+          const middle = elem.value.slice(start_idx, end_idx+1);
+          const end = elem.value.slice(end_idx+1);
+          return (
+            <TouchableOpacity style={styles.item} onPress={onPress}>
+              <Text style={styles.itemText}>
+                {start}
+                <Text style={{fontWeight: 'bold'}}>{middle}</Text>
+                {end}
+              </Text>
+            </TouchableOpacity>
+          );
+        }
+
         return (
           <TouchableOpacity style={styles.item} onPress={onPress}>
             <Text style={styles.itemText}>{elem.value}</Text>
@@ -131,9 +172,9 @@ class FilterListModal extends Component<Props, State> {
 
   render() {
     const { placeholder } = this.props;
-    const { filteredElements } = this.state;
+    const { filteredElements, curValue } = this.state;
     const elements = filteredElements.map(elem => {
-      return {...elem, type: 'FILTERABLE_ELEMENT'};
+      return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
     }).toJS();
     const allItems = [{ type: 'GAP' }].concat(elements).concat([{ type: 'NO_MORE_RESULTS' }]);
     const ds = this.ds.cloneWithRows(allItems);
@@ -203,12 +244,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomWidth: 0.5,
     borderColor: '#909090',
-    backgroundColor: '#F0F0F0',
     padding: 10,
   },
   itemText: {
     fontSize: 18,
-    fontWeight: '700',
   },
   textInputContainer: {
     justifyContent: 'center',
@@ -248,7 +287,6 @@ const styles = StyleSheet.create({
   },
   noMoreResults: {
     marginTop: 10,
-    fontSize: 14,
     alignItems: 'center',
   },
 });
