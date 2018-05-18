@@ -16,7 +16,7 @@ type ResolveType int
 
 type userWithCredentialId struct {
 	userId       int
-	credentialId CredentialId
+	credentialId uint
 }
 
 const (
@@ -38,7 +38,7 @@ func getPotentialMatchUserIds(
 	db *gorm.DB,
 	userId int,
 	resolveType ResolveType,
-	credentialId CredentialId,
+	credentialId uint,
 ) ([]userWithCredentialId, errs.Error) {
 	if resolveType == RESOLVE_TYPE_ASKER {
 		var userRequest data.UserCredentialRequest
@@ -48,9 +48,7 @@ func getPotentialMatchUserIds(
 		}
 		var userCredentials []data.UserCredential
 		err = db.Where(
-			"position_id = ? and organization_id = ?",
-			userRequest.PositionId,
-			userRequest.OrganizationId,
+			&data.UserCredential{CredentialId: userRequest.CredentialId},
 		).Find(&userCredentials).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -59,7 +57,7 @@ func getPotentialMatchUserIds(
 		for i, userCredential := range userCredentials {
 			userCredentialIds[i] = userWithCredentialId{
 				userCredential.UserId,
-				CredentialId(userCredential.ID),
+				uint(userCredential.ID),
 			}
 		}
 		return userCredentialIds, nil
@@ -71,9 +69,7 @@ func getPotentialMatchUserIds(
 		}
 		var userRequests []data.UserCredentialRequest
 		err = db.Where(
-			"position_id = ? and organization_id = ?",
-			userCredential.PositionId,
-			userCredential.OrganizationId,
+			&data.UserCredentialRequest{CredentialId: userCredential.CredentialId},
 		).Find(&userRequests).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -82,7 +78,7 @@ func getPotentialMatchUserIds(
 		for i, userRequest := range userRequests {
 			userCredentialIds[i] = userWithCredentialId{
 				userRequest.UserId,
-				CredentialId(userRequest.ID),
+				uint(userRequest.ID),
 			}
 		}
 		return userCredentialIds, nil
@@ -132,7 +128,7 @@ func ResolveRequestToMatch(
 	c *ctx.Context,
 	userId int,
 	resolveType ResolveType,
-	credentialId CredentialId,
+	credentialId uint,
 ) errs.Error {
 	userCredentialIds, err := getPotentialMatchUserIds(c.Db, userId, resolveType, credentialId)
 	if err != nil {
@@ -145,7 +141,7 @@ func ResolveRequestToMatch(
 		var (
 			askerId             int
 			answererId          int
-			credentialRequestId CredentialId // We only delete the credential request, not the credential
+			credentialRequestId uint // We only delete the credential request, not the credential
 		)
 		if resolveType == RESOLVE_TYPE_ASKER {
 			askerId = userId
