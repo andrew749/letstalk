@@ -35,7 +35,7 @@ import {
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Card, FilterListModal, Header, Loading } from '../components';
-import { CredentialPair, CredentialFilterableElement } from '../models/credential';
+import { Credential } from '../models/credential';
 
 interface DispatchActions {
   addCredential: ActionCreator<
@@ -83,23 +83,21 @@ class CredentialEditView extends Component<Props> {
     }
     return credentialsWithState.map(credentialWithState => {
       const {
+        id,
+        name,
         state,
-        credentialId,
-        organizationName,
-        positionName,
       } = credentialWithState;
       switch (state) {
         case 'normal':
-          const name = `${positionName} at ${organizationName}`;
           const onPress = async () => {
             try {
-              await this.props.removeCredential(credentialId);
+              await this.props.removeCredential(id);
             } catch(e) {
               await this.props.errorToast(e.message);
             }
           };
           return (
-            <Card key={credentialId} style={styles.credentialCard}>
+            <Card key={id} style={styles.credentialCard}>
               <Text style={styles.credential}>{name}</Text>
               <TouchableOpacity onPress={onPress} style={styles.delete}>
                 <MaterialIcons name="delete" size={24} />
@@ -108,7 +106,7 @@ class CredentialEditView extends Component<Props> {
           );
         case 'deleting':
           return (
-            <Card key={credentialId} style={styles.deletingCard}>
+            <Card key={id} style={styles.deletingCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -119,16 +117,16 @@ class CredentialEditView extends Component<Props> {
     });
   }
 
-  private async onSelect(elem: CredentialFilterableElement): Promise<void> {
+  private async onSelect(elem: { id: number, value: string }): Promise<void> {
     try {
-      await this.props.addCredential(elem);
+      await this.props.addCredential(elem.value);
     } catch (e) {
       await this.props.errorToast(e.message);
     }
   }
 
   private renderBody() {
-    const { credentialElements } = this.props.credentialOptions;
+    const { credentials } = this.props.credentialOptions;
     return (
       <ScrollView keyboardShouldPersistTaps={'always'}>
         <Header>Your Credentials</Header>
@@ -137,7 +135,7 @@ class CredentialEditView extends Component<Props> {
         </View>
         <Text style={styles.addCredentialText}>Add a credential:</Text>
         <FilterListModal
-          data={credentialElements}
+          data={credentials.map(cred => { return { id: cred.id, value: cred.name } }).toList()}
           onSelect={this.onSelect}
           placeholder="I am a..."
         />

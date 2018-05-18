@@ -34,8 +34,15 @@ import {
 } from '../redux/credential-options/reducer';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
-import { ActionButton, Card, FilterListModal, Header, Loading } from '../components';
-import { CredentialFilterableElement } from '../models/credential';
+import {
+  ActionButton,
+  Card,
+  FilterableElement,
+  FilterListModal,
+  Header,
+  Loading,
+} from '../components';
+import { Credential } from '../models/credential';
 
 interface DispatchActions {
   addCredentialRequest: ActionCreator<
@@ -83,23 +90,21 @@ class RequestToMatchView extends Component<Props> {
     }
     return credentialRequestsWithState.map(credentialWithState => {
       const {
+        id,
+        name,
         state,
-        credentialRequestId,
-        organizationName,
-        positionName,
       } = credentialWithState;
       switch (state) {
         case 'normal':
-          const name = `${positionName} at ${organizationName}`;
           const onPress = async () => {
             try {
-              await this.props.removeCredentialRequest(credentialRequestId);
+              await this.props.removeCredentialRequest(id);
             } catch(e) {
               await this.props.errorToast(e.message);
             }
           };
           return (
-            <Card key={credentialRequestId} style={styles.credentialRequestCard}>
+            <Card key={id} style={styles.credentialRequestCard}>
               <Text style={styles.credentialRequest}>{name}</Text>
               <TouchableOpacity onPress={onPress} style={styles.delete}>
                 <MaterialIcons name="delete" size={24} />
@@ -108,7 +113,7 @@ class RequestToMatchView extends Component<Props> {
           );
         case 'deleting':
           return (
-            <Card key={credentialRequestId} style={styles.deletingCard}>
+            <Card key={id} style={styles.deletingCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -119,20 +124,20 @@ class RequestToMatchView extends Component<Props> {
     });
   }
 
-  private async onSelect(elem: CredentialFilterableElement): Promise<void> {
+  private async onSelect(elem: FilterableElement): Promise<void> {
     try {
-      await this.props.addCredentialRequest(elem);
+      await this.props.addCredentialRequest({ id: elem.id, name: elem.value });
     } catch (e) {
       await this.props.errorToast(e.message);
     }
   }
 
   private renderBody() {
-    const { credentialElements } = this.props.credentialOptions;
+    const { credentials } = this.props.credentialOptions;
     return (
       <ScrollView keyboardShouldPersistTaps={'always'}>
         <FilterListModal
-          data={credentialElements}
+          data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
           onSelect={this.onSelect}
           placeholder="Find someone who is a..."
         />

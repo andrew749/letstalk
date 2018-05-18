@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-interface FilterableElement {
+export interface FilterableElement {
   readonly id: any;
   readonly value: string;
 }
