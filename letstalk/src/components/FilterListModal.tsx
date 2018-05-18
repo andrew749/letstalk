@@ -3,7 +3,7 @@ import fuzzysearch from 'fuzzysearch';
 import Fuse from 'fuse-js-latest';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import {
   Dimensions,
   ListView,
@@ -48,6 +48,7 @@ interface Props {
   onSelect(elem: FilterableElement): Promise<void>;
   placeholder: string;
   onRawSelect?(value: string): Promise<void>;
+  buttonComponent?(onPress: () => void): ReactNode;
 }
 
 interface State {
@@ -204,7 +205,7 @@ class FilterListModal extends Component<Props, State> {
   }
 
   render() {
-    const { placeholder, onRawSelect } = this.props;
+    const { placeholder, onRawSelect, buttonComponent } = this.props;
     const { filteredElements, curValue } = this.state;
     let elements = filteredElements.map(elem => {
       return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
@@ -222,13 +223,24 @@ class FilterListModal extends Component<Props, State> {
         modalVisible: false,
       });
     };
+
+    const onPressOpen = () => {
+      this.setModalVisible(true)
+    }
+
+    const butt = !!buttonComponent ? buttonComponent(onPressOpen) : (
+      <TouchableOpacity
+        style={styles.textInputContainer}
+        onPress={onPressOpen}
+      >
+        <MaterialIcons name="search" size={20} color="white" />
+        <Text style={styles.buttonText}>{placeholder}</Text>
+      </TouchableOpacity>
+    );
+
     return (
       <View>
-        <View style={styles.textInputContainer}>
-          <TouchableOpacity onPress={() => { this.setModalVisible(true) }}>
-            <Text style={styles.buttonText}>{placeholder}</Text>
-          </TouchableOpacity>
-        </View>
+        { butt }
         <Modal
           animationType="fade"
           transparent={true}
@@ -238,6 +250,7 @@ class FilterListModal extends Component<Props, State> {
           <View style={styles.container}>
             <View style={styles.topContainer}>
               <View style={[styles.textInputContainer, styles.textInputContainerWidth]}>
+                <MaterialIcons name="search" size={20} color="white" />
                 <TextInput
                   style={styles.textInput}
                   onChangeText={this.filterElements}
@@ -289,11 +302,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   textInputContainer: {
-    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
     margin: 10,
     borderRadius: 25,
     backgroundColor: '#FFD475',
-    paddingLeft: 20,
+    paddingLeft: 10,
     paddingRight: 20,
     height: 30,
   },

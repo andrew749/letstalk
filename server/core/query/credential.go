@@ -62,7 +62,9 @@ func AddUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.E
 }
 
 func RemoveUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.Error {
-	err := db.Delete(&data.UserCredentialRequest{UserId: userId, CredentialId: credentialId}).Error
+	err := db.Where(
+		&data.UserCredentialRequest{UserId: userId, CredentialId: credentialId},
+	).Delete(&data.UserCredentialRequest{}).Error
 	if err != nil {
 		return errs.NewDbError(err)
 	}
@@ -124,7 +126,9 @@ func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error)
 }
 
 func RemoveUserCredential(db *gorm.DB, userId int, credentialId uint) errs.Error {
-	err := db.Delete(&data.UserCredential{UserId: userId, CredentialId: credentialId}).Error
+	err := db.Where(
+		&data.UserCredential{UserId: userId, CredentialId: credentialId},
+	).Delete(&data.UserCredential{}).Error
 	if err != nil {
 		return errs.NewDbError(err)
 	}

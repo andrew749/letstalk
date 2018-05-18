@@ -31,6 +31,10 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return err
 	}
 
+	if err := query.ResolveRequestToMatch(c, query.RESOLVE_TYPE_ASKER, req.CredentialId); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -71,6 +75,10 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 
 	credentialId, err := query.AddUserCredential(c.Db, c.SessionData.UserId, req.Name)
 	if err != nil {
+		return err
+	}
+
+	if err := query.ResolveRequestToMatch(c, query.RESOLVE_TYPE_ANSWERER, *credentialId); err != nil {
 		return err
 	}
 

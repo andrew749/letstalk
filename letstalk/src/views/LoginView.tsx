@@ -162,7 +162,7 @@ export default class LoginView extends Component<Props> {
       if (await auth.loginWithFb(token)) {
         this.props.navigation.dispatch(NavigationActions.reset({
           index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'Home' })]
+          actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
         }));
       }
     } catch(e) {

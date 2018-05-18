@@ -10,6 +10,7 @@ import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
+import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -25,6 +26,8 @@ import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 
 import Colors from './services/colors';
+
+YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
