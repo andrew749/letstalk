@@ -24,24 +24,30 @@ export interface FilterableElement {
 }
 
 interface FilterableElementType extends FilterableElement {
-  readonly type: 'FILTERABLE_ELEMENT',
-  readonly searchValue: string,
+  readonly type: 'FILTERABLE_ELEMENT';
+  readonly searchValue: string;
 }
 
-interface GapType extends FilterableElement {
-  readonly type: 'GAP',
+interface GapType {
+  readonly type: 'GAP';
 }
 
-interface NoMoreResultsType extends FilterableElement {
-  readonly type: 'NO_MORE_RESULTS',
+interface NoMoreResultsType {
+  readonly type: 'NO_MORE_RESULTS';
 }
 
-type Element = FilterableElementType | GapType | NoMoreResultsType;
+interface RawInputType {
+  readonly type: 'RAW_INPUT';
+  readonly searchValue: string;
+}
+
+type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputType;
 
 interface Props {
   data: Immutable.List<FilterableElement>;
   onSelect(elem: FilterableElement): Promise<void>;
   placeholder: string;
+  onRawSelect?(value: string): Promise<void>;
 }
 
 interface State {
@@ -54,20 +60,20 @@ function filterElements(
   value: string,
   elements: Immutable.List<FilterableElement>,
 ): Immutable.List<FilterableElement> {
+  if (value === '') return elements;
+
   const options = {
+    shouldSort: true,
     threshold: 0.6,
     location: 0,
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
   };
+  const fuse = new Fuse(elements.map(elem => elem.value.toLowerCase()).toJS(), options);
+  const result = fuse.search(value.toLowerCase());
 
-  const lowerVal = value.toLowerCase();
-  return elements.filter((elem: FilterableElement) => {
-    const fuse = new Fuse([elem.value.toLowerCase()], options);
-    const result = fuse.search(lowerVal);
-    return result.length !== 0;
-  }).toList();
+  return Immutable.List(result.map((idx: number) => elements.get(idx)));
 }
 
 class FilterListModal extends Component<Props, State> {
@@ -111,9 +117,10 @@ class FilterListModal extends Component<Props, State> {
   }
 
   private renderElement(elem: Element) {
+    let onPress;
     switch (elem.type) {
       case 'FILTERABLE_ELEMENT':
-        const onPress = async () => {
+        onPress = async () => {
           await this.props.onSelect(elem);
           this.setState({
             curValue: '',
@@ -136,7 +143,11 @@ class FilterListModal extends Component<Props, State> {
         if (result.length > 0 && result[0].matches.length > 0 &&
           result[0].matches[0].indices.length > 0
         ) {
-          const [start_idx, end_idx] = result[0].matches[0].indices[0]
+          const [start_idx, end_idx] = result[0].matches[0].indices.reduce(
+            (acc: Array<number>, cur: Array<number>) => {
+            if (cur[1] - cur[0] > acc[1] - acc[0]) return cur;
+            else return acc;
+          });
           const start = elem.value.slice(0, start_idx);
           const middle = elem.value.slice(start_idx, end_idx+1);
           const end = elem.value.slice(end_idx+1);
@@ -164,6 +175,23 @@ class FilterListModal extends Component<Props, State> {
             <Text>No more results...</Text>
           </View>
         );
+      case 'RAW_INPUT':
+        onPress = async () => {
+          await this.props.onRawSelect(elem.searchValue);
+          this.setState({
+            curValue: '',
+            filteredElements: this.props.data,
+            modalVisible: false,
+          });
+        };
+        return (
+          <TouchableOpacity style={styles.item} onPress={onPress}>
+            <Text style={[styles.itemText, styles.rawInputText]}>
+              {'Add '}
+              <Text style={{fontWeight: 'bold'}}>"{elem.searchValue}"</Text>
+            </Text>
+          </TouchableOpacity>
+        );
       default:
         // Ensure exhaustiveness of select
         const _: never = elem;
@@ -171,13 +199,17 @@ class FilterListModal extends Component<Props, State> {
   }
 
   render() {
-    const { placeholder } = this.props;
+    const { placeholder, onRawSelect } = this.props;
     const { filteredElements, curValue } = this.state;
-    const elements = filteredElements.map(elem => {
+    let elements = filteredElements.map(elem => {
       return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
     }).toJS();
-    const allItems = [{ type: 'GAP' }].concat(elements).concat([{ type: 'NO_MORE_RESULTS' }]);
-    const ds = this.ds.cloneWithRows(allItems);
+    if (filteredElements.size > 0) elements = [{ type: 'GAP' }].concat(elements);
+    if (!!onRawSelect && curValue !== '') {
+      elements = elements.concat([{ type: 'GAP' }, { type: 'RAW_INPUT', searchValue: curValue }]);
+    }
+    elements = elements.concat([{ type: 'NO_MORE_RESULTS' }]);
+    const ds = this.ds.cloneWithRows(elements);
     const onPressDismiss = () => {
       this.setState({
         curValue: '',
@@ -240,11 +272,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   item: {
-    flex: 1,
     justifyContent: 'center',
     borderBottomWidth: 0.5,
     borderColor: '#909090',
     padding: 10,
+  },
+  rawInputText: {
+    color: '#003CB2',
   },
   itemText: {
     fontSize: 18,

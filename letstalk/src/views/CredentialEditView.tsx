@@ -66,6 +66,7 @@ class CredentialEditView extends Component<Props> {
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
     this.onSelect = this.onSelect.bind(this);
+    this.onRawSelect = this.onRawSelect.bind(this);
   }
 
   async componentDidMount() {
@@ -125,6 +126,14 @@ class CredentialEditView extends Component<Props> {
     }
   }
 
+  private async onRawSelect(value: string) {
+    try {
+      await this.props.addCredential(value);
+    } catch (e) {
+      await this.props.errorToast(e.message);
+    }
+  }
+
   private renderBody() {
     const { credentials } = this.props.credentialOptions;
     return (
@@ -137,6 +146,7 @@ class CredentialEditView extends Component<Props> {
         <FilterListModal
           data={credentials.map(cred => { return { id: cred.id, value: cred.name } }).toList()}
           onSelect={this.onSelect}
+          onRawSelect={this.onRawSelect}
           placeholder="I am a..."
         />
       </ScrollView>
