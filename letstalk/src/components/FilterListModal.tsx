@@ -22,6 +22,20 @@ export interface FilterableElement {
   readonly value: string;
 }
 
+interface FilterableElementType extends FilterableElement {
+  readonly type: 'FILTERABLE_ELEMENT',
+}
+
+interface GapType extends FilterableElement {
+  readonly type: 'GAP',
+}
+
+interface NoMoreResultsType extends FilterableElement {
+  readonly type: 'NO_MORE_RESULTS',
+}
+
+type Element = FilterableElementType | GapType | NoMoreResultsType;
+
 interface Props {
   data: Immutable.List<FilterableElement>;
   onSelect(elem: FilterableElement): Promise<void>;
@@ -84,26 +98,52 @@ class FilterListModal extends Component<Props, State> {
     });
   }
 
-  private renderElement(elem: FilterableElement) {
-    const onPress = async () => {
-      await this.props.onSelect(elem);
+  private renderElement(elem: Element) {
+    console.log(elem);
+    switch (elem.type) {
+      case 'FILTERABLE_ELEMENT':
+        const onPress = async () => {
+          await this.props.onSelect(elem);
+          this.setState({
+            curValue: '',
+            filteredElements: this.props.data,
+            modalVisible: false,
+          });
+        };
+        return (
+          <TouchableOpacity style={styles.item} onPress={onPress}>
+            <Text style={styles.itemText}>{elem.value}</Text>
+          </TouchableOpacity>
+        );
+      case 'GAP':
+        return <View style={styles.gap} />;
+      case 'NO_MORE_RESULTS':
+        return (
+          <View style={styles.noMoreResults}>
+            <Text>No more results...</Text>
+          </View>
+        );
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = elem;
+    }
+  }
+
+  render() {
+    const { placeholder } = this.props;
+    const { filteredElements } = this.state;
+    const elements = filteredElements.map(elem => {
+      return {...elem, type: 'FILTERABLE_ELEMENT'};
+    }).toJS();
+    const allItems = [{ type: 'GAP' }].concat(elements).concat([{ type: 'NO_MORE_RESULTS' }]);
+    const ds = this.ds.cloneWithRows(allItems);
+    const onPressDismiss = () => {
       this.setState({
         curValue: '',
         filteredElements: this.props.data,
         modalVisible: false,
       });
     };
-    return (
-      <TouchableOpacity style={styles.item} onPress={onPress}>
-        <Text style={styles.itemText}>{elem.value}</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  render() {
-    const { placeholder } = this.props;
-    const { filteredElements } = this.state;
-    const ds = this.ds.cloneWithRows(filteredElements.toJS());
     return (
       <View>
         <View style={styles.textInputContainer}>
@@ -119,16 +159,19 @@ class FilterListModal extends Component<Props, State> {
         >
           <View style={styles.container}>
             <View style={styles.topContainer}>
-              <View style={styles.textInputContainer}>
+              <View style={[styles.textInputContainer, styles.textInputContainerWidth]}>
                 <TextInput
                   style={styles.textInput}
                   onChangeText={this.filterElements}
                   onFocus={() => this.setModalVisible(true)}
                   placeholder={placeholder}
+                  placeholderTextColor='white'
                   ref={textInput => this.textInputRef = textInput as any}
                 />
               </View>
-              <MaterialIcons style={styles.dismiss} name="delete" size={24} />
+              <TouchableOpacity style={styles.dismiss} onPress={onPressDismiss}>
+                <MaterialIcons name="close" size={24} />
+              </TouchableOpacity>
             </View>
             <ListView
               keyboardShouldPersistTaps={'always'}
@@ -144,18 +187,23 @@ class FilterListModal extends Component<Props, State> {
 
 export default FilterListModal;
 
+const DISMISS_BUTTON_PADDING = 12;
+// Size of button + 2 * button padding + my margin
+const TEXT_INPUT_RIGHT_MARGIN = 24 + 2 * DISMISS_BUTTON_PADDING + 10;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 25,
     justifyContent: 'center',
-    backgroundColor: '#F0F0F0',
+    backgroundColor: 'white',
   },
   item: {
     flex: 1,
     justifyContent: 'center',
-    borderTopWidth: 0.5,
-    borderTopColor: '#909090',
+    borderBottomWidth: 0.5,
+    borderColor: '#909090',
+    backgroundColor: '#F0F0F0',
     padding: 10,
   },
   itemText: {
@@ -166,24 +214,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 10,
     borderRadius: 25,
-    backgroundColor: 'white',
+    backgroundColor: '#FFD475',
     paddingLeft: 10,
     paddingRight: 10,
     height: 30,
   },
+  textInputContainerWidth: {
+    marginRight: 0,
+    width: SCREEN_WIDTH - TEXT_INPUT_RIGHT_MARGIN,
+  },
   dismiss: {
-    alignSelf: 'flex-end',
+    flex: 0,
+    padding: 12,
   },
   topContainer: {
-    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     flexDirection: 'row',
     width: SCREEN_WIDTH,
+    backgroundColor: '#FFBB25',
   },
   buttonText: {
     fontSize: 14,
-    color: '#909090',
+    color: 'white',
+  },
+  gap: {
+    height: 20,
+    borderBottomWidth: 0.5,
+    borderColor: '#909090',
   },
   textInput: {
     fontSize: 14,
+    color: 'white',
+  },
+  noMoreResults: {
+    marginTop: 10,
+    fontSize: 14,
+    alignItems: 'center',
   },
 });
