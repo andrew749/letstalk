@@ -1,8 +1,10 @@
 import Immutable from 'immutable';
 import fuzzysearch from 'fuzzysearch';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import React, { Component } from 'react';
 import {
+  Dimensions,
   ListView,
   ListViewDataSource,
   Modal,
@@ -12,6 +14,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export interface FilterableElement {
   readonly id: any;
@@ -103,9 +107,7 @@ class FilterListModal extends Component<Props, State> {
     return (
       <View>
         <View style={styles.textInputContainer}>
-          <TouchableOpacity
-            onPress={() => { this.setModalVisible(true) }}
-          >
+          <TouchableOpacity onPress={() => { this.setModalVisible(true) }}>
             <Text style={styles.buttonText}>{placeholder}</Text>
           </TouchableOpacity>
         </View>
@@ -116,14 +118,17 @@ class FilterListModal extends Component<Props, State> {
           onShow={() => this.textInputRef.focus()}
         >
           <View style={styles.container}>
-            <View style={styles.textInputContainer}>
-              <TextInput
-                style={styles.textInput}
-                onChangeText={this.filterElements}
-                onFocus={() => this.setModalVisible(true)}
-                placeholder={placeholder}
-                ref={textInput => this.textInputRef = textInput as any}
-              />
+            <View style={styles.topContainer}>
+              <View style={styles.textInputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  onChangeText={this.filterElements}
+                  onFocus={() => this.setModalVisible(true)}
+                  placeholder={placeholder}
+                  ref={textInput => this.textInputRef = textInput as any}
+                />
+              </View>
+              <MaterialIcons style={styles.dismiss} name="delete" size={24} />
             </View>
             <ListView
               keyboardShouldPersistTaps={'always'}
@@ -162,14 +167,23 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 25,
     backgroundColor: 'white',
-    padding: 10,
-    paddingLeft: 20,
-    paddingRight: 20,
-    height: 50,
+    paddingLeft: 10,
+    paddingRight: 10,
+    height: 30,
+  },
+  dismiss: {
+    alignSelf: 'flex-end',
+  },
+  topContainer: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    width: SCREEN_WIDTH,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 14,
     color: '#909090',
   },
-  textInput: { },
+  textInput: {
+    fontSize: 14,
+  },
 });
