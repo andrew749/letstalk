@@ -202,6 +202,9 @@ interface Props extends ProfileState, DispatchActions {
 class ProfileEditView extends Component<Props> {
   static navigationOptions = () => ({
     headerTitle: 'Edit Profile',
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {

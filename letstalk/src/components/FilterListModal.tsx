@@ -148,18 +148,23 @@ class FilterListModal extends Component<Props, State> {
             if (cur[1] - cur[0] > acc[1] - acc[0]) return cur;
             else return acc;
           });
-          const start = elem.value.slice(0, start_idx);
-          const middle = elem.value.slice(start_idx, end_idx+1);
-          const end = elem.value.slice(end_idx+1);
-          return (
-            <TouchableOpacity style={styles.item} onPress={onPress}>
-              <Text style={styles.itemText}>
-                {start}
-                <Text style={{fontWeight: 'bold'}}>{middle}</Text>
-                {end}
-              </Text>
-            </TouchableOpacity>
-          );
+
+
+          if (start_idx < end_idx && end_idx < elem.value.length) {
+            const start = elem.value.slice(0, start_idx);
+            const middle = elem.value.slice(start_idx, end_idx+1);
+            const end = elem.value.slice(end_idx+1);
+            console.log({ start_idx, end_idx, start, middle, end });
+            return (
+              <TouchableOpacity style={styles.item} onPress={onPress}>
+                <Text style={styles.itemText}>
+                  {start}
+                  <Text style={{fontWeight: 'bold'}}>{middle}</Text>
+                  {end}
+                </Text>
+              </TouchableOpacity>
+            );
+          }
         }
 
         return (
@@ -226,7 +231,7 @@ class FilterListModal extends Component<Props, State> {
         </View>
         <Modal
           animationType="fade"
-          transparent={false}
+          transparent={true}
           visible={this.state.modalVisible}
           onShow={() => this.textInputRef.focus()}
         >
@@ -267,7 +272,7 @@ const TEXT_INPUT_RIGHT_MARGIN = 24 + 2 * DISMISS_BUTTON_PADDING + 10;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 25,
+    marginTop: 20,
     justifyContent: 'center',
     backgroundColor: 'white',
   },
@@ -288,8 +293,8 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 25,
     backgroundColor: '#FFD475',
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
     height: 30,
   },
   textInputContainerWidth: {
@@ -304,7 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     width: SCREEN_WIDTH,
-    backgroundColor: '#FFBB25',
+    backgroundColor: '#FFC107',
   },
   buttonText: {
     fontSize: 14,

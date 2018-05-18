@@ -1,15 +1,17 @@
-import React, { Component } from 'react';
+import React, { Component, SFC } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
   Button as ReactNativeButton,
+  Dimensions,
   Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ScrollView,
+  Platform,
 } from 'react-native';
 import {
   NavigationScreenProp,
@@ -43,6 +45,9 @@ import {
   Loading,
 } from '../components';
 import { Credential } from '../models/credential';
+import Colors from '../services/colors';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   addCredentialRequest: ActionCreator<
@@ -62,9 +67,16 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
+const Head: SFC<{}> = (props: {}) => {
+  return <View style={styles.header}/>;
+}
+
 class RequestToMatchView extends Component<Props> {
   static navigationOptions = () => ({
-    headerTitle: 'Request To Match',
+    header: <Head/>,
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {
@@ -135,17 +147,21 @@ class RequestToMatchView extends Component<Props> {
   private renderBody() {
     const { credentials } = this.props.credentialOptions;
     return (
-      <ScrollView keyboardShouldPersistTaps={'always'}>
-        <FilterListModal
-          data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-          onSelect={this.onSelect}
-          placeholder="Find someone who is a..."
-        />
-        <Header>Active Requests</Header>
-        <View style={styles.credentialRequestContainer}>
-          {this.renderCredentialRequests()}
+      <View>
+        <View style={styles.topContainer}>
+          <FilterListModal
+            data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
+            onSelect={this.onSelect}
+            placeholder="Find someone who is a..."
+          />
         </View>
-      </ScrollView>
+        <ScrollView keyboardShouldPersistTaps={'always'}>
+          <Header>Active Requests</Header>
+          <View style={styles.credentialRequestContainer}>
+            {this.renderCredentialRequests()}
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 
@@ -200,7 +216,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
+  searchBar: {
+
+  },
+  header: {
+    height: Platform.OS == "ios" ? 20 : 0,
+    backgroundColor: Colors.HIVE_MAIN_BG,
+  },
   // TODO: Make this float right
   delete: {
+  },
+  topContainer: {
+    width: SCREEN_WIDTH,
+    backgroundColor: '#FFC107',
   },
 })

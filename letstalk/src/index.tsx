@@ -45,6 +45,40 @@ const styles = StyleSheet.create({
   },
 });
 
+const createTabView = () => TabNavigator({
+  Home: {
+    screen: HomeView,
+  },
+  'Request To Match': {
+    screen: RequestToMatchView,
+  },
+  Profile: {
+    screen: ProfileView,
+  },
+}, {
+  navigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ focused, tintColor }) => {
+      const { routeName } = navigation.state;
+      let iconName;
+      if (routeName === 'Home') {
+        iconName = 'home';
+      } else if (routeName === 'Profile') {
+        iconName = 'person';
+      } else if (routeName === 'Request To Match') {
+        iconName = 'people';
+      }
+
+      // You can return any component that you like here! We usually use an
+      // icon component from react-native-vector-icons
+      return <MaterialIcons name={iconName} size={24} color={tintColor} />;
+    },
+  }),
+  tabBarOptions: {
+    activeTintColor: Colors.HIVE_MAIN_BG,
+    inactiveTintColor: 'gray',
+  },
+});
+
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
@@ -52,17 +86,11 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Signup: {
     screen: SignupView,
   },
-  Home: {
-    screen: HomeView,
-  },
-  Profile: {
-    screen: ProfileView,
+  Tabbed: {
+    screen: createTabView(),
   },
   ProfileEdit: {
     screen: ProfileEditView,
-  },
-  RequestToMatch: {
-    screen: RequestToMatchView,
   },
   CredentialEdit: {
     screen: CredentialEditView,
@@ -71,7 +99,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: OnboardingView,
   },
 }, {
-  initialRouteName: loggedIn ? "Home" : "Login",
+  initialRouteName: loggedIn ? "Tabbed" : "Login",
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));

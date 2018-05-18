@@ -187,7 +187,7 @@ export default class LoginView extends Component<Props> {
       await auth.login(email, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Home' })]
+        actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
