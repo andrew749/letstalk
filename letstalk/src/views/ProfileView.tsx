@@ -34,6 +34,7 @@ import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
 import {AnalyticsHelper} from '../services/analytics';
+import Colors from '../services/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -52,6 +53,9 @@ class ProfileView extends Component<Props> {
     headerTitle: 'Profile',
     headerRight: <ReactNativeButton title="Edit"
       onPress={() => navigation.navigate('ProfileEdit')} />,
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {

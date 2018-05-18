@@ -50,6 +50,7 @@ func migrateDB(db *gorm.DB) {
 	db.AutoMigrate(&data.FbAuthToken{})
 	db.AutoMigrate(&data.Matching{})
 	db.AutoMigrate(&data.RequestMatching{})
+	db.AutoMigrate(&data.Credential{})
 	db.AutoMigrate(&data.UserCredential{})
 	db.AutoMigrate(&data.UserCredentialRequest{})
 	db.AutoMigrate(&data.Subscriber{})

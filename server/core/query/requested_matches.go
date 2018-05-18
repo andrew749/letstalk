@@ -16,7 +16,7 @@ type ResolveType int
 
 type userWithCredentialId struct {
 	userId       int
-	credentialId CredentialId
+	credentialId uint
 }
 
 const (
@@ -38,19 +38,19 @@ func getPotentialMatchUserIds(
 	db *gorm.DB,
 	userId int,
 	resolveType ResolveType,
-	credentialId CredentialId,
+	credentialId uint,
 ) ([]userWithCredentialId, errs.Error) {
 	if resolveType == RESOLVE_TYPE_ASKER {
 		var userRequest data.UserCredentialRequest
-		err := db.Where("id = ? and user_id = ?", credentialId, userId).First(&userRequest).Error
+		err := db.Where(
+			"credential_id = ? and user_id = ?", credentialId, userId,
+		).First(&userRequest).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
 		}
 		var userCredentials []data.UserCredential
 		err = db.Where(
-			"position_id = ? and organization_id = ?",
-			userRequest.PositionId,
-			userRequest.OrganizationId,
+			&data.UserCredential{CredentialId: userRequest.CredentialId},
 		).Find(&userCredentials).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -59,21 +59,21 @@ func getPotentialMatchUserIds(
 		for i, userCredential := range userCredentials {
 			userCredentialIds[i] = userWithCredentialId{
 				userCredential.UserId,
-				CredentialId(userCredential.ID),
+				uint(userCredential.ID),
 			}
 		}
 		return userCredentialIds, nil
 	} else if resolveType == RESOLVE_TYPE_ANSWERER {
 		var userCredential data.UserCredential
-		err := db.Where("id = ? and user_id = ?", credentialId, userId).First(&userCredential).Error
+		err := db.Where(
+			"credential_id = ? and user_id = ?", credentialId, userId,
+		).First(&userCredential).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
 		}
 		var userRequests []data.UserCredentialRequest
 		err = db.Where(
-			"position_id = ? and organization_id = ?",
-			userCredential.PositionId,
-			userCredential.OrganizationId,
+			&data.UserCredentialRequest{CredentialId: userCredential.CredentialId},
 		).Find(&userRequests).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -82,7 +82,7 @@ func getPotentialMatchUserIds(
 		for i, userRequest := range userRequests {
 			userCredentialIds[i] = userWithCredentialId{
 				userRequest.UserId,
-				CredentialId(userRequest.ID),
+				uint(userRequest.ID),
 			}
 		}
 		return userCredentialIds, nil
@@ -130,10 +130,10 @@ func sendNotifications(c *ctx.Context, askerId int, answererId int) errs.Error {
 // TODO: This should run in a job
 func ResolveRequestToMatch(
 	c *ctx.Context,
-	userId int,
 	resolveType ResolveType,
-	credentialId CredentialId,
+	credentialId uint,
 ) errs.Error {
+	userId := c.SessionData.UserId
 	userCredentialIds, err := getPotentialMatchUserIds(c.Db, userId, resolveType, credentialId)
 	if err != nil {
 		return err
@@ -145,7 +145,7 @@ func ResolveRequestToMatch(
 		var (
 			askerId             int
 			answererId          int
-			credentialRequestId CredentialId // We only delete the credential request, not the credential
+			credentialRequestId uint // We only delete the credential request, not the credential
 		)
 		if resolveType == RESOLVE_TYPE_ASKER {
 			askerId = userId
@@ -161,7 +161,7 @@ func ResolveRequestToMatch(
 
 		tx := c.Db.Begin()
 
-		dbErr := tx.Where("id = ? and user_id = ?", credentialRequestId, askerId).Delete(
+		dbErr := tx.Where("credential_id = ? and user_id = ?", credentialRequestId, askerId).Delete(
 			data.UserCredentialRequest{}).Error
 		if dbErr != nil {
 			tx.Rollback()
