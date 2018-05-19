@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import { Action } from 'redux'
 
-import { CredentialRequest } from '../../models/credential';
+import { Credential } from '../../models/credential';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -19,11 +19,11 @@ export enum TypeKeys {
 
 export type CredentialRequestStates = 'normal' | 'deleting';
 
-export interface CredentialRequestWithState extends CredentialRequest {
+export interface CredentialWithState extends Credential {
   readonly state: CredentialRequestStates;
 }
 
-export type CredentialsWithState = Immutable.List<CredentialRequestWithState>;
+export type CredentialsWithState = Immutable.List<CredentialWithState>;
 
 type CredentialRequestEditReceiveAction = FetchReceiveAction<TypeKeys.FETCH, CredentialsWithState>;
 type CredentialRequestEditErrorAction = FetchErrorAction<TypeKeys.FETCH>;
@@ -31,18 +31,18 @@ type CredentialRequestEditStartAction = FetchStartAction<TypeKeys.FETCH>;
 
 export interface CredentialRequestAddAction extends Action {
   readonly type: TypeKeys.ADD_CREDENTIAL;
-  readonly credentialRequest: CredentialRequest;
+  readonly credential: Credential;
 }
 
 export interface CredentialRequestSetStateAction extends Action {
   readonly type: TypeKeys.SET_STATE_CREDENTIAL;
-  readonly credentialRequestId: number;
+  readonly credentialId: number;
   readonly state: CredentialRequestStates;
 }
 
 export interface CredentialRequestRemoveAction extends Action {
   readonly type: TypeKeys.REMOVE_CREDENTIAL;
-  readonly credentialRequestId: number;
+  readonly credentialId: number;
 }
 
 function receive(data: CredentialsWithState): CredentialRequestEditReceiveAction {
@@ -68,32 +68,28 @@ function start(): CredentialRequestEditStartAction {
   };
 }
 
-export function credentialRequestAdd(
-  credentialRequest: CredentialRequest,
-): CredentialRequestAddAction {
+export function credentialRequestAdd(credential: Credential): CredentialRequestAddAction {
   return {
     type: TypeKeys.ADD_CREDENTIAL,
-    credentialRequest,
+    credential,
   };
 }
 
 export function credentialRequestSetState(
-  credentialRequestId: number,
+  credentialId: number,
   state: CredentialRequestStates,
 ): CredentialRequestSetStateAction {
   return {
     type: TypeKeys.SET_STATE_CREDENTIAL,
-    credentialRequestId,
+    credentialId,
     state,
   };
 }
 
-export function credentialRequestRemove(
-  credentialRequestId: number,
-): CredentialRequestRemoveAction {
+export function credentialRequestRemove(credentialId: number): CredentialRequestRemoveAction {
   return {
     type: TypeKeys.REMOVE_CREDENTIAL,
-    credentialRequestId,
+    credentialId,
   };
 }
 

@@ -12,7 +12,6 @@ import (
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
-	"letstalk/server/core/request_to_match"
 	"letstalk/server/core/sessions"
 	"net/http"
 	"time"
@@ -109,42 +108,42 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// request-to-match endpoints
 
-	v1.OPTIONS("/credential_options")
+	v1.OPTIONS("/all_credentials")
 	v1.GET(
-		"/credential_options",
-		hw.wrapHandler(request_to_match.GetCredentialOptionsController, false),
+		"/all_credentials",
+		hw.wrapHandler(controller.GetAllCredentialsController, false),
 	)
 
 	v1.OPTIONS("/credential")
 	v1.POST(
 		"/credential",
-		hw.wrapHandler(request_to_match.AddUserCredentialController, true),
+		hw.wrapHandler(controller.AddUserCredentialController, true),
 	)
 	v1.DELETE(
 		"/credential",
-		hw.wrapHandler(request_to_match.RemoveUserCredentialController, true),
+		hw.wrapHandler(controller.RemoveUserCredentialController, true),
 	)
 
 	v1.OPTIONS("/credentials")
 	v1.GET(
 		"/credentials",
-		hw.wrapHandler(request_to_match.GetUserCredentialsController, true),
+		hw.wrapHandler(controller.GetUserCredentialsController, true),
 	)
 
 	v1.OPTIONS("/credential_request")
 	v1.POST(
 		"/credential_request",
-		hw.wrapHandler(request_to_match.AddUserCredentialRequestController, true),
+		hw.wrapHandler(controller.AddUserCredentialRequestController, true),
 	)
 	v1.DELETE(
 		"/credential_request",
-		hw.wrapHandler(request_to_match.RemoveUserCredentialRequestController, true),
+		hw.wrapHandler(controller.RemoveUserCredentialRequestController, true),
 	)
 
 	v1.OPTIONS("/credential_requests")
 	v1.GET(
 		"/credential_requests",
-		hw.wrapHandler(request_to_match.GetUserCredentialRequestsController, true),
+		hw.wrapHandler(controller.GetUserCredentialRequestsController, true),
 	)
 
 	v1.OPTIONS("/upload_profile_pic")
@@ -161,8 +160,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// Meetings
 	v1.OPTIONS("/meeting/confirm")
-	v1.POST( "/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */),
-	)
+	v1.POST("/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */))
 
 	// Debug route group.
 	debug := router.Group("/debug")

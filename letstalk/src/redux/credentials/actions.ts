@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import { Action } from 'redux'
 
-import { CredentialWithId } from '../../models/credential';
+import { Credential } from '../../models/credential';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -19,7 +19,7 @@ export enum TypeKeys {
 
 export type CredentialStates = 'normal' | 'deleting';
 
-export interface CredentialWithState extends CredentialWithId {
+export interface CredentialWithState extends Credential {
   readonly state: CredentialStates;
 }
 
@@ -31,7 +31,7 @@ type CredentialEditStartAction = FetchStartAction<TypeKeys.FETCH>;
 
 export interface CredentialAddAction extends Action {
   readonly type: TypeKeys.ADD_CREDENTIAL;
-  readonly credentialWithId: CredentialWithId;
+  readonly credential: Credential;
 }
 
 export interface CredentialSetStateAction extends Action {
@@ -68,10 +68,10 @@ function start(): CredentialEditStartAction {
   };
 }
 
-export function credentialAdd(credentialWithId: CredentialWithId): CredentialAddAction {
+export function credentialAdd(credential: Credential): CredentialAddAction {
   return {
     type: TypeKeys.ADD_CREDENTIAL,
-    credentialWithId,
+    credential,
   };
 }
 

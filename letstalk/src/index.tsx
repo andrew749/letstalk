@@ -10,6 +10,7 @@ import { StackNavigator, TabNavigator } from 'react-navigation';
 import Notification from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
+import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
@@ -25,6 +26,8 @@ import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 
 import Colors from './services/colors';
+
+YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
@@ -45,6 +48,40 @@ const styles = StyleSheet.create({
   },
 });
 
+const createTabView = () => TabNavigator({
+  Home: {
+    screen: HomeView,
+  },
+  'Request To Match': {
+    screen: RequestToMatchView,
+  },
+  Profile: {
+    screen: ProfileView,
+  },
+}, {
+  navigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ focused, tintColor }) => {
+      const { routeName } = navigation.state;
+      let iconName;
+      if (routeName === 'Home') {
+        iconName = 'home';
+      } else if (routeName === 'Profile') {
+        iconName = 'person';
+      } else if (routeName === 'Request To Match') {
+        iconName = 'people';
+      }
+
+      // You can return any component that you like here! We usually use an
+      // icon component from react-native-vector-icons
+      return <MaterialIcons name={iconName} size={24} color={tintColor} />;
+    },
+  }),
+  tabBarOptions: {
+    activeTintColor: Colors.HIVE_MAIN_BG,
+    inactiveTintColor: 'gray',
+  },
+});
+
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
@@ -52,17 +89,11 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Signup: {
     screen: SignupView,
   },
-  Home: {
-    screen: HomeView,
-  },
-  Profile: {
-    screen: ProfileView,
+  Tabbed: {
+    screen: createTabView(),
   },
   ProfileEdit: {
     screen: ProfileEditView,
-  },
-  RequestToMatch: {
-    screen: RequestToMatchView,
   },
   CredentialEdit: {
     screen: CredentialEditView,
@@ -71,7 +102,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: OnboardingView,
   },
 }, {
-  initialRouteName: loggedIn ? "Home" : "Login",
+  initialRouteName: loggedIn ? "Tabbed" : "Login",
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));

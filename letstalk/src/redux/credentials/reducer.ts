@@ -9,7 +9,7 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credential, CredentialWithId } from '../../models/credential';
+import { Credential } from '../../models/credential';
 import {
   credentialAdd,
   credentialSetState,
@@ -44,7 +44,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       };
     case TypeKeys.ADD_CREDENTIAL:
       const newCredentialWithState: CredentialWithState = {
-        ...action.credentialWithId,
+        ...action.credential,
         state: 'normal',
       };
       newCredentialsWithState = state.credentialsWithState ?
@@ -57,7 +57,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       };
     case TypeKeys.SET_STATE_CREDENTIAL:
       newCredentialsWithState = state.credentialsWithState.map(credentialWithState => {
-        return credentialWithState.credentialId === action.credentialId ?
+        return credentialWithState.id === action.credentialId ?
           { ...credentialWithState, state: action.state } : credentialWithState;
       }).toList();
 
@@ -67,7 +67,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       };
     case TypeKeys.REMOVE_CREDENTIAL:
       newCredentialsWithState = state.credentialsWithState.filter(credentialWithState => {
-        return credentialWithState.credentialId !== action.credentialId;
+        return credentialWithState.id !== action.credentialId;
       }).toList();
 
       return {
@@ -102,10 +102,10 @@ const fetchCredentials: ActionCreator<
 
 // TODO: Make your own ActionCreator type, since this never checks the types of the param.
 const addCredential: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (credential: Credential) => {
+  ThunkAction<Promise<ActionTypes>, State, void>> = (name: string) => {
   return async (dispatch: Dispatch<State>) => {
-    const credentialId = await requestToMatchService.addCredential(credential);
-    return dispatch(credentialAdd({ ...credential, credentialId }));
+    const id = await requestToMatchService.addCredential(name);
+    return dispatch(credentialAdd({ id, name }));
   };
 }
 

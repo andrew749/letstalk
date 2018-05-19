@@ -1,4 +1,6 @@
-import { CredentialOptions } from '../../models/credential';
+import Immutable from 'immutable';
+
+import { Credential } from '../../models/credential';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -11,11 +13,13 @@ export enum TypeKeys {
   FETCH = 'CREDENTIAL_OPTIONS/FETCH',
 }
 
-type CredentialOptionsReceiveAction = FetchReceiveAction<TypeKeys.FETCH, CredentialOptions>;
+type Credentials = Immutable.List<Credential>;
+
+type CredentialOptionsReceiveAction = FetchReceiveAction<TypeKeys.FETCH, Credentials>;
 type CredentialOptionsErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type CredentialOptionsStartAction = FetchStartAction<TypeKeys.FETCH>;
 
-function receive(data: CredentialOptions): CredentialOptionsReceiveAction {
+function receive(data: Credentials): CredentialOptionsReceiveAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.RECEIVE,
@@ -38,7 +42,7 @@ function start(): CredentialOptionsStartAction {
   };
 }
 
-const fetch: FetchActionCreators<TypeKeys.FETCH, CredentialOptions> = {
+const fetch: FetchActionCreators<TypeKeys.FETCH, Credentials> = {
   receive,
   error,
   start,

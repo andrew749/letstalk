@@ -40,8 +40,9 @@ class HomeView extends Component<Props> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Home',
-    headerRight: <ReactNativeButton title="Profile"
-      onPress={() => navigation.navigate('Profile')} />,
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {

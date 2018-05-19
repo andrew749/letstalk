@@ -2,7 +2,7 @@ import ActionButton from './ActionButton';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
 import Emoji from './Emoji';
-import FilterListModal from './FilterListModal';
+import FilterListModal, { FilterableElement } from './FilterListModal';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
 import InfoText from './InfoText';
@@ -18,6 +18,7 @@ export {
   ButtonPicker,
   Card,
   Emoji,
+  FilterableElement,
   FilterListModal,
   FormP,
   FormProps,

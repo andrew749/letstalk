@@ -2,55 +2,27 @@ import Immutable from 'immutable';
 
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
+import { Credential, Credentials } from '../models/credential';
 import {
-  CredentialWithId,
-  CredentialPair,
-  CredentialOptions,
-  CredentialOrganization,
-  CredentialPosition,
-  CredentialFilterableElement,
-  CredentialRequest,
-  ValidCredentialPair,
-} from '../models/credential';
-import {
-  CREDENTIAL_OPTIONS_ROUTE,
+  ALL_CREDENTIAL_ROUTE,
   CREDENTIAL_ROUTE,
   CREDENTIALS_ROUTE,
   CREDENTIAL_REQUEST_ROUTE,
   CREDENTIAL_REQUESTS_ROUTE,
 } from './constants';
 
-export interface RequestToMatchService {
-  getCredentialOptions(): Promise<CredentialOptions>;
-}
+type GetAllCredentialsResponse = Array<Credential>;
+type GetCredentialsResponse = Array<Credential>;
+type GetCredentialRequestsResponse = Array<Credential>;
 
-interface GetCredentialOptionsResponse {
-  readonly validPairs: Array<ValidCredentialPair>;
-  readonly organizations: Array<CredentialOrganization>;
-  readonly positions: Array<CredentialPosition>;
-}
+interface AddCredentialRequest { name: string }
+interface AddCredentialResponse { credentialId: number }
+interface AddCredentialRequestRequest { credentialId: number }
 
-type GetCredentialsResponse = Array<CredentialWithId>;
+interface RemoveCredentialRequest { credentialId: number }
+interface RemoveCredentialRequestRequest { credentialId: number }
 
-interface AddCredentialResponse {
-  credentialId: number;
-}
-
-interface RemoveCredentialRequest {
-  credentialId: number;
-}
-
-type GetCredentialRequestsResponse = Array<CredentialRequest>
-
-interface AddCredentialRequestResponse {
-  credentialRequestId: number;
-}
-
-interface RemoveCredentialRequestRequest {
-  credentialRequestId: number;
-}
-
-export class RemoteRequestToMatchService implements RequestToMatchService {
+export class RemoteRequestToMatchService {
   private requestor: Requestor;
   private auth: Auth;
 
@@ -59,27 +31,24 @@ export class RemoteRequestToMatchService implements RequestToMatchService {
     this.auth = auth;
   }
 
-  async getCredentialOptions(): Promise<CredentialOptions> {
-    const response: GetCredentialOptionsResponse =
-      await this.requestor.get(CREDENTIAL_OPTIONS_ROUTE);
-    return {
-      validPairs: Immutable.List(response.validPairs),
-      organizations: Immutable.List(response.organizations),
-      positions: Immutable.List(response.positions),
-    };
+  async getAllCredentials(): Promise<Credentials> {
+    const response: GetAllCredentialsResponse =
+      await this.requestor.get(ALL_CREDENTIAL_ROUTE);
+    return Immutable.List(response);
   }
 
-  async getCredentials(): Promise<Immutable.List<CredentialWithId>> {
+  async getCredentials(): Promise<Credentials> {
     const sessionToken = await auth.getSessionToken();
     const response: GetCredentialsResponse =
       await this.requestor.get(CREDENTIALS_ROUTE, sessionToken);
     return Immutable.List(response);
   }
 
-  async addCredential(credential: CredentialPair): Promise<number> {
+  async addCredential(name: string): Promise<number> {
     const sessionToken = await auth.getSessionToken();
+    const request: AddCredentialRequest = { name };
     const response: AddCredentialResponse =
-      await this.requestor.post(CREDENTIAL_ROUTE, credential, sessionToken);
+      await this.requestor.post(CREDENTIAL_ROUTE, request, sessionToken);
     return response.credentialId;
   }
 
@@ -89,23 +58,22 @@ export class RemoteRequestToMatchService implements RequestToMatchService {
     await this.requestor.delete(CREDENTIAL_ROUTE, request, sessionToken);
   }
 
-  async getCredentialRequests(): Promise<Immutable.List<CredentialRequest>> {
+  async getCredentialRequests(): Promise<Credentials> {
     const sessionToken = await auth.getSessionToken();
     const response: GetCredentialRequestsResponse =
       await this.requestor.get(CREDENTIAL_REQUESTS_ROUTE, sessionToken);
     return Immutable.List(response);
   }
 
-  async addCredentialRequest(credential: CredentialPair): Promise<number> {
+  async addCredentialRequest(credentialId: number): Promise<void> {
     const sessionToken = await auth.getSessionToken();
-    const response: AddCredentialRequestResponse =
-      await this.requestor.post(CREDENTIAL_REQUEST_ROUTE, credential, sessionToken);
-    return response.credentialRequestId;
+    const request: AddCredentialRequestRequest = { credentialId };
+    await this.requestor.post(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
   }
 
-  async removeCredentialRequest(credentialRequestId: number): Promise<void> {
+  async removeCredentialRequest(credentialId: number): Promise<void> {
     const sessionToken = await auth.getSessionToken();
-    const request: RemoveCredentialRequestRequest = { credentialRequestId };
+    const request: RemoveCredentialRequestRequest = { credentialId };
     await this.requestor.delete(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
   }
 }
