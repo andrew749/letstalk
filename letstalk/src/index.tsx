@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
 });
 
 const createTabView = () => TabNavigator({
-  Home: {
+  'Home': {
     screen: HomeView,
   },
   'Request To Match': {
     screen: RequestToMatchView,
   },
-  Profile: {
+  'Profile': {
     screen: ProfileView,
   },
 }, {
@@ -79,6 +79,9 @@ const createTabView = () => TabNavigator({
   tabBarOptions: {
     activeTintColor: Colors.HIVE_MAIN_BG,
     inactiveTintColor: 'gray',
+    style: {
+      backgroundColor: 'white',
+    }
   },
 });
 
