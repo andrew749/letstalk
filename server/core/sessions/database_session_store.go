@@ -38,7 +38,8 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 	if session.NotificationToken != nil {
 		rlog.Debug("Storing notification data")
 		notificationModel := data.NotificationToken{
-			Token: *session.NotificationToken,
+			SessionId: *session.SessionId,
+			Token:     *session.NotificationToken,
 		}
 
 		if err := tx.FirstOrCreate(&notificationModel).Error; err != nil {
