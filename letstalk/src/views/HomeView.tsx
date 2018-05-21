@@ -25,7 +25,7 @@ import { ActionTypes } from '../redux/bootstrap/actions';
 import { ActionButton, Card, Header, Loading, ProfileAvatar } from '../components';
 
 import Colors from '../services/colors';
-import {AnalyticsHelper} from '../services/analytics';
+import { AnalyticsHelper } from '../services/analytics';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -69,14 +69,6 @@ class HomeView extends Component<Props> {
 
   private async load() {
     await this.props.fetchBootstrap();
-  }
-
-  private requestToMatch() {
-    this.props.navigation.navigate('RequestToMatch');
-  }
-
-  private credentialEdit() {
-    this.props.navigation.navigate('CredentialEdit');
   }
 
   private renderMatches() {
@@ -159,8 +151,6 @@ class HomeView extends Component<Props> {
         return (
           <ScrollView>
             { matches }
-            <ActionButton onPress={() => this.requestToMatch()} title="Request To Match" />
-            <ActionButton onPress={() => this.credentialEdit()} title="Edit Credentials" />
           </ScrollView>
         );
       default:

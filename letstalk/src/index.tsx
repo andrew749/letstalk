@@ -14,9 +14,6 @@ import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
-import AchievementsView from './views/AchievementsView';
-import CredentialEditView from './views/CredentialEditView';
-import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
@@ -94,9 +91,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   ProfileEdit: {
     screen: ProfileEditView,
-  },
-  CredentialEdit: {
-    screen: CredentialEditView,
   },
   Onboarding: {
     screen: OnboardingView,
