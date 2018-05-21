@@ -22,7 +22,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, Header, Loading, ProfileAvatar } from '../components';
 
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
@@ -109,17 +109,22 @@ class HomeView extends Component<Props> {
       );
       // TODO: Handle errors for links
       return (
-        <Card key={userId}>
-          <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
-          <Text style={styles.relationshipType}>{userType}</Text>
-          <TouchableOpacity style={styles.emailContainer}
-            onPress={() => Linking.openURL(emailLink)}
-          >
-            <MaterialIcons name="email" size={24} />
-            <Text style={styles.email}>{email}</Text>
-          </TouchableOpacity>
-          {fb}
-          {sms}
+        <Card style={styles.card} key={userId}>
+          <View style={styles.cardProfilePicture}>
+            <ProfileAvatar userId={userId.toString()}/>
+          </View>
+          <View>
+            <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
+            <Text style={styles.relationshipType}>{userType}</Text>
+            <TouchableOpacity style={styles.emailContainer}
+              onPress={() => Linking.openURL(emailLink)}
+              >
+                <MaterialIcons name="email" size={24} />
+                <Text style={styles.email}>{email}</Text>
+              </TouchableOpacity>
+              {fb}
+              {sms}
+        </View>
         </Card>
       );
     });
@@ -211,4 +216,11 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 16,
   },
+  card: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  cardProfilePicture: {
+    marginRight: 10,
+  }
 })
