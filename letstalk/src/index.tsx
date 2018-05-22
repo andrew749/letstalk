@@ -52,7 +52,7 @@ const createTabView = () => TabNavigator({
   'Home': {
     screen: HomeView,
   },
-  'Request To Match': {
+  'Requests': {
     screen: RequestToMatchView,
   },
   'Profile': {
