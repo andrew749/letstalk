@@ -7,16 +7,13 @@ import { Notifications } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { StackNavigator, TabNavigator } from 'react-navigation';
-import Notification from 'react-native-in-app-notification';
+import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
 import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
-import AchievementsView from './views/AchievementsView';
-import CredentialEditView from './views/CredentialEditView';
-import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
@@ -24,6 +21,7 @@ import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
+import NotificationService, { Notification } from './services/notification-service';
 
 import Colors from './services/colors';
 
@@ -71,8 +69,6 @@ const createTabView = () => TabNavigator({
         iconName = 'people';
       }
 
-      // You can return any component that you like here! We usually use an
-      // icon component from react-native-vector-icons
       return <MaterialIcons name={iconName} size={24} color={tintColor} />;
     },
   }),
@@ -98,9 +94,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   ProfileEdit: {
     screen: ProfileEditView,
   },
-  CredentialEdit: {
-    screen: CredentialEditView,
-  },
   Onboarding: {
     screen: OnboardingView,
   },
@@ -117,7 +110,7 @@ interface AppState {
 type Props = {};
 
 class App extends React.Component<Props, AppState> {
-  private notification: any;
+  private notificationService: NotificationService;
 
   constructor(props: Props) {
     super(props);
@@ -126,13 +119,11 @@ class App extends React.Component<Props, AppState> {
     };
 
     this.handleNotification = this.handleNotification.bind(this);
+    this.notificationService = null;
   }
 
-  handleNotification(notification: any) {
-    this.notification.show({
-      title: notification.data.title,
-      message: notification.data.message,
-    });
+  async handleNotification(notification: any) {
+    await this.notificationService.handleNotification(notification as Notification);
   }
 
   async componentWillMount() {
@@ -149,7 +140,9 @@ class App extends React.Component<Props, AppState> {
       <Provider store={store}>
         <View style={{ flex: 1 }}>
           <AppNavigation />
-          <Notification ref={(ref: any) => { this.notification = ref; }} />
+          <NotificationComponent ref={(ref: any) => {
+            this.notificationService = new NotificationService(ref, store);
+          }} />
           <Toast messageStyle={styles.toastMessageStyle} />
         </View>
       </Provider>

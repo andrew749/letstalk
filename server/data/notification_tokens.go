@@ -1,6 +1,7 @@
 package data
 
 type NotificationToken struct {
-	Token   string `json:"token" gorm:"not null;primary_key"`
-	Service string `json:"service"`
+	SessionId string `gorm:"not null;primary_key"`
+	Token     string `gorm:"not null;primary_key"`
+	Service   string
 }

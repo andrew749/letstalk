@@ -5,10 +5,9 @@ import (
 )
 
 type Session struct {
-	SessionId  string    `json:"sessionId" gorm:"not null;primary_key"`
-	User       User      `gorm:"foreignkey:UserId"`
-	UserId     int       `json:"userId" gorm:"not null"`
-	ExpiryDate time.Time `json:"expiryDate" gorm:"not null"`
-	// TODO: Wtf. fix this.
-	NotificationToken *NotificationToken
+	SessionId         string             `gorm:"not null;primary_key"`
+	User              User               `gorm:"foreignkey:UserId"`
+	UserId            int                `gorm:"not null"`
+	ExpiryDate        time.Time          `gorm:"not null"`
+	NotificationToken *NotificationToken `gorm:"foreignkey:SessionId;association_foreignkey:SessionId"`
 }
