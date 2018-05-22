@@ -43,6 +43,7 @@ class ProfileView extends Component<Props> {
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
+    this.openQrView = this.openQrView.bind(this);
   }
 
   private async onLogoutPress() {
