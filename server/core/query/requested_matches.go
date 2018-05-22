@@ -109,7 +109,14 @@ func getDeviceTokensForUser(c *ctx.Context, userId int) ([]string, errs.Error) {
 	return deviceTokens, nil
 }
 
-func sendNotifications(c *ctx.Context, askerId int, answererId int) errs.Error {
+func sendNotifications(
+	c *ctx.Context,
+	askerId int,
+	answererId int,
+	credentialRequestId uint,
+	credentialId uint,
+	name string,
+) errs.Error {
 	askerDeviceTokens, err := getDeviceTokensForUser(c, askerId)
 	if err != nil {
 		return err
@@ -119,10 +126,20 @@ func sendNotifications(c *ctx.Context, askerId int, answererId int) errs.Error {
 		return err
 	}
 	for _, token := range askerDeviceTokens {
-		notifications.CreateAndSendNotification(token, "You got a match", "Match")
+		notifications.RequestToMatchNotification(
+			token,
+			notifications.REQUEST_TO_MATCH_SIDE_ASKER,
+			credentialRequestId,
+			name,
+		)
 	}
 	for _, token := range answererDeviceTokens {
-		notifications.CreateAndSendNotification(token, "You got a match", "Match")
+		notifications.RequestToMatchNotification(
+			token,
+			notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
+			credentialId,
+			name,
+		)
 	}
 	return nil
 }
@@ -134,6 +151,12 @@ func ResolveRequestToMatch(
 	credentialId uint,
 ) errs.Error {
 	userId := c.SessionData.UserId
+
+	var credential data.Credential
+	if err := c.Db.Where("id = ?", credentialId).First(&credential).Error; err != nil {
+		return errs.NewDbError(err)
+	}
+
 	userCredentialIds, err := getPotentialMatchUserIds(c.Db, userId, resolveType, credentialId)
 	if err != nil {
 		return err
@@ -181,7 +204,14 @@ func ResolveRequestToMatch(
 
 		tx.Commit()
 
-		err = sendNotifications(c, askerId, answererId)
+		err = sendNotifications(
+			c,
+			askerId,
+			answererId,
+			credentialRequestId,
+			credentialId,
+			credential.Name,
+		)
 		if err != nil {
 			return err
 		}

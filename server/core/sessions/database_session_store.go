@@ -82,8 +82,10 @@ func (sm DatabaseSessionStore) GetUserSessions(
 	userId int,
 ) ([]*SessionData, error) {
 	sessions := make([]data.Session, 0)
-	if err := sm.DB.Where("user_id = ?", userId).
-		Find(&sessions).Error; err != nil {
+	if err := sm.DB.Where(
+		"user_id = ?",
+		userId,
+	).Preload("NotificationToken").Find(&sessions).Error; err != nil {
 		return nil, err
 	}
 
