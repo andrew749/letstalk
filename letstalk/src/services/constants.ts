@@ -1,5 +1,5 @@
 // DEV
-export const BASE_URL = 'http://10.3.21.42';
+export const BASE_URL = 'http://10.0.2.2';
 export const ANALYTICS_ID = 'UA-118691527-1';
 // PROD
 // export const BASE_URL = 'http://54.175.152.141';

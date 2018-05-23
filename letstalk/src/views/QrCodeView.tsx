@@ -9,6 +9,8 @@ import {ActionTypes} from "../redux/bootstrap/actions";
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import {NavigationScreenProp, NavigationStackAction} from "react-navigation";
 import {RootState} from "../redux/index";
+import QRCode from 'react-native-qrcode';
+
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -34,9 +36,16 @@ class QrCodeView extends Component<Props> {
   }
 
   render() {
-    const { email = '' } = this.props.bootstrap && this.props.bootstrap.me;
+    const { secret } = this.props.bootstrap && this.props.bootstrap.me;
     return (
-      <View><Text>QrCodeView for {email}</Text></View>
+      <View>
+        {secret && <QRCode
+          value={secret}
+          size={200}
+          bgColor='black'
+          fgColor='white'/>
+        }
+      </View>
     );
   }
 }
