@@ -22,7 +22,7 @@ interface Props extends BootstrapState, DispatchActions {
 class QrCodeView extends Component<Props> {
   static navigationOptions = () => ({
     headerTitle: 'QrCode',
-  })
+  });
 
   constructor(props: Props) {
     super(props);

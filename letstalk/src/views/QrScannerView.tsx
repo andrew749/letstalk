@@ -11,28 +11,63 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { BarCodeScanner, Permissions } from 'expo';
+import { ToastActionsCreators } from 'react-native-redux-toast';
+import { errorToast, infoToast } from '../redux/toast';
+import {NavigationScreenProp, NavigationStackAction} from "react-navigation";
+import {ActionTypes} from "../redux/bootstrap/actions";
+import {ThunkAction} from "redux-thunk";
+import {ActionCreator, connect, Dispatch} from "react-redux";
+import {RootState} from "../redux/index";
+import { State as BootstrapState, fetchBootstrap } from "../redux/bootstrap/reducer";
 
-export default class QrScannerView extends Component {
+interface DispatchActions {
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+}
+
+interface Props extends BootstrapState, DispatchActions {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
+
+class QrScannerView extends Component<Props> {
+  static navigationOptions = () => ({
+    headerTitle: 'QrScanner',
+  })
+
   state = {
     hasCameraPermission: false,
     lastScannedUrl: '',
   };
 
-  componentDidMount() {
-    this._requestCameraPermission();
+  constructor(props: Props) {
+    super(props);
+    console.log("QrScanner constructor");
+
+    this.load = this.load.bind(this);
+  }
+
+  private async load() {
+    console.log("loading");
+    await this._requestCameraPermission();
+    console.log("done requesting camera permissions");
+    await this.props.fetchBootstrap();
+    console.log("done fetching bootstrap");
   }
 
   _requestCameraPermission = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    console.log("permissions result: ", status);
     this.setState({
       hasCameraPermission: status === 'granted',
     });
   };
 
-  _handleBarCodeRead = (result: { type: string; data: string; }) => {
+  _handleBarCodeRead = async (result: { type: string; data: string; }) => {
     if (result.data !== this.state.lastScannedUrl) {
       LayoutAnimation.spring();
       this.setState({ lastScannedUrl: result.data });
+      await this.props.infoToast(`Scanned barcode ${result.data}`);
     }
   };
 
@@ -54,55 +89,19 @@ export default class QrScannerView extends Component {
               }}
             />}
 
-        {this._maybeRenderUrl()}
+        <View style={styles.bottomBar}>
+          <Text numberOfLines={1} style={styles.infoText}>
+            {'Scan a QR code to confirm a match or meeting'}
+          </Text>
+        </View>
 
         <StatusBar hidden />
       </View>
     );
-  }
-
-  _handlePressUrl = () => {
-    Alert.alert(
-      'Open this URL?',
-      this.state.lastScannedUrl,
-      [
-        {
-          text: 'Yes',
-          onPress: () => Linking.openURL(this.state.lastScannedUrl),
-        },
-        { text: 'No', onPress: () => {} },
-      ],
-      { cancelable: false }
-    );
-  };
-
-  _handlePressCancel = () => {
-    this.setState({ lastScannedUrl: null });
-  };
-
-  _maybeRenderUrl = () => {
-    if (!this.state.lastScannedUrl) {
-      return;
-    }
-
-    return (
-      <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.url} onPress={this._handlePressUrl}>
-          <Text numberOfLines={1} style={styles.urlText}>
-            {this.state.lastScannedUrl}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={this._handlePressCancel}>
-          <Text style={styles.cancelButtonText}>
-            Cancel
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
   };
 }
+
+export default connect(({bootstrap}: RootState) => bootstrap, { fetchBootstrap, errorToast, infoToast })(QrScannerView);
 
 const styles = StyleSheet.create({
   container: {
@@ -120,20 +119,8 @@ const styles = StyleSheet.create({
     padding: 15,
     flexDirection: 'row',
   },
-  url: {
-    flex: 1,
-  },
-  urlText: {
+  infoText: {
     color: '#fff',
     fontSize: 20,
-  },
-  cancelButton: {
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButtonText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 18,
   },
 });
