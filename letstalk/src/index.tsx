@@ -74,7 +74,7 @@ const createTabView = () => TabNavigator({
     },
   }),
   tabBarOptions: {
-    showLabel: Platform.IOS ? true: false,
+    showLabel: Platform.OS == 'ios' ? true: false,
     showIcon: true,
     activeTintColor: Colors.HIVE_MAIN_BG,
     inactiveTintColor: 'gray',
