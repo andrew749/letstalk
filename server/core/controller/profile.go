@@ -75,6 +75,7 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 			LastName:  user.LastName,
 			Gender:    user.Gender,
 			Birthdate: user.Birthdate.Unix(),
+			Secret:    user.Secret,
 		},
 		UserContactInfo: api.UserContactInfo{
 			Email: user.Email,
