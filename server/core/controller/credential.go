@@ -83,9 +83,12 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	if err := query.ResolveRequestToMatch(c, query.RESOLVE_TYPE_ANSWERER, *credentialId); err != nil {
-		return err
-	}
+	go query.ResolveRequestToMatchWithDelay(
+		c,
+		query.RESOLVE_TYPE_ANSWERER,
+		*credentialId,
+		RESOLVE_WAIT_TIME,
+	)
 
 	c.Result = api.AddUserCredentialResponse{CredentialId: *credentialId}
 	return nil
