@@ -17,6 +17,7 @@ import (
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+	"github.com/google/uuid"
 )
 
 /**
@@ -61,6 +62,13 @@ func FBController(c *ctx.Context) errs.Error {
 			Gender:    user.Gender,
 			Birthdate: user.Birthdate,
 		}
+
+		// Generate UUID for FB user.
+		secret, err := uuid.NewRandom()
+		if err != nil {
+			return errs.NewInternalError("%v", err)
+		}
+		appUser.Secret = secret.String()
 
 		if err := tx.Where(&appUser).FirstOrCreate(&appUser).Error; err != nil {
 			tx.Rollback()
