@@ -4,9 +4,6 @@ import React, { ReactNode } from 'react';
 import {
   Dimensions,
   Modal,
-  DatePickerIOS,
-  DatePickerIOSProperties,
-  DatePickerAndroid,
   Platform,
   StyleSheet,
   Text,
@@ -14,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import DatePicker from 'react-native-datepicker';
 import { WrappedFieldProps } from 'redux-form';
 import { Button, ButtonProps, FormValidationMessage } from 'react-native-elements';
 import BottomModal from './BottomModal';
@@ -32,31 +30,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const launchAndroidDatePicker = async (
-    onSubmit: (newValue: Date) => void
-): Promise<void> =>  {
-  try {
-    const {action, year, month, day} = await DatePickerAndroid.open({
-      date: new Date()
-    });
-    if (action !== DatePickerAndroid.dismissedAction) {
-      onSubmit(new Date(year, month, day));
-    }
-  } catch ({code, message}) {
-    console.warn('Cannot open date picker', message);
-  }
-}
-
 const ModalDatePicker: React.SFC<Props> = (props) => {
   const { defaultDate, label, mode } = props;
   const { onChange, value } = props.input;
-  const onSubmitPress = () => {
-    onChange(value || defaultDate);
-  }
   // TODO: make this externally configurable
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   const valueLabel = value ? value.toLocaleDateString('en-US', options) : null;
-
   const pickerButtonStyle = {
     buttonStyle: {
       width: SCREEN_WIDTH - 40,
@@ -70,30 +49,34 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
   // TODO: Maybe hold state about what the value is using another onChange, and only call the
   // passed in onChange when the user presses submit.
 
-  const dateValue = (value || defaultDate).toString();
-  const datePicker = Platform.select({
-    'ios': (
-    <BottomModal {...props}
-      onSubmitPress={onSubmitPress}
-      valueLabel={valueLabel}>
-      <DatePickerIOS
-        mode={mode}
-        style={styles.bottomPicker}
-        date={value || defaultDate}
-        onDateChange={onChange}
-        />
-    </BottomModal>
-    ),
-    'android': (
-      <Button
-        {...props}
-        title={dateValue}
-        textStyle={pickerButtonStyle.textStyle}
-        buttonStyle={pickerButtonStyle.buttonStyle}
-        onPress={launchAndroidDatePicker.bind(this, onChange)}
+  const dateValue = (value || defaultDate);
+  return (
+    <DatePicker
+        style={{width: '100%'}}
+        date={ dateValue }
+        mode="date"
+        placeholder="Select Date"
+        format="YYYY-MM-DD"
+        minDate="1900-01-01"
+        maxDate={new Date()}
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        customStyles={{
+          dateIcon: {
+            position: 'absolute',
+            left: 0,
+            top: 4,
+            marginLeft: 0
+          },
+          dateInput: {
+            marginLeft: 36
+          }
+          // ... You can check the source to find the other keys.
+        }}
+        onDateChange={(date) => {
+          onChange(new Date(date));
+        }}
       />
-     )}
-   );
-  return datePicker;
+  );
 }
 export default ModalDatePicker;
