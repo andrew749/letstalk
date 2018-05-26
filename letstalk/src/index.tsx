@@ -65,7 +65,7 @@ const createTabView = () => TabNavigator({
         iconName = 'home';
       } else if (routeName === 'Profile') {
         iconName = 'person';
-      } else if (routeName === 'Request To Match') {
+      } else if (routeName === 'Requests') {
         iconName = 'people';
       }
 

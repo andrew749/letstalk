@@ -10,6 +10,7 @@ import (
 	"letstalk/server/notifications"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 type ResolveType int
@@ -50,7 +51,9 @@ func getPotentialMatchUserIds(
 		}
 		var userCredentials []data.UserCredential
 		err = db.Where(
-			&data.UserCredential{CredentialId: userRequest.CredentialId},
+			"credential_id = ? and user_id <> ?",
+			credentialId,
+			userId,
 		).Find(&userCredentials).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -73,7 +76,9 @@ func getPotentialMatchUserIds(
 		}
 		var userRequests []data.UserCredentialRequest
 		err = db.Where(
-			&data.UserCredentialRequest{CredentialId: userCredential.CredentialId},
+			"credential_id = ? and user_id <> ?",
+			credentialId,
+			userId,
 		).Find(&userRequests).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -142,6 +147,19 @@ func sendNotifications(
 		)
 	}
 	return nil
+}
+
+func ResolveRequestToMatchWithDelay(
+	c *ctx.Context,
+	resolveType ResolveType,
+	credentialId uint,
+	delayMs int,
+) {
+	<-time.After(time.Duration(delayMs) * time.Millisecond)
+	err := ResolveRequestToMatch(c, resolveType, credentialId)
+	if err != nil {
+		rlog.Error(err)
+	}
 }
 
 // TODO: This should run in a job

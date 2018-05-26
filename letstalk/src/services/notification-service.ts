@@ -35,16 +35,11 @@ export default class NotificationService {
 
   private async actOnNotification(notification: Notification): Promise<void> {
     const data = notification.data;
-    console.log(data);
     switch (data.type) {
       case 'REQUEST_TO_MATCH':
-        switch (data.side) {
-          case SIDE_ASKER:
-            await this.store.dispatch(credentialRequestRemove(data.requestId));
-            break;
-          case SIDE_ANSWERER:
-            await this.store.dispatch(credentialRemove(data.requestId));
-            break;
+        if (data.side === SIDE_ASKER) {
+          await this.store.dispatch(credentialRequestRemove(data.requestId));
+          break;
         }
         break;
       default:

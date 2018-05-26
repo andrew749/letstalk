@@ -4,11 +4,12 @@ package api
  * Holds all the data that we currently associate with a user.
  */
 type UserPersonalInfo struct {
-	UserId    int    `json:"userId"`
-	FirstName string `json:"firstName" binding:"required"`
-	LastName  string `json:"lastName" binding:"required"`
-	Gender    int    `json:"gender" binding:"required"`
-	Birthdate int64  `json:"birthdate" binding:"required"` // unix time
+	UserId               int    `json:"userId"`
+	FirstName            string `json:"firstName" binding:"required"`
+	LastName             string `json:"lastName" binding:"required"`
+	Gender               int    `json:"gender" binding:"required"`
+	Birthdate            int64  `json:"birthdate" binding:"required"` // unix time
+	MentorshipPreference *int   `json:"mentorshipPreference"`
 
 	// TODO: Does this belong here?
 	Secret     string  `json:"secret"`
@@ -20,6 +21,13 @@ type UserContactInfo struct {
 	PhoneNumber *string `json:"phoneNumber"`
 	FbId        *string `json:"fbId"`
 }
+
+type MentorshipPreference uint
+
+const (
+	MENTORSHIP_PREFERENCE_MENTOR MentorshipPreference = iota + 1
+	MENTORSHIP_PREFERENCE_MENTEE
+)
 
 type UserType string
 

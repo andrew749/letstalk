@@ -36,6 +36,7 @@ export interface SignupRequest {
 
 interface UpdateCohortRequest {
   readonly cohortId: number;
+  readonly mentorshipPreference: number;
 }
 
 export interface PersonalityVector {
