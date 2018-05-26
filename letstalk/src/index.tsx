@@ -28,6 +28,8 @@ import Colors from './services/colors';
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
+// turn off annoying warnings
+console.disableYellowBox = true;
 
 interface TabBarIcon {
   tintColor: (string | null),
@@ -137,7 +139,6 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-
     const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>

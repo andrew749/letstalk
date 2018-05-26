@@ -86,12 +86,21 @@ const Head: SFC<{}> = (props: {}) => {
 }
 
 class RequestToMatchView extends Component<Props> {
-  static navigationOptions = () => ({
+  static navigationOptionsAndroid = ({ navigation }: NavigationScreenDetails<void> ) => ({
+    headerTitle: 'Request',
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
+  });
+
+  static navigationOptionsIOS = ({ navigation}: NavigationScreenDetails<void> ) => ({
     header: <Head/>,
     headerStyle: {
       backgroundColor: Colors.HIVE_MAIN_BG,
     },
-  })
+  });
+
+  static navigationOptions = (Platform.OS == 'ios') ? RequestToMatchView.navigationOptionsIOS : RequestToMatchView.navigationOptionsAndroid;
 
   constructor(props: Props) {
     super(props);
