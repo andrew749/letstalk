@@ -170,7 +170,7 @@ export default class SignupView extends Component<Props> {
           "phoneNumber": values.phoneNumber,
           "gender": values.gender,
           "password": values.password,
-          "profilePic": values.profilePic.data,
+          "profilePic": values.profilePic ? values.profilePic.data: undefined,
         },
         birthdate: Math.round(values.birthdate.getTime() / 1000),
       });
