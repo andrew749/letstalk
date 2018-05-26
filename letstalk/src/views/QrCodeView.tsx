@@ -11,7 +11,6 @@ import {NavigationScreenProp, NavigationStackAction} from "react-navigation";
 import {RootState} from "../redux/index";
 import QRCode from 'react-native-qrcode';
 
-
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
 }

@@ -44,6 +44,7 @@ class ProfileView extends Component<Props> {
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
     this.openQrView = this.openQrView.bind(this);
+    this.openQrScannerView = this.openQrScannerView.bind(this);
   }
 
   private async onLogoutPress() {
@@ -109,6 +110,8 @@ class ProfileView extends Component<Props> {
         <Image style={styles.image} source={require('../img/profile.jpg')} />
         <ReactNativeButton title="View QR Code"
               onPress={this.openQrView} />
+        <ReactNativeButton title="Scan QR Code"
+                           onPress={this.openQrScannerView} />
         <Card>
           <Text style={styles.sectionHeader}>Profile</Text>
           {profileItems}
@@ -151,6 +154,10 @@ class ProfileView extends Component<Props> {
 
   private async openQrView() {
     this.props.navigation.navigate('QrCode');
+  }
+
+  private async openQrScannerView() {
+    this.props.navigation.navigate('QrScanner');
   }
 }
 
