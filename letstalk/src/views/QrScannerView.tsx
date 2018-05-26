@@ -47,12 +47,15 @@ class QrScannerView extends Component<Props> {
     this.load = this.load.bind(this);
   }
 
+  async componentDidMount() {
+    this.load();
+  }
+
   private async load() {
-    console.log("loading");
-    await this._requestCameraPermission();
-    console.log("done requesting camera permissions");
-    await this.props.fetchBootstrap();
-    console.log("done fetching bootstrap");
+    await Promise.all([
+      this._requestCameraPermission(),
+      this.props.fetchBootstrap(),
+    ]);
   }
 
   _requestCameraPermission = async () => {
@@ -75,23 +78,23 @@ class QrScannerView extends Component<Props> {
     return (
       <View style={styles.container}>
 
-        {this.state.hasCameraPermission === null
-          ? <Text>Requesting for camera permission</Text>
-          : this.state.hasCameraPermission === false
-            ? <Text style={{ color: '#fff' }}>
-              Camera permission is not granted
-            </Text>
-            : React.createElement('BarCodeScanner', {
-              onBarCodeRead: this._handleBarCodeRead,
-              style: {
-                height: Dimensions.get('window').height,
-                width: Dimensions.get('window').width,
-              },
-            })
+        {!this.state.hasCameraPermission
+          ? <Text style={{ color: '#fff' }}>
+            Camera permission required.
+          </Text>
+          // Need to use React.createElement to skip type checking on style prop.
+          : React.createElement(BarCodeScanner, {
+            onBarCodeRead: this._handleBarCodeRead,
+            // @ts-ignore bug where style isn't detected in BarCodeScannerProps
+            style: {
+              height: Dimensions.get('window').height,
+              width: Dimensions.get('window').width,
+            },
+          })
         }
 
         <View style={styles.bottomBar}>
-          <Text numberOfLines={1} style={styles.infoText}>
+          <Text numberOfLines={1} style={styles.bottomText}>
             {'Scan a QR code to confirm a match or meeting'}
           </Text>
         </View>
@@ -120,8 +123,8 @@ const styles = StyleSheet.create({
     padding: 15,
     flexDirection: 'row',
   },
-  infoText: {
+  bottomText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 14,
   },
 });

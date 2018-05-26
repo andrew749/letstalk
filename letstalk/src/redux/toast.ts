@@ -11,6 +11,6 @@ export function errorToast(message: string) {
 
 export function infoToast(message: string) {
   return (dispatch: Dispatch<RootState>): Promise<void> => {
-    return dispatch(ToastActionsCreators.display(message, 2000));
+    return dispatch(ToastActionsCreators.displayInfo(message, 2000));
   };
 }
