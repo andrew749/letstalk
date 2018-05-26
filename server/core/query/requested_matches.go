@@ -1,6 +1,7 @@
 package query
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -62,7 +63,7 @@ func getPotentialMatchUserIds(
 		for i, userCredential := range userCredentials {
 			userCredentialIds[i] = userWithCredentialId{
 				userCredential.UserId,
-				uint(userCredential.ID),
+				uint(userCredential.CredentialId),
 			}
 		}
 		return userCredentialIds, nil
@@ -87,7 +88,7 @@ func getPotentialMatchUserIds(
 		for i, userRequest := range userRequests {
 			userCredentialIds[i] = userWithCredentialId{
 				userRequest.UserId,
-				uint(userRequest.ID),
+				uint(userRequest.CredentialId),
 			}
 		}
 		return userCredentialIds, nil
@@ -118,7 +119,6 @@ func sendNotifications(
 	c *ctx.Context,
 	askerId int,
 	answererId int,
-	credentialRequestId uint,
 	credentialId uint,
 	name string,
 ) errs.Error {
@@ -134,7 +134,7 @@ func sendNotifications(
 		notifications.RequestToMatchNotification(
 			token,
 			notifications.REQUEST_TO_MATCH_SIDE_ASKER,
-			credentialRequestId,
+			credentialId,
 			name,
 		)
 	}
@@ -184,26 +184,26 @@ func ResolveRequestToMatch(
 		Shuffle(userCredentialIds)
 
 		var (
-			askerId             int
-			answererId          int
-			credentialRequestId uint // We only delete the credential request, not the credential
+			askerId    int
+			answererId int
 		)
 		if resolveType == RESOLVE_TYPE_ASKER {
 			askerId = userId
 			answererId = userCredentialIds[0].userId
-			credentialRequestId = credentialId
 		} else if resolveType == RESOLVE_TYPE_ANSWERER {
 			askerId = userCredentialIds[0].userId
 			answererId = userId
-			credentialRequestId = userCredentialIds[0].credentialId
 		} else {
 			return errs.NewClientError("invalid resolveType %d", resolveType)
 		}
 
 		tx := c.Db.Begin()
 
-		dbErr := tx.Where("credential_id = ? and user_id = ?", credentialRequestId, askerId).Delete(
-			data.UserCredentialRequest{}).Error
+		rlog.Info(fmt.Sprintf("Cred: %d, User: %d", credentialId, askerId))
+
+		dbErr := tx.Where("credential_id = ? and user_id = ?", credentialId, askerId).Delete(
+			data.UserCredentialRequest{},
+		).Error
 		if dbErr != nil {
 			tx.Rollback()
 			return errs.NewDbError(dbErr)
@@ -226,7 +226,6 @@ func ResolveRequestToMatch(
 			c,
 			askerId,
 			answererId,
-			credentialRequestId,
 			credentialId,
 			credential.Name,
 		)
