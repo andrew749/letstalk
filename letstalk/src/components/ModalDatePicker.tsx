@@ -35,7 +35,6 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
   const { onChange, value } = props.input;
   // TODO: make this externally configurable
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  const valueLabel = value ? value.toLocaleDateString('en-US', options) : null;
   const pickerButtonStyle = {
     buttonStyle: {
       width: SCREEN_WIDTH - 40,
@@ -73,8 +72,8 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
           }
           // ... You can check the source to find the other keys.
         }}
-        onDateChange={(date) => {
-          onChange(new Date(date));
+        onDateChange={(_, date) => {
+          onChange(date);
         }}
       />
   );
