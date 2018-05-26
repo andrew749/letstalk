@@ -13,7 +13,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Button as ReactNativeButton,
 } from 'react-native';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
@@ -172,7 +171,6 @@ class ProfileView extends Component<Props> {
               onPress={this.openQrView} />
         <ReactNativeButton title="Scan QR Code"
                            onPress={this.openQrScannerView} />
-        <Card>
         <Text style={styles.sectionHeader}>Personal Info</Text>
         <View style={styles.sectionContainer}>
           {profileItems}
