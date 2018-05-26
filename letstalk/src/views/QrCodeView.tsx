@@ -1,27 +1,24 @@
 import React, { Component } from 'react';
-import {
-  Text,
-  View,
-} from 'react-native';
+import { View } from 'react-native';
 import {ActionCreator, connect} from "react-redux";
 import {ThunkAction} from "redux-thunk";
-import {ActionTypes} from "../redux/bootstrap/actions";
-import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
+import {ActionTypes} from "../redux/profile/actions";
+import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
 import {NavigationScreenProp, NavigationStackAction} from "react-navigation";
 import {RootState} from "../redux/index";
 import QRCode from 'react-native-qrcode';
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
 }
 
-interface Props extends BootstrapState, DispatchActions {
+interface Props extends ProfileState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
 class QrCodeView extends Component<Props> {
   static navigationOptions = () => ({
-    headerTitle: 'QrCode',
+    headerTitle: 'My Code',
   });
 
   constructor(props: Props) {
@@ -30,15 +27,19 @@ class QrCodeView extends Component<Props> {
     this.load = this.load.bind(this);
   }
 
+  async componentDidMount() {
+    await this.load();
+  }
+
   private async load() {
-    await this.props.fetchBootstrap();
+    await this.props.fetchProfile();
   }
 
   render() {
-    const { secret } = this.props.bootstrap && this.props.bootstrap.me;
+    const { secret } = this.props.profile;
     return (
       <View>
-        {secret && <QRCode
+        {!!secret && <QRCode
           value={secret}
           size={200}
           bgColor='black'
@@ -49,4 +50,4 @@ class QrCodeView extends Component<Props> {
   }
 }
 
-export default connect(({bootstrap}: RootState) => bootstrap, { fetchBootstrap })(QrCodeView);
+export default connect(({profile}: RootState) => profile, { fetchProfile })(QrCodeView);
