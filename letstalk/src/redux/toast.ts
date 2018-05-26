@@ -8,3 +8,9 @@ export function errorToast(message: string) {
     return dispatch(ToastActionsCreators.displayError(message, 2000));
   };
 }
+
+export function infoToast(message: string) {
+  return (dispatch: Dispatch<RootState>): Promise<void> => {
+    return dispatch(ToastActionsCreators.displayInfo(message, 2000));
+  };
+}

@@ -32,6 +32,7 @@ export interface UserPersonalInfo {
 	readonly lastName: string
 	readonly gender: GenderId
 	readonly birthdate: Date
+  readonly secret: string
 }
 
 export interface UserContactInfo {

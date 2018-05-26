@@ -19,5 +19,4 @@ declare module 'expo-analytics' {
   class Event extends Hit {
     constructor(category: string, action: string, label: string, value: number): void;
   }
-
 }
