@@ -1,5 +1,5 @@
 // DEV
-export const BASE_URL = 'http://192.168.0.106';
+export const BASE_URL = 'http://192.168.0.108';
 export const ANALYTICS_ID = 'UA-118691527-1';
 // PROD
 // export const BASE_URL = 'http://54.175.152.141';
@@ -20,3 +20,4 @@ export const CREDENTIAL_REQUESTS_ROUTE = '/v1/credential_requests';
 export const CREDENTIAL_REQUEST_ROUTE  = '/v1/credential_request';
 export const PROFILE_PIC_UPLOAD_ROUTE  = '/v1/profile_pic_upload';
 export const PROFILE_EDIT_ROUTE        = '/v1/profile_edit';
+export const MEETING_CONFIRMATION_ROUTE = '/v1/meeting/confirm';

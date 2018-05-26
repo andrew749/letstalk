@@ -65,6 +65,8 @@ class ProfileView extends Component<Props> {
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
+    this.openQrView = this.openQrView.bind(this);
+    this.openQrScannerView = this.openQrScannerView.bind(this);
   }
 
   private async onLogoutPress() {
@@ -164,6 +166,11 @@ class ProfileView extends Component<Props> {
 
     return (
       <View style={styles.contentContainer} >
+        <Image style={styles.image} source={require('../img/profile.jpg')} />
+        <ReactNativeButton title="View QR Code"
+              onPress={this.openQrView} />
+        <ReactNativeButton title="Scan QR Code"
+                           onPress={this.openQrScannerView} />
         <Text style={styles.sectionHeader}>Personal Info</Text>
         <View style={styles.sectionContainer}>
           {profileItems}
@@ -210,6 +217,14 @@ class ProfileView extends Component<Props> {
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
+  }
+
+  private async openQrView() {
+    this.props.navigation.navigate('QrCode');
+  }
+
+  private async openQrScannerView() {
+    this.props.navigation.navigate('QrScanner');
   }
 }
 
