@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Platform, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -59,6 +59,7 @@ const createTabView = () => TabNavigator({
     screen: ProfileView,
   },
 }, {
+  tabBarPosition: 'bottom',
   navigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ focused, tintColor }) => {
       const { routeName } = navigation.state;
@@ -67,8 +68,8 @@ const createTabView = () => TabNavigator({
         iconName = 'home';
       } else if (routeName === 'Profile') {
         iconName = 'person';
-      } else if (routeName === 'Request To Match') {
-        iconName = 'people';
+      } else if (routeName === 'Requests') {
+        iconName = 'supervisor-account';
       }
 
       // You can return any component that you like here! We usually use an
@@ -77,11 +78,13 @@ const createTabView = () => TabNavigator({
     },
   }),
   tabBarOptions: {
+    showLabel: Platform.IOS ? true: false,
+    showIcon: true,
     activeTintColor: Colors.HIVE_MAIN_BG,
     inactiveTintColor: 'gray',
     style: {
       backgroundColor: 'white',
-    }
+    },
   },
 });
 
