@@ -10,7 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { BarCodeScanner, Permissions } from 'expo';
+import {BarCodeScanner, Permissions} from 'expo';
 import { ToastActionsCreators } from 'react-native-redux-toast';
 import { errorToast, infoToast } from '../redux/toast';
 import {NavigationScreenProp, NavigationStackAction} from "react-navigation";
@@ -81,13 +81,14 @@ class QrScannerView extends Component<Props> {
             ? <Text style={{ color: '#fff' }}>
               Camera permission is not granted
             </Text>
-            : <BarCodeScanner
-              onBarCodeRead={this._handleBarCodeRead}
-              style={{
+            : React.createElement('BarCodeScanner', {
+              onBarCodeRead: this._handleBarCodeRead,
+              style: {
                 height: Dimensions.get('window').height,
                 width: Dimensions.get('window').width,
-              }}
-            />}
+              },
+            })
+        }
 
         <View style={styles.bottomBar}>
           <Text numberOfLines={1} style={styles.infoText}>
