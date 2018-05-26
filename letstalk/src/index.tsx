@@ -72,6 +72,7 @@ const createTabView = () => TabNavigator({
         iconName = 'person';
       } else if (routeName === 'Requests') {
         iconName = 'supervisor-account';
+
       }
 
       return <MaterialIcons name={iconName} size={24} color={tintColor} />;

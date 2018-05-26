@@ -58,11 +58,16 @@ import {
   gradYearOptions,
   ValueLabel,
 } from '../models/cohort';
+import {
+  MENTORSHIP_PREFERENCE_MENTOR,
+  MENTORSHIP_PREFERENCE_MENTEE,
+} from '../models/user';
 
 interface CohortFormData {
   programId: string,
   sequenceId: string;
   gradYear: number;
+  mentorshipPreference: number;
 }
 
 interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
@@ -122,6 +127,15 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         validate={required}
       >
         {gradYearItems}
+      </Field>
+      <Field
+        label="Mentorship Preference"
+        name="mentorshipPreference"
+        component={ModalPicker}
+        validate={required}
+      >
+        <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
+        <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
       </Field>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
@@ -240,11 +254,19 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
-    const { programId, sequenceId, gradYear } = values;
+    const { programId, sequenceId, gradYear, mentorshipPreference } = values;
     const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
     try {
-      const onboardingStatus = await profileService.updateCohort({ cohortId });
+      const onboardingStatus = await profileService.updateCohort({
+        cohortId,
+        mentorshipPreference,
+      });
       this.props.setOnboardingStatusAction(onboardingStatus);
+      await this.props.fetchBootstrap();
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+      }));
     } catch(e) {
       throw new SubmissionError({_error: e.message});
     }
@@ -263,7 +285,7 @@ class OnboardingView extends Component<Props> {
     const { state } = this.props.onboardingStatus;
     switch (state) {
       case ONBOARDING_COHORT:
-        // TODO: Gender specific emoji
+        // TODO: Update copy here
         return (
           <ScrollView>
             <Header>Your Cohort</Header>
@@ -275,6 +297,7 @@ class OnboardingView extends Component<Props> {
           </ScrollView>
         );
       case ONBOARDING_VECTOR_ME:
+        // NOTE: This will not show up now
         const onSubmitMine = async (values: PersonalityFormData) => {
           await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_ME, values);
         };
@@ -290,13 +313,14 @@ class OnboardingView extends Component<Props> {
           </ScrollView>
         );
       case ONBOARDING_VECTOR_YOU:
+        // NOTE: This will not show up now
         const onSubmitYour = async (values: PersonalityFormData) => {
           await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_YOU, values);
           // Reload bootstrap data after updating
           await this.props.fetchBootstrap();
           this.props.navigation.dispatch(NavigationActions.reset({
             index: 0,
-            actions: [NavigationActions.navigate({ routeName: 'Home' })]
+            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
           }));
         };
         return (

@@ -3,7 +3,6 @@ package onboarding
 import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/query"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -45,11 +44,6 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 
 	userId := c.SessionData.UserId
-	userCohort, err := query.GetUserCohortMappingById(c.Db, userId)
-
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		return errs.NewDbError(err)
-	}
 
 	var (
 		dbErr          error
@@ -58,27 +52,33 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 
 	tx := c.Db.Begin()
 
-	// if the user doesnt have a cohort
-	if userCohort == nil {
-		rlog.Debug("No cohort found for user. Adding cohort.")
-		// insert new data from the request
-		userCohort = &data.UserCohort{
-			UserId:   userId,
-			CohortId: newCohortId,
-		}
+	rlog.Debug("No cohort found for user. Adding cohort.")
+	// insert new data from the request
+	var (
+		userCohort     data.UserCohort
+		userPreference data.UserPreference
+	)
 
-		dbErr = tx.Create(&userCohort).Error
-	} else {
-		rlog.Debug("Updating cohort information for user.")
-		userCohort.CohortId = newCohortId
-		// update the cohort data from the request
-		dbErr = c.Db.Save(&userCohort).Error
-	}
+	dbErr = tx.Where(&data.UserCohort{UserId: userId}).Assign(
+		&data.UserCohort{CohortId: newCohortId},
+	).FirstOrCreate(&userCohort).Error
 
 	if dbErr != nil {
 		tx.Rollback()
 		return errs.NewInternalError(dbErr.Error())
 	}
+
+	dbErr = tx.Where(
+		&data.UserPreference{UserId: userId},
+	).Assign(
+		&data.UserPreference{MentorshipPreference: &newCohortRequest.MentorshipPreference},
+	).FirstOrCreate(&userPreference).Error
+
+	if dbErr != nil {
+		tx.Rollback()
+		return errs.NewInternalError(dbErr.Error())
+	}
+
 	successMessage = "Successfully added cohort to user."
 	tx.Commit()
 

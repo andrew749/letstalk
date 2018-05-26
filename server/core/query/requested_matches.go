@@ -1,6 +1,7 @@
 package query
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"letstalk/server/notifications"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 type ResolveType int
@@ -50,7 +52,9 @@ func getPotentialMatchUserIds(
 		}
 		var userCredentials []data.UserCredential
 		err = db.Where(
-			&data.UserCredential{CredentialId: userRequest.CredentialId},
+			"credential_id = ? and user_id <> ?",
+			credentialId,
+			userId,
 		).Find(&userCredentials).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -59,7 +63,7 @@ func getPotentialMatchUserIds(
 		for i, userCredential := range userCredentials {
 			userCredentialIds[i] = userWithCredentialId{
 				userCredential.UserId,
-				uint(userCredential.ID),
+				uint(userCredential.CredentialId),
 			}
 		}
 		return userCredentialIds, nil
@@ -73,7 +77,9 @@ func getPotentialMatchUserIds(
 		}
 		var userRequests []data.UserCredentialRequest
 		err = db.Where(
-			&data.UserCredentialRequest{CredentialId: userCredential.CredentialId},
+			"credential_id = ? and user_id <> ?",
+			credentialId,
+			userId,
 		).Find(&userRequests).Error
 		if err != nil {
 			return nil, errs.NewDbError(err)
@@ -82,7 +88,7 @@ func getPotentialMatchUserIds(
 		for i, userRequest := range userRequests {
 			userCredentialIds[i] = userWithCredentialId{
 				userRequest.UserId,
-				uint(userRequest.ID),
+				uint(userRequest.CredentialId),
 			}
 		}
 		return userCredentialIds, nil
@@ -113,7 +119,6 @@ func sendNotifications(
 	c *ctx.Context,
 	askerId int,
 	answererId int,
-	credentialRequestId uint,
 	credentialId uint,
 	name string,
 ) errs.Error {
@@ -129,7 +134,7 @@ func sendNotifications(
 		notifications.RequestToMatchNotification(
 			token,
 			notifications.REQUEST_TO_MATCH_SIDE_ASKER,
-			credentialRequestId,
+			credentialId,
 			name,
 		)
 	}
@@ -142,6 +147,19 @@ func sendNotifications(
 		)
 	}
 	return nil
+}
+
+func ResolveRequestToMatchWithDelay(
+	c *ctx.Context,
+	resolveType ResolveType,
+	credentialId uint,
+	delayMs int,
+) {
+	<-time.After(time.Duration(delayMs) * time.Millisecond)
+	err := ResolveRequestToMatch(c, resolveType, credentialId)
+	if err != nil {
+		rlog.Error(err)
+	}
 }
 
 // TODO: This should run in a job
@@ -166,26 +184,26 @@ func ResolveRequestToMatch(
 		Shuffle(userCredentialIds)
 
 		var (
-			askerId             int
-			answererId          int
-			credentialRequestId uint // We only delete the credential request, not the credential
+			askerId    int
+			answererId int
 		)
 		if resolveType == RESOLVE_TYPE_ASKER {
 			askerId = userId
 			answererId = userCredentialIds[0].userId
-			credentialRequestId = credentialId
 		} else if resolveType == RESOLVE_TYPE_ANSWERER {
 			askerId = userCredentialIds[0].userId
 			answererId = userId
-			credentialRequestId = userCredentialIds[0].credentialId
 		} else {
 			return errs.NewClientError("invalid resolveType %d", resolveType)
 		}
 
 		tx := c.Db.Begin()
 
-		dbErr := tx.Where("credential_id = ? and user_id = ?", credentialRequestId, askerId).Delete(
-			data.UserCredentialRequest{}).Error
+		rlog.Info(fmt.Sprintf("Cred: %d, User: %d", credentialId, askerId))
+
+		dbErr := tx.Where("credential_id = ? and user_id = ?", credentialId, askerId).Delete(
+			data.UserCredentialRequest{},
+		).Error
 		if dbErr != nil {
 			tx.Rollback()
 			return errs.NewDbError(dbErr)
@@ -208,7 +226,6 @@ func ResolveRequestToMatch(
 			c,
 			askerId,
 			answererId,
-			credentialRequestId,
 			credentialId,
 			credential.Name,
 		)

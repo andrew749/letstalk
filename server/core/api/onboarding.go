@@ -15,9 +15,10 @@ const (
 )
 
 type OnboardingInfo struct {
-	State      OnboardingState `json:"state" binding:"required"`
-	UserType   UserType        `json:"userType" binding:"required"`
-	UserCohort *data.Cohort    `json:"userCohort"`
+	State          OnboardingState      `json:"state" binding:"required"`
+	UserType       UserType             `json:"userType" binding:"required"`
+	UserCohort     *data.Cohort         `json:"userCohort"`
+	UserPreference *data.UserPreference `json:"userPreference"`
 }
 
 type OnboardingStatus struct {
@@ -26,7 +27,8 @@ type OnboardingStatus struct {
 }
 
 type UpdateCohortRequest struct {
-	CohortId int `json:"cohortId" binding:"required"`
+	CohortId             int `json:"cohortId" binding:"required"`
+	MentorshipPreference int `json:"mentorshipPreference" binding:"required"`
 }
 
 type OnboardingUpdateResponse struct {

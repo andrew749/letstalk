@@ -7,6 +7,8 @@ import (
 	"letstalk/server/core/query"
 )
 
+const RESOLVE_WAIT_TIME = 5000 // ms
+
 func GetAllCredentialsController(c *ctx.Context) errs.Error {
 	credentials, err := query.GetAllCredentials(c.Db)
 	if err != nil {
@@ -31,9 +33,12 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	if err := query.ResolveRequestToMatch(c, query.RESOLVE_TYPE_ASKER, req.CredentialId); err != nil {
-		return err
-	}
+	go query.ResolveRequestToMatchWithDelay(
+		c,
+		query.RESOLVE_TYPE_ASKER,
+		req.CredentialId,
+		RESOLVE_WAIT_TIME,
+	)
 
 	return nil
 }
@@ -78,9 +83,12 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	if err := query.ResolveRequestToMatch(c, query.RESOLVE_TYPE_ANSWERER, *credentialId); err != nil {
-		return err
-	}
+	go query.ResolveRequestToMatchWithDelay(
+		c,
+		query.RESOLVE_TYPE_ANSWERER,
+		*credentialId,
+		RESOLVE_WAIT_TIME,
+	)
 
 	c.Result = api.AddUserCredentialResponse{CredentialId: *credentialId}
 	return nil
