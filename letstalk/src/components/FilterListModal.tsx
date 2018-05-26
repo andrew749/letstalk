@@ -16,6 +16,10 @@ import {
   View,
 } from 'react-native';
 
+import {
+  SearchBar,
+} from 'react-native-elements';
+
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export interface FilterableElement {

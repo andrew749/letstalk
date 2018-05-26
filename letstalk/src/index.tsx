@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Platform, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -28,6 +28,8 @@ import Colors from './services/colors';
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
+// turn off annoying warnings
+console.disableYellowBox = true;
 
 interface TabBarIcon {
   tintColor: (string | null),
@@ -57,6 +59,7 @@ const createTabView = () => TabNavigator({
     screen: ProfileView,
   },
 }, {
+  tabBarPosition: 'bottom',
   navigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ focused, tintColor }) => {
       const { routeName } = navigation.state;
@@ -66,18 +69,21 @@ const createTabView = () => TabNavigator({
       } else if (routeName === 'Profile') {
         iconName = 'person';
       } else if (routeName === 'Requests') {
-        iconName = 'people';
+        iconName = 'supervisor-account';
+
       }
 
       return <MaterialIcons name={iconName} size={24} color={tintColor} />;
     },
   }),
   tabBarOptions: {
+    showLabel: Platform.OS == 'ios' ? true: false,
+    showIcon: true,
     activeTintColor: Colors.HIVE_MAIN_BG,
     inactiveTintColor: 'gray',
     style: {
       backgroundColor: 'white',
-    }
+    },
   },
 });
 
@@ -134,7 +140,6 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-
     const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>
