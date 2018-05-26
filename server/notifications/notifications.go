@@ -74,8 +74,24 @@ func SendNotification(notification Notification) error {
 	return nil
 }
 
-func CreateAndSendNotification(deviceToken string, message string, title string) error {
-	data := map[string]string{"message": message, "title": title}
+type NotifType string
+
+const (
+	NOTIF_TYPE_REQUEST_TO_MATCH NotifType = "REQUEST_TO_MATCH"
+)
+
+func CreateAndSendNotificationWithData(
+	deviceToken string,
+	message string,
+	title string,
+	tpe NotifType,
+	extraData map[string]interface{},
+) error {
+	data := map[string]interface{}{"message": message, "title": title, "type": string(tpe)}
+	for key, value := range extraData {
+		data[key] = value
+	}
+
 	notification := Notification{
 		To:    deviceToken,
 		Title: title,
@@ -84,4 +100,48 @@ func CreateAndSendNotification(deviceToken string, message string, title string)
 	}
 
 	return SendNotification(notification)
+}
+
+func CreateAndSendNotification(
+	deviceToken string,
+	message string,
+	title string,
+	tpe NotifType,
+) error {
+	return CreateAndSendNotificationWithData(
+		deviceToken,
+		message,
+		title,
+		tpe,
+		make(map[string]interface{}),
+	)
+}
+
+// SPECIFIC NOTIFICATION MESSAGES
+
+type RequestToMatchSide string
+
+const (
+	REQUEST_TO_MATCH_SIDE_ASKER    RequestToMatchSide = "ASKER"
+	REQUEST_TO_MATCH_SIDE_ANSWERER RequestToMatchSide = "ANSWERER"
+)
+
+func RequestToMatchNotification(
+	deviceToken string,
+	side RequestToMatchSide,
+	requestId uint,
+	name string,
+) error {
+	var (
+		extraData map[string]interface{} = map[string]interface{}{"side": side, "requestId": requestId}
+		title     string                 = "You got a match!"
+		message   string                 = fmt.Sprintf("You got matched for \"%s\"", name)
+	)
+	return CreateAndSendNotificationWithData(
+		deviceToken,
+		message,
+		title,
+		NOTIF_TYPE_REQUEST_TO_MATCH,
+		extraData,
+	)
 }
