@@ -18,19 +18,20 @@ const (
 )
 
 type BootstrapUserRelationshipDataModel struct {
-	User        int      `json:"userId" binding:"required"`
+	UserId      int      `json:"userId" binding:"required"`
 	UserType    UserType `json:"userType" binding:"required"`
 	FirstName   string   `json:"firstName" binding:"required"`
 	LastName    string   `json:"lastName" binding:"required"`
 	Email       string   `json:"email" binding:"required"`
 	FbId        *string  `json:"fbId"`
 	PhoneNumber *string  `json:"phoneNumber"`
+	Cohort      *Cohort  `json:"cohort"`
+	Description *string  `json:"description"`
 }
 
 type BootstrapResponse struct {
 	State            BootstrapState                        `json:"state" binding:"required"`
 	Relationships    []*BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort           *data.Cohort                          `json:"cohort" binding:"required"`
-	Me               *data.User                            `json:"me" binding:"required"`
 	OnboardingStatus *OnboardingStatus                     `json:"onboardingStatus" binding:"required"`
 }

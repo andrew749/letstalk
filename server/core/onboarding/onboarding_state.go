@@ -21,7 +21,7 @@ func GetOnboardingInfo(db *gorm.DB, userId int) (*api.OnboardingInfo, errs.Error
 	onboardingInfo := &api.OnboardingInfo{
 		api.ONBOARDING_DONE,
 		api.USER_TYPE_UNKNOWN,
-		&user.Cohort.Cohort,
+		user.Cohort.Cohort,
 		user.Preference,
 	}
 	return onboardingInfo, nil

@@ -10,49 +10,60 @@ import (
 )
 
 func convertUserToRelationshipDataModel(
-	user *data.User,
-	isMentor bool,
+	user data.User,
+	description *string,
+	userType api.UserType,
 ) *api.BootstrapUserRelationshipDataModel {
 	var (
-		userType    api.UserType
 		fbId        *string
 		phoneNumber *string
+		cohort      *api.Cohort
 	)
 	if user.ExternalAuthData != nil {
 		fbId = user.ExternalAuthData.FbUserId
 		phoneNumber = user.ExternalAuthData.PhoneNumber
 	}
-	if isMentor == true {
-		userType = api.USER_TYPE_MENTOR
-	} else {
-		userType = api.USER_TYPE_MENTEE
+
+	if user.Cohort != nil && user.Cohort.Cohort != nil {
+		cohort = &api.Cohort{
+			CohortId:   user.Cohort.Cohort.CohortId,
+			ProgramId:  user.Cohort.Cohort.ProgramId,
+			SequenceId: user.Cohort.Cohort.SequenceId,
+			GradYear:   user.Cohort.Cohort.GradYear,
+		}
 	}
+
 	return &api.BootstrapUserRelationshipDataModel{
-		User:        user.UserId,
+		UserId:      user.UserId,
 		UserType:    userType,
 		FirstName:   user.FirstName,
 		LastName:    user.LastName,
 		Email:       user.Email,
 		FbId:        fbId,
 		PhoneNumber: phoneNumber,
+		Description: description,
+		Cohort:      cohort,
 	}
+}
+
+func getDescriptionForRequestToMatch(requestMatching data.RequestMatching) *string {
+	if requestMatching.Credential != nil {
+		return &requestMatching.Credential.Name
+	}
+	return nil
 }
 
 /**
  * Returns what the current status of a user is
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
-	user, err := query.GetUserById(c.Db, c.SessionData.UserId)
-	if err != nil {
-		return errs.NewInternalError("Unable to get user data.")
-	}
-	// since this method is authenticated the account needs to exist.
-	var response = api.BootstrapResponse{
-		State: api.ACCOUNT_CREATED,
-		Me:    user,
-	}
+	var (
+		err      error
+		response = api.BootstrapResponse{State: api.ACCOUNT_CREATED}
+		userId   = c.SessionData.UserId
+	)
 
-	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, c.SessionData.UserId)
+	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, userId)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
@@ -71,19 +82,19 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	// Fetch mentors and mentees.
-	mentors, err := query.GetMentorsByMenteeId(c.Db, user.UserId) // Matchings where user is the mentee.
+	mentors, err := query.GetMentorsByMenteeId(c.Db, userId) // Matchings where user is the mentee.
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	mentees, err := query.GetMenteesByMentorId(c.Db, user.UserId) // Matchings where user is the mentor.
+	mentees, err := query.GetMenteesByMentorId(c.Db, userId) // Matchings where user is the mentor.
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	askers, err := query.GetAskersByAnswererId(c.Db, user.UserId) // Request matchings where user is answerer.
+	askers, err := query.GetAskersByAnswererId(c.Db, userId) // Request matchings where user is answerer.
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	answerers, err := query.GetAnswerersByAskerId(c.Db, user.UserId) // Request matchings where user is asker.
+	answerers, err := query.GetAnswerersByAskerId(c.Db, userId) // Request matchings where user is asker.
 	if err != nil {
 		return errs.NewDbError(err)
 	}
@@ -97,25 +108,35 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	for _, mentor := range mentors {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(mentor.MentorUser, true),
+			convertUserToRelationshipDataModel(*mentor.MentorUser, nil, api.USER_TYPE_MENTOR),
 		)
 	}
 	for _, mentee := range mentees {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(mentee.MenteeUser, false),
+			convertUserToRelationshipDataModel(*mentee.MenteeUser, nil, api.USER_TYPE_MENTEE),
 		)
 	}
 	for _, asker := range askers {
+		description := getDescriptionForRequestToMatch(asker)
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(&asker.AskerUser, true),
+			convertUserToRelationshipDataModel(
+				*asker.AskerUser,
+				description,
+				api.USER_TYPE_ASKER,
+			),
 		)
 	}
 	for _, answerer := range answerers {
+		description := getDescriptionForRequestToMatch(answerer)
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(&answerer.AnswererUser, false),
+			convertUserToRelationshipDataModel(
+				*answerer.AnswererUser,
+				description,
+				api.USER_TYPE_ANSWERER,
+			),
 		)
 	}
 	if len(relationships) > 0 {

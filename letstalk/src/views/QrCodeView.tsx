@@ -35,7 +35,7 @@ class QrCodeView extends Component<Props> {
   }
 
   render() {
-    const { secret } = this.props.bootstrap && this.props.bootstrap.me;
+    const secret = 'yolo';
     return (
       <View>
         {secret && <QRCode

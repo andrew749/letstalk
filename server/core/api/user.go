@@ -29,13 +29,15 @@ const (
 	MENTORSHIP_PREFERENCE_MENTEE
 )
 
-type UserType string
+type UserType int
 
 // the roles a user can take in a relationship
 const (
-	USER_TYPE_MENTOR  UserType = "user_type_mentor"
-	USER_TYPE_MENTEE  UserType = "user_type_mentee"
-	USER_TYPE_UNKNOWN UserType = "user_type_unknown"
+	USER_TYPE_MENTOR UserType = iota + 1
+	USER_TYPE_MENTEE
+	USER_TYPE_ASKER
+	USER_TYPE_ANSWERER
+	USER_TYPE_UNKNOWN
 )
 
 type UserVectorPreferenceType int

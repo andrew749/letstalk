@@ -242,7 +242,9 @@ func GetAnswerersByAskerId(db *gorm.DB, askerId int) ([]data.RequestMatching, er
 	matchings := make([]data.RequestMatching, 0)
 	if err := db.Where(
 		&data.RequestMatching{Asker: askerId},
-	).Preload("AnswererUser").Preload("AnswererUser.ExternalAuthData").Find(&matchings).Error; err != nil {
+	).Preload("AnswererUser").Preload("AnswererUser.ExternalAuthData").Preload(
+		"Credential",
+	).Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil
@@ -252,7 +254,9 @@ func GetAskersByAnswererId(db *gorm.DB, answererId int) ([]data.RequestMatching,
 	matchings := make([]data.RequestMatching, 0)
 	if err := db.Where(
 		&data.RequestMatching{Answerer: answererId},
-	).Preload("AskerUser").Preload("AskerUser.ExternalAuthData").Find(&matchings).Error; err != nil {
+	).Preload("AskerUser").Preload("AskerUser.ExternalAuthData").Preload(
+		"Credential",
+	).Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil
