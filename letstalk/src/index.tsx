@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Platform, Text, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,25 +7,27 @@ import { Notifications } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import { StackNavigator, TabNavigator } from 'react-navigation';
-import Notification from 'react-native-in-app-notification';
+import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
+import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
-import AchievementsView from './views/AchievementsView';
-import CredentialEditView from './views/CredentialEditView';
-import EventsView from './views/EventsView';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
 import ProfileView from './views/ProfileView';
+import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
+import NotificationService, { Notification } from './services/notification-service';
 
 import Colors from './services/colors';
 import QrCodeView from "./views/QrCodeView";
 import QrScannerView from "./views/QrScannerView";
+
+YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
 Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
 
@@ -46,6 +48,44 @@ const styles = StyleSheet.create({
   },
 });
 
+const createTabView = () => TabNavigator({
+  'Home': {
+    screen: HomeView,
+  },
+  'Requests': {
+    screen: RequestToMatchView,
+  },
+  'Profile': {
+    screen: ProfileView,
+  },
+}, {
+  tabBarPosition: 'bottom',
+  navigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ focused, tintColor }) => {
+      const { routeName } = navigation.state;
+      let iconName;
+      if (routeName === 'Home') {
+        iconName = 'home';
+      } else if (routeName === 'Profile') {
+        iconName = 'person';
+      } else if (routeName === 'Requests') {
+        iconName = 'supervisor-account';
+      }
+
+      return <MaterialIcons name={iconName} size={24} color={tintColor} />;
+    },
+  }),
+  tabBarOptions: {
+    showLabel: Platform.OS == 'ios' ? true: false,
+    showIcon: true,
+    activeTintColor: Colors.HIVE_MAIN_BG,
+    inactiveTintColor: 'gray',
+    style: {
+      backgroundColor: 'white',
+    },
+  },
+});
+
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Login: {
     screen: LoginView,
@@ -53,17 +93,11 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Signup: {
     screen: SignupView,
   },
-  Home: {
-    screen: HomeView,
+  Tabbed: {
+    screen: createTabView(),
   },
-  Profile: {
-    screen: ProfileView,
-  },
-  RequestToMatch: {
-    screen: RequestToMatchView,
-  },
-  CredentialEdit: {
-    screen: CredentialEditView,
+  ProfileEdit: {
+    screen: ProfileEditView,
   },
   Onboarding: {
     screen: OnboardingView,
@@ -75,7 +109,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: QrScannerView,
   },
 }, {
-  initialRouteName: loggedIn ? "Home" : "Login",
+  initialRouteName: loggedIn ? "Tabbed" : "Login",
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
@@ -87,7 +121,7 @@ interface AppState {
 type Props = {};
 
 class App extends React.Component<Props, AppState> {
-  private notification: any;
+  private notificationService: NotificationService;
 
   constructor(props: Props) {
     super(props);
@@ -96,13 +130,11 @@ class App extends React.Component<Props, AppState> {
     };
 
     this.handleNotification = this.handleNotification.bind(this);
+    this.notificationService = null;
   }
 
-  handleNotification(notification: any) {
-    this.notification.show({
-      title: notification.data.title,
-      message: notification.data.message,
-    });
+  async handleNotification(notification: any) {
+    await this.notificationService.handleNotification(notification as Notification);
   }
 
   async componentWillMount() {
@@ -113,14 +145,15 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-    if (loggedIn === null) return <View><Text>Splash</Text></View>;
 
     const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>
         <View style={{ flex: 1 }}>
           <AppNavigation />
-          <Notification ref={(ref: any) => { this.notification = ref; }} />
+          <NotificationComponent ref={(ref: any) => {
+            this.notificationService = new NotificationService(ref, store);
+          }} />
           <Toast messageStyle={styles.toastMessageStyle} />
         </View>
       </Provider>

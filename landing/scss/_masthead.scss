@@ -2,6 +2,10 @@
   position: relative;
   overflow: hidden;
   padding-bottom: 3rem;
+  padding-top: 8rem;
+  .landing {
+    display: flex;
+  }
   .masthead-bg {
     position: absolute;
     top: 0;
@@ -19,12 +23,13 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
+    margin: 30px;
 
     h1 {
-      font-size: 2.0rem;
+      font-size: 1.6rem;
     }
     p {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       strong {
         font-weight: 700;
       }
@@ -35,6 +40,8 @@
 .masthead-form {
   display: flex;
   flex-direction: column;
+  margin-top: 30px;
+  text-align: center;
   .input-group-newsletter {
     background-color: fade-out($gray-800, 0.2);
     border-radius: 7px;
@@ -56,14 +63,29 @@
       letter-spacing: 1px;
       padding: 1rem;
     }
+    h1 {
+      font-size: 1.6rem;
+    }
+    p {
+      font-size: 1.2rem;
+      strong {
+        font-weight: 700;
+      }
+    }
   }
 }
 
-@media (min-width: 768px) {
+#messageContainer {
+  margin-top: 10px;
+}
+
+@media (min-width: 1000px) {
   .masthead {
     height: 100%;
     min-height: 0;
     padding-bottom: 0;
+    align-items: center;
+    margin: 0px;
     .masthead-bg {
       min-height: 0;
       transform: skewX(-8deg);
@@ -72,6 +94,7 @@
     .masthead-content {
       padding-left: 3rem;
       padding-right: 10rem;
+      margin: 0;
       h1 {
         font-size: 2.5rem;
       }
@@ -83,5 +106,6 @@
 
   .masthead-form {
     width: 30rem;
+    text-align: left;
   }
 }

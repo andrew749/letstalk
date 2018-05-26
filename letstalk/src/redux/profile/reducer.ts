@@ -9,22 +9,21 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credentials } from '../../models/credential';
+import { ProfileData } from '../../models/profile';
 import {
   fetch,
   ActionTypes,
   TypeKeys,
 } from './actions';
-import requestToMatchService from '../../services/request-to-match-service';
+import profileService from '../../services/profile-service';
 
 export interface State {
-  readonly credentials: Credentials;
+  readonly profile?: ProfileData;
   readonly fetchState: FetchState;
 }
 
 const initialState: State = {
   fetchState: initialFetchState,
-  credentials: Immutable.List(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -33,7 +32,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       return {
         ...state,
         fetchState: fetchStateReducer(action),
-        credentials: getDataOrCur(action, state.credentials),
+        profile: getDataOrCur(action, state.profile),
       };
     default:
       // Ensure exhaustiveness of select
@@ -42,12 +41,12 @@ export function reducer(state: State = initialState, action: ActionTypes): State
   }
 };
 
-const fetchCredentialOptions: ActionCreator<
+const fetchProfile: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = () => {
   return async (dispatch: Dispatch<State>) => {
     await dispatch(fetch.start());
     try {
-      const data = await requestToMatchService.getAllCredentials();
+      const data = await profileService.me();
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e.message));
@@ -55,4 +54,4 @@ const fetchCredentialOptions: ActionCreator<
   };
 }
 
-export { fetchCredentialOptions };
+export { fetchProfile };

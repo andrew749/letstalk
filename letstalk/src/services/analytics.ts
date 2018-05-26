@@ -28,3 +28,5 @@ export class AnalyticsHelper {
       .catch(e => console.log(e.message));
   }
 }
+
+export default AnalyticsHelper;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Avatar, AvatarProps, FormInput, FormInputProps } from 'react-native-elements';
 import { ImageURISource, StyleSheet } from 'react-native';
 import photoService, {PhotoResult} from '../services/photo_service';
+import {profileService, RemoteProfileService} from '../services/profile-service';
 import { WrappedFieldProps } from 'redux-form';
 import {
     FormProps
@@ -9,18 +10,6 @@ import {
 
 interface ProfileAvatarProps extends AvatarProps {
   userId?: string,
-  overrideUri?: string,
-  editable: boolean,
-}
-
-type Props = WrappedFieldProps & ProfileAvatarProps;
-
-function getProfilePicUrl(userId: string): string {
-  return `https://s3.amazonaws.com/hive-user-profile-pictures/{userId}`;
-}
-
-type State = {
-  uri: string
 }
 
 /**
@@ -29,30 +18,18 @@ type State = {
  *
  * If there isn't a profile pic then fallback
  */
-class ProfileAvatar extends React.Component<Props, State> {
+class ProfileAvatar extends React.Component<ProfileAvatarProps> {
   render() {
-    let avatarSource = undefined;
+    let avatarSource;
     let props = this.props;
-    let overrideUri = props.overrideUri;
-    if (props.input.value) {
-      overrideUri = (props.input.value as PhotoResult).uri;
-    }
-    let onChange = this.props.input.onChange;
 
-    if (overrideUri) {
-      const profilePicUrl = overrideUri;
-      avatarSource = {uri: profilePicUrl};
-    } else if (props.userId) {
-      const profilePicUrl = getProfilePicUrl(props.userId);
-      avatarSource = {uri: profilePicUrl};
+    if (props.source) {
+      avatarSource = props.source;
     }
 
-    let pressAction = () => {};
-    if (props.editable) {
-      pressAction = async() => {
-        let photoResult = await photoService.getPhotoFromPicker();
-        onChange(photoResult);
-      };
+    if (props.userId) {
+      const profilePicUrl = RemoteProfileService.getProfilePicUrl(props.userId);
+      avatarSource = {uri: profilePicUrl};
     }
 
     return (
@@ -63,9 +40,38 @@ class ProfileAvatar extends React.Component<Props, State> {
         // default
         icon={{name: 'person'}}
         source={ avatarSource }
-        onPress={ pressAction }
         activeOpacity={0.7}
       />
+    );
+  }
+}
+
+type FormElementProps = WrappedFieldProps & ProfileAvatarProps;
+export class ProfileAvatarEditableFormElement extends React.Component<FormElementProps> {
+  render() {
+    let props = this.props;
+    let avatarSource = undefined;
+
+    // handle an on click
+    let onChange = this.props.input.onChange;
+
+    let pressAction = async() => {
+        let photoResult = await photoService.getPhotoFromPicker();
+        onChange(photoResult);
+      };
+
+    // the user changed the form contents to an image
+    if (props.input.value) {
+      let uri = (props.input.value as PhotoResult).uri;
+      avatarSource = {uri: uri};
+    }
+
+    return (
+        <ProfileAvatar
+          {...props}
+          onPress={ pressAction }
+          source={ avatarSource }
+        />
     );
   }
 }

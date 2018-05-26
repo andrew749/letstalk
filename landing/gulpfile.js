@@ -50,12 +50,6 @@ gulp.task('vendor', function() {
     ])
     .pipe(gulp.dest('./vendor/jquery-easing'))
 
-  // Vide.js
-  gulp.src([
-      './node_modules/vide/dist/*'
-    ])
-    .pipe(gulp.dest('./vendor/vide'))
-
 });
 
 // Compile SCSS

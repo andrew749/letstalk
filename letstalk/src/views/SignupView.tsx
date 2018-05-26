@@ -1,3 +1,4 @@
+import {FileSystem} from 'expo';
 import React, { Component } from 'react';
 import { Picker, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native';
 import {
@@ -7,8 +8,6 @@ import {
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
-import Colors from '../services/colors';
-import {AnalyticsHelper} from '../services/analytics';
 
 import {
   ActionButton,
@@ -18,11 +17,12 @@ import {
   LabeledFormInput,
   ModalPicker,
   ModalDatePicker,
-  ProfileAvatar,
+  ProfileAvatarEditableFormElement,
 } from '../components';
 import profileService, {SignupRequest} from '../services/profile-service';
 import photoService, {PhotoResult} from '../services/photo_service';
-import {FileSystem} from 'expo';
+import Colors from '../services/colors';
+import {AnalyticsHelper} from '../services/analytics';
 
 interface SignupFormData {
   firstName: string;
@@ -30,8 +30,8 @@ interface SignupFormData {
   email: string;
   phoneNumber: string;
   password: string;
-  gender: string;
-  birthday: Date;
+  gender: number;
+  birthdate: Date;
   profilePic: PhotoResult;
 }
 
@@ -56,9 +56,8 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
     <ScrollView>
       <Field
         name="profilePic"
-        component={ProfileAvatar}
+        component={ProfileAvatarEditableFormElement}
         containerStyle={styles.profilePicContainerStyle}
-        editable={true}
       />
       <Field
         label="First name"
@@ -105,16 +104,16 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       >
         <Picker.Item
           label="Male"
-          value="male"
+          value={2}
         />
         <Picker.Item
           label="Female"
-          value="female"
+          value={1}
         />
       </Field>
       <Field
         label="Birthday"
-        name="birthday"
+        name="birthdate"
         mode={'date' as 'date'}
         defaultDate={new Date('1996-11-07T00:00:00.000Z')}
         component={ModalDatePicker}
@@ -173,7 +172,7 @@ export default class SignupView extends Component<Props> {
           "password": values.password,
           "profilePic": values.profilePic.data,
         },
-        birthday: Math.round(values.birthday.getTime() / 1000),
+        birthdate: Math.round(values.birthdate.getTime() / 1000),
       });
       // TODO: have a prompt saying successfully signed up
       this.props.navigation.dispatch(NavigationActions.reset({

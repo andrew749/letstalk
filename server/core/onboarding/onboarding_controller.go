@@ -1,9 +1,9 @@
 package onboarding
 
 import (
-	"letstalk/server/core/query"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"

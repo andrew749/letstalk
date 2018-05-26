@@ -2,7 +2,7 @@ import ActionButton from './ActionButton';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
 import Emoji from './Emoji';
-import FilterListModal from './FilterListModal';
+import FilterListModal, { FilterableElement } from './FilterListModal';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
 import InfoText from './InfoText';
@@ -11,13 +11,14 @@ import Loading from './Loading';
 import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
 import Rating from './Rating';
-import ProfileAvatar from './ProfileAvatar';
+import ProfileAvatar, {ProfileAvatarEditableFormElement} from './ProfileAvatar';
 
 export {
   ActionButton,
   ButtonPicker,
   Card,
   Emoji,
+  FilterableElement,
   FilterListModal,
   FormP,
   FormProps,
@@ -29,4 +30,5 @@ export {
   ModalPicker,
   Rating,
   ProfileAvatar,
+  ProfileAvatarEditableFormElement,
 };

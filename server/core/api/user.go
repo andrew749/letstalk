@@ -3,22 +3,22 @@ package api
 /**
  * Holds all the data that we currently associate with a user.
  */
-type User struct {
+type UserPersonalInfo struct {
+	UserId    int    `json:"userId"`
 	FirstName string `json:"firstName" binding:"required"`
 	LastName  string `json:"lastName" binding:"required"`
+	Gender    int    `json:"gender" binding:"required"`
+	Birthdate int64  `json:"birthdate" binding:"required"` // unix time
 
-	// Contact information
+	// TODO: Does this belong here?
+	Secret     string  `json:"secret"`
+	ProfilePic *string `json:"profilePic"`
+}
+
+type UserContactInfo struct {
 	Email       string  `json:"email" binding:"required"`
 	PhoneNumber *string `json:"phoneNumber"`
-
-	// Personal information
-	Gender   string `json:"gender" binding:"required"`
-	Birthday int64  `json:"birthday" binding:"required"` // unix time
-
-	// Logistical information
-	Secret     string `json:"secret"`
-	Password   *string `json:"password" binding:"required"`
-	ProfilePic *string `json:"profilePic"`
+	FbId        *string `json:"fbId"`
 }
 
 type UserType string

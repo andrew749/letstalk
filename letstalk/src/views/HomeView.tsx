@@ -22,10 +22,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, Header, Loading, ProfileAvatar } from '../components';
 
 import Colors from '../services/colors';
-import {AnalyticsHelper} from '../services/analytics';
+import { AnalyticsHelper } from '../services/analytics';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -40,8 +40,9 @@ class HomeView extends Component<Props> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Home',
-    headerRight: <ReactNativeButton title="Profile"
-      onPress={() => navigation.navigate('Profile')} />,
+    headerStyle: {
+      backgroundColor: Colors.HIVE_MAIN_BG,
+    },
   })
 
   constructor(props: Props) {
@@ -70,14 +71,6 @@ class HomeView extends Component<Props> {
     await this.props.fetchBootstrap();
   }
 
-  private requestToMatch() {
-    this.props.navigation.navigate('RequestToMatch');
-  }
-
-  private credentialEdit() {
-    this.props.navigation.navigate('CredentialEdit');
-  }
-
   private renderMatches() {
     const { relationships } = this.props.bootstrap;
     const matchCards = relationships.map(relationship => {
@@ -97,7 +90,7 @@ class HomeView extends Component<Props> {
       const fb = fbId === null ? null : (
         <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(fbLink)}>
           <MaterialIcons name="face" size={24} />
-          <Text style={styles.email}>Talk on Messenger</Text>
+          <Text style={styles.email}>Facebook profile</Text>
         </TouchableOpacity>
       );
       const sms = phoneNumber === null ? null : (
@@ -108,17 +101,22 @@ class HomeView extends Component<Props> {
       );
       // TODO: Handle errors for links
       return (
-        <Card key={userId}>
-          <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
-          <Text style={styles.relationshipType}>{userType}</Text>
-          <TouchableOpacity style={styles.emailContainer}
-            onPress={() => Linking.openURL(emailLink)}
-          >
-            <MaterialIcons name="email" size={24} />
-            <Text style={styles.email}>{email}</Text>
-          </TouchableOpacity>
-          {fb}
-          {sms}
+        <Card style={styles.card} key={userId}>
+          <View style={styles.cardProfilePicture}>
+            <ProfileAvatar userId={userId.toString()}/>
+          </View>
+          <View>
+            <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
+            <Text style={styles.relationshipType}>{userType}</Text>
+            <TouchableOpacity style={styles.emailContainer}
+              onPress={() => Linking.openURL(emailLink)}
+              >
+                <MaterialIcons name="email" size={24} />
+                <Text style={styles.email}>{email}</Text>
+              </TouchableOpacity>
+              {fb}
+              {sms}
+        </View>
         </Card>
       );
     });
@@ -153,8 +151,6 @@ class HomeView extends Component<Props> {
         return (
           <ScrollView>
             { matches }
-            <ActionButton onPress={() => this.requestToMatch()} title="Request To Match" />
-            <ActionButton onPress={() => this.credentialEdit()} title="Edit Credentials" />
           </ScrollView>
         );
       default:
@@ -210,4 +206,11 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 16,
   },
+  card: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  cardProfilePicture: {
+    marginRight: 10,
+  }
 })

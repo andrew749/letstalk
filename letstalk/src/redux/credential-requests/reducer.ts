@@ -10,13 +10,13 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credential, CredentialRequest } from '../../models/credential';
+import { Credential } from '../../models/credential';
 import {
   credentialRequestAdd,
   credentialRequestSetState,
   credentialRequestRemove,
   CredentialRequestStates,
-  CredentialRequestWithState,
+  CredentialWithState,
   CredentialsWithState,
   fetch,
   ActionTypes,
@@ -44,8 +44,8 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         credentialRequestsWithState: getDataOrCur(action, state.credentialRequestsWithState),
       };
     case TypeKeys.ADD_CREDENTIAL:
-      const newCredentialWithState: CredentialRequestWithState = {
-        ...action.credentialRequest,
+      const newCredentialWithState: CredentialWithState = {
+        ...action.credential,
         state: 'normal',
       };
       newCredentialRequestsWithState =
@@ -58,7 +58,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
     case TypeKeys.SET_STATE_CREDENTIAL:
       newCredentialRequestsWithState = state.credentialRequestsWithState.map(
         credentialRequestWithState => {
-          return credentialRequestWithState.credentialRequestId === action.credentialRequestId ?
+          return credentialRequestWithState.id === action.credentialId ?
           { ...credentialRequestWithState, state: action.state } : credentialRequestWithState;
       }).toList();
 
@@ -69,7 +69,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
     case TypeKeys.REMOVE_CREDENTIAL:
       newCredentialRequestsWithState = state.credentialRequestsWithState.filter(
         credentialRequestWithState => {
-        return credentialRequestWithState.credentialRequestId !== action.credentialRequestId;
+        return credentialRequestWithState.id !== action.credentialId;
       }).toList();
 
       return {
@@ -105,8 +105,8 @@ const fetchCredentialRequests: ActionCreator<
 const addCredentialRequest: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = (credential: Credential) => {
   return async (dispatch: Dispatch<State>) => {
-    const credentialRequestId = await requestToMatchService.addCredentialRequest(credential);
-    return dispatch(credentialRequestAdd({ ...credential, credentialRequestId }));
+    await requestToMatchService.addCredentialRequest(credential.id);
+    return dispatch(credentialRequestAdd(credential));
   };
 }
 
