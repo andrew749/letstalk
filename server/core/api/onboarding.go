@@ -15,10 +15,10 @@ const (
 )
 
 type OnboardingInfo struct {
-	State          OnboardingState      `json:"state" binding:"required"`
-	UserType       UserType             `json:"userType" binding:"required"`
-	UserCohort     *data.Cohort         `json:"userCohort"`
-	UserPreference *data.UserPreference `json:"userPreference"`
+	State              OnboardingState          `json:"state" binding:"required"`
+	UserType           UserType                 `json:"userType" binding:"required"`
+	UserCohort         *data.Cohort             `json:"userCohort"`
+	UserAdditionalData *data.UserAdditionalData `json:"userAdditionalData"`
 }
 
 type OnboardingStatus struct {

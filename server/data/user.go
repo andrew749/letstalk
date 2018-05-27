@@ -17,5 +17,5 @@ type User struct {
 	AuthData         *AuthenticationData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	ExternalAuthData *ExternalAuthData   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	Cohort           *UserCohort         `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
-	Preference       *UserPreference     `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
+	AdditionalData   *UserAdditionalData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 }
