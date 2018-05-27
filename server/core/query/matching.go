@@ -28,7 +28,9 @@ func GetMenteesByMentorId(db *gorm.DB, mentorId int) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
 	err := db.Where(
 		&data.Matching{Mentor: mentorId},
-	).Preload("MenteeUser").Preload("MenteeUser.ExternalAuthData").Find(&matchings).Error
+	).Preload("MenteeUser").Preload("MenteeUser.ExternalAuthData").Preload(
+		"MenteeUser.Cohort.Cohort",
+	).Find(&matchings).Error
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +41,9 @@ func GetMentorsByMenteeId(db *gorm.DB, menteeId int) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
 	err := db.Where(
 		&data.Matching{Mentee: menteeId},
-	).Preload("MentorUser").Preload("MentorUser.ExternalAuthData").Find(&matchings).Error
+	).Preload("MentorUser").Preload("MentorUser.ExternalAuthData").Preload(
+		"MentorUser.Cohort.Cohort",
+	).Find(&matchings).Error
 	if err != nil {
 		return nil, err
 	}

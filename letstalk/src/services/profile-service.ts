@@ -8,7 +8,6 @@ import {
   ProfileData,
   Relationship,
   UserState,
-  UserType,
 } from '../models';
 import {
   UserPersonalInfo,
@@ -61,7 +60,6 @@ export interface BootstrapResponse {
   readonly relationships: Array<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
-  readonly me: UserPersonalInfo;
   readonly onboardingStatus: OnboardingStatus;
 };
 
@@ -133,17 +131,9 @@ export class RemoteProfileService implements ProfileService {
     const sessionToken = await this.auth.getSessionToken();
     const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
 
-    const {
-      relationships,
-      me,
-    } = response;
     return {
       ...response,
-      relationships: Immutable.List(relationships),
-      me: {
-        ...me,
-        birthdate: new Date(me.birthdate),
-      },
+      relationships: Immutable.List(response.relationships),
     };
   }
 

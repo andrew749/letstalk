@@ -3,6 +3,7 @@ import { Store } from 'redux';
 import { RootState } from '../redux';
 import { credentialRequestRemove } from '../redux/credential-requests/actions';
 import { credentialRemove } from '../redux/credentials/actions';
+import { fetchBootstrap } from '../redux/bootstrap/reducer';
 
 interface BaseNotificationData {
   readonly title: string;
@@ -41,6 +42,7 @@ export default class NotificationService {
           await this.store.dispatch(credentialRequestRemove(data.requestId));
           break;
         }
+        await fetchBootstrap()(this.store.dispatch, null, null);
         break;
       default:
         // Ensure exhaustiveness of select
