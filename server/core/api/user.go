@@ -37,7 +37,7 @@ const (
 	USER_TYPE_MENTEE
 	USER_TYPE_ASKER
 	USER_TYPE_ANSWERER
-	USER_TYPE_UNKNOWN
+	USER_TYPE_UNKNOWN UserType = -1
 )
 
 type UserVectorPreferenceType int

@@ -11,5 +11,5 @@ type RequestMatching struct {
 	AnswererUser *User       `gorm:"foreignkey:Answerer"`
 	Answerer     int         `gorm:"not null"`
 	Credential   *Credential `gorm:"foreignkey:CredentialId"`
-	CredentialId int         `gorm:"not null"`
+	CredentialId uint        `gorm:"not null"`
 }

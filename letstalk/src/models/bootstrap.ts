@@ -1,17 +1,19 @@
 import Immutable from 'immutable';
 
 import { Cohort } from './cohort';
-import { UserPersonalInfo, UserType } from './user';
+import { UserPersonalInfo } from './user';
 import { OnboardingStatus } from './onboarding';
 
 export interface Relationship {
   readonly userId: number;
-  readonly userType: UserType;
+  readonly userType: number;
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
   readonly fbId: string | null;
   readonly phoneNumber: string | null;
+  readonly cohort: Cohort | null;
+  readonly description: string | null;
 }
 
 export type UserState =

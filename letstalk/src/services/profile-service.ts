@@ -8,7 +8,6 @@ import {
   ProfileData,
   Relationship,
   UserState,
-  UserType,
 } from '../models';
 import {
   UserPersonalInfo,

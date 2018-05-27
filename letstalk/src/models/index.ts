@@ -3,7 +3,6 @@ import { Cohort } from './cohort';
 import { ProfileData } from './profile';
 import {
   GenderId,
-  UserType,
 } from './user';
 import {
   OnboardingState,
@@ -19,5 +18,4 @@ export {
   ProfileData,
   Relationship,
   UserState,
-  UserType,
 };

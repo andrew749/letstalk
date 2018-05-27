@@ -210,8 +210,9 @@ func ResolveRequestToMatch(
 		}
 
 		match := data.RequestMatching{
-			Asker:    askerId,
-			Answerer: answererId,
+			Asker:        askerId,
+			Answerer:     answererId,
+			CredentialId: credentialId,
 		}
 
 		dbErr = tx.Create(&match).Error
