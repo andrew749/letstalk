@@ -35,7 +35,7 @@ const email = (value: string) =>
     : undefined
 
 const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
+  const { error, handleSubmit, onSubmit, reset, submitting, valid, pristine } = props;
   const onSubmitWithReset = async (values: LoginFormData): Promise<void> => {
     await onSubmit(values);
     reset();
@@ -61,7 +61,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
       <ActionButton
         buttonStyle={{backgroundColor: Colors.HIVE_MAIN_BG}}
         textStyle={{color: Colors.HIVE_MAIN_FONT}}
-        disabled={!valid}
+        disabled={pristine || !valid}
         loading={submitting}
         title={submitting ? null : "Log in"}
         onPress={handleSubmit(onSubmitWithReset)}
