@@ -1,39 +1,32 @@
 import React, { Component } from 'react';
 import {
-  Alert,
-  Linking,
   Dimensions,
   LayoutAnimation,
   Text,
   View,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import {BarCodeScanner, Permissions} from 'expo';
 import { ToastActionsCreators } from 'react-native-redux-toast';
 import { errorToast, infoToast } from '../redux/toast';
 import {NavigationActions, NavigationScreenProp, NavigationStackAction} from "react-navigation";
-import {ActionTypes} from "../redux/bootstrap/actions";
-import {ThunkAction} from "redux-thunk";
-import {ActionCreator, connect, Dispatch} from "react-redux";
+import {connect, Dispatch} from "react-redux";
 import {RootState} from "../redux/index";
-import { State as BootstrapState, fetchBootstrap } from "../redux/bootstrap/reducer";
 import meetingService from "../services/meeting";
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
-interface Props extends BootstrapState, DispatchActions {
+interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
 class QrScannerView extends Component<Props> {
   static navigationOptions = () => ({
-    headerTitle: 'QrScanner',
+    headerTitle: 'Scan A Code',
   })
 
   state = {
@@ -43,25 +36,19 @@ class QrScannerView extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    console.log("QrScanner constructor");
-
     this.load = this.load.bind(this);
   }
 
   async componentDidMount() {
-    this.load();
+    await this.load();
   }
 
   private async load() {
-    await Promise.all([
-      this.requestCameraPermission(),
-      this.props.fetchBootstrap(),
-    ]);
+    await this.requestCameraPermission();
   }
 
   requestCameraPermission = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    console.log("permissions result: ", status);
     this.setState({
       hasCameraPermission: status === 'granted',
     });
@@ -77,7 +64,7 @@ class QrScannerView extends Component<Props> {
         await this.props.infoToast('Meeting confirmed!');
         await this.props.navigation.dispatch(NavigationActions.back());
       } catch(error) {
-        await this.props.errorToast('Failed to confirm meeting, please try again.')
+        await this.props.errorToast('Failed to confirm meeting, please try again')
         await this.setState({ lastScannedBarcode: '' });
       }
     }
@@ -91,7 +78,6 @@ class QrScannerView extends Component<Props> {
           ? <Text style={{color: '#fff'}}>
             Camera permission required.
           </Text>
-          // Need to use React.createElement to skip type checking on style prop.
           : React.createElement(BarCodeScanner, {
             onBarCodeRead: this.handleBarCodeRead,
             // @ts-ignore bug where style isn't detected in BarCodeScannerProps
@@ -114,7 +100,7 @@ class QrScannerView extends Component<Props> {
   }
 }
 
-export default connect(({bootstrap}: RootState) => bootstrap, { fetchBootstrap, errorToast, infoToast })(QrScannerView);
+export default connect(null, { errorToast, infoToast })(QrScannerView);
 
 const styles = StyleSheet.create({
   container: {
