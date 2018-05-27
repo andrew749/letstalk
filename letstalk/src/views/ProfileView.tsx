@@ -36,6 +36,7 @@ import { programById, sequenceById } from '../models/cohort';
 import {AnalyticsHelper} from '../services/analytics';
 import {ProfileAvatar} from '../components';
 import Colors from '../services/colors';
+import QRCode from "react-native-qrcode";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -65,7 +66,6 @@ class ProfileView extends Component<Props> {
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
-    this.openQrView = this.openQrView.bind(this);
     this.openQrScannerView = this.openQrScannerView.bind(this);
   }
 
@@ -167,8 +167,7 @@ class ProfileView extends Component<Props> {
     return (
       <View style={styles.contentContainer} >
         <Image style={styles.image} source={require('../img/profile.jpg')} />
-        <ReactNativeButton title="View QR Code"
-              onPress={this.openQrView} />
+        {this.renderQrCode()}
         <ReactNativeButton title="Scan QR Code"
                            onPress={this.openQrScannerView} />
         <Text style={styles.sectionHeader}>Personal Info</Text>
@@ -198,6 +197,18 @@ class ProfileView extends Component<Props> {
     );
   }
 
+  renderQrCode = () => {
+    const {secret} = this.props.profile;
+    return (
+      !!secret && <QRCode
+        value={secret}
+        size={200}
+        bgColor='black'
+        fgColor='white'
+      />
+    );
+  };
+
   render() {
     const body = this.renderBody();
 
@@ -217,10 +228,6 @@ class ProfileView extends Component<Props> {
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
-  }
-
-  private async openQrView() {
-    this.props.navigation.navigate('QrCode');
   }
 
   private async openQrScannerView() {
