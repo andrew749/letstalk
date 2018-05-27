@@ -23,7 +23,7 @@ import Immutable from 'immutable';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
-import { ActionButton, Card, Header, Loading, ProfileAvatar } from '../components';
+import { ActionButton, Button, Card, Header, Loading, ProfileAvatar } from '../components';
 import { Relationship } from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
@@ -112,50 +112,60 @@ class HomeView extends Component<Props> {
     }
   }
 
-  private renderMatch(relationship: Relationship) {
+  private renderContactButton(relationship: Relationship) {
+    var icon: string;
+    var onPress: () => void;
     const {
-      userId,
-      firstName,
-      lastName,
       email,
       fbId,
       phoneNumber,
     } = relationship;
 
-    const fbLink = 'fb://profile/' + fbId;
-    const emailLink = 'mailto:' + email;
-    const smsLink = 'sms:' + phoneNumber;
-    const fb = fbId === null ? null : (
-      <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(fbLink)}>
-        <MaterialIcons name="face" size={24} />
-        <Text style={styles.email}>Facebook profile</Text>
-      </TouchableOpacity>
+    if (fbId !== null) {
+      const fbLink = 'fb://profile/' + fbId;
+      icon = 'face';
+      onPress = () => Linking.openURL(fbLink);
+    } else if (phoneNumber !== null) {
+      const smsLink = 'sms:' + phoneNumber;
+      icon = 'textsms';
+      onPress = () => Linking.openURL(smsLink);
+    } else {
+      const emailLink = 'mailto:' + email;
+      icon = 'email';
+      onPress = () => Linking.openURL(emailLink);
+    }
+
+    // TODO: Move into styles
+    return (
+      <View style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TouchableOpacity>
+          <Text style={{ color: Colors.HIVE_MAIN_BG, fontSize: 18, paddingTop: 2 }}>View Profile</Text>
+        </TouchableOpacity>
+        <Button buttonStyle={{ width: 150 }} icon={icon} title="Contact" onPress={onPress} />
+      </View>
     );
-    const sms = phoneNumber === null ? null : (
-      <TouchableOpacity style={styles.emailContainer} onPress={() => Linking.openURL(smsLink)}>
-        <MaterialIcons name="textsms" size={24} />
-        <Text style={styles.email}>Talk on SMS</Text>
-      </TouchableOpacity>
-    );
+  }
+
+  private renderMatch(relationship: Relationship) {
+    const {
+      userId,
+      firstName,
+      lastName,
+    } = relationship;
     const description = this.renderDescription(relationship);
     // TODO: Handle errors for links
     return (
-      <Card style={styles.card} key={userId}>
-        <View style={styles.cardProfilePicture}>
-          <ProfileAvatar userId={userId.toString()}/>
+      <Card key={userId}>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={styles.cardProfilePicture}>
+            <ProfileAvatar userId={userId.toString()}/>
+          </View>
+          <View style={{ flex: 2 }}>
+            <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
+            { description }
+          </View>
         </View>
-        <View style={{ flex: 2 }}>
-          <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
-          { description }
-          <TouchableOpacity style={styles.emailContainer}
-            onPress={() => Linking.openURL(emailLink)}
-          >
-              <MaterialIcons name="email" size={24} />
-              <Text style={styles.email}>{email}</Text>
-          </TouchableOpacity>
-          {fb}
-          {sms}
-      </View>
+        { this.renderContactButton(relationship) }
       </Card>
     );
   }
@@ -254,10 +264,10 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 20,
   },
   description: {
-    fontSize: 12,
+    fontSize: 14,
     color: 'gray',
     marginBottom: 5,
   },
@@ -269,10 +279,6 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     marginLeft: 5,
     fontSize: 16,
-  },
-  card: {
-    flex: 1,
-    flexDirection: 'row',
   },
   cardProfilePicture: {
     flex: 1,

@@ -1,4 +1,5 @@
 import ActionButton from './ActionButton';
+import Button from './Button';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
 import Emoji from './Emoji';
@@ -15,6 +16,7 @@ import ProfileAvatar, {ProfileAvatarEditableFormElement} from './ProfileAvatar';
 
 export {
   ActionButton,
+  Button,
   ButtonPicker,
   Card,
   Emoji,
