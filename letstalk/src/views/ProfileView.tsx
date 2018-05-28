@@ -163,8 +163,9 @@ class ProfileView extends Component<Props> {
       profileItems.push(
         <TouchableOpacity
           style={styles.listItem}
-          onPress={() => {
-            auth.linkFB();
+          onPress={async () => {
+            await auth.linkFB();
+            await this.props.fetchProfile();
           }}
         >
           <MaterialIcons name="face" size={24} />
