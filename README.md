@@ -46,6 +46,20 @@ Restart machine with updated options.
 docker-machine restart
 ```
 
+#### How to see mysql tables
+
+Run
+```
+docker exec -it {DOCKER_CONTAINER_ID} bash
+```
+
+Use `docker ps` to list containers
+
+In the container run the following to see mysql database
+```
+mysql -u letstalk -p
+```
+
 ### LINUX
 Things should be good to go
 

@@ -1,8 +1,13 @@
 const Colors = {
-  HIVE_MAIN_BG: "#FFC107",
+  HIVE_ACCENT: "#2A86FF",
+  HIVE_BG: "#F9F9F9",
+  HIVE_ERROR: "#E13A3A",
+  HIVE_HIGHLIGHT: "#FFBE43",
   HIVE_MAIN_FONT: "#263238",
+  HIVE_PRIMARY: "#FFB52A",
   FB_BG: "#3B5998",
   WHITE: "#FFFFFF",
+  HIVE_SUBDUED: "#808080"
 };
 
 export default Colors;

@@ -16,6 +16,7 @@ const ActionButton: React.SFC<Props> = props => {
       {...props}
       buttonStyle={[styles.loginButtonStyle, props.buttonStyle]}
       textStyle={[styles.loginButtonTextStyle, props.textStyle]}
+      containerViewStyle={[styles.containerStyle, props.containerStyle]}
     />
   );
 };
@@ -23,9 +24,11 @@ const ActionButton: React.SFC<Props> = props => {
 export default ActionButton;
 
 const styles = StyleSheet.create({
+  containerStyle: {
+    width: "90%"
+  },
   loginButtonStyle: {
     height: 55,
-    width: SCREEN_WIDTH - 40,
     borderRadius: 5,
     margin: 10,
   },

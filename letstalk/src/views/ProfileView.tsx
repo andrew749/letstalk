@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Icon } from 'react-native-elements';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
@@ -34,8 +35,8 @@ import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
-import {AnalyticsHelper} from '../services/analytics';
-import {ProfileAvatar} from '../components';
+import { AnalyticsHelper } from '../services/analytics';
+import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
 import QRCode from "react-native-qrcode";
 
@@ -52,28 +53,19 @@ interface Props extends ProfileState, DispatchActions {
 class ProfileView extends Component<Props> {
   PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'Profile',
-    headerRight: <ReactNativeButton title="Edit"
-      onPress={() => navigation.navigate('ProfileEdit')} />,
-    headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
-    },
-  })
-
   constructor(props: Props) {
     super(props);
 
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
-    this.openQrScannerView = this.openQrScannerView.bind(this);
+    // this.openQrScannerView = this.openQrScannerView.bind(this);
   }
 
   private async onLogoutPress() {
     try {
       await auth.logout();
-    } catch(error) {}
+    } catch (error) { }
     this.props.navigation.dispatch(NavigationActions.reset({
       index: 0,
       key: null,
@@ -90,7 +82,75 @@ class ProfileView extends Component<Props> {
     await this.props.fetchProfile();
   }
 
+  private renderProfile(gradYear: string, program: string) {
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.description}>Hey there! I’m passionate about entrepreneurship, especially in the healthcare and fintech industries. I live by the saying “work hard, play hard”.</Text>
+        <Text style={styles.profileTitle}>{program}, {gradYear}</Text>
+      </View>
+    )
+  }
+
+  private renderContactInfo(email: string, fbId: string, phoneNumber: string) {
+
+    const buildItem = (label: string, value: string) => {
+      return (
+        <View key={label} style={styles.listItem}>
+          <Text style={styles.label}>{label}: </Text>
+          <Text style={styles.value}>{value}</Text>
+        </View>
+      );
+    };
+
+    const buildItems = (name_values: Array<[string, string]>) => {
+      const items = name_values.map(([label, value]) => {
+        return buildItem(label, value);
+      });
+      return items;
+    };
+
+    const contactItems = buildItems([
+      ['Phone', phoneNumber],
+      ['Email', email]
+    ]);
+
+
+    if (fbId !== null) {
+      const fbLink = 'fb://profile/' + fbId;
+      contactItems.push(
+        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+          <MaterialIcons name="face" size={24} />
+          <Text style={styles.label}>Facebook: </Text>
+          <Text style={styles.value}>{fbId}</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      // link fb profile
+      contactItems.push(
+        <TouchableOpacity
+          style={styles.listItem}
+          onPress={async () => {
+            await auth.linkFB();
+            await this.props.fetchProfile();
+          }}
+        >
+          <Text style={styles.value}>Link your Facebook account</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionHeader}>Contact Info</Text>
+        {contactItems}
+      </View>
+    )
+  }
+
   private renderInner() {
+
+    const { navigate } = this.props.navigation;
+
     const {
       programId,
       gradYear,
@@ -107,93 +167,39 @@ class ProfileView extends Component<Props> {
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+    let userId;
+    if (this.props.profile) {
+      userId = this.props.profile.userId.toString();
+    }
+    const headerText = this.props.profile ?
+      this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
+
     const genderStr = capitalize(genderIdToString(gender));
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const birthdayStr = birthdate.toLocaleDateString('en-US', options);
+    const timeDiff = new Date().valueOf() - birthdate.valueOf();
+    const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
+
     const sequence = sequenceById(sequenceId);
     const program = programById(programId);
 
-    const hr = <View
-      style={{
-        borderBottomColor: '#555555',
-        borderBottomWidth: 1,
-      }}
-    />;
-
-    const buildItem = (label: string, value: string) => {
-      return (
-        <View key={label} style={styles.listItem}>
-          <Text style={styles.label}>{label}:</Text>
-          <Text style={styles.value}>{value}</Text>
-        </View>
-      );
-    };
-
-    const buildItems = (name_values: Array<[string, string]>) => {
-      const items = name_values.map(([label, value]) => {
-        return [buildItem(label, value), hr];
-      });
-      const flatItems = [].concat(...items);
-      return flatItems.length > 0 ? flatItems.slice(0, flatItems.length - 1) : flatItems;
-    };
-
-    const profileItems = buildItems([
-      ['Gender', genderStr],
-      ['Birthday', birthdayStr],
-      ['Email', email],
-    ]);
-
-    if (phoneNumber !== null) {
-      profileItems.push(hr);
-      profileItems.push(buildItem('Phone Number', phoneNumber));
-    }
-
-    if (fbId !== null) {
-      const fbLink = 'fb://profile/' + fbId;
-      profileItems.push(hr);
-      profileItems.push(
-        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.value}>Facebook profile</Text>
-        </TouchableOpacity>
-      );
-    } else {
-      // link fb profile
-      profileItems.push(hr);
-      profileItems.push(
-        <TouchableOpacity
-          style={styles.listItem}
-          onPress={async () => {
-            await auth.linkFB();
-            await this.props.fetchProfile();
-          }}
-        >
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.value}>Link Facebook profile</Text>
-        </TouchableOpacity>
-      );
-    }
-
-    const cohortItems = buildItems([
-      ['Program', program],
-      ['Sequence', sequence],
-      ['Grad year', String(gradYear)],
-    ]);
-
     return (
       <View style={styles.contentContainer} >
-        <Image style={styles.image} source={require('../img/profile.jpg')} />
         {this.renderQrCode()}
-        <ReactNativeButton title="Scan QR Code"
-                           onPress={this.openQrScannerView} />
-        <Text style={styles.sectionHeader}>Personal Info</Text>
+        <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+        <Header>{headerText}</Header>
+        <Icon 
+          name='pencil'
+          type='font-awesome'
+          color={Colors.HIVE_PRIMARY}
+          containerStyle={styles.editButton}
+          onPress={() => navigate('ProfileEdit')} />
+        {/* <ReactNativeButton title="Scan QR Code" onPress={this.openQrScannerView} /> */}
+        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - Missassauga, ON</Text>
+        {this.renderProfile(String(gradYear), program)}
+        {this.renderContactInfo(email, fbId, phoneNumber)}
         <View style={styles.sectionContainer}>
-          {profileItems}
         </View>
-        <Text style={styles.sectionHeader}>Cohort</Text>
-        <View style={styles.sectionContainer}>
-          {cohortItems}
-        </View>
+        <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
       </View>
     );
   }
@@ -218,7 +224,7 @@ class ProfileView extends Component<Props> {
     return (
       !!secret && <QRCode
         value={secret}
-        size={200}
+        size={150}
         bgColor='black'
         fgColor='white'
       />
@@ -227,49 +233,43 @@ class ProfileView extends Component<Props> {
 
   render() {
     const body = this.renderBody();
-
-    let userId;
-    if (this.props.profile) {
-        userId = this.props.profile.userId.toString();
-    }
-    const headerText = this.props.profile ?
-      this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerContainer}>
-          <ProfileAvatar userId={userId} />
-          <Header>{headerText}</Header>
-        </View>
         {body}
-        <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
   }
 
-  private async openQrScannerView() {
-    this.props.navigation.navigate('QrScanner');
-  }
+  // private async openQrScannerView() {
+  //   this.props.navigation.navigate('QrScanner');
+  // }
 }
 
-export default connect(({profile}: RootState) => profile, { fetchProfile })(ProfileView);
+export default connect(({ profile }: RootState) => profile, { fetchProfile })(ProfileView);
 
 const styles = StyleSheet.create({
   container: {
     paddingBottom: 10,
+    minHeight: '100%'
   },
   contentContainer: {
     alignItems: 'center',
-    marginHorizontal: 25
-  },
-  image: {
-    width: 60,
-    height: 60,
-    margin: 10,
-    borderRadius: 30,
-  },
-  headerContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
+    margin: 20,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: Colors.HIVE_PRIMARY,
+    backgroundColor: Colors.WHITE
+  },
+  description: {
+    fontSize: 18,
+    color: Colors.HIVE_SUBDUED
+  },
+  editButton: {
+    position: 'absolute',
+    right: 0,
+    margin: 20
   },
   listItem: {
     flex: 1,
@@ -277,24 +277,39 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 8,
   },
+  logoutButton: {
+    color: Colors.HIVE_ERROR
+  },
+  profileTitle: {
+    fontSize: 18,
+    marginTop: 10,
+    alignSelf: 'flex-end'
+  },
+  profilePicture: { 
+    borderWidth: 2, 
+    borderColor: Colors.HIVE_PRIMARY,
+    margin: 20
+  },
   sectionHeader: {
     fontWeight: 'bold',
     fontSize: 24,
-    marginBottom: 5,
-    marginTop: 10,
     alignSelf: 'flex-start',
   },
   sectionContainer: {
-    width: SCREEN_WIDTH,
-    padding: 10,
+    width: "100%",
     backgroundColor: 'white',
+    flex: 1,
+    flexDirection: 'column',
+    marginTop: 20
+  },
+  subHeaderText: {
+    fontSize: 18
   },
   label: {
-    fontWeight: 'bold',
     fontSize: 18,
   },
   value: {
     fontSize: 18,
-    marginLeft: 10,
+    color: Colors.HIVE_ACCENT
   },
 });

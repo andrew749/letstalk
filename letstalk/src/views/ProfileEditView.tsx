@@ -196,7 +196,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
-        backgroundColor={Colors.HIVE_MAIN_BG}
+        backgroundColor={Colors.HIVE_PRIMARY}
         style={styles.submitButton}
         disabled={!valid}
         loading={submitting}
@@ -230,10 +230,11 @@ interface Props extends ProfileState, DispatchActions {
 }
 
 class ProfileEditView extends Component<Props> {
+  // TODO: Remove the padding on this component
   static navigationOptions = () => ({
     headerTitle: 'Edit Profile',
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY
     },
   })
 

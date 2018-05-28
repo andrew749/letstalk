@@ -2,6 +2,9 @@
   "name": "letsTalk",
   "displayName": "letsTalk",
   "expo": {
+    "androidStatusBar": {
+      "backgroundColor": "#FFB52A"
+    },
     "sdkVersion": "27.0.0",
     "packagerOpts": {
       "sourceExts": [

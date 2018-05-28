@@ -40,7 +40,7 @@ interface TabBarIcon {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.HIVE_MAIN_BG,
+    backgroundColor: Colors.HIVE_PRIMARY,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -71,7 +71,6 @@ const createTabView = () => TabNavigator({
         iconName = 'person';
       } else if (routeName === 'Requests') {
         iconName = 'supervisor-account';
-
       }
 
       return <MaterialIcons name={iconName} size={24} color={tintColor} />;
@@ -80,7 +79,7 @@ const createTabView = () => TabNavigator({
   tabBarOptions: {
     showLabel: Platform.OS == 'ios' ? true: false,
     showIcon: true,
-    activeTintColor: Colors.HIVE_MAIN_BG,
+    activeTintColor: Colors.HIVE_PRIMARY,
     inactiveTintColor: 'gray',
     style: {
       backgroundColor: 'white',
@@ -97,6 +96,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Tabbed: {
     screen: createTabView(),
+    navigationOptions: {
+      header: null
+    },
   },
   ProfileEdit: {
     screen: ProfileEditView,
@@ -147,7 +149,7 @@ class App extends React.Component<Props, AppState> {
     const AppNavigation = createAppNavigation(loggedIn);
     return (
       <Provider store={store}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
           <AppNavigation />
           <NotificationComponent ref={(ref: any) => {
             this.notificationService = new NotificationService(ref, store);

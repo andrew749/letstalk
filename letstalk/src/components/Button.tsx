@@ -28,7 +28,7 @@ const Button: React.SFC<Props> = props => {
   const icon = props.icon ?
     <MaterialIcons
       style={{ position: 'absolute', left: 2, top: 2 }}
-      color={Colors.HIVE_MAIN_BG}
+      color={Colors.HIVE_PRIMARY}
       name={props.icon}
       size={24}
     /> : null;
@@ -47,7 +47,7 @@ export default Button;
 const styles = StyleSheet.create({
   loginButtonStyle: {
     flexDirection: 'row',
-    borderColor: Colors.HIVE_MAIN_BG,
+    borderColor: Colors.HIVE_PRIMARY,
     borderWidth: 0.5,
     borderRadius: 5,
     height: 28,
@@ -57,6 +57,6 @@ const styles = StyleSheet.create({
   },
   loginButtonTextStyle: {
     fontSize: 14,
-    color: Colors.HIVE_MAIN_BG,
+    color: Colors.HIVE_PRIMARY,
   },
 });

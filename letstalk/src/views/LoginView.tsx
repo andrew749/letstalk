@@ -41,7 +41,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
     reset();
   };
   return (
-    <View>
+    <View style={styles.container}>
       <Field
         label="Email"
         name="email"
@@ -60,7 +60,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
-        buttonStyle={{backgroundColor: Colors.HIVE_MAIN_BG}}
+        buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
         textStyle={{color: Colors.HIVE_MAIN_FONT}}
         disabled={pristine || !valid}
         loading={submitting}
@@ -85,7 +85,7 @@ const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
     reset();
   };
   return (
-    <View>
+    <View style={styles.container}>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         backgroundColor={Colors.FB_BG}
@@ -113,7 +113,7 @@ export default class LoginView extends Component<Props> {
     headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Sign up"
       onPress={() => navigation.navigate('Signup')} /> : null,
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY,
     },
   })
 
@@ -199,13 +199,13 @@ export default class LoginView extends Component<Props> {
     const signupButton = Platform.OS === 'android' ?
       <ActionButton
         title="Sign up"
-        buttonStyle={{backgroundColor: Colors.HIVE_MAIN_BG}}
+        buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
         textStyle={{color: Colors.HIVE_MAIN_FONT}}
         onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'Signup'}))} />
       : null;
 
     return (
-      <View>
+      <View style={{ flex: 1, alignItems: 'center', flexDirection: 'column'}}>
         <LoginFormWithRedux onSubmit={this.onSubmit} />
         {signupButton}
         <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
@@ -213,3 +213,11 @@ export default class LoginView extends Component<Props> {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    alignItems: 'center',
+    flexDirection:'column'
+  }
+});
