@@ -50,6 +50,11 @@ export class Auth {
     AsyncStorage.removeItem(Auth.tokenLocation);
     await this.sessionService.logout(sessionToken);
   }
+
+  async linkFB(): Promise<boolean> {
+    const sessionToken = await this.getSessionToken();
+    return await this.sessionService.linkFb(sessionToken);
+  }
 };
 
 const auth = new Auth(new RemoteSessionService(requestor));

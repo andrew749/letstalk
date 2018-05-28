@@ -27,6 +27,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
 import auth from '../services/auth';
+import {fbLogin} from '../services/fb';
 import { ActionButton, Card, Header, Loading } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -154,6 +155,20 @@ class ProfileView extends Component<Props> {
         <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
           <MaterialIcons name="face" size={24} />
           <Text style={styles.value}>Facebook profile</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      // link fb profile
+      profileItems.push(hr);
+      profileItems.push(
+        <TouchableOpacity
+          style={styles.listItem}
+          onPress={() => {
+            auth.linkFB();
+          }}
+        >
+          <MaterialIcons name="face" size={24} />
+          <Text style={styles.value}>Link Facebook profile</Text>
         </TouchableOpacity>
       );
     }
