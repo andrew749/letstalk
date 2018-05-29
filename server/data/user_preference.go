@@ -5,5 +5,5 @@ type UserAdditionalData struct {
 	UserId               int  `json:"userId" gorm:"not null;primary_key;auto_increment:false"`
 	MentorshipPreference *int
 	Bio                  *string
-	Location             *string
+	Hometown             *string
 }

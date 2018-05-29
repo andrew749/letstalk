@@ -30,7 +30,7 @@ type UpdateCohortRequest struct {
 	CohortId             int     `json:"cohortId" binding:"required"`
 	MentorshipPreference int     `json:"mentorshipPreference" binding:"required"`
 	Bio                  *string `json:"bio"`
-	Location             *string `json:"location"`
+	Hometown             *string `json:"hometown"`
 }
 
 type OnboardingUpdateResponse struct {

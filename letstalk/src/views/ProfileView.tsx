@@ -82,10 +82,11 @@ class ProfileView extends Component<Props> {
     await this.props.fetchProfile();
   }
 
-  private renderProfile(gradYear: string, program: string) {
+  private renderProfile(gradYear: string, program: string, bio: string | null) {
+    const bioStr = bio === null ? 'Add bio by editing profile' : bio;
     return (
       <View style={styles.sectionContainer}>
-        <Text style={styles.description}>Hey there! I’m passionate about entrepreneurship, especially in the healthcare and fintech industries. I live by the saying “work hard, play hard”.</Text>
+        <Text style={styles.description}>{ bioStr }</Text>
         <Text style={styles.profileTitle}>{program}, {gradYear}</Text>
       </View>
     )
@@ -163,6 +164,8 @@ class ProfileView extends Component<Props> {
       birthdate,
       phoneNumber,
       fbId,
+      bio,
+      hometown,
     } = this.props.profile;
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -182,20 +185,22 @@ class ProfileView extends Component<Props> {
     const sequence = sequenceById(sequenceId);
     const program = programById(programId);
 
+    const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
+
     return (
       <View style={styles.contentContainer} >
         {this.renderQrCode()}
         <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
         <Header>{headerText}</Header>
-        <Icon 
+        <Icon
           name='pencil'
           type='font-awesome'
           color={Colors.HIVE_PRIMARY}
           containerStyle={styles.editButton}
           onPress={() => navigate('ProfileEdit')} />
         {/* <ReactNativeButton title="Scan QR Code" onPress={this.openQrScannerView} /> */}
-        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - Missassauga, ON</Text>
-        {this.renderProfile(String(gradYear), program)}
+        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+        {this.renderProfile(String(gradYear), program, bio)}
         {this.renderContactInfo(email, fbId, phoneNumber)}
         <View style={styles.sectionContainer}>
         </View>
@@ -285,8 +290,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'flex-end'
   },
-  profilePicture: { 
-    borderWidth: 2, 
+  profilePicture: {
+    borderWidth: 2,
     borderColor: Colors.HIVE_PRIMARY,
     margin: 20
   },
