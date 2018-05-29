@@ -53,12 +53,29 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 		}
 	}
 
+	if request.MentorshipPreference != nil || request.Bio != nil || request.Location != nil {
+		// Should only replace non-null elements.
+		err = tx.Where(
+			&data.UserAdditionalData{UserId: c.SessionData.UserId},
+		).Assign(
+			&data.UserAdditionalData{
+				MentorshipPreference: request.MentorshipPreference,
+				Bio:                  request.Bio,
+				Location:             request.Location,
+			},
+		).FirstOrCreate(&data.UserAdditionalData{}).Error
+		if err != nil {
+			tx.Rollback()
+			return errs.NewInternalError(err.Error())
+		}
+	}
+
 	tx.Commit()
 	return nil
 }
 
 func GetMyProfileController(c *ctx.Context) errs.Error {
-	user, err := query.GetUserByIdWithExternalAuth(c.Db, c.SessionData.UserId)
+	user, err := query.GetUserProfileById(c.Db, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewClientError("Unable to get user data.")
 	}
@@ -79,6 +96,11 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 		},
 		UserContactInfo: api.UserContactInfo{
 			Email: user.Email,
+		},
+		UserAdditionalData: api.UserAdditionalData{
+			MentorshipPreference: user.AdditionalData.MentorshipPreference,
+			Bio:                  user.AdditionalData.Bio,
+			Location:             user.AdditionalData.Location,
 		},
 	}
 

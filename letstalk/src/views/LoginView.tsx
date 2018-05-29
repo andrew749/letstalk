@@ -45,6 +45,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
       <Field
         label="Email"
         name="email"
+        keyboardType={'email-address' as 'email-address'}
         component={LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}

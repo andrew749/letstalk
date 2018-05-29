@@ -71,7 +71,11 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	dbErr = tx.Where(
 		&data.UserAdditionalData{UserId: userId},
 	).Assign(
-		&data.UserAdditionalData{MentorshipPreference: &newCohortRequest.MentorshipPreference},
+		&data.UserAdditionalData{
+			MentorshipPreference: &newCohortRequest.MentorshipPreference,
+			Bio:                  newCohortRequest.Bio,
+			Location:             newCohortRequest.Location,
+		},
 	).FirstOrCreate(&userAdditionalData).Error
 
 	if dbErr != nil {
@@ -93,7 +97,6 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 	c.Result = api.OnboardingUpdateResponse{successMessage, onboardingStatus}
 	return nil
-
 }
 
 type UserVectorType string

@@ -273,13 +273,14 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
-    console.log(values);
-    const { programId, sequenceId, gradYear, mentorshipPreference } = values;
+    const { programId, sequenceId, gradYear, mentorshipPreference, bio, location } = values;
     const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
     try {
       const onboardingStatus = await profileService.updateCohort({
         cohortId,
         mentorshipPreference,
+        bio,
+        location,
       });
       this.props.setOnboardingStatusAction(onboardingStatus);
       await this.props.fetchBootstrap();
