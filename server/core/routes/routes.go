@@ -16,11 +16,12 @@ import (
 	"net/http"
 	"time"
 
+	"letstalk/server/core/meeting"
+
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"letstalk/server/core/meeting"
 )
 
 type handlerWrapper struct {
@@ -54,6 +55,9 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
 	v1.POST("/fb_login", hw.wrapHandler(login.FBController, false))
+
+	v1.OPTIONS("/fb_link")
+	v1.POST("/fb_link", hw.wrapHandler(login.FBLinkController, true))
 
 	// update user data
 	v1.OPTIONS("/cohort")

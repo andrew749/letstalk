@@ -9,23 +9,30 @@ import (
 	"errors"
 	"time"
 
-	"github.com/getsentry/raven-go"
-	fb "github.com/huandu/facebook"
-	"github.com/romana/rlog"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+
+	"github.com/getsentry/raven-go"
 	"github.com/google/uuid"
+	fb "github.com/huandu/facebook"
+	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
+
+type FBLoginRequestDataCore struct {
+	Token  string `json:"token" binding:"required"`
+	Expiry int64  `json:"expiry" binding:"required"`
+}
 
 /**
  * Login with fb
  */
 type FBLoginRequestData struct {
-	Token             string `json:"token" binding:"required"`
-	Expiry            int64  `json:"expiry" binding:"required"`
+	FBLoginRequestDataCore
 	NotificationToken string `json:"notificationToken"`
 }
 
@@ -175,6 +182,46 @@ func FBController(c *ctx.Context) errs.Error {
 	}
 
 	c.Result = LoginResponse{*session.SessionId, session.ExpiryDate}
+
+	return nil
+}
+
+// FBLinkController Link the currently logged in user with the facebook user specified in the request
+func FBLinkController(c *ctx.Context) errs.Error {
+	var loginRequest FBLoginRequestData
+	var err error
+	if err = c.GinContext.BindJSON(&loginRequest); err != nil {
+		return errs.NewClientError("Request is invalid")
+	}
+
+	var fbUser *FBUser
+	if fbUser, err = getFBUser(loginRequest.Token); err != nil {
+		return errs.NewInternalError("Unable to get FB Identity")
+	}
+
+	var fbUserID = fbUser.Id
+	var userID = c.SessionData.UserId
+
+	// link the user
+	if err := linkFBUser(c.Db, userID, fbUserID); err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	return nil
+}
+
+// linkFBUser link the specified user to the facebook user with fbUserID
+func linkFBUser(db *gorm.DB, userID int, fbUserID string) error {
+	var externalAuthRecord *data.ExternalAuthData
+	var err error
+	if externalAuthRecord, err = query.GetExternalAuthRecord(db, userID); err != nil {
+		return err
+	}
+
+	// update the user data
+	if err := db.Model(&externalAuthRecord).
+		Updates(&data.ExternalAuthData{FbUserId: &fbUserID}).Error; err != nil {
+	}
 
 	return nil
 }
