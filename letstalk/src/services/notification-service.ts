@@ -40,7 +40,6 @@ export default class NotificationService {
       case 'REQUEST_TO_MATCH':
         if (data.side === SIDE_ASKER) {
           await this.store.dispatch(credentialRequestRemove(data.requestId));
-          break;
         }
         await fetchBootstrap()(this.store.dispatch, null, null);
         break;

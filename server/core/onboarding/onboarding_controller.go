@@ -55,8 +55,8 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	rlog.Debug("No cohort found for user. Adding cohort.")
 	// insert new data from the request
 	var (
-		userCohort     data.UserCohort
-		userPreference data.UserPreference
+		userCohort         data.UserCohort
+		userAdditionalData data.UserAdditionalData
 	)
 
 	dbErr = tx.Where(&data.UserCohort{UserId: userId}).Assign(
@@ -69,10 +69,14 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 
 	dbErr = tx.Where(
-		&data.UserPreference{UserId: userId},
+		&data.UserAdditionalData{UserId: userId},
 	).Assign(
-		&data.UserPreference{MentorshipPreference: &newCohortRequest.MentorshipPreference},
-	).FirstOrCreate(&userPreference).Error
+		&data.UserAdditionalData{
+			MentorshipPreference: &newCohortRequest.MentorshipPreference,
+			Bio:                  newCohortRequest.Bio,
+			Location:             newCohortRequest.Location,
+		},
+	).FirstOrCreate(&userAdditionalData).Error
 
 	if dbErr != nil {
 		tx.Rollback()
@@ -93,7 +97,6 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 	}
 	c.Result = api.OnboardingUpdateResponse{successMessage, onboardingStatus}
 	return nil
-
 }
 
 type UserVectorType string

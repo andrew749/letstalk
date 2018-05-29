@@ -1,5 +1,6 @@
 import { Cohort } from './cohort';
-import { UserContactInfo, UserPersonalInfo } from './user';
+import { UserAdditionalData, UserContactInfo, UserPersonalInfo } from './user';
 
-export interface ProfileData extends UserPersonalInfo, UserContactInfo, Cohort {
+export interface ProfileData extends UserAdditionalData, UserPersonalInfo, UserContactInfo,
+  Cohort, UserContactInfo {
 }

@@ -35,6 +35,12 @@ export interface UserPersonalInfo {
   readonly secret: string
 }
 
+export interface UserAdditionalData {
+  readonly mentorshipPreference: number | null;
+  readonly bio: string | null;
+  readonly location: string | null;
+}
+
 export interface UserContactInfo {
 	readonly email: string
   readonly phoneNumber: string | null;

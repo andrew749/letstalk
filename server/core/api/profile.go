@@ -8,6 +8,7 @@ type Cohort struct {
 }
 
 type MyProfileResponse struct {
+	UserAdditionalData
 	UserPersonalInfo
 	UserContactInfo
 	Cohort
@@ -15,6 +16,7 @@ type MyProfileResponse struct {
 
 type ProfileEditRequest struct {
 	UserPersonalInfo
+	UserAdditionalData
 	PhoneNumber *string `json:"phoneNumber"`
 	CohortId    int     `json:"cohortId" binding:"required"`
 }
