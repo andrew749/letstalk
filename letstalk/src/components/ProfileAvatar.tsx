@@ -8,6 +8,8 @@ import {
     FormProps
 } from '../components'
 
+import Colors from '../services/colors';
+
 interface ProfileAvatarProps extends AvatarProps {
   userId?: string,
 }
@@ -35,7 +37,7 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps> {
     return (
       <Avatar
         {...props}
-        large
+        xlarge
         rounded
         // default
         icon={{name: 'person'}}

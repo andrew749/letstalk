@@ -74,7 +74,7 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		&data.UserAdditionalData{
 			MentorshipPreference: &newCohortRequest.MentorshipPreference,
 			Bio:                  newCohortRequest.Bio,
-			Location:             newCohortRequest.Location,
+			Hometown:             newCohortRequest.Hometown,
 		},
 	).FirstOrCreate(&userAdditionalData).Error
 

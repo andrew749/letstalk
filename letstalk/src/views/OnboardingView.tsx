@@ -70,7 +70,7 @@ interface CohortFormData {
   gradYear: number;
   mentorshipPreference: number;
   bio: string | null,
-  location: string | null,
+  hometown: string | null,
 }
 
 interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
@@ -143,8 +143,8 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Header>Additional Info</Header>
       <Text style={styles.hint}>Optional</Text>;
       <Field
-        label="Location"
-        name="location"
+        label="Hometown"
+        name="hometown"
         component={LabeledFormInput}
         autoCorrect={false}
         placeholder="e.g. Waterloo, ON"
@@ -273,14 +273,14 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
-    const { programId, sequenceId, gradYear, mentorshipPreference, bio, location } = values;
+    const { programId, sequenceId, gradYear, mentorshipPreference, bio, hometown } = values;
     const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
     try {
       const onboardingStatus = await profileService.updateCohort({
         cohortId,
         mentorshipPreference,
         bio,
-        location,
+        hometown,
       });
       this.props.setOnboardingStatusAction(onboardingStatus);
       await this.props.fetchBootstrap();

@@ -121,7 +121,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
-        backgroundColor={Colors.HIVE_MAIN_BG}
+        backgroundColor={Colors.HIVE_PRIMARY}
         style={styles.submitButton}
         disabled={!valid}
         loading={submitting}
@@ -146,7 +146,7 @@ export default class SignupView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'Signup',
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY,
     }
   }
 

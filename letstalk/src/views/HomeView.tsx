@@ -52,7 +52,7 @@ class HomeView extends Component<Props> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Home',
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY,
     },
   })
 
@@ -139,7 +139,7 @@ class HomeView extends Component<Props> {
     return (
       <View style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
         <TouchableOpacity>
-          <Text style={{ color: Colors.HIVE_MAIN_BG, fontSize: 18, paddingTop: 2 }}>View Profile</Text>
+          <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 18, paddingTop: 2 }}>View Profile</Text>
         </TouchableOpacity>
         <Button buttonStyle={{ width: 150 }} icon={icon} title="Contact" onPress={onPress} />
       </View>
@@ -158,7 +158,7 @@ class HomeView extends Component<Props> {
       <Card key={userId}>
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.cardProfilePicture}>
-            <ProfileAvatar userId={userId.toString()}/>
+            <ProfileAvatar userId={userId.toString()} large/>
           </View>
           <View style={{ flex: 2 }}>
             <Text style={styles.name}>{firstName + ' ' + lastName}</Text>

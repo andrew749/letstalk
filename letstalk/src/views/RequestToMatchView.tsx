@@ -89,14 +89,14 @@ class RequestToMatchView extends Component<Props> {
   static navigationOptionsAndroid = ({ navigation }: NavigationScreenDetails<void> ) => ({
     headerTitle: 'Request',
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY,
     },
   });
 
   static navigationOptionsIOS = ({ navigation}: NavigationScreenDetails<void> ) => ({
     header: <Head/>,
     headerStyle: {
-      backgroundColor: Colors.HIVE_MAIN_BG,
+      backgroundColor: Colors.HIVE_PRIMARY,
     },
   });
 
@@ -236,7 +236,7 @@ class RequestToMatchView extends Component<Props> {
     const addCredentialButton = (onPress: () => void) => {
       return (
         <TouchableOpacity onPress={onPress} style={styles.addButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_MAIN_BG} />
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
         </TouchableOpacity>
       );
     }
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   header: {
     height: Platform.OS == "ios" ? 20 : 0,
-    backgroundColor: Colors.HIVE_MAIN_BG,
+    backgroundColor: Colors.HIVE_PRIMARY,
   },
   addButton: {
     margin: 12,

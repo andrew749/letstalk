@@ -53,7 +53,7 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 		}
 	}
 
-	if request.MentorshipPreference != nil || request.Bio != nil || request.Location != nil {
+	if request.MentorshipPreference != nil || request.Bio != nil || request.Hometown != nil {
 		// Should only replace non-null elements.
 		err = tx.Where(
 			&data.UserAdditionalData{UserId: c.SessionData.UserId},
@@ -61,7 +61,7 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 			&data.UserAdditionalData{
 				MentorshipPreference: request.MentorshipPreference,
 				Bio:                  request.Bio,
-				Location:             request.Location,
+				Hometown:             request.Hometown,
 			},
 		).FirstOrCreate(&data.UserAdditionalData{}).Error
 		if err != nil {
@@ -100,7 +100,7 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 		UserAdditionalData: api.UserAdditionalData{
 			MentorshipPreference: user.AdditionalData.MentorshipPreference,
 			Bio:                  user.AdditionalData.Bio,
-			Location:             user.AdditionalData.Location,
+			Hometown:             user.AdditionalData.Hometown,
 		},
 	}
 
