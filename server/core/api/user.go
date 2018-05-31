@@ -18,7 +18,7 @@ type UserPersonalInfo struct {
 type UserAdditionalData struct {
 	MentorshipPreference *int    `json:"mentorshipPreference"`
 	Bio                  *string `json:"bio"`
-	Location             *string `json:"location"`
+	Hometown             *string `json:"hometown"`
 }
 
 type UserContactInfo struct {
