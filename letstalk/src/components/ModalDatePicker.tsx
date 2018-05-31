@@ -57,7 +57,7 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
         showIcon={false}
         placeholder="Select Date"
         format="MMM Do, YYYY"
-        minDate="1900-01-01"
+        minDate={new Date(1900, 1, 1)}
         maxDate={new Date()}
         confirmBtnText="Confirm"
         cancelBtnText="Cancel"
