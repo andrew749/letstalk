@@ -27,6 +27,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
 import auth from '../services/auth';
+import {fbLogin} from '../services/fb';
 import { ActionButton, Card, Header, Loading } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -36,6 +37,7 @@ import { programById, sequenceById } from '../models/cohort';
 import {AnalyticsHelper} from '../services/analytics';
 import {ProfileAvatar} from '../components';
 import Colors from '../services/colors';
+import QRCode from "react-native-qrcode";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -65,7 +67,6 @@ class ProfileView extends Component<Props> {
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
-    this.openQrView = this.openQrView.bind(this);
     this.openQrScannerView = this.openQrScannerView.bind(this);
   }
 
@@ -156,6 +157,21 @@ class ProfileView extends Component<Props> {
           <Text style={styles.value}>Facebook profile</Text>
         </TouchableOpacity>
       );
+    } else {
+      // link fb profile
+      profileItems.push(hr);
+      profileItems.push(
+        <TouchableOpacity
+          style={styles.listItem}
+          onPress={async () => {
+            await auth.linkFB();
+            await this.props.fetchProfile();
+          }}
+        >
+          <MaterialIcons name="face" size={24} />
+          <Text style={styles.value}>Link Facebook profile</Text>
+        </TouchableOpacity>
+      );
     }
 
     const cohortItems = buildItems([
@@ -167,8 +183,7 @@ class ProfileView extends Component<Props> {
     return (
       <View style={styles.contentContainer} >
         <Image style={styles.image} source={require('../img/profile.jpg')} />
-        <ReactNativeButton title="View QR Code"
-              onPress={this.openQrView} />
+        {this.renderQrCode()}
         <ReactNativeButton title="Scan QR Code"
                            onPress={this.openQrScannerView} />
         <Text style={styles.sectionHeader}>Personal Info</Text>
@@ -198,6 +213,18 @@ class ProfileView extends Component<Props> {
     );
   }
 
+  renderQrCode = () => {
+    const {secret} = this.props.profile;
+    return (
+      !!secret && <QRCode
+        value={secret}
+        size={200}
+        bgColor='black'
+        fgColor='white'
+      />
+    );
+  };
+
   render() {
     const body = this.renderBody();
 
@@ -217,10 +244,6 @@ class ProfileView extends Component<Props> {
         <ActionButton onPress={this.onLogoutPress} title='LOGOUT'/>
       </ScrollView>
     );
-  }
-
-  private async openQrView() {
-    this.props.navigation.navigate('QrCode');
   }
 
   private async openQrScannerView() {

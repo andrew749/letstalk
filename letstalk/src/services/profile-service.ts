@@ -10,6 +10,7 @@ import {
   UserState,
 } from '../models';
 import {
+  UserAdditionalData,
   UserPersonalInfo,
 } from '../models/user';
 import auth, { Auth } from './auth';
@@ -33,9 +34,8 @@ export interface SignupRequest {
   readonly profilePic?: string;
 }
 
-interface UpdateCohortRequest {
+interface UpdateCohortRequest extends UserAdditionalData {
   readonly cohortId: number;
-  readonly mentorshipPreference: number;
 }
 
 export interface PersonalityVector {
@@ -63,7 +63,7 @@ export interface BootstrapResponse {
   readonly onboardingStatus: OnboardingStatus;
 };
 
-export interface ProfileEditRequest {
+export interface ProfileEditRequest extends UserAdditionalData {
   readonly firstName: string;
   readonly lastName: string;
   readonly gender: number;
@@ -142,7 +142,7 @@ export class RemoteProfileService implements ProfileService {
     const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
     return {
       ...response,
-      birthdate: new Date(response.birthdate),
+      birthdate: new Date(1000 * (response.birthdate as any)),
     };
   }
 

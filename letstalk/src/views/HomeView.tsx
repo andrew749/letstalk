@@ -192,7 +192,7 @@ class HomeView extends Component<Props> {
     };
 
     pushRels('Your Mentor', mentors);
-    pushRels('Your Mentor', mentees);
+    pushRels('Your Mentee', mentees);
 
     if (connections.size > 0) {
       elements.push(<Header>Your Connections</Header>);

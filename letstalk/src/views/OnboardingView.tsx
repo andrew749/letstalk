@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Picker, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Picker, ScrollView, StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -42,6 +42,7 @@ import {
   FormProps,
   Header,
   InfoText,
+  LabeledFormInput,
   ModalPicker,
   Rating,
 } from '../components';
@@ -68,6 +69,8 @@ interface CohortFormData {
   sequenceId: string;
   gradYear: number;
   mentorshipPreference: number;
+  bio: string | null,
+  location: string | null,
 }
 
 interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
@@ -103,7 +106,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
   const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   return (
-    <View>
+    <View style={styles.cohortForm}>
       <Field
         label="Program"
         name="programId"
@@ -137,11 +140,27 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
       </Field>
+      <Header>Additional Info</Header>
+      <Text style={styles.hint}>Optional</Text>;
+      <Field
+        label="Location"
+        name="location"
+        component={LabeledFormInput}
+        autoCorrect={false}
+        placeholder="e.g. Waterloo, ON"
+      />
+      <Field
+        label="Bio"
+        name="bio"
+        component={LabeledFormInput}
+        autoCorrect={false}
+        placeholder="e.g. I enjoy long walks on the beach"
+      />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         disabled={!valid}
         loading={submitting}
-        title={submitting ? null : "Choose cohort"}
+        title={submitting ? null : "Submit"}
         onPress={handleSubmit(onSubmitWithReset)}
       />
     </View>
@@ -254,12 +273,14 @@ class OnboardingView extends Component<Props> {
   }
 
   async onSubmitCohort(values: CohortFormData) {
-    const { programId, sequenceId, gradYear, mentorshipPreference } = values;
+    const { programId, sequenceId, gradYear, mentorshipPreference, bio, location } = values;
     const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
     try {
       const onboardingStatus = await profileService.updateCohort({
         cohortId,
         mentorshipPreference,
+        bio,
+        location,
       });
       this.props.setOnboardingStatusAction(onboardingStatus);
       await this.props.fetchBootstrap();
@@ -287,14 +308,16 @@ class OnboardingView extends Component<Props> {
       case ONBOARDING_COHORT:
         // TODO: Update copy here
         return (
-          <ScrollView>
-            <Header>Your Cohort</Header>
-            <InfoText>
-              Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
-              students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
-            </InfoText>
-            <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
-          </ScrollView>
+          <KeyboardAvoidingView behavior="padding">
+            <ScrollView>
+              <Header>Your Cohort</Header>
+              <InfoText>
+                Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
+                students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
+              </InfoText>
+              <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
+            </ScrollView>
+          </KeyboardAvoidingView>
         );
       case ONBOARDING_VECTOR_ME:
         // NOTE: This will not show up now
@@ -350,6 +373,15 @@ class OnboardingView extends Component<Props> {
 const styles = StyleSheet.create({
   actionButton: {
     marginBottom: 10,
+  },
+  hint: {
+    color: 'gray',
+    fontSize: 14,
+    marginTop: -10,
+    marginLeft: 10,
+  },
+  cohortForm: {
+    paddingBottom: 100,
   },
 });
 

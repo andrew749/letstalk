@@ -1,5 +1,5 @@
 // DEV
-export const BASE_URL = 'http://192.168.0.197';
+export const BASE_URL = 'http://192.168.0.100';
 export const ANALYTICS_ID = 'UA-118691527-1';
 // PROD
 // export const BASE_URL = 'http://54.175.152.141';
@@ -8,6 +8,7 @@ export const ANALYTICS_ID = 'UA-118691527-1';
 export const BOOTSTRAP_ROUTE           = '/v1/bootstrap';
 export const COHORT_ROUTE              = '/v1/cohort';
 export const FB_LOGIN_ROUTE            = '/v1/fb_login';
+export const FB_LINK_ROUTE            = '/v1/fb_link';
 export const LOGIN_ROUTE               = '/v1/login';
 export const LOGOUT_ROUTE              = '/v1/logout';
 export const ME_ROUTE                  = '/v1/me';

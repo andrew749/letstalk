@@ -1,5 +1,5 @@
 import { Requestor } from './requests';
-import { FB_LOGIN_ROUTE, LOGIN_ROUTE, LOGOUT_ROUTE } from './constants';
+import { FB_LOGIN_ROUTE, FB_LINK_ROUTE, LOGIN_ROUTE, LOGOUT_ROUTE } from './constants';
 import { fbLogin } from './fb';
 
 export type SessionToken = string;
@@ -8,6 +8,7 @@ export interface SessionService {
   login(username: string, password: string, notificationToken?: string): Promise<SessionToken>;
   loginWithFb(notificationToken?: string): Promise<SessionToken>;
   logout(sessionToken: SessionToken): Promise<void>;
+  linkFb(sessionToken: SessionToken): Promise<boolean>;
 }
 
 export class InvalidCredentialsError extends Error {
@@ -40,6 +41,10 @@ export class MockSessionService implements SessionService {
     if (sessionToken !== MockSessionService.token) throw new Error('Invalid session token');
     // no-op
   }
+
+  async linkFb(sessionToken: SessionToken): Promise<boolean> {
+    return true;
+  }
 }
 
 export class RemoteSessionService implements SessionService {
@@ -69,5 +74,22 @@ export class RemoteSessionService implements SessionService {
 
   async logout(sessionToken: SessionToken): Promise<void> {
     await this.requestor.post(LOGOUT_ROUTE, {}, sessionToken);
+  }
+
+  async linkFb(sessionToken: SessionToken): Promise<boolean> {
+    const res = await fbLogin();
+    if (!res) return false;
+    const {token, expires} = res;
+    try {
+      const response = await this.requestor.post(FB_LINK_ROUTE, {
+        token: token,
+        expiry: expires
+      }, sessionToken);
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+
+    return true;
   }
 }

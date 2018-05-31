@@ -24,7 +24,6 @@ import RequestToMatchView from './views/RequestToMatchView';
 import NotificationService, { Notification } from './services/notification-service';
 
 import Colors from './services/colors';
-import QrCodeView from "./views/QrCodeView";
 import QrScannerView from "./views/QrScannerView";
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
@@ -104,9 +103,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Onboarding: {
     screen: OnboardingView,
-  },
-  QrCode: {
-    screen: QrCodeView,
   },
   QrScanner: {
     screen: QrScannerView,

@@ -49,6 +49,10 @@ import {
   gradYearOptions,
   ValueLabel,
 } from '../models/cohort';
+import {
+  MENTORSHIP_PREFERENCE_MENTOR,
+  MENTORSHIP_PREFERENCE_MENTEE,
+} from '../models/user';
 import Colors from '../services/colors';
 
 interface EditFormData {
@@ -60,6 +64,9 @@ interface EditFormData {
   programId: string,
   sequenceId: string;
   gradYear: number;
+  mentorshipPreference: number;
+  bio: string | null;
+  location: string | null;
 }
 
 // TODO: move elsewhere
@@ -164,6 +171,29 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
       >
         {gradYearItems}
       </Field>
+      <Field
+        label="Mentorship Preference"
+        name="mentorshipPreference"
+        component={ModalPicker}
+        validate={required}
+      >
+        <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
+        <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
+      </Field>
+      <Field
+        label="Location"
+        name="location"
+        component={LabeledFormInput}
+        autoCorrect={false}
+        placeholder="e.g. Waterloo, ON"
+      />
+      <Field
+        label="Bio"
+        name="bio"
+        component={LabeledFormInput}
+        autoCorrect={false}
+        placeholder="e.g. I enjoy long walks on the beach"
+      />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         backgroundColor={Colors.HIVE_MAIN_BG}
@@ -223,6 +253,9 @@ class ProfileEditView extends Component<Props> {
         programId,
         sequenceId,
         gradYear,
+        mentorshipPreference,
+        bio,
+        location,
       } = values;
       const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
       await profileService.profileEdit({
@@ -232,6 +265,9 @@ class ProfileEditView extends Component<Props> {
         gender,
         cohortId,
         birthdate: Math.round(values.birthdate.getTime() / 1000),
+        mentorshipPreference,
+        bio,
+        location,
       });
       await this.props.fetchProfile();
       this.props.navigation.goBack();
@@ -250,6 +286,9 @@ class ProfileEditView extends Component<Props> {
       programId,
       sequenceId,
       gradYear,
+      mentorshipPreference,
+      bio,
+      location,
     } = this.props.profile;
     const EditFormWithRedux = EditFormWithReduxBuilder({
       firstName,
@@ -260,6 +299,9 @@ class ProfileEditView extends Component<Props> {
       programId,
       sequenceId,
       gradYear,
+      mentorshipPreference,
+      bio,
+      location,
     });
     return (
       <KeyboardAvoidingView behavior="padding">
