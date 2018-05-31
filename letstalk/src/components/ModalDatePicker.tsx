@@ -54,23 +54,18 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
         style={{width: '100%'}}
         date={ dateValue }
         mode="date"
+        showIcon={false}
         placeholder="Select Date"
-        format="YYYY-MM-DD"
+        format="MMM Do, YYYY"
         minDate="1900-01-01"
         maxDate={new Date()}
         confirmBtnText="Confirm"
         cancelBtnText="Cancel"
         customStyles={{
-          dateIcon: {
-            position: 'absolute',
-            left: 0,
-            top: 4,
-            marginLeft: 0
-          },
           dateInput: {
-            marginLeft: 36
-          }
-          // ... You can check the source to find the other keys.
+            marginLeft: 20,
+            marginRight: 20
+          },
         }}
         onDateChange={(_, date) => {
           onChange(date);
