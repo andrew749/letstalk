@@ -143,7 +143,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
       <Header>Additional Info</Header>
-      <Text style={styles.hint}>Optional</Text>;
+      <Text style={styles.hint}>Optional</Text>
       <Field
         label="Hometown"
         name="hometown"
