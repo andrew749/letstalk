@@ -23,7 +23,7 @@ import Immutable from 'immutable';
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { ActionTypes } from '../redux/bootstrap/actions';
-import { ActionButton, Button, Card, Header, Loading, ProfileAvatar } from '../components';
+import { ActionButton, Button, Card, TextHeader, Loading, ProfileAvatar } from '../components';
 import { Relationship } from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
@@ -192,7 +192,7 @@ class HomeView extends Component<Props> {
     const elements: Array<ReactNode> = [];
     const pushRels = (title: string, rels: Immutable.List<ReactNode>) => {
       if (rels.size > 0) {
-        elements.push(<Header>{ title + (rels.size > 1 ? 's' : '') }</Header>);
+        elements.push(<TextHeader>{ title + (rels.size > 1 ? 's' : '') }</TextHeader>);
         elements.push(rels.toJS());
       }
     };
@@ -201,7 +201,7 @@ class HomeView extends Component<Props> {
     pushRels('Your Mentee', mentees);
 
     if (connections.size > 0) {
-      elements.push(<Header>Your Connections</Header>);
+      elements.push(<TextHeader>Your Connections</TextHeader>);
       elements.push(connections.toJS());
     }
 

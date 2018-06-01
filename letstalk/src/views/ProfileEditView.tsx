@@ -28,7 +28,7 @@ import {
   Card,
   FormP,
   FormProps,
-  Header,
+  TextHeader,
   LabeledFormInput,
   Loading,
   ModalDatePicker,

@@ -43,12 +43,14 @@ import {
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
+
 import {
   ActionButton,
   Card,
   FilterableElement,
   FilterListModal,
   Header,
+  TextHeader,
   Loading,
 } from '../components';
 import { Credential } from '../models/credential';
@@ -81,26 +83,12 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-const Head: SFC<{}> = (props: {}) => {
-  return <View style={styles.header}/>;
-}
 
 class RequestToMatchView extends Component<Props> {
-  static navigationOptionsAndroid = ({ navigation }: NavigationScreenDetails<void> ) => ({
-    headerTitle: 'Request',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
-  });
 
-  static navigationOptionsIOS = ({ navigation}: NavigationScreenDetails<void> ) => ({
-    header: <Head/>,
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void> ) => ({
+    header: (props: any) => <Header {...props}></Header>
   });
-
-  static navigationOptions = (Platform.OS == 'ios') ? RequestToMatchView.navigationOptionsIOS : RequestToMatchView.navigationOptionsAndroid;
 
   constructor(props: Props) {
     super(props);
@@ -231,7 +219,7 @@ class RequestToMatchView extends Component<Props> {
   }
 
   private renderBody() {
-    const { credentials } = this.props.credentialOptions;
+    const { credentialOptions } = this.props.credentialOptions;
 
     const addCredentialButton = (onPress: () => void) => {
       return (
@@ -243,22 +231,15 @@ class RequestToMatchView extends Component<Props> {
 
     return (
       <View style={styles.container}>
-        <View style={styles.topContainer}>
-          <FilterListModal
-            data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-            onSelect={this.onReqSelect}
-            placeholder="Find someone who is a..."
-          />
-        </View>
         <ScrollView keyboardShouldPersistTaps={'always'}>
-          <Header>Active Requests</Header>
+          <TextHeader>Active Requests</TextHeader>
           <View style={styles.credentialRequestContainer}>
             {this.renderCredentialRequests()}
           </View>
           <View style={styles.credentialHeaderContainer}>
-            <Header>Your Credentials</Header>
+            <TextHeader>Your Credentials</TextHeader>
             <FilterListModal
-              data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
+              data={credentialOptions.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
               onSelect={this.onCredSelect}
               onRawSelect={this.onRawCredSelect}
               placeholder="I am a..."
@@ -341,10 +322,6 @@ const styles = StyleSheet.create({
   credential: {
     fontWeight: 'bold',
     fontSize: 18,
-  },
-  header: {
-    height: Platform.OS == "ios" ? 20 : 0,
-    backgroundColor: Colors.HIVE_PRIMARY,
   },
   addButton: {
     margin: 12,

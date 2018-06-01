@@ -29,7 +29,7 @@ import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, TextHeader, Loading } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
@@ -191,8 +191,8 @@ class ProfileView extends Component<Props> {
       <View style={styles.contentContainer} >
         {this.renderQrCode()}
         <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-        <Header>{headerText}</Header>
-        <Icon
+        <TextHeader>{headerText}</TextHeader>
+        <Icon 
           name='pencil'
           type='font-awesome'
           color={Colors.HIVE_PRIMARY}
