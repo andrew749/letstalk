@@ -52,7 +52,7 @@ func GetMentorsByMenteeId(
 	flag api.MatchingInfoFlag,
 ) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
-	req := db.Where(&data.Matching{Mentee: menteeId})
+	req := db.Where(&data.Matching{Mentee: menteeId}).Preload("MentorUser")
 
 	if flag&api.MATCHING_INFO_FLAG_AUTH_DATA != 0 {
 		req = req.Preload("MentorUser.ExternalAuthData")

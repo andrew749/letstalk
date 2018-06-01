@@ -246,9 +246,7 @@ func GetAnswerersByAskerId(
 	flag api.ReqMatchingInfoFlag,
 ) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
-	req := db.Where(
-		&data.RequestMatching{Asker: askerId},
-	).Preload("AnswererUser")
+	req := db.Where(&data.RequestMatching{Asker: askerId}).Preload("AnswererUser")
 
 	if flag&api.REQ_MATCHING_INFO_FLAG_AUTH_DATA != 0 {
 		req = req.Preload("AnswererUser.ExternalAuthData")
@@ -269,9 +267,7 @@ func GetAskersByAnswererId(
 	flag api.ReqMatchingInfoFlag,
 ) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
-	req := db.Where(
-		&data.RequestMatching{Answerer: answererId},
-	).Preload("AskerUser")
+	req := db.Where(&data.RequestMatching{Answerer: answererId}).Preload("AskerUser")
 
 	if flag&api.REQ_MATCHING_INFO_FLAG_AUTH_DATA != 0 {
 		req = req.Preload("AskerUser.ExternalAuthData")

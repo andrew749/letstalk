@@ -34,14 +34,14 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 
 func GetMatchProfileController(c *ctx.Context) errs.Error {
 	matchUserIdStr := c.GinContext.Param("userId")
-	matchUserId, err := strconv.Atoi(matchUserIdStr)
-	if err != nil {
-		return errs.NewClientError(err.Error())
+	matchUserId, convErr := strconv.Atoi(matchUserIdStr)
+	if convErr != nil {
+		return errs.NewClientError(convErr.Error())
 	}
 
 	userModel, err := query.GetMatchProfile(c.Db, c.SessionData.UserId, matchUserId)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	c.Result = *userModel

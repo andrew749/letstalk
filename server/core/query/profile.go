@@ -118,5 +118,50 @@ func GetMatchProfile(
 	meUserId int,
 	matchUserId int,
 ) (*api.ProfileResponse, errs.Error) {
+
+	// Fetch mentors and mentees.
+	flag := api.MATCHING_INFO_FLAG_NONE
+	// Matchings where user is the mentee.
+	mentors, err := GetMentorsByMenteeId(db, meUserId, flag)
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	// Matchings where user is the mentor.
+	mentees, err := GetMenteesByMentorId(db, meUserId, flag)
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	reqFlag := api.REQ_MATCHING_INFO_FLAG_NONE
+	// Request matchings where user is answerer.
+	askers, err := GetAskersByAnswererId(db, meUserId, reqFlag)
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	// Request matchings where user is asker.
+	answerers, err := GetAnswerersByAskerId(db, meUserId, reqFlag)
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	userIds := make(map[int]interface{})
+	for _, mentor := range mentors {
+		userIds[mentor.MentorUser.UserId] = nil
+	}
+	for _, mentee := range mentees {
+		userIds[mentee.MenteeUser.UserId] = nil
+	}
+	for _, asker := range askers {
+		userIds[asker.AskerUser.UserId] = nil
+	}
+	for _, answerer := range answerers {
+		userIds[answerer.AnswererUser.UserId] = nil
+	}
+
+	// Check if the user profile being request is actually matched with the calling user
+	if _, ok := userIds[matchUserId]; !ok {
+		return nil, errs.NewClientError("You are not matched with this user")
+	}
+
 	return GetProfile(db, matchUserId)
 }
