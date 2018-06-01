@@ -17,6 +17,7 @@ import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
   COHORT_ROUTE,
+  MATCH_PROFILE_ROUTE,
   ME_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
@@ -140,6 +141,16 @@ export class RemoteProfileService implements ProfileService {
   async me(): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
+    return {
+      ...response,
+      birthdate: new Date(1000 * (response.birthdate as any)),
+    };
+  }
+
+  async matchProfile(userId: number): Promise<ProfileData> {
+    const sessionToken = await this.auth.getSessionToken();
+    const url = MATCH_PROFILE_ROUTE + '/' + userId;
+    const response: ProfileData = await this.requestor.get(url, sessionToken);
     return {
       ...response,
       birthdate: new Date(1000 * (response.birthdate as any)),

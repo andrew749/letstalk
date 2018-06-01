@@ -1,6 +1,7 @@
 package query
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -24,27 +25,43 @@ func GetMatchingByUserIds(db *gorm.DB, firstUser int, secondUser int) (*data.Mat
 	return &matchings[0], nil
 }
 
-func GetMenteesByMentorId(db *gorm.DB, mentorId int) ([]data.Matching, error) {
+func GetMenteesByMentorId(
+	db *gorm.DB,
+	mentorId int,
+	flag api.MatchingInfoFlag,
+) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
-	err := db.Where(
-		&data.Matching{Mentor: mentorId},
-	).Preload("MenteeUser").Preload("MenteeUser.ExternalAuthData").Preload(
-		"MenteeUser.Cohort.Cohort",
-	).Find(&matchings).Error
-	if err != nil {
+	req := db.Where(&data.Matching{Mentor: mentorId}).Preload("MenteeUser")
+
+	if flag&api.MATCHING_INFO_FLAG_AUTH_DATA != 0 {
+		req = req.Preload("MenteeUser.ExternalAuthData")
+	}
+	if flag&api.MATCHING_INFO_FLAG_COHORT != 0 {
+		req = req.Preload("MenteeUser.Cohort.Cohort")
+	}
+
+	if err := req.Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil
 }
 
-func GetMentorsByMenteeId(db *gorm.DB, menteeId int) ([]data.Matching, error) {
+func GetMentorsByMenteeId(
+	db *gorm.DB,
+	menteeId int,
+	flag api.MatchingInfoFlag,
+) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
-	err := db.Where(
-		&data.Matching{Mentee: menteeId},
-	).Preload("MentorUser").Preload("MentorUser.ExternalAuthData").Preload(
-		"MentorUser.Cohort.Cohort",
-	).Find(&matchings).Error
-	if err != nil {
+	req := db.Where(&data.Matching{Mentee: menteeId}).Preload("MentorUser")
+
+	if flag&api.MATCHING_INFO_FLAG_AUTH_DATA != 0 {
+		req = req.Preload("MentorUser.ExternalAuthData")
+	}
+	if flag&api.MATCHING_INFO_FLAG_COHORT != 0 {
+		req = req.Preload("MentorUser.Cohort.Cohort")
+	}
+
+	if err := req.Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil
