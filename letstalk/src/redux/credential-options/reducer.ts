@@ -18,13 +18,13 @@ import {
 import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
-  readonly credentials: Credentials;
+  readonly credentialOptions: Credentials;
   readonly fetchState: FetchState;
 }
 
 const initialState: State = {
   fetchState: initialFetchState,
-  credentials: Immutable.List(),
+  credentialOptions: Immutable.List(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -33,7 +33,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       return {
         ...state,
         fetchState: fetchStateReducer(action),
-        credentials: getDataOrCur(action, state.credentials),
+        credentialOptions: getDataOrCur(action, state.credentialOptions),
       };
     default:
       // Ensure exhaustiveness of select

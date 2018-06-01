@@ -40,7 +40,7 @@ import {
   Emoji,
   FormP,
   FormProps,
-  Header,
+  TextHeader,
   InfoText,
   LabeledFormInput,
   ModalPicker,
@@ -142,7 +142,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
         <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
-      <Header>Additional Info</Header>
+      <TextHeader>Additional Info</TextHeader>
       <Text style={styles.hint}>Optional</Text>
       <Field
         label="Hometown"
@@ -312,7 +312,7 @@ class OnboardingView extends Component<Props> {
         return (
           <KeyboardAvoidingView behavior="padding">
             <ScrollView>
-              <Header>Your Cohort</Header>
+              <TextHeader>Your Cohort</TextHeader>
               <InfoText>
                 Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
                 students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
@@ -328,7 +328,7 @@ class OnboardingView extends Component<Props> {
         };
         return (
           <ScrollView>
-            <Header>Your Personality</Header>
+            <TextHeader>Your Personality</TextHeader>
             <InfoText>
               Looks like you're going to be a big <Emoji name="man"/>! We'd like to get
               to know you a little better, so that we can find you some lit <Emoji name="fire"/>
@@ -350,7 +350,7 @@ class OnboardingView extends Component<Props> {
         };
         return (
           <ScrollView>
-            <Header>Their Personality</Header>
+            <TextHeader>Their Personality</TextHeader>
             <InfoText>
               We'd also like to get a sense of what kind of noobies <Emoji name="baby"/> you would
               like to mentor.
@@ -362,7 +362,7 @@ class OnboardingView extends Component<Props> {
         // TODO: What to do in this case
         return (
           <ScrollView>
-            <Header>You're done</Header>
+            <TextHeader>You're done</TextHeader>
           </ScrollView>
         );
       default:

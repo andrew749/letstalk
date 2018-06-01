@@ -6,6 +6,7 @@ import Emoji from './Emoji';
 import FilterListModal, { FilterableElement } from './FilterListModal';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
+import TextHeader from './TextHeader';
 import InfoText from './InfoText';
 import LabeledFormInput from './LabeledFormInput';
 import Loading from './Loading';
@@ -33,4 +34,5 @@ export {
   Rating,
   ProfileAvatar,
   ProfileAvatarEditableFormElement,
+  TextHeader
 };

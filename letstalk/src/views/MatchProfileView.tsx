@@ -29,7 +29,7 @@ import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, TextHeader, Loading } from '../components';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as MatchProfileState, fetchMatchProfile } from '../redux/match-profile/reducer';
@@ -170,7 +170,7 @@ class MatchProfileView extends Component<Props> {
     return (
       <View style={styles.contentContainer} >
         <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-        <Header>{headerText}</Header>
+        <TextHeader>{headerText}</TextHeader>
         <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
         {this.renderProfile(String(gradYear), program, bio)}
         {this.renderContactInfo(email, fbId, phoneNumber)}
