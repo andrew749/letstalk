@@ -56,21 +56,8 @@ class MatchProfileView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
-    this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
     this.renderInner = this.renderInner.bind(this);
-    // this.openQrScannerView = this.openQrScannerView.bind(this);
-  }
-
-  private async onLogoutPress() {
-    try {
-      await auth.logout();
-    } catch (error) { }
-    this.props.navigation.dispatch(NavigationActions.reset({
-      index: 0,
-      key: null,
-      actions: [NavigationActions.navigate({ routeName: 'Login' })]
-    }));
   }
 
   async componentDidMount() {
@@ -95,27 +82,32 @@ class MatchProfileView extends Component<Props> {
 
   private renderContactInfo(email: string, fbId: string, phoneNumber: string) {
 
-    const buildItem = (label: string, value: string) => {
+    const buildItem = (label: string, value: string, link: string) => {
+      const onPress = () => Linking.openURL(link);
       return (
-        <View key={label} style={styles.listItem}>
+        <TouchableOpacity key={label} onPress={onPress} style={styles.listItem}>
           <Text style={styles.label}>{label}: </Text>
           <Text style={styles.value}>{value}</Text>
-        </View>
+        </TouchableOpacity>
       );
     };
 
-    const buildItems = (name_values: Array<[string, string]>) => {
-      const items = name_values.map(([label, value]) => {
-        return buildItem(label, value);
+    const buildItems = (name_values: Array<[string, string, string]>) => {
+      const items = name_values.map(([label, value, link]) => {
+        return buildItem(label, value, link);
       });
       return items;
     };
 
-    const contactItems = buildItems([
-      ['Phone', phoneNumber],
-      ['Email', email]
-    ]);
-
+    const emailLink = 'mailto:' + email;
+    const contactInfos: Array<[string, string, string]> = [
+      ['Email', email, emailLink],
+    ];
+    if (!!phoneNumber) {
+      const smsLink = 'sms:' + phoneNumber;
+      contactInfos.push(['Phone', phoneNumber, smsLink]);
+    }
+    const contactItems = buildItems(contactInfos);
 
     if (fbId !== null) {
       const fbLink = 'fb://profile/' + fbId;
@@ -177,22 +169,13 @@ class MatchProfileView extends Component<Props> {
 
     return (
       <View style={styles.contentContainer} >
-        {this.renderQrCode()}
         <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
         <Header>{headerText}</Header>
-        <Icon
-          name='pencil'
-          type='font-awesome'
-          color={Colors.HIVE_PRIMARY}
-          containerStyle={styles.editButton}
-          onPress={() => navigate('ProfileEdit')} />
-        {/* <ReactNativeButton title="Scan QR Code" onPress={this.openQrScannerView} /> */}
         <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
         {this.renderProfile(String(gradYear), program, bio)}
         {this.renderContactInfo(email, fbId, phoneNumber)}
         <View style={styles.sectionContainer}>
         </View>
-        <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
       </View>
     );
   }
@@ -211,18 +194,6 @@ class MatchProfileView extends Component<Props> {
       />
     );
   }
-
-  renderQrCode = () => {
-    const {secret} = this.props.profile;
-    return (
-      !!secret && <QRCode
-        value={secret}
-        size={150}
-        bgColor='black'
-        fgColor='white'
-      />
-    );
-  };
 
   render() {
     const body = this.renderBody();
