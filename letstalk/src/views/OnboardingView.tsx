@@ -62,6 +62,7 @@ import {
 import {
   MENTORSHIP_PREFERENCE_MENTOR,
   MENTORSHIP_PREFERENCE_MENTEE,
+  MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
 
 interface CohortFormData {
@@ -139,6 +140,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       >
         <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
+        <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
       <Header>Additional Info</Header>
       <Text style={styles.hint}>Optional</Text>;

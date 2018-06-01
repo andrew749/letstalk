@@ -52,6 +52,7 @@ import {
 import {
   MENTORSHIP_PREFERENCE_MENTOR,
   MENTORSHIP_PREFERENCE_MENTEE,
+  MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
 import Colors from '../services/colors';
 
@@ -179,6 +180,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
       >
         <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
+        <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
       <Field
         label="Hometown"

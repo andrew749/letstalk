@@ -32,6 +32,7 @@ type MentorshipPreference uint
 const (
 	MENTORSHIP_PREFERENCE_MENTOR MentorshipPreference = iota + 1
 	MENTORSHIP_PREFERENCE_MENTEE
+	MENTORSHIP_PREFERENCE_NONE
 )
 
 type UserType int
