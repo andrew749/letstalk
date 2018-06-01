@@ -7,7 +7,7 @@ type Cohort struct {
 	SequenceId string `json:"sequenceId"`
 }
 
-type MyProfileResponse struct {
+type ProfileResponse struct {
 	UserAdditionalData
 	UserPersonalInfo
 	UserContactInfo

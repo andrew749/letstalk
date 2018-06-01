@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -239,25 +240,47 @@ func ResolveRequestToMatch(
 	}
 }
 
-func GetAnswerersByAskerId(db *gorm.DB, askerId int) ([]data.RequestMatching, error) {
+func GetAnswerersByAskerId(
+	db *gorm.DB,
+	askerId int,
+	flag api.ReqMatchingInfoFlag,
+) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
-	if err := db.Where(
+	req := db.Where(
 		&data.RequestMatching{Asker: askerId},
-	).Preload("AnswererUser").Preload("AnswererUser.ExternalAuthData").Preload(
-		"Credential",
-	).Find(&matchings).Error; err != nil {
+	).Preload("AnswererUser")
+
+	if flag&api.REQ_MATCHING_INFO_FLAG_AUTH_DATA != 0 {
+		req = req.Preload("AnswererUser.ExternalAuthData")
+	}
+	if flag&api.REQ_MATCHING_INFO_FLAG_CREDENTIAL != 0 {
+		req = req.Preload("Credential")
+	}
+
+	if err := req.Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil
 }
 
-func GetAskersByAnswererId(db *gorm.DB, answererId int) ([]data.RequestMatching, error) {
+func GetAskersByAnswererId(
+	db *gorm.DB,
+	answererId int,
+	flag api.ReqMatchingInfoFlag,
+) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
-	if err := db.Where(
+	req := db.Where(
 		&data.RequestMatching{Answerer: answererId},
-	).Preload("AskerUser").Preload("AskerUser.ExternalAuthData").Preload(
-		"Credential",
-	).Find(&matchings).Error; err != nil {
+	).Preload("AskerUser")
+
+	if flag&api.REQ_MATCHING_INFO_FLAG_AUTH_DATA != 0 {
+		req = req.Preload("AskerUser.ExternalAuthData")
+	}
+	if flag&api.REQ_MATCHING_INFO_FLAG_CREDENTIAL != 0 {
+		req = req.Preload("Credential")
+	}
+
+	if err := req.Find(&matchings).Error; err != nil {
 		return nil, err
 	}
 	return matchings, nil

@@ -82,19 +82,27 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	// Fetch mentors and mentees.
-	mentors, err := query.GetMentorsByMenteeId(c.Db, userId) // Matchings where user is the mentee.
+
+	flag := api.MATCHING_INFO_FLAG_AUTH_DATA | api.MATCHING_INFO_FLAG_COHORT
+	// Matchings where user is the mentee.
+	mentors, err := query.GetMentorsByMenteeId(c.Db, userId, flag)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	mentees, err := query.GetMenteesByMentorId(c.Db, userId) // Matchings where user is the mentor.
+	// Matchings where user is the mentor.
+	mentees, err := query.GetMenteesByMentorId(c.Db, userId, flag)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	askers, err := query.GetAskersByAnswererId(c.Db, userId) // Request matchings where user is answerer.
+
+	reqFlag := api.REQ_MATCHING_INFO_FLAG_CREDENTIAL | api.REQ_MATCHING_INFO_FLAG_AUTH_DATA
+	// Request matchings where user is answerer.
+	askers, err := query.GetAskersByAnswererId(c.Db, userId, reqFlag)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	answerers, err := query.GetAnswerersByAskerId(c.Db, userId) // Request matchings where user is asker.
+	// Request matchings where user is asker.
+	answerers, err := query.GetAnswerersByAskerId(c.Db, userId, reqFlag)
 	if err != nil {
 		return errs.NewDbError(err)
 	}

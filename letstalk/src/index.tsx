@@ -16,6 +16,7 @@ import appReducer from './redux';
 import auth from './services/auth';
 import HomeView from './views/HomeView';
 import LoginView from './views/LoginView';
+import MatchProfileView from './views/MatchProfileView';
 import ProfileView from './views/ProfileView';
 import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
@@ -108,6 +109,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   QrScanner: {
     screen: QrScannerView,
+  },
+  MatchProfile: {
+    screen: MatchProfileView,
   },
 }, {
   initialRouteName: loggedIn ? "Tabbed" : "Login",

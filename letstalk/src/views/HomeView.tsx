@@ -116,6 +116,7 @@ class HomeView extends Component<Props> {
     var icon: string;
     var onPress: () => void;
     const {
+      userId,
       email,
       fbId,
       phoneNumber,
@@ -135,10 +136,15 @@ class HomeView extends Component<Props> {
       onPress = () => Linking.openURL(emailLink);
     }
 
+    const viewProfile = () => {
+      console.log('opening: ' + userId);
+      this.props.navigation.navigate('MatchProfile', { userId });
+    }
+
     // TODO: Move into styles
     return (
       <View style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={ viewProfile }>
           <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 18, paddingTop: 2 }}>View Profile</Text>
         </TouchableOpacity>
         <Button buttonStyle={{ width: 150 }} icon={icon} title="Contact" onPress={onPress} />
