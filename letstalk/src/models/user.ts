@@ -25,6 +25,7 @@ export const USER_TYPE_UNKNOWN  = -1;
 
 export const MENTORSHIP_PREFERENCE_MENTOR = 1;
 export const MENTORSHIP_PREFERENCE_MENTEE = 2;
+export const MENTORSHIP_PREFERENCE_NONE = 3;
 
 export interface UserPersonalInfo {
   readonly userId: number
