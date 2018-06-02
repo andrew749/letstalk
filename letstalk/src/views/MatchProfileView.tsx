@@ -159,7 +159,7 @@ class MatchProfileView extends Component<Props> {
 
     const genderStr = capitalize(genderIdToString(gender));
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const timeDiff = new Date().valueOf() - birthdate.valueOf();
+    const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
     const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
 
     const sequence = sequenceById(sequenceId);

@@ -232,7 +232,7 @@ type FBUser struct {
 	LastName  string
 	Email     string
 	Gender    int
-	Birthdate *time.Time
+	Birthdate string
 }
 
 func getFBUser(accessToken string) (*FBUser, error) {
@@ -251,19 +251,13 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, errors.New("Unable to parse gender")
 	}
 
-	birthdate, err := time.Parse("01/02/2006", res["birthday"].(string))
-	if err != nil {
-		return nil, errors.New("Unable to parse birthday")
-	}
-
 	rlog.Debug(res)
-
 	return &FBUser{
 		Id:        res["id"].(string),
 		FirstName: res["first_name"].(string),
 		LastName:  res["last_name"].(string),
 		Email:     res["email"].(string),
 		Gender:    gender,
-		Birthdate: &birthdate,
+		Birthdate: res["birthdate"].(string),
 	}, nil
 }

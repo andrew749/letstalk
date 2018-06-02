@@ -32,7 +32,7 @@ export interface UserPersonalInfo {
 	readonly firstName: string
 	readonly lastName: string
 	readonly gender: GenderId
-	readonly birthdate: Date
+	readonly birthdate: string
   readonly secret: string
   readonly profilePic: string
 }

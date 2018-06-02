@@ -31,7 +31,7 @@ interface SignupFormData {
   phoneNumber: string;
   password: string;
   gender: number;
-  birthdate: Date;
+  birthdate: string;
   profilePic: PhotoResult;
 }
 
@@ -171,8 +171,8 @@ export default class SignupView extends Component<Props> {
           "gender": values.gender,
           "password": values.password,
           "profilePic": values.profilePic ? values.profilePic.data: undefined,
-        },
-        birthdate: Math.round(values.birthdate.getTime() / 1000),
+          "birthdate": values.birthdate,
+        }
       });
       // TODO: have a prompt saying successfully signed up
       this.props.navigation.dispatch(NavigationActions.reset({

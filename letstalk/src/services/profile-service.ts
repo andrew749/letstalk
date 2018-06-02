@@ -31,7 +31,7 @@ export interface SignupRequest {
   readonly email: string;
   readonly phoneNumber: string;
   readonly gender: number;
-  readonly birthdate: number; // unix time
+  readonly birthdate: string;
   readonly password: string;
   readonly profilePic?: string;
 }
@@ -69,7 +69,7 @@ export interface ProfileEditRequest extends UserAdditionalData {
   readonly firstName: string;
   readonly lastName: string;
   readonly gender: number;
-  readonly birthdate: number; // unix time
+  readonly birthdate: string;
   readonly phoneNumber: string | null;
   readonly cohortId: number;
 }
@@ -143,19 +143,13 @@ export class RemoteProfileService implements ProfileService {
   async me(): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
-    return {
-      ...response,
-      birthdate: new Date(1000 * (response.birthdate as any)),
-    };
+    return response;
   }
   async matchProfile(userId: number): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const url = MATCH_PROFILE_ROUTE + '/' + userId;
     const response: ProfileData = await this.requestor.get(url, sessionToken);
-    return {
-      ...response,
-      birthdate: new Date(1000 * (response.birthdate as any)),
-    };
+    return response;
   }
 
   async getProfilePicUrl(userId: string): Promise<string> {
