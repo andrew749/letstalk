@@ -42,7 +42,9 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarSta
     let props = this.props;
     if (props.userId) {
       const profilePicUrl = await profileService.getProfilePicUrl(props.userId);
-      this.setState({ avatarSource: {uri: profilePicUrl} });
+      if (profilePicUrl != undefined || profilePicUrl != null) {
+        this.setState({ avatarSource: {uri: profilePicUrl} });
+      }
     }
   }
 
