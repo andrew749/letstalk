@@ -12,9 +12,9 @@ import (
 
 	"letstalk/server/core/api"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"github.com/google/uuid"
 )
 
 /**
@@ -131,13 +131,21 @@ func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 		return err
 	}
 
+	// upload the profile pic
 	if user.ProfilePic != nil {
 		var photoData []byte
 		if photoData, err = base64.StdEncoding.DecodeString(*user.ProfilePic); err != nil {
 			return err
 		}
 		reader := bytes.NewReader(photoData)
-		if err = onboarding.UploadProfilePic(userModel.UserId, reader); err != nil {
+		var location *string
+		if location, err = onboarding.UploadProfilePic(userModel.UserId, reader); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		rlog.Debug("Successfully uploaded profile pic. Updating profile pic")
+		if err = tx.Model(&userModel).Update(&data.User{ProfilePic: location}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}

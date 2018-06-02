@@ -22,6 +22,7 @@ import {
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
   PROFILE_EDIT_ROUTE,
+  PROFILE_PIC_ROUTE,
 } from './constants';
 
 export interface SignupRequest {
@@ -86,6 +87,7 @@ export interface ProfileService {
     vector: PersonalityVector
   ): Promise<OnboardingStatus>;
   bootstrap(): Promise<BootstrapData>;
+  getProfilePicUrl(userId: string): Promise<string>;
 }
 
 export class RemoteProfileService implements ProfileService {
@@ -146,7 +148,6 @@ export class RemoteProfileService implements ProfileService {
       birthdate: new Date(1000 * (response.birthdate as any)),
     };
   }
-
   async matchProfile(userId: number): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const url = MATCH_PROFILE_ROUTE + '/' + userId;
@@ -157,20 +158,12 @@ export class RemoteProfileService implements ProfileService {
     };
   }
 
-  static getProfilePicUrl(userId: string): string {
-      return `https://s3.amazonaws.com/hive-user-profile-pictures/${userId}`;
+  async getProfilePicUrl(userId: string): Promise<string> {
+    const sessionToken = await this.auth.getSessionToken();
+    const profileRequest = `${PROFILE_PIC_ROUTE}?userId=${userId}`
+    const response: {profilePic: string} = await this.requestor.get(profileRequest, sessionToken);
+    return response.profilePic;
   }
-
-  static async getProfilePicForUser(userId: string): Promise<Blob> {
-    const profilePicUrl = this.getProfilePicUrl(userId);
-    // not a standard get
-    const response = await fetch(profilePicUrl);
-    console.log(response);
-    const data = await response.body;
-    const blob = (await data.getReader().read() as Blob);
-    return blob;
-  }
-
 }
 
 export const profileService = new RemoteProfileService(requestor, auth);

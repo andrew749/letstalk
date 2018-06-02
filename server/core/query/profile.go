@@ -81,12 +81,13 @@ func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
 
 	userModel := api.ProfileResponse{
 		UserPersonalInfo: api.UserPersonalInfo{
-			UserId:    userId,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Gender:    user.Gender,
-			Birthdate: user.Birthdate.Unix(),
-			Secret:    user.Secret,
+			UserId:     userId,
+			FirstName:  user.FirstName,
+			LastName:   user.LastName,
+			Gender:     user.Gender,
+			Birthdate:  user.Birthdate.Unix(),
+			Secret:     user.Secret,
+			ProfilePic: user.ProfilePic,
 		},
 		UserContactInfo: api.UserContactInfo{
 			Email: user.Email,

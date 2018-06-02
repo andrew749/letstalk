@@ -20,20 +20,36 @@ interface ProfileAvatarProps extends AvatarProps {
  *
  * If there isn't a profile pic then fallback
  */
-class ProfileAvatar extends React.Component<ProfileAvatarProps> {
-  render() {
-    let avatarSource;
+
+interface ProfileAvatarState {
+  avatarSource: ImageURISource,
+}
+
+class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarState> {
+
+  constructor(props: ProfileAvatarProps) {
+    super(props);
+    this.state={
+      avatarSource: props.source
+    }
+  }
+
+  async componentWillReceiveProps(props: ProfileAvatarProps) {
+    this.setState({avatarSource: props.source});
+  }
+
+  async componentWillMount() {
     let props = this.props;
-
-    if (props.source) {
-      avatarSource = props.source;
-    }
-
     if (props.userId) {
-      const profilePicUrl = RemoteProfileService.getProfilePicUrl(props.userId);
-      avatarSource = {uri: profilePicUrl};
+      const profilePicUrl = await profileService.getProfilePicUrl(props.userId);
+      if (profilePicUrl != undefined || profilePicUrl != null) {
+        this.setState({ avatarSource: {uri: profilePicUrl} });
+      }
     }
+  }
 
+  render() {
+    let props = this.props;
     return (
       <Avatar
         {...props}
@@ -41,7 +57,7 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps> {
         rounded
         // default
         icon={{name: 'person'}}
-        source={ avatarSource }
+        source={ this.state.avatarSource }
         activeOpacity={0.7}
       />
     );
@@ -67,7 +83,6 @@ export class ProfileAvatarEditableFormElement extends React.Component<FormElemen
       let uri = (props.input.value as PhotoResult).uri;
       avatarSource = {uri: uri};
     }
-
     return (
         <ProfileAvatar
           {...props}
