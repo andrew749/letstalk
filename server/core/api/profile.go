@@ -20,3 +20,7 @@ type ProfileEditRequest struct {
 	PhoneNumber *string `json:"phoneNumber"`
 	CohortId    int     `json:"cohortId" binding:"required"`
 }
+
+type ProfilePicResponse struct {
+	ProfilePic *string `json:"profilePic"`
+}

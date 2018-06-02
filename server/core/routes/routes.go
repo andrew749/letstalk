@@ -78,6 +78,9 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/match_profile/:userId")
 	v1.GET("/match_profile/:userId", hw.wrapHandler(controller.GetMatchProfileController, true))
 
+	v1.OPTIONS("/profile_pic")
+	v1.GET("/profile_pic", hw.wrapHandler(controller.GetProfilePicUrl, true))
+
 	// updates profile data for signed in user
 	v1.OPTIONS("/profile_edit")
 	v1.POST("/profile_edit", hw.wrapHandler(controller.ProfileEditController, true))

@@ -34,6 +34,7 @@ export interface UserPersonalInfo {
 	readonly gender: GenderId
 	readonly birthdate: Date
   readonly secret: string
+  readonly profilePic: string
 }
 
 export interface UserAdditionalData {

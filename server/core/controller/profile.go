@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"strconv"
-
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
+	"letstalk/server/data"
+	"strconv"
 )
 
 func ProfileEditController(c *ctx.Context) errs.Error {
@@ -45,5 +45,35 @@ func GetMatchProfileController(c *ctx.Context) errs.Error {
 	}
 
 	c.Result = *userModel
+	return nil
+}
+
+func GetProfilePicUrl(ctx *ctx.Context) errs.Error {
+	params := ctx.GinContext.Request.URL.Query()
+	var userId int
+	var val string
+
+	if valTemp, ok := params["userId"]; ok {
+		val = valTemp[0]
+	} else {
+		return errs.NewClientError("Missing userId parameter")
+	}
+
+	if userIdTemp, err := strconv.Atoi(val); err == nil {
+		userId = userIdTemp
+	} else {
+		return errs.NewClientError("Malformed userId")
+	}
+
+	db := ctx.Db
+
+	var user data.User
+	if err := db.Select("profile_pic").Where("user_id = ?", userId).First(&user).Error; err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+	var profilePicResult api.ProfilePicResponse
+	profilePicResult.ProfilePic = user.ProfilePic
+
+	ctx.Result = profilePicResult
 	return nil
 }
