@@ -705,18 +705,18 @@
   version "9.6.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.2.tgz#e49ac1adb458835e95ca6487bc20f916b37aff23"
 
-"@types/react-native-qrcode@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@types/react-native-qrcode/-/react-native-qrcode-0.2.1.tgz#2142da5917336b381b744c4f9675c56558459669"
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-native-datepicker@^1.6.2":
   version "1.6.2"
   resolved "https://registry.yarnpkg.com/@types/react-native-datepicker/-/react-native-datepicker-1.6.2.tgz#92d10a8b0933cea16e07ca41db035db2e1b522e6"
   dependencies:
     "@types/react" "*"
     "@types/react-native" "*"
+
+"@types/react-native-qrcode@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@types/react-native-qrcode/-/react-native-qrcode-0.2.1.tgz#2142da5917336b381b744c4f9675c56558459669"
+  dependencies:
+    "@types/react" "*"
 
 "@types/react-native-vector-icons@*", "@types/react-native-vector-icons@^4.4.2":
   version "4.6.0"
@@ -5050,6 +5050,10 @@ lodash.isempty@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.isempty/-/lodash.isempty-4.4.0.tgz#6f86cbedd8be4ec987be9aaf33c9684db1b31e7e"
 
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
+
 lodash.map@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/lodash.map/-/lodash.map-4.6.0.tgz#771ec7839e3473d9c4cde28b19394c3562f4f6d3"
@@ -6395,6 +6399,12 @@ react-native-maps@0.21.0:
   dependencies:
     babel-plugin-module-resolver "^2.3.0"
     babel-preset-react-native "1.9.0"
+
+react-native-picker-select@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-picker-select/-/react-native-picker-select-3.1.0.tgz#99ba83835dec0e5d1630b2626f024d50a421c4ee"
+  dependencies:
+    lodash.isequal "^4.5.0"
 
 react-native-qrcode@^0.2.6:
   version "0.2.6"

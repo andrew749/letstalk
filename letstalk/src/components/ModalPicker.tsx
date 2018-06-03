@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
+import RNPickerSelect from 'react-native-picker-select';
+
 import BottomModal from './BottomModal';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -72,6 +74,10 @@ class StatefulModalPicker extends Component<Props, State> {
       onChange(value || this.state.values[0]);
     }
 
+    const items = values.map((value: any, index: number) => {
+      return { value, label: labels[index] };
+    });
+
     // TODO: Maybe hold state about what the value is using another onChange, and only call the
     // passed in onChange when the user presses submit.
     return Platform.select({
@@ -82,15 +88,13 @@ class StatefulModalPicker extends Component<Props, State> {
             selectedValue={value}
             onValueChange={onChange}
           >
-            {this.props.children}
+            {children}
           </PickerIOS>
         </BottomModal>
       ),
       'android': (
         <View>
-          <Picker {...this.props} onValueChange={onChange} selectedValue={value} prompt={label}>
-            {children}
-          </Picker>
+          <RNPickerSelect items={items} onValueChange={onChange} value={value} />
           {touched && (
             (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
             (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}
