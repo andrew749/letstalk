@@ -95,6 +95,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         component={LabeledFormInput}
         secureTextEntry={true}
         validate={required} // Add some rules for password
+        autoCapitalize={'none' as 'none'}
       />
       <Field
         label="Gender"

@@ -57,6 +57,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
         component={LabeledFormInput}
         secureTextEntry={true}
         validate={required}
+        autoCapitalize={'none' as 'none'}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
