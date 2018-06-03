@@ -37,26 +37,6 @@ var (
 	production  = flag.Bool("PROD", false, "Whether to run in debug mode.")
 )
 
-func migrateDB(db *gorm.DB) {
-	db.AutoMigrate(&data.AuthenticationData{})
-	db.AutoMigrate(&data.Cohort{})
-	data.PopulateCohort(db)
-	db.AutoMigrate(&data.User{})
-	db.AutoMigrate(&data.Session{})
-	db.AutoMigrate(&data.UserVector{})
-	db.AutoMigrate(&data.UserCohort{})
-	db.AutoMigrate(&data.UserAdditionalData{})
-	db.AutoMigrate(&data.NotificationToken{})
-	db.AutoMigrate(&data.ExternalAuthData{})
-	db.AutoMigrate(&data.FbAuthToken{})
-	db.AutoMigrate(&data.Matching{})
-	db.AutoMigrate(&data.RequestMatching{})
-	db.AutoMigrate(&data.Credential{})
-	db.AutoMigrate(&data.UserCredential{})
-	db.AutoMigrate(&data.UserCredentialRequest{})
-	db.AutoMigrate(&data.Subscriber{})
-}
-
 func main() {
 	rlog.Info("Starting server")
 	flag.Parse()
@@ -75,7 +55,8 @@ func main() {
 
 	rlog.Info("Migrating database")
 	db.LogMode(true)
-	migrateDB(db)
+	// create the database
+	data.CreateDB(db)
 
 	sessionManager := sessions.CreateSessionManager(db)
 	router := routes.Register(db, &sessionManager)
