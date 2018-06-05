@@ -15,8 +15,13 @@ import {
   State as SearchBarState,
   updateValue,
   updateFocus,
+  updateListType
 } from '../redux/search-bar/reducer';
-import { ActionTypes as SearchBarActionTypes } from '../redux/search-bar/actions';
+import {
+  ActionTypes as SearchBarActionTypes,
+  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
+  SEARCH_LIST_TYPE_CREDENTIALS,
+} from '../redux/search-bar/actions';
 import Colors from '../services/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -26,11 +31,11 @@ interface DispatchActions {
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
   updateFocus: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateListType: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
-interface Props extends DispatchActions, SearchBarState {
-  placeholder: string;
-}
+interface Props extends DispatchActions, SearchBarState {}
 
 class TopHeader extends Component<Props> {
   private searchBar: SearchBar;
@@ -57,6 +62,19 @@ class TopHeader extends Component<Props> {
       style: [styles.icon, styles.rightIcon],
     } : null;
 
+    let placeholder = '';
+    switch (this.props.listType) {
+      case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
+        placeholder = 'Find someone who is a...';
+        break;
+      case SEARCH_LIST_TYPE_CREDENTIALS:
+        placeholder = 'I am a...';
+        break
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = this.props.listType;
+    }
+
     return <View style={styles.header}>
       <SearchBar
         round
@@ -69,12 +87,13 @@ class TopHeader extends Component<Props> {
         containerStyle={styles.searchBarContainer}
         inputStyle={styles.searchBarTextInput}
         value={this.props.value}
-        placeholder={this.props.placeholder}
+        placeholder={placeholder}
         placeholderTextColor={Colors.HIVE_LIGHT_FONT}
         onFocus={() => this.props.updateFocus(true)}
         onBlur={() => {
           this.props.updateFocus(false);
           this.props.updateValue('');
+          this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
         }}
       />
     </View>;
@@ -82,7 +101,7 @@ class TopHeader extends Component<Props> {
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus })(TopHeader);
+  { updateValue, updateFocus, updateListType })(TopHeader);
 
 const styles = StyleSheet.create({
   searchBarTextInput: {

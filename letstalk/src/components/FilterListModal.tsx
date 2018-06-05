@@ -52,9 +52,7 @@ type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputTyp
 interface Props {
   data: Immutable.List<FilterableElement>;
   onSelect(elem: FilterableElement): Promise<void>;
-  placeholder: string;
   onRawSelect?(value: string): Promise<void>;
-  buttonComponent?(onPress: () => void): ReactNode;
   curValue: string;
 }
 
@@ -183,7 +181,7 @@ class FilterListModal extends Component<Props, State> {
   }
 
   render() {
-    const { curValue, placeholder, onRawSelect, buttonComponent } = this.props;
+    const { curValue, onRawSelect } = this.props;
     const { filteredElements } = this.state;
     let elements = filteredElements.map(elem => {
       return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };

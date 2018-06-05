@@ -38,6 +38,15 @@ import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
+import {
+  ActionTypes as SearchBarActionTypes,
+  SEARCH_LIST_TYPE_CREDENTIALS,
+} from '../redux/search-bar/actions';
+import {
+  State as SearchBarState,
+  updateFocus,
+  updateListType
+} from '../redux/search-bar/reducer';
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
@@ -66,6 +75,10 @@ interface DispatchActions {
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   fetchCredentials: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
+  updateFocus: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateListType: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
 interface Props extends DispatchActions {
@@ -77,7 +90,7 @@ interface Props extends DispatchActions {
 
 class RequestToMatchView extends Component<Props> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: <TopHeader placeholder="Find someone who is a..." />,
+    headerTitle: <TopHeader />,
     headerStyle,
   })
 
@@ -185,12 +198,9 @@ class RequestToMatchView extends Component<Props> {
   private renderBody() {
     const { credentials } = this.props.credentialOptions;
 
-    const addCredentialButton = (onPress: () => void) => {
-      return (
-        <TouchableOpacity onPress={onPress} style={styles.addButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>
-      );
+    const onAddCredentialPress = () => {
+      this.props.updateFocus(true);
+      this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
     }
 
     return (
@@ -202,6 +212,9 @@ class RequestToMatchView extends Component<Props> {
           </View>
           <View style={styles.credentialHeaderContainer}>
             <Header>Your Credentials</Header>
+            <TouchableOpacity onPress={onAddCredentialPress} style={styles.addButton}>
+              <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+            </TouchableOpacity>
           </View>
           <View style={styles.credentialRequestContainer}>
             {this.renderCredentials()}
@@ -241,6 +254,8 @@ export default connect(
     fetchCredentialOptions,
     removeCredential,
     removeCredentialRequest,
+    updateFocus,
+    updateListType,
   })(RequestToMatchView);
 
 const styles = StyleSheet.create({

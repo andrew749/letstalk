@@ -23,7 +23,11 @@ import {
 import {
   State as CredentialOptionsState,
 } from '../redux/credential-options/reducer';
-import { ActionTypes as SearchBarActionTypes } from '../redux/search-bar/actions';
+import {
+  ActionTypes as SearchBarActionTypes,
+  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
+  SEARCH_LIST_TYPE_CREDENTIALS,
+} from '../redux/search-bar/actions';
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
@@ -42,6 +46,7 @@ interface DispatchActions {
 interface Props extends DispatchActions {
   searchBar: SearchBarState;
   credentialOptions: CredentialOptionsState;
+  onSelectSuccess?(): void;
 }
 
 class AllFilterableModals extends Component<Props> {
@@ -50,12 +55,16 @@ class AllFilterableModals extends Component<Props> {
     super(props);
 
     this.onReqSelect = this.onReqSelect.bind(this);
-    // this.onCredSelect = this.onCredSelect.bind(this);
-    // this.onRawCredSelect = this.onRawCredSelect.bind(this);
+    this.onCredSelect = this.onCredSelect.bind(this);
+    this.onRawCredSelect = this.onRawCredSelect.bind(this);
   }
 
   private async blurSearchBar() {
     await this.props.updateFocus(false);
+  }
+
+  private selectSuccess() {
+    if (this.props.onSelectSuccess !== null) this.props.onSelectSuccess();
   }
 
   private async onReqSelect(elem: FilterableElement): Promise<void> {
@@ -65,44 +74,59 @@ class AllFilterableModals extends Component<Props> {
       await this.props.errorToast(e.message);
     }
     await this.blurSearchBar();
+    this.selectSuccess();
   }
 
-  // private async onCredSelect(elem: { id: number, value: string }): Promise<void> {
-  //   try {
-  //     await this.props.addCredential(elem.value);
-  //   } catch (e) {
-  //     await this.props.errorToast(e.message);
-  //   }
-  // }
+  private async onCredSelect(elem: { id: number, value: string }): Promise<void> {
+    try {
+      await this.props.addCredential(elem.value);
+    } catch (e) {
+      await this.props.errorToast(e.message);
+    }
+    await this.blurSearchBar();
+    this.selectSuccess();
+  }
 
-  // private async onRawCredSelect(value: string) {
-  //   try {
-  //     await this.props.addCredential(value);
-  //   } catch (e) {
-  //     await this.props.errorToast(e.message);
-  //   }
-  // }
+  private async onRawCredSelect(value: string) {
+    try {
+      await this.props.addCredential(value);
+    } catch (e) {
+      await this.props.errorToast(e.message);
+    }
+    await this.blurSearchBar();
+    this.selectSuccess();
+  }
 
   render() {
+    if (!this.props.searchBar.hasFocus) return null;
+
     const { credentials } = this.props.credentialOptions;
-    return this.props.searchBar.hasFocus ? (
-      <FilterListModal
-        curValue={this.props.searchBar.value}
-        data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-        onSelect={this.onReqSelect}
-        placeholder="Find someone who is a..."
-      />
-    ) : null;
+    switch (this.props.searchBar.listType) {
+      case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
+        return (
+          <FilterListModal
+            curValue={this.props.searchBar.value}
+            data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
+            onSelect={this.onReqSelect}
+          />
+        );
+      case SEARCH_LIST_TYPE_CREDENTIALS:
+        return (
+          <FilterListModal
+            curValue={this.props.searchBar.value}
+            data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
+            onSelect={this.onCredSelect}
+            onRawSelect={this.onRawCredSelect}
+          />
+        );
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = this.props.searchBar.listType;
+        return null;
+    }
   }
 }
 
-// <FilterListModal
-//   data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-//   onSelect={this.onCredSelect}
-//   onRawSelect={this.onRawCredSelect}
-//   placeholder="I am a..."
-//   buttonComponent={addCredentialButton}
-// />
 
 export default connect(({ credentialOptions, searchBar }: RootState) => {
   return { credentialOptions, searchBar };
