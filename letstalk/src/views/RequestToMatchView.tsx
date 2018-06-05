@@ -84,7 +84,7 @@ interface Props extends DispatchActions {
 
 class RequestToMatchView extends Component<Props> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: <TopHeader />,
+    headerTitle: <TopHeader placeholder="Find someone who is a..." />,
     headerStyle,
   })
 
