@@ -8,7 +8,6 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
-	"time"
 
 	"letstalk/server/core/api"
 
@@ -82,14 +81,12 @@ func SignupUser(c *ctx.Context) errs.Error {
 func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
-	bday := time.Unix(user.Birthdate, 0)
-
 	userModel := data.User{
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Gender:    user.Gender,
-		Birthdate: &bday,
+		Birthdate: user.Birthdate,
 	}
 
 	// Generate UUID for each user.

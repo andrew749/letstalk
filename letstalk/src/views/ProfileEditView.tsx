@@ -61,7 +61,7 @@ interface EditFormData {
   lastName: string;
   phoneNumber: string;
   gender: number;
-  birthdate: Date;
+  birthdate: string;
   programId: string,
   sequenceId: string;
   gradYear: number;
@@ -144,7 +144,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         label="Birthday"
         name="birthdate"
         mode={'date' as 'date'}
-        defaultDate={new Date('1996-11-07T00:00:00.000Z')}
+        defaultDate={new Date('1996-11-07')}
         component={ModalDatePicker}
         validate={required}
       />
@@ -253,6 +253,7 @@ class ProfileEditView extends Component<Props> {
         lastName,
         phoneNumber,
         gender,
+        birthdate,
         programId,
         sequenceId,
         gradYear,
@@ -266,8 +267,8 @@ class ProfileEditView extends Component<Props> {
         lastName,
         phoneNumber,
         gender,
+        birthdate,
         cohortId,
-        birthdate: Math.round(values.birthdate.getTime() / 1000),
         mentorshipPreference,
         bio,
         hometown,

@@ -1,8 +1,6 @@
 package query
 
 import (
-	"time"
-
 	"letstalk/server/core/api"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -11,8 +9,6 @@ import (
 )
 
 func UpdateProfile(db *gorm.DB, userId int, request api.ProfileEditRequest) errs.Error {
-	bday := time.Unix(request.Birthdate, 0)
-
 	tx := db.Begin()
 	err := tx.Model(&data.User{}).Where(&data.User{
 		UserId: userId,
@@ -20,7 +16,7 @@ func UpdateProfile(db *gorm.DB, userId int, request api.ProfileEditRequest) errs
 		FirstName: request.FirstName,
 		LastName:  request.LastName,
 		Gender:    request.Gender,
-		Birthdate: &bday,
+		Birthdate: request.Birthdate,
 	}).Error
 	if err != nil {
 		tx.Rollback()
@@ -85,7 +81,7 @@ func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
 			FirstName:  user.FirstName,
 			LastName:   user.LastName,
 			Gender:     user.Gender,
-			Birthdate:  user.Birthdate.Unix(),
+			Birthdate:  user.Birthdate,
 			Secret:     user.Secret,
 			ProfilePic: user.ProfilePic,
 		},

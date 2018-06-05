@@ -1,5 +1,3 @@
-// NB: This is meant for iOS only.
-// TODO: Rename to .ios.tsx
 import React, { ReactNode } from 'react';
 import {
   Dimensions,
@@ -15,9 +13,11 @@ import DatePicker from 'react-native-datepicker';
 import { WrappedFieldProps } from 'redux-form';
 import { Button, ButtonProps, FormValidationMessage } from 'react-native-elements';
 import BottomModal from './BottomModal';
+import Moment from 'moment';
 
 type Props = WrappedFieldProps & {
   label: string;
+  dateObj?: boolean; // whether to return a `Date` or a string
   defaultDate: Date;
   mode?: 'date' | 'time' | 'datetime';
 };
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 });
 
 const ModalDatePicker: React.SFC<Props> = (props) => {
-  const { defaultDate, label, mode } = props;
+  const { defaultDate, label, mode, dateObj } = props;
   const { onChange, value } = props.input;
   // TODO: make this externally configurable
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -56,19 +56,25 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
         mode="date"
         showIcon={false}
         placeholder="Select Date"
-        format="MMM Do, YYYY"
+        format="YYYY-MM-DD"
         minDate={new Date(1900, 1, 1)}
         maxDate={new Date()}
         confirmBtnText="Confirm"
         cancelBtnText="Cancel"
+        // @ts-ignore waiting for https://github.com/DefinitelyTyped/DefinitelyTyped/pull/26237 to land
+        getDateStr={(date: Date) => Moment(date).format("MMM Do, YYYY")}
         customStyles={{
           dateInput: {
             marginLeft: 20,
             marginRight: 20
           },
         }}
-        onDateChange={(_, date) => {
-          onChange(date);
+        onDateChange={(dateString, date) => {
+          if (!dateObj) {
+            onChange(Moment(date).format("YYYY-MM-DD"));
+          } else {
+            onChange(date);
+          }
         }}
       />
   );
