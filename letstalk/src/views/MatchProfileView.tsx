@@ -109,17 +109,6 @@ class MatchProfileView extends Component<Props> {
     }
     const contactItems = buildItems(contactInfos);
 
-    if (fbId !== null) {
-      const fbLink = 'fb://profile/' + fbId;
-      contactItems.push(
-        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook: </Text>
-          <Text style={styles.value}>{fbId}</Text>
-        </TouchableOpacity>
-      );
-    }
-
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Contact Info</Text>
