@@ -17,6 +17,7 @@ import Moment from 'moment';
 
 type Props = WrappedFieldProps & {
   label: string;
+  dateObj?: boolean; // whether to return a `Date` or a string
   defaultDate: Date;
   mode?: 'date' | 'time' | 'datetime';
 };
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
 });
 
 const ModalDatePicker: React.SFC<Props> = (props) => {
-  const { defaultDate, label, mode } = props;
+  const { defaultDate, label, mode, dateObj } = props;
   const { onChange, value } = props.input;
   // TODO: make this externally configurable
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -69,7 +70,11 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
           },
         }}
         onDateChange={(dateString, date) => {
-          onChange(dateString);
+          if (!dateObj) {
+            onChange(Moment(date).format("YYYY-MM-DD"));
+          } else {
+            onChange(date);
+          }
         }}
       />
   );

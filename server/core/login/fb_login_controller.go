@@ -258,6 +258,6 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		LastName:  res["last_name"].(string),
 		Email:     res["email"].(string),
 		Gender:    gender,
-		Birthdate: res["birthdate"].(string),
+		Birthdate: res["birthday"].(string),
 	}, nil
 }
