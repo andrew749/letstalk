@@ -39,6 +39,7 @@ import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
 import QRCode from "react-native-qrcode";
+import { headerStyle } from './TopHeader';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -52,6 +53,11 @@ interface Props extends MatchProfileState, DispatchActions {
 
 class MatchProfileView extends Component<Props> {
   PROFILE_VIEW_IDENTIFIER = "MatchProfileView";
+
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
+    headerTitle: 'Match Profile',
+    headerStyle,
+  })
 
   constructor(props: Props) {
     super(props);

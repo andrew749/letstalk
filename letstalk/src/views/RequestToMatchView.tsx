@@ -53,6 +53,7 @@ import {
 } from '../components';
 import { Credential } from '../models/credential';
 import Colors from '../services/colors';
+import TopHeader, { headerStyle } from './TopHeader';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -81,26 +82,11 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-const Head: SFC<{}> = (props: {}) => {
-  return <View style={styles.header}/>;
-}
-
 class RequestToMatchView extends Component<Props> {
-  static navigationOptionsAndroid = ({ navigation }: NavigationScreenDetails<void> ) => ({
-    headerTitle: 'Request',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
-  });
-
-  static navigationOptionsIOS = ({ navigation}: NavigationScreenDetails<void> ) => ({
-    header: <Head/>,
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
-  });
-
-  static navigationOptions = (Platform.OS == 'ios') ? RequestToMatchView.navigationOptionsIOS : RequestToMatchView.navigationOptionsAndroid;
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
+    headerTitle: <TopHeader />,
+    headerStyle,
+  })
 
   constructor(props: Props) {
     super(props);
@@ -341,10 +327,6 @@ const styles = StyleSheet.create({
   credential: {
     fontWeight: 'bold',
     fontSize: 18,
-  },
-  header: {
-    height: Platform.OS == "ios" ? 20 : 0,
-    backgroundColor: Colors.HIVE_PRIMARY,
   },
   addButton: {
     margin: 12,

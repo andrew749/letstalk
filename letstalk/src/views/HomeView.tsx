@@ -37,6 +37,7 @@ import {
 } from '../models/cohort';
 import Colors from '../services/colors';
 import { AnalyticsHelper } from '../services/analytics';
+import TopHeader, { headerStyle } from './TopHeader';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
@@ -50,10 +51,8 @@ class HomeView extends Component<Props> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'Home',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
+    headerTitle: <TopHeader />,
+    headerStyle,
   })
 
   constructor(props: Props) {

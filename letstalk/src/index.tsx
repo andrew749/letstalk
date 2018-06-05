@@ -78,7 +78,7 @@ const createTabView = () => TabNavigator({
     },
   }),
   tabBarOptions: {
-    showLabel: Platform.OS == 'ios' ? true: false,
+    showLabel: Platform.OS === 'ios',
     showIcon: true,
     activeTintColor: Colors.HIVE_PRIMARY,
     inactiveTintColor: 'gray',
@@ -98,7 +98,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Tabbed: {
     screen: createTabView(),
     navigationOptions: {
-      header: null
     },
   },
   ProfileEdit: {

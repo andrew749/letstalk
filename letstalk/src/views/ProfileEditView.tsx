@@ -55,6 +55,7 @@ import {
   MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
 import Colors from '../services/colors';
+import { headerStyle } from './TopHeader';
 
 interface EditFormData {
   firstName: string;
@@ -232,12 +233,9 @@ interface Props extends ProfileState, DispatchActions {
 }
 
 class ProfileEditView extends Component<Props> {
-  // TODO: Remove the padding on this component
   static navigationOptions = () => ({
     headerTitle: 'Edit Profile',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
+    headerStyle,
   })
 
   constructor(props: Props) {
