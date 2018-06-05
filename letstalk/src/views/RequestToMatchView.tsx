@@ -236,7 +236,7 @@ class RequestToMatchView extends Component<Props> {
             placeholder="Find someone who is a..."
           />
         </View>
-        <ScrollView keyboardShouldPersistTaps={'always'}>
+        <ScrollView>
           <Header>Active Requests</Header>
           <View style={styles.credentialRequestContainer}>
             {this.renderCredentialRequests()}

@@ -1,4 +1,4 @@
-import React, { SFC } from 'react';
+import React, { Component } from 'react';
 import { ThunkAction } from 'redux-thunk';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
@@ -14,6 +14,7 @@ import { RootState } from '../redux';
 import {
   State as SearchBarState,
   updateValue,
+  updateFocus,
 } from '../redux/search-bar/reducer';
 import { ActionTypes as SearchBarActionTypes } from '../redux/search-bar/actions';
 import Colors from '../services/colors';
@@ -23,38 +24,57 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 interface DispatchActions {
   updateValue: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateFocus: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
 interface Props extends DispatchActions, SearchBarState {
   placeholder: string;
 }
 
-const TopHeader: SFC<Props> = (props: Props) => {
-  // Only show clear icon if there is actually text to be cleared
-  const clearIcon = props.value === '' ? null : {
-    color: '#86939e',
-    name: 'close',
-    style: [styles.icon, styles.rightIcon],
-  };
+class TopHeader extends Component<Props> {
+  private searchBar: SearchBar;
 
-  return <View style={styles.header}>
-    <SearchBar
-      round
-      lightTheme
-      clearIcon={clearIcon}
-      icon={{ style: [styles.icon, styles.leftIcon] }}
-      onChangeText={(value: string) => props.updateValue(value)}
-      onClearText={() => props.updateValue('')}
-      containerStyle={styles.searchBarContainer}
-      inputStyle={styles.searchBarTextInput}
-      value={props.value}
-      placeholder={props.placeholder}
-      placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-    />
-  </View>;
+  constructor(props: Props) {
+    super(props);
+
+    this.searchBar = null;
+  }
+
+  render() {
+    // Only show clear icon if the element has focus
+    const clearIcon = this.props.hasFocus ? {
+      color: '#86939e',
+      name: 'close',
+      style: [styles.icon, styles.rightIcon],
+    } : null;
+
+    return <View style={styles.header}>
+      <SearchBar
+        round
+        lightTheme
+        ref={(ref: SearchBar) => this.searchBar = ref}
+        clearIcon={clearIcon}
+        icon={{ style: [styles.icon, styles.leftIcon] }}
+        onChangeText={(value: string) => this.props.updateValue(value)}
+        onClearText={() => this.searchBar.blur()}
+        containerStyle={styles.searchBarContainer}
+        inputStyle={styles.searchBarTextInput}
+        value={this.props.value}
+        placeholder={this.props.placeholder}
+        placeholderTextColor={Colors.HIVE_LIGHT_FONT}
+        onFocus={() => this.props.updateFocus(true)}
+        onBlur={() => {
+          this.props.updateFocus(false);
+          this.props.updateValue('');
+        }}
+      />
+    </View>;
+  }
 }
 
-export default connect(({ searchBar }: RootState) => searchBar, { updateValue })(TopHeader);
+export default connect(({ searchBar }: RootState) => searchBar,
+  { updateValue, updateFocus })(TopHeader);
 
 const styles = StyleSheet.create({
   searchBarTextInput: {
