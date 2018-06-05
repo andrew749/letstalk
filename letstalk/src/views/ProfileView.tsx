@@ -117,12 +117,10 @@ class ProfileView extends Component<Props> {
 
 
     if (fbId !== null) {
-      const fbLink = 'fb://profile/' + fbId;
       contactItems.push(
-        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+        <TouchableOpacity style={styles.listItem}>
           <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook: </Text>
-          <Text style={styles.value}>{fbId}</Text>
+          <Text style={styles.label}>Facebook Linked </Text>
         </TouchableOpacity>
       );
     } else {
