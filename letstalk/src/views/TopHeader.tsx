@@ -41,6 +41,14 @@ class TopHeader extends Component<Props> {
     this.searchBar = null;
   }
 
+  componentWillReceiveProps(props: Props) {
+    if (this.props.hasFocus && !props.hasFocus) {
+      this.searchBar.blur();
+    } else if (!this.props.hasFocus && props.hasFocus) {
+      this.searchBar.focus();
+    }
+  }
+
   render() {
     // Only show clear icon if the element has focus
     const clearIcon = this.props.hasFocus ? {
