@@ -70,31 +70,31 @@ class AllFilterableModals extends Component<Props> {
   private async onReqSelect(elem: FilterableElement): Promise<void> {
     try {
       await this.props.addCredentialRequest({ id: elem.id, name: elem.value });
+      this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.message);
     }
     await this.blurSearchBar();
-    this.selectSuccess();
   }
 
   private async onCredSelect(elem: { id: number, value: string }): Promise<void> {
     try {
       await this.props.addCredential(elem.value);
+      this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.message);
     }
     await this.blurSearchBar();
-    this.selectSuccess();
   }
 
   private async onRawCredSelect(value: string) {
     try {
       await this.props.addCredential(value);
+      this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.message);
     }
     await this.blurSearchBar();
-    this.selectSuccess();
   }
 
   render() {
