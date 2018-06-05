@@ -7,7 +7,7 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
-import { FormValidationMessage } from 'react-native-elements';
+import { FormValidationMessage, FormInputProps, FormInput } from 'react-native-elements';
 
 import {
   ActionButton,
@@ -35,6 +35,14 @@ interface SignupFormData {
   profilePic: PhotoResult;
 }
 
+class SignupFormRefs {
+  firstNameFieldRef: Field<FormInputProps>;
+  lastNameFieldRef: Field<FormInputProps>;
+  emailFieldRef: Field<FormInputProps>;
+  phoneNumberFieldRef: Field<FormInputProps>;
+  passwordFieldRef: Field<FormInputProps>;
+}
+
 // TODO: move elsewhere
 const required = (value: any) => (value ? undefined : 'Required')
 const email = (value: string) =>
@@ -52,6 +60,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
     await onSubmit(values);
     reset();
   };
+  const fieldRefs = new SignupFormRefs();
   return (
     <ScrollView>
       <Field
@@ -63,6 +72,12 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="First name"
         name="firstName"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.lastNameFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         autoCorrect={false}
         validate={required}
       />
@@ -70,6 +85,12 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Last name"
         name="lastName"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.emailFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         autoCorrect={false}
         validate={required}
       />
@@ -77,6 +98,12 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Email"
         name="email"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.emailFieldRef = ref}
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.phoneNumberFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         keyboardType={'email-address' as 'email-address'}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
@@ -84,7 +111,13 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       />
       <Field
         label="Phone number"
+        ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
         name="phoneNumber"
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.passwordFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         component={LabeledFormInput}
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={[required, phoneNumber]}
@@ -93,6 +126,8 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Password"
         name="password"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.passwordFieldRef = ref}
+        withRef={true}
         secureTextEntry={true}
         validate={required} // Add some rules for password
         autoCapitalize={'none' as 'none'}
