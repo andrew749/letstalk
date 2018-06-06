@@ -41,6 +41,7 @@ import {
 import {
   ActionTypes as SearchBarActionTypes,
   SEARCH_LIST_TYPE_CREDENTIALS,
+  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
 } from '../redux/search-bar/actions';
 import {
   State as SearchBarState,
@@ -52,6 +53,7 @@ import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credentia
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import {
   ActionButton,
+  Button,
   Card,
   Header,
   Loading,
@@ -116,7 +118,16 @@ class RequestToMatchView extends Component<Props> {
   private renderCredentials() {
     const { credentialsWithState } = this.props.credentials;
     if (credentialsWithState.isEmpty()) {
-      return <Text style={styles.credential}>You haven't added any credentials</Text>;
+      const onPress = () => {
+        this.props.updateFocus(true);
+        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
+      };
+      return (
+        <View style={styles.noCredentialsContainer}>
+          <Text style={styles.noCredentials}>You haven't added any credentials</Text>
+          <Button buttonStyle={styles.noCredentialsButton} title="Add credential" onPress={onPress} />
+        </View>
+      );
     }
     return credentialsWithState.map(credentialWithState => {
       const {
@@ -136,14 +147,14 @@ class RequestToMatchView extends Component<Props> {
           return (
             <Card key={id} style={styles.credentialCard}>
               <Text style={styles.credential}>{name}</Text>
-              <TouchableOpacity onPress={onPress}>
-                <MaterialIcons name="delete" size={24} />
+              <TouchableOpacity style={styles.deleteCredential} onPress={onPress}>
+                <MaterialIcons name="close" size={18} />
               </TouchableOpacity>
             </Card>
           );
         case 'deleting':
           return (
-            <Card key={id} style={styles.deletingCard}>
+            <Card key={id} style={styles.credentialCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -157,7 +168,16 @@ class RequestToMatchView extends Component<Props> {
   private renderCredentialRequests() {
     const { credentialRequestsWithState } = this.props.credentialRequests;
     if (credentialRequestsWithState.isEmpty()) {
-      return <Text style={styles.credentialRequest}>You don't have any requests</Text>;
+      const onPress = () => {
+        this.props.updateFocus(true);
+        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
+      };
+      return (
+        <View style={styles.noCredentialsContainer}>
+          <Text style={styles.noCredentials}>You don't have any requests</Text>
+          <Button buttonStyle={styles.noCredentialsButton} title="Add request" onPress={onPress} />
+        </View>
+      );
     }
     return credentialRequestsWithState.map(credentialWithState => {
       const {
@@ -175,16 +195,16 @@ class RequestToMatchView extends Component<Props> {
             }
           };
           return (
-            <Card key={id} style={styles.credentialRequestCard}>
-              <Text style={styles.credentialRequest}>{name}</Text>
-              <TouchableOpacity onPress={onPress}>
-                <MaterialIcons name="delete" size={24} />
+            <Card key={id} style={styles.credentialCard}>
+              <Text style={styles.credential}>{name}</Text>
+              <TouchableOpacity style={styles.deleteCredential} onPress={onPress}>
+                <MaterialIcons name="close" size={18} />
               </TouchableOpacity>
             </Card>
           );
         case 'deleting':
           return (
-            <Card key={id} style={styles.deletingCard}>
+            <Card key={id} style={styles.credentialCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -207,7 +227,7 @@ class RequestToMatchView extends Component<Props> {
       <View style={styles.container}>
         <ScrollView>
           <Header>Active Requests</Header>
-          <View style={styles.credentialRequestContainer}>
+          <View style={styles.credentialContainer}>
             {this.renderCredentialRequests()}
           </View>
           <View style={styles.credentialHeaderContainer}>
@@ -216,7 +236,7 @@ class RequestToMatchView extends Component<Props> {
               <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
             </TouchableOpacity>
           </View>
-          <View style={styles.credentialRequestContainer}>
+          <View style={styles.credentialContainer}>
             {this.renderCredentials()}
           </View>
         </ScrollView>
@@ -262,9 +282,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  credentialRequestContainer: {
+  credentialContainer: {
     flex: 1,
-    alignItems: 'center'
+    alignItems: 'stretch'
   },
   headline: {
     fontWeight: 'bold',
@@ -279,20 +299,29 @@ const styles = StyleSheet.create({
   },
   credentialCard: {
     flexDirection: 'row',
+    padding: 10,
+    marginVertical: 5,
+    marginHorizontal: 10,
   },
-  credentialRequestCard: {
-    flexDirection: 'row',
+  noCredentialsContainer: {
+    alignSelf: 'center',
+    alignItems: 'center'
   },
-  deletingCard: {
-    alignItems: 'center',
+  noCredentialsButton: {
+    width: 200,
+    marginTop: 10,
   },
-  credentialRequest: {
-    fontWeight: 'bold',
-    fontSize: 18,
+  noCredentials: {
+    fontSize: 14,
+  },
+  deleteCredential: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   credential: {
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 14,
+    paddingRight: 30,
   },
   addButton: {
     margin: 12,
