@@ -14,7 +14,7 @@ import {
   SubmissionError,
 } from 'redux-form';
 import { connect, ActionCreator } from 'react-redux';
-import { FormValidationMessage } from 'react-native-elements';
+import { FormValidationMessage, FormInputProps } from 'react-native-elements';
 import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
@@ -81,6 +81,12 @@ interface EditFormProps extends FormProps<EditFormData>, EditFormData {
   cohorts: Immutable.List<Cohort>;
 }
 
+class EditFormRefs {
+  firstNameFieldRef: Field<FormInputProps>;
+  lastNameFieldRef: Field<FormInputProps>;
+  phoneNumberFieldRef: Field<FormInputProps>;
+}
+
 const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const {
     cohorts,
@@ -102,12 +108,19 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const programItems = buildItems(programOptions(cohorts)).toJS();
   const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
+  const fieldRefs = new EditFormRefs();
   return (
     <ScrollView>
       <Field
         label="First name"
         name="firstName"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.lastNameFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         autoCorrect={false}
         validate={required}
       />
@@ -115,6 +128,12 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         label="Last name"
         name="lastName"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
+        onSubmitEditing={() => {
+          // @ts-ignore
+          fieldRefs.phoneNumberFieldRef.getRenderedComponent().focus();
+        }}
+        withRef={true}
         autoCorrect={false}
         validate={required}
       />
@@ -122,6 +141,8 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         label="Phone number"
         name="phoneNumber"
         component={LabeledFormInput}
+        ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
+        withRef={true}
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={phoneNumber}
       />
