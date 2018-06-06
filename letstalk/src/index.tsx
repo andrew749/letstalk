@@ -79,6 +79,8 @@ class TabBar extends Component<TabBarBottomProps, TabBarState> {
         Keyboard.addListener('keyboardDidShow', this.visible(false)),
         Keyboard.addListener('keyboardDidHide', this.visible(true))
       ];
+    } else {
+      this.keyboardEventListeners = [];
     }
   }
 

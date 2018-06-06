@@ -14,6 +14,7 @@ import {NavigationActions, NavigationScreenProp, NavigationStackAction} from "re
 import {connect, Dispatch} from "react-redux";
 import {RootState} from "../redux/index";
 import meetingService from "../services/meeting";
+import { headerStyle } from './TopHeader';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -27,6 +28,7 @@ interface Props extends DispatchActions {
 class QrScannerView extends Component<Props> {
   static navigationOptions = () => ({
     headerTitle: 'Scan A Code',
+    headerStyle,
   })
 
   state = {

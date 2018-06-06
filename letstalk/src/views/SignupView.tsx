@@ -23,6 +23,7 @@ import profileService, {SignupRequest} from '../services/profile-service';
 import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
+import { headerStyle } from './TopHeader';
 
 interface SignupFormData {
   firstName: string;
@@ -146,9 +147,7 @@ export default class SignupView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Signup',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    }
+    headerStyle,
   }
 
   constructor(props: Props) {
