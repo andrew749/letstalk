@@ -6,6 +6,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import React, { Component, ReactNode } from 'react';
 import {
   Dimensions,
+  EmitterSubscription,
+  Keyboard,
   ListView,
   ListViewDataSource,
   Modal,
@@ -15,12 +17,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Constants } from 'expo';
 
 import {
   SearchBar,
 } from 'react-native-elements';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export interface FilterableElement {
   readonly id: any;
@@ -50,15 +54,13 @@ type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputTyp
 interface Props {
   data: Immutable.List<FilterableElement>;
   onSelect(elem: FilterableElement): Promise<void>;
-  placeholder: string;
   onRawSelect?(value: string): Promise<void>;
-  buttonComponent?(onPress: () => void): ReactNode;
+  curValue: string;
 }
 
 interface State {
-  curValue: string;
   filteredElements: Immutable.List<FilterableElement>;
-  modalVisible: boolean;
+  keyboardHeight: number;
 }
 
 function filterElements(
@@ -83,7 +85,8 @@ function filterElements(
 
 class FilterListModal extends Component<Props, State> {
   private ds: ListViewDataSource;
-  private textInputRef: TextInput;
+  private keyboardDidShowListener: EmitterSubscription;
+  private keyboardDidHideListener: EmitterSubscription;
 
   constructor(props: Props) {
     super(props);
@@ -93,32 +96,43 @@ class FilterListModal extends Component<Props, State> {
     });
 
     this.state = {
-      curValue: '',
       filteredElements: props.data,
-      modalVisible: false,
+      keyboardHeight: 0,
     };
 
-    this.filterElements = this.filterElements.bind(this);
     this.renderElement = this.renderElement.bind(this);
-    this.setModalVisible = this.setModalVisible.bind(this);
-    this.textInputRef = null;
+    this.keyboardDidHide = this.keyboardDidHide.bind(this);
+    this.keyboardDidShow = this.keyboardDidShow.bind(this);
   }
 
   componentWillReceiveProps(props: Props) {
     this.setState({
-      filteredElements: filterElements(this.state.curValue, props.data),
+      filteredElements: filterElements(props.curValue, props.data),
     });
   }
 
-  private setModalVisible(modalVisible: boolean) {
-    this.setState({ modalVisible });
+  keyboardDidShow (e: any) {
+    let newSize = e.endCoordinates.height;
+    console.log(newSize);
+    this.setState({ keyboardHeight: newSize });
   }
 
-  private filterElements(newValue: string) {
-    this.setState({
-      curValue: newValue,
-      filteredElements: filterElements(newValue, this.props.data),
-    });
+  keyboardDidHide (e: any) {
+    this.setState({ keyboardHeight: 0 });
+  }
+
+  componentWillMount () {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow', this.keyboardDidShow,
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide', this.keyboardDidHide,
+    );
+  }
+
+  componentWillUnmount () {
+    this.keyboardDidShowListener.remove()
+    this.keyboardDidHideListener.remove()
   }
 
   private renderElement(elem: Element) {
@@ -127,11 +141,6 @@ class FilterListModal extends Component<Props, State> {
       case 'FILTERABLE_ELEMENT':
         onPress = async () => {
           await this.props.onSelect(elem);
-          this.setState({
-            curValue: '',
-            filteredElements: this.props.data,
-            modalVisible: false,
-          });
         };
         const options = {
           includeMatches: true,
@@ -180,19 +189,17 @@ class FilterListModal extends Component<Props, State> {
       case 'GAP':
         return <View style={styles.gap} />;
       case 'NO_MORE_RESULTS':
+        const padding = {
+          paddingBottom: this.state.keyboardHeight + 80,
+        };
         return (
-          <View style={styles.noMoreResults}>
+          <View style={[styles.noMoreResults, padding]}>
             <Text>No more results...</Text>
           </View>
         );
       case 'RAW_INPUT':
         onPress = async () => {
           await this.props.onRawSelect(elem.searchValue);
-          this.setState({
-            curValue: '',
-            filteredElements: this.props.data,
-            modalVisible: false,
-          });
         };
         return (
           <TouchableOpacity style={styles.item} onPress={onPress}>
@@ -209,8 +216,8 @@ class FilterListModal extends Component<Props, State> {
   }
 
   render() {
-    const { placeholder, onRawSelect, buttonComponent } = this.props;
-    const { filteredElements, curValue } = this.state;
+    const { curValue, onRawSelect } = this.props;
+    const { filteredElements } = this.state;
     let elements = filteredElements.map(elem => {
       return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
     }).toJS();
@@ -220,61 +227,14 @@ class FilterListModal extends Component<Props, State> {
     }
     elements = elements.concat([{ type: 'NO_MORE_RESULTS' }]);
     const ds = this.ds.cloneWithRows(elements);
-    const onPressDismiss = () => {
-      this.setState({
-        curValue: '',
-        filteredElements: this.props.data,
-        modalVisible: false,
-      });
-    };
-
-    const onPressOpen = () => {
-      this.setModalVisible(true)
-    }
-
-    const butt = !!buttonComponent ? buttonComponent(onPressOpen) : (
-      <TouchableOpacity
-        style={styles.textInputContainer}
-        onPress={onPressOpen}
-      >
-        <MaterialIcons name="search" size={20} color="white" />
-        <Text style={styles.buttonText}>{placeholder}</Text>
-      </TouchableOpacity>
-    );
 
     return (
-      <View>
-        { butt }
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={this.state.modalVisible}
-          onShow={() => this.textInputRef.focus()}
-        >
-          <View style={styles.container}>
-            <View style={styles.topContainer}>
-              <View style={[styles.textInputContainer, styles.textInputContainerWidth]}>
-                <MaterialIcons name="search" size={20} color="white" />
-                <TextInput
-                  style={styles.textInput}
-                  onChangeText={this.filterElements}
-                  onFocus={() => this.setModalVisible(true)}
-                  placeholder={placeholder}
-                  placeholderTextColor='white'
-                  ref={textInput => this.textInputRef = textInput as any}
-                />
-              </View>
-              <TouchableOpacity style={styles.dismiss} onPress={onPressDismiss}>
-                <MaterialIcons name="close" size={24} />
-              </TouchableOpacity>
-            </View>
-            <ListView
-              keyboardShouldPersistTaps={'always'}
-              dataSource={ds}
-              renderRow={this.renderElement}
-            />
-          </View>
-        </Modal>
+      <View style={styles.container}>
+        <ListView
+          keyboardShouldPersistTaps={'always'}
+          dataSource={ds}
+          renderRow={this.renderElement}
+        />
       </View>
     );
   }
@@ -282,14 +242,15 @@ class FilterListModal extends Component<Props, State> {
 
 export default FilterListModal;
 
-const DISMISS_BUTTON_PADDING = 12;
-// Size of button + 2 * button padding + my margin
-const TEXT_INPUT_RIGHT_MARGIN = 24 + 2 * DISMISS_BUTTON_PADDING + 10;
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginTop: 20,
+    position: 'absolute',
+    width: SCREEN_WIDTH,
+    // TODO: doesn't take into account header height
+    height: SCREEN_HEIGHT - Constants.statusBarHeight,
+    top: 0,
+    left: 0,
+    alignSelf: 'stretch',
     justifyContent: 'center',
     backgroundColor: 'white',
   },
@@ -305,42 +266,10 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 18,
   },
-  textInputContainer: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    margin: 10,
-    borderRadius: 25,
-    backgroundColor: '#FFD475',
-    paddingLeft: 10,
-    paddingRight: 20,
-    height: 30,
-  },
-  textInputContainerWidth: {
-    marginRight: 0,
-    width: SCREEN_WIDTH - TEXT_INPUT_RIGHT_MARGIN,
-  },
-  dismiss: {
-    flex: 0,
-    padding: 12,
-  },
-  topContainer: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    width: SCREEN_WIDTH,
-    backgroundColor: '#FFC107',
-  },
-  buttonText: {
-    fontSize: 14,
-    color: 'white',
-  },
   gap: {
     height: 20,
     borderBottomWidth: 0.5,
     borderColor: '#909090',
-  },
-  textInput: {
-    fontSize: 14,
-    color: 'white',
   },
   noMoreResults: {
     marginTop: 10,

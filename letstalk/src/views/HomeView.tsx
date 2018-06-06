@@ -22,7 +22,12 @@ import Immutable from 'immutable';
 
 import { RootState } from '../redux';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
-import { ActionTypes } from '../redux/bootstrap/actions';
+import {
+  State as CredentialOptionsState,
+  fetchCredentialOptions,
+} from '../redux/credential-options/reducer';
+import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
+import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, Loading, ProfileAvatar } from '../components';
 import { Relationship } from '../models/bootstrap';
 import {
@@ -37,9 +42,13 @@ import {
 } from '../models/cohort';
 import Colors from '../services/colors';
 import { AnalyticsHelper } from '../services/analytics';
+import TopHeader, { headerStyle } from './TopHeader';
+import AllFilterableModals from './AllFilterableModals';
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
+  fetchCredentialOptions: ActionCreator<
+    ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
 }
 
 interface Props extends BootstrapState, DispatchActions {
@@ -50,10 +59,8 @@ class HomeView extends Component<Props> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'Home',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
+    headerTitle: <TopHeader />,
+    headerStyle,
   })
 
   constructor(props: Props) {
@@ -80,7 +87,10 @@ class HomeView extends Component<Props> {
   }
 
   private async load() {
-    await this.props.fetchBootstrap();
+    await Promise.all([
+      this.props.fetchBootstrap(),
+      this.props.fetchCredentialOptions(),
+    ]);
   }
 
   private renderDescription(relationship: Relationship) {
@@ -225,9 +235,16 @@ class HomeView extends Component<Props> {
       case 'account_matched':
         const matches = this.renderMatches();
         return (
-          <ScrollView>
-            { matches }
-          </ScrollView>
+          <View style={styles.container}>
+            <ScrollView>
+              { matches }
+            </ScrollView>
+            <AllFilterableModals
+              onSelectSuccess={() => {
+                this.props.navigation.navigate({ routeName: 'Requests' });
+              }}
+            />
+          </View>
         );
       default:
         // Ensure exhaustiveness of select
@@ -251,9 +268,13 @@ class HomeView extends Component<Props> {
   }
 }
 
-export default connect(({ bootstrap }: RootState) => bootstrap, { fetchBootstrap })(HomeView);
+export default connect(({ bootstrap }: RootState) => bootstrap,
+  { fetchBootstrap, fetchCredentialOptions })(HomeView);
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   centeredContainer: {
     flex: 1,
     justifyContent: 'center'
