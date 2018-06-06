@@ -6,6 +6,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import React, { Component, ReactNode } from 'react';
 import {
   Dimensions,
+  EmitterSubscription,
+  Keyboard,
   ListView,
   ListViewDataSource,
   Modal,
@@ -58,6 +60,7 @@ interface Props {
 
 interface State {
   filteredElements: Immutable.List<FilterableElement>;
+  keyboardHeight: number;
 }
 
 function filterElements(
@@ -82,6 +85,8 @@ function filterElements(
 
 class FilterListModal extends Component<Props, State> {
   private ds: ListViewDataSource;
+  private keyboardDidShowListener: EmitterSubscription;
+  private keyboardDidHideListener: EmitterSubscription;
 
   constructor(props: Props) {
     super(props);
@@ -92,15 +97,42 @@ class FilterListModal extends Component<Props, State> {
 
     this.state = {
       filteredElements: props.data,
+      keyboardHeight: 0,
     };
 
     this.renderElement = this.renderElement.bind(this);
+    this.keyboardDidHide = this.keyboardDidHide.bind(this);
+    this.keyboardDidShow = this.keyboardDidShow.bind(this);
   }
 
   componentWillReceiveProps(props: Props) {
     this.setState({
       filteredElements: filterElements(props.curValue, props.data),
     });
+  }
+
+  keyboardDidShow (e: any) {
+    let newSize = e.endCoordinates.height;
+    console.log(newSize);
+    this.setState({ keyboardHeight: newSize });
+  }
+
+  keyboardDidHide (e: any) {
+    this.setState({ keyboardHeight: 0 });
+  }
+
+  componentWillMount () {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow', this.keyboardDidShow,
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide', this.keyboardDidHide,
+    );
+  }
+
+  componentWillUnmount () {
+    this.keyboardDidShowListener.remove()
+    this.keyboardDidHideListener.remove()
   }
 
   private renderElement(elem: Element) {
@@ -157,8 +189,11 @@ class FilterListModal extends Component<Props, State> {
       case 'GAP':
         return <View style={styles.gap} />;
       case 'NO_MORE_RESULTS':
+        const padding = {
+          paddingBottom: this.state.keyboardHeight + 80,
+        };
         return (
-          <View style={styles.noMoreResults}>
+          <View style={[styles.noMoreResults, padding]}>
             <Text>No more results...</Text>
           </View>
         );

@@ -239,7 +239,7 @@ class HomeView extends Component<Props> {
       case 'account_matched':
         const matches = this.renderMatches();
         return (
-          <View>
+          <View style={styles.container}>
             <ScrollView>
               { matches }
             </ScrollView>
@@ -276,6 +276,9 @@ export default connect(({ bootstrap }: RootState) => bootstrap,
   { fetchBootstrap, fetchCredentialOptions })(HomeView);
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   centeredContainer: {
     flex: 1,
     justifyContent: 'center'

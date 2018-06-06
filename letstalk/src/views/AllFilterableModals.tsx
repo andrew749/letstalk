@@ -64,7 +64,7 @@ class AllFilterableModals extends Component<Props> {
   }
 
   private selectSuccess() {
-    if (this.props.onSelectSuccess !== null) this.props.onSelectSuccess();
+    if (!!this.props.onSelectSuccess) this.props.onSelectSuccess();
   }
 
   private async onReqSelect(elem: FilterableElement): Promise<void> {
