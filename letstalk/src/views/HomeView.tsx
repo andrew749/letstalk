@@ -143,7 +143,6 @@ class HomeView extends Component<Props> {
     }
 
     const viewProfile = () => {
-      console.log('opening: ' + userId);
       this.props.navigation.navigate('MatchProfile', { userId });
     }
 

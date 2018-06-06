@@ -113,7 +113,6 @@ class FilterListModal extends Component<Props, State> {
 
   keyboardDidShow (e: any) {
     let newSize = e.endCoordinates.height;
-    console.log(newSize);
     this.setState({ keyboardHeight: newSize });
   }
 
@@ -168,7 +167,6 @@ class FilterListModal extends Component<Props, State> {
             const start = elem.value.slice(0, start_idx);
             const middle = elem.value.slice(start_idx, end_idx+1);
             const end = elem.value.slice(end_idx+1);
-            console.log({ start_idx, end_idx, start, middle, end });
             return (
               <TouchableOpacity style={styles.item} onPress={onPress}>
                 <Text style={styles.itemText}>
