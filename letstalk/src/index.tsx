@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
-import { Button, StyleSheet, Platform, Text, View } from 'react-native';
+import {
+  Button,
+  Keyboard,
+  EmitterSubscription,
+  StyleSheet,
+  Platform,
+  Text,
+  View,
+} from 'react-native';
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Notifications } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
-import { StackNavigator, TabNavigator } from 'react-navigation';
+import { StackNavigator, TabNavigator, TabBarBottomProps, TabBarBottom } from 'react-navigation';
 import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
@@ -50,6 +58,44 @@ const styles = StyleSheet.create({
   },
 });
 
+interface TabBarState {
+  visible: boolean;
+}
+
+class TabBar extends Component<TabBarBottomProps, TabBarState> {
+  private keyboardEventListeners: Array<EmitterSubscription>;
+
+  constructor(props: TabBarBottomProps) {
+    super(props);
+
+    this.state = { visible: true };
+
+    this.visible = this.visible.bind(this);
+  }
+
+  componentDidMount() {
+    if (Platform.OS !== 'ios') {
+      this.keyboardEventListeners = [
+        Keyboard.addListener('keyboardDidShow', this.visible(false)),
+        Keyboard.addListener('keyboardDidHide', this.visible(true))
+      ];
+    } else {
+      this.keyboardEventListeners = [];
+    }
+  }
+
+  componentWillUnmount() {
+    this.keyboardEventListeners.forEach((eventListener) => eventListener.remove());
+  }
+
+  visible = (visible: boolean) => () => this.setState({ visible });
+
+  render() {
+    if (!this.state.visible) return null;
+    return <TabBarBottom {...this.props}/>;
+  }
+}
+
 const createTabView = () => TabNavigator({
   'Home': {
     screen: HomeView,
@@ -78,7 +124,7 @@ const createTabView = () => TabNavigator({
     },
   }),
   tabBarOptions: {
-    showLabel: Platform.OS == 'ios' ? true: false,
+    showLabel: Platform.OS === 'ios',
     showIcon: true,
     activeTintColor: Colors.HIVE_PRIMARY,
     inactiveTintColor: 'gray',
@@ -86,6 +132,7 @@ const createTabView = () => TabNavigator({
       backgroundColor: 'white',
     },
   },
+  tabBarComponent: TabBar,
 });
 
 const createAppNavigation = (loggedIn: boolean) => StackNavigator({
@@ -98,7 +145,6 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   Tabbed: {
     screen: createTabView(),
     navigationOptions: {
-      header: null
     },
   },
   ProfileEdit: {

@@ -26,13 +26,11 @@ import { errorToast } from '../redux/toast';
 import { combineFetchStates } from '../redux/actions';
 import {
   State as CredentialsState,
-  addCredential,
   fetchCredentials,
   removeCredential,
 } from '../redux/credentials/reducer';
 import {
   State as CredentialRequestsState,
-  addCredentialRequest,
   fetchCredentialRequests,
   removeCredentialRequest,
 } from '../redux/credential-requests/reducer';
@@ -40,25 +38,34 @@ import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
+import {
+  ActionTypes as SearchBarActionTypes,
+  SEARCH_LIST_TYPE_CREDENTIALS,
+  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
+} from '../redux/search-bar/actions';
+import {
+  State as SearchBarState,
+  updateFocus,
+  updateListType
+} from '../redux/search-bar/reducer';
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import {
   ActionButton,
+  Button,
   Card,
-  FilterableElement,
-  FilterListModal,
   Header,
   Loading,
 } from '../components';
 import { Credential } from '../models/credential';
 import Colors from '../services/colors';
+import TopHeader, { headerStyle } from './TopHeader';
+import AllFilterableModals from './AllFilterableModals';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
-  addCredentialRequest: ActionCreator<
-    ThunkAction<Promise<CredentialRequestsActionTypes>, CredentialRequestsState, void>>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   removeCredentialRequest: ActionCreator<
     ThunkAction<Promise<CredentialRequestsActionTypes>, CredentialRequestsState, void>>;
@@ -66,12 +73,14 @@ interface DispatchActions {
     ThunkAction<Promise<CredentialRequestsActionTypes>, CredentialRequestsState, void>>;
   fetchCredentialOptions: ActionCreator<
     ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
-  addCredential: ActionCreator<
-    ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   removeCredential: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   fetchCredentials: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
+  updateFocus: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateListType: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
 interface Props extends DispatchActions {
@@ -81,35 +90,17 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-const Head: SFC<{}> = (props: {}) => {
-  return <View style={styles.header}/>;
-}
-
 class RequestToMatchView extends Component<Props> {
-  static navigationOptionsAndroid = ({ navigation }: NavigationScreenDetails<void> ) => ({
-    headerTitle: 'Request',
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
-  });
-
-  static navigationOptionsIOS = ({ navigation}: NavigationScreenDetails<void> ) => ({
-    header: <Head/>,
-    headerStyle: {
-      backgroundColor: Colors.HIVE_PRIMARY,
-    },
-  });
-
-  static navigationOptions = (Platform.OS == 'ios') ? RequestToMatchView.navigationOptionsIOS : RequestToMatchView.navigationOptionsAndroid;
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
+    headerTitle: <TopHeader />,
+    headerStyle,
+  })
 
   constructor(props: Props) {
     super(props);
 
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
-    this.onReqSelect = this.onReqSelect.bind(this);
-    this.onCredSelect = this.onCredSelect.bind(this);
-    this.onRawCredSelect = this.onRawCredSelect.bind(this);
   }
 
   async componentDidMount() {
@@ -127,7 +118,16 @@ class RequestToMatchView extends Component<Props> {
   private renderCredentials() {
     const { credentialsWithState } = this.props.credentials;
     if (credentialsWithState.isEmpty()) {
-      return <Text style={styles.credential}>You haven't added any credentials</Text>;
+      const onPress = () => {
+        this.props.updateFocus(true);
+        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
+      };
+      return (
+        <View style={styles.noCredentialsContainer}>
+          <Text style={styles.noCredentials}>You haven't added any credentials</Text>
+          <Button buttonStyle={styles.noCredentialsButton} title="Add credential" onPress={onPress} />
+        </View>
+      );
     }
     return credentialsWithState.map(credentialWithState => {
       const {
@@ -147,14 +147,14 @@ class RequestToMatchView extends Component<Props> {
           return (
             <Card key={id} style={styles.credentialCard}>
               <Text style={styles.credential}>{name}</Text>
-              <TouchableOpacity onPress={onPress}>
-                <MaterialIcons name="delete" size={24} />
+              <TouchableOpacity style={styles.deleteCredential} onPress={onPress}>
+                <MaterialIcons name="close" size={18} />
               </TouchableOpacity>
             </Card>
           );
         case 'deleting':
           return (
-            <Card key={id} style={styles.deletingCard}>
+            <Card key={id} style={styles.credentialCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -168,7 +168,16 @@ class RequestToMatchView extends Component<Props> {
   private renderCredentialRequests() {
     const { credentialRequestsWithState } = this.props.credentialRequests;
     if (credentialRequestsWithState.isEmpty()) {
-      return <Text style={styles.credentialRequest}>You don't have any requests</Text>;
+      const onPress = () => {
+        this.props.updateFocus(true);
+        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
+      };
+      return (
+        <View style={styles.noCredentialsContainer}>
+          <Text style={styles.noCredentials}>You don't have any requests</Text>
+          <Button buttonStyle={styles.noCredentialsButton} title="Add request" onPress={onPress} />
+        </View>
+      );
     }
     return credentialRequestsWithState.map(credentialWithState => {
       const {
@@ -186,16 +195,16 @@ class RequestToMatchView extends Component<Props> {
             }
           };
           return (
-            <Card key={id} style={styles.credentialRequestCard}>
-              <Text style={styles.credentialRequest}>{name}</Text>
-              <TouchableOpacity onPress={onPress}>
-                <MaterialIcons name="delete" size={24} />
+            <Card key={id} style={styles.credentialCard}>
+              <Text style={styles.credential}>{name}</Text>
+              <TouchableOpacity style={styles.deleteCredential} onPress={onPress}>
+                <MaterialIcons name="close" size={18} />
               </TouchableOpacity>
             </Card>
           );
         case 'deleting':
           return (
-            <Card key={id} style={styles.deletingCard}>
+            <Card key={id} style={styles.credentialCard}>
               <ActivityIndicator />
             </Card>
           );
@@ -206,69 +215,32 @@ class RequestToMatchView extends Component<Props> {
     });
   }
 
-  private async onReqSelect(elem: FilterableElement): Promise<void> {
-    try {
-      await this.props.addCredentialRequest({ id: elem.id, name: elem.value });
-    } catch (e) {
-      await this.props.errorToast(e.message);
-    }
-  }
-
-  private async onCredSelect(elem: { id: number, value: string }): Promise<void> {
-    try {
-      await this.props.addCredential(elem.value);
-    } catch (e) {
-      await this.props.errorToast(e.message);
-    }
-  }
-
-  private async onRawCredSelect(value: string) {
-    try {
-      await this.props.addCredential(value);
-    } catch (e) {
-      await this.props.errorToast(e.message);
-    }
-  }
-
   private renderBody() {
     const { credentials } = this.props.credentialOptions;
 
-    const addCredentialButton = (onPress: () => void) => {
-      return (
-        <TouchableOpacity onPress={onPress} style={styles.addButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>
-      );
+    const onAddCredentialPress = () => {
+      this.props.updateFocus(true);
+      this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
     }
 
     return (
       <View style={styles.container}>
-        <View style={styles.topContainer}>
-          <FilterListModal
-            data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-            onSelect={this.onReqSelect}
-            placeholder="Find someone who is a..."
-          />
-        </View>
-        <ScrollView keyboardShouldPersistTaps={'always'}>
+        <ScrollView>
           <Header>Active Requests</Header>
-          <View style={styles.credentialRequestContainer}>
+          <View style={styles.credentialContainer}>
             {this.renderCredentialRequests()}
           </View>
           <View style={styles.credentialHeaderContainer}>
             <Header>Your Credentials</Header>
-            <FilterListModal
-              data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-              onSelect={this.onCredSelect}
-              onRawSelect={this.onRawCredSelect}
-              placeholder="I am a..."
-              buttonComponent={addCredentialButton}
-            />
+            <TouchableOpacity onPress={onAddCredentialPress} style={styles.addButton}>
+              <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.credentialRequestContainer}>
+          <View style={styles.credentialContainer}>
             {this.renderCredentials()}
           </View>
         </ScrollView>
+        <AllFilterableModals />
       </View>
     );
   }
@@ -296,23 +268,23 @@ export default connect(
   ({ credentialRequests, credentialOptions, credentials }: RootState) => {
     return { credentialOptions, credentialRequests, credentials };
   }, {
-    addCredential,
-    addCredentialRequest,
     errorToast,
     fetchCredentials,
     fetchCredentialRequests,
     fetchCredentialOptions,
     removeCredential,
     removeCredentialRequest,
+    updateFocus,
+    updateListType,
   })(RequestToMatchView);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  credentialRequestContainer: {
+  credentialContainer: {
     flex: 1,
-    alignItems: 'center'
+    alignItems: 'stretch'
   },
   headline: {
     fontWeight: 'bold',
@@ -327,30 +299,31 @@ const styles = StyleSheet.create({
   },
   credentialCard: {
     flexDirection: 'row',
+    padding: 10,
+    marginVertical: 5,
+    marginHorizontal: 10,
   },
-  credentialRequestCard: {
-    flexDirection: 'row',
+  noCredentialsContainer: {
+    alignSelf: 'center',
+    alignItems: 'center'
   },
-  deletingCard: {
-    alignItems: 'center',
+  noCredentialsButton: {
+    width: 200,
+    marginTop: 10,
   },
-  credentialRequest: {
-    fontWeight: 'bold',
-    fontSize: 18,
+  noCredentials: {
+    fontSize: 14,
+  },
+  deleteCredential: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   credential: {
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  header: {
-    height: Platform.OS == "ios" ? 20 : 0,
-    backgroundColor: Colors.HIVE_PRIMARY,
+    fontSize: 14,
+    paddingRight: 30,
   },
   addButton: {
     margin: 12,
-  },
-  topContainer: {
-    width: SCREEN_WIDTH,
-    backgroundColor: '#FFC107',
   },
 })

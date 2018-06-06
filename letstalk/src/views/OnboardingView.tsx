@@ -64,6 +64,7 @@ import {
   MENTORSHIP_PREFERENCE_MENTEE,
   MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
+import { headerStyle } from './TopHeader';
 
 interface CohortFormData {
   programId: string,
@@ -266,6 +267,7 @@ interface Props extends State, DispatchActions {
 class OnboardingView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'Onboarding',
+    headerStyle,
   }
 
   constructor(props: Props) {

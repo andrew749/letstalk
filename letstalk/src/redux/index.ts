@@ -15,16 +15,18 @@ import {
   reducer as credentialOptions,
   State as CredentialOptionsState,
 } from './credential-options/reducer';
+import { reducer as searchBar, State as SearchBarState } from './search-bar/reducer';
 
 export interface RootState {
   bootstrap: BootstrapState;
-  credentialOptions: CredentialOptionsState,
-  credentialRequests: CredentialRequestsState,
-  credentials: CredentialsState,
+  credentialOptions: CredentialOptionsState;
+  credentialRequests: CredentialRequestsState;
+  credentials: CredentialsState;
   form: FormState;
   onboarding: OnboardingState;
-  matchProfile: MatchProfileState,
+  matchProfile: MatchProfileState;
   profile: ProfileState;
+  searchBar: SearchBarState;
 };
 
 const reducers = {
@@ -37,6 +39,7 @@ const reducers = {
   onboarding,
   matchProfile,
   profile,
+  searchBar,
 };
 
 const appReducer: Reducer<RootState> = combineReducers<RootState>(reducers);
