@@ -41,7 +41,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
     reset();
   };
   return (
-    <View style={styles.container}>
+    <View>
       <Field
         label="Email"
         name="email"
@@ -86,7 +86,7 @@ const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
     reset();
   };
   return (
-    <View style={styles.container}>
+    <View>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         backgroundColor={Colors.FB_BG}
@@ -204,7 +204,7 @@ export default class LoginView extends Component<Props> {
       : null;
 
     return (
-      <View style={{ flex: 1, alignItems: 'center', flexDirection: 'column'}}>
+      <View>
         <LoginFormWithRedux onSubmit={this.onSubmit} />
         {signupButton}
         <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
@@ -212,11 +212,3 @@ export default class LoginView extends Component<Props> {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    alignItems: 'center',
-    flexDirection:'column'
-  }
-});
