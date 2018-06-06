@@ -27,6 +27,7 @@ type BootstrapUserRelationshipDataModel struct {
 	PhoneNumber *string  `json:"phoneNumber"`
 	Cohort      *Cohort  `json:"cohort"`
 	Description *string  `json:"description"`
+	MatchingState data.MatchingState `json:"matchingState"`
 }
 
 type BootstrapResponse struct {
