@@ -6,9 +6,15 @@ import {
   StyleSheet,
   View,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import { Constants } from 'expo';
+import {
+  NavigationScreenProp,
+  NavigationRoute,
+  NavigationParams,
+} from 'react-navigation';
 
 import { RootState } from '../redux';
 import {
@@ -23,6 +29,7 @@ import {
   SEARCH_LIST_TYPE_CREDENTIALS,
 } from '../redux/search-bar/actions';
 import Colors from '../services/colors';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -35,7 +42,9 @@ interface DispatchActions {
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
-interface Props extends DispatchActions, SearchBarState {}
+interface Props extends DispatchActions, SearchBarState {
+  navigation: NavigationScreenProp<NavigationRoute<NavigationParams>, NavigationParams>;
+}
 
 class TopHeader extends Component<Props> {
   private searchBar: SearchBar;
@@ -75,33 +84,45 @@ class TopHeader extends Component<Props> {
         const _: never = this.props.listType;
     }
 
-    return <View style={styles.header}>
-      <SearchBar
-        round
-        lightTheme
-        ref={(ref: SearchBar) => this.searchBar = ref}
-        clearIcon={clearIcon}
-        icon={{ style: [styles.icon, styles.leftIcon] }}
-        onChangeText={(value: string) => this.props.updateValue(value)}
-        onClearText={() => this.searchBar.blur()}
-        containerStyle={styles.searchBarContainer}
-        inputStyle={styles.searchBarTextInput}
-        value={this.props.value}
-        placeholder={placeholder}
-        placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-        onFocus={() => this.props.updateFocus(true)}
-        onBlur={() => {
-          this.props.updateFocus(false);
-          this.props.updateValue('');
-          this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
-        }}
-      />
-    </View>;
+    const openQr = () => {
+      this.props.navigation.navigate({routeName: 'QrScanner'});
+    };
+
+    return (
+      <View style={styles.header}>
+        <SearchBar
+          round
+          lightTheme
+          ref={(ref: SearchBar) => this.searchBar = ref}
+          clearIcon={clearIcon}
+          icon={{ style: [styles.icon, styles.leftIcon] }}
+          onChangeText={(value: string) => this.props.updateValue(value)}
+          onClearText={() => this.searchBar.blur()}
+          containerStyle={styles.searchBarContainer}
+          inputStyle={styles.searchBarTextInput}
+          value={this.props.value}
+          placeholder={placeholder}
+          placeholderTextColor={Colors.HIVE_LIGHT_FONT}
+          onFocus={() => this.props.updateFocus(true)}
+          onBlur={() => {
+            this.props.updateFocus(false);
+            this.props.updateValue('');
+            this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
+          }}
+        />
+        <TouchableOpacity style={styles.qrButton} onPress={openQr}>
+          <MaterialIcons name="camera-enhance" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
+        </TouchableOpacity>
+      </View>
+    );
   }
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
   { updateValue, updateFocus, updateListType })(TopHeader);
+
+const SEARCH_BAR_LEFT_MARGIN = 36;
+const SEARCH_BAR_RIGHT_MARGIN = 8;
 
 const styles = StyleSheet.create({
   searchBarTextInput: {
@@ -110,6 +131,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: Colors.HIVE_PRIMARY_LIGHT,
     color: Colors.HIVE_MAIN_FONT,
+  },
+  qrButton: {
+    position: 'absolute',
+    padding: 8,
   },
   icon: {
     top: 11.5, // 15.5 - 4 (hard coded top - decrease in margin)
@@ -122,12 +147,16 @@ const styles = StyleSheet.create({
     right: 12, // 16 - 4 (hard coded right - decrease in margin)
   },
   searchBarContainer: {
-    width: SCREEN_WIDTH,
+    width: SCREEN_WIDTH - SEARCH_BAR_LEFT_MARGIN - SEARCH_BAR_RIGHT_MARGIN,
     backgroundColor: Colors.HIVE_PRIMARY,
     borderBottomWidth: 0,
     borderTopWidth: 0,
+    marginLeft: SEARCH_BAR_LEFT_MARGIN,
+    marginRight: SEARCH_BAR_RIGHT_MARGIN,
   },
   header: {
+    flex: 1,
+    flexDirection: 'row',
     backgroundColor: Colors.HIVE_PRIMARY,
   },
   topLevelHeader: {

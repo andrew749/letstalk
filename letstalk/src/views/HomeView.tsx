@@ -59,7 +59,7 @@ class HomeView extends Component<Props> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: <TopHeader />,
+    headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
   })
 
