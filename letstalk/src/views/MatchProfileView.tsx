@@ -29,7 +29,8 @@ import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, Header } from '../components';
+import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as MatchProfileState, fetchMatchProfile } from '../redux/match-profile/reducer';
@@ -38,7 +39,6 @@ import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import QRCode from "react-native-qrcode";
 import { headerStyle } from './TopHeader';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -63,7 +63,7 @@ class MatchProfileView extends Component<Props> {
     super(props);
 
     this.load = this.load.bind(this);
-    this.renderInner = this.renderInner.bind(this);
+    this.renderBody = this.renderBody.bind(this);
   }
 
   async componentDidMount() {
@@ -77,7 +77,7 @@ class MatchProfileView extends Component<Props> {
   }
 
   private renderProfile(gradYear: string, program: string, bio: string | null) {
-    const bioStr = bio === null ? 'Add bio by editing profile' : bio;
+    const bioStr = bio === null ? 'N/A' : bio;
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.description}>{ bioStr }</Text>
@@ -123,8 +123,7 @@ class MatchProfileView extends Component<Props> {
     )
   }
 
-  private renderInner() {
-
+  private renderBody() {
     const { navigate } = this.props.navigation;
 
     const {
@@ -163,45 +162,37 @@ class MatchProfileView extends Component<Props> {
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
     return (
-      <View style={styles.contentContainer} >
-        <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-        <Header>{headerText}</Header>
-        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-        {this.renderProfile(String(gradYear), program, bio)}
-        {this.renderContactInfo(email, fbId, phoneNumber)}
-        <View style={styles.sectionContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.contentContainer} >
+          <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+          <Header>{headerText}</Header>
+          <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+          {this.renderProfile(String(gradYear), program, bio)}
+          {this.renderContactInfo(email, fbId, phoneNumber)}
+          <View style={styles.sectionContainer}>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
-  renderBody() {
+  render() {
     const {
       state,
       errorMsg,
+      errorType,
     } = this.props.fetchState;
     return (
       <Loading
         state={state}
         errorMsg={errorMsg}
+        errorType={errorType}
         load={this.load}
-        renderBody={this.renderInner}
+        renderBody={this.renderBody}
+        navigation={this.props.navigation}
       />
     );
   }
-
-  render() {
-    const body = this.renderBody();
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        {body}
-      </ScrollView>
-    );
-  }
-
-  // private async openQrScannerView() {
-  //   this.props.navigation.navigate('QrScanner');
-  // }
 }
 
 export default connect(

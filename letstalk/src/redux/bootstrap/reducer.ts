@@ -53,7 +53,7 @@ const fetchBootstrap: ActionCreator<
       await dispatch(setOnboardingStatusAction(data.onboardingStatus));
       return dispatch(fetch.receive(data));
     } catch(e) {
-      return dispatch(fetch.error(e.message));
+      return dispatch(fetch.error(e));
     }
   };
 }

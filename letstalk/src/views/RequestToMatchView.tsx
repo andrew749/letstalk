@@ -56,8 +56,8 @@ import {
   Button,
   Card,
   Header,
-  Loading,
 } from '../components';
+import Loading from './Loading';
 import { Credential } from '../models/credential';
 import Colors from '../services/colors';
 import TopHeader, { headerStyle } from './TopHeader';
@@ -141,7 +141,7 @@ class RequestToMatchView extends Component<Props> {
             try {
               await this.props.removeCredential(id);
             } catch(e) {
-              await this.props.errorToast(e.message);
+              await this.props.errorToast(e.errorMsg);
             }
           };
           return (
@@ -191,7 +191,7 @@ class RequestToMatchView extends Component<Props> {
             try {
               await this.props.removeCredentialRequest(id);
             } catch(e) {
-              await this.props.errorToast(e.message);
+              await this.props.errorToast(e.errorMsg);
             }
           };
           return (
@@ -249,6 +249,7 @@ class RequestToMatchView extends Component<Props> {
     const {
       state,
       errorMsg,
+      errorType,
     } = combineFetchStates(
       this.props.credentialRequests.fetchState,
       this.props.credentialOptions.fetchState,
@@ -257,8 +258,10 @@ class RequestToMatchView extends Component<Props> {
       <Loading
         state={state}
         errorMsg={errorMsg}
+        errorType={errorType}
         load={this.load}
         renderBody={this.renderBody}
+        navigation={this.props.navigation}
       />
     );
   }

@@ -33,7 +33,6 @@ const initialState: State = {
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
-  console.log(action);
   switch (action.type) {
     case TypeKeys.UPDATE_VALUE:
       return {

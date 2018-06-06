@@ -216,7 +216,7 @@ export default class SignupView extends Component<Props> {
         actions: [NavigationActions.navigate({ routeName: 'Login' })]
       }));
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 

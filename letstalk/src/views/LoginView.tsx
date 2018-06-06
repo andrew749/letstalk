@@ -166,7 +166,7 @@ export default class LoginView extends Component<Props> {
         }));
       }
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
@@ -190,7 +190,7 @@ export default class LoginView extends Component<Props> {
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 

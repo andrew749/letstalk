@@ -6,6 +6,7 @@ import {
   FetchTypeKeys,
   FetchActionCreators,
 } from '../actions';
+import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH = 'BOOTSTRAP/FETCH',
@@ -23,11 +24,11 @@ function receive(data: BootstrapData): BootstrapReceiveAction {
   };
 }
 
-function error(errorMsg: string): BootstrapErrorAction {
+function error(error: APIError): BootstrapErrorAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.ERROR,
-    errorMsg,
+    error,
   };
 }
 

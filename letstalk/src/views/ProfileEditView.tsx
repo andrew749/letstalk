@@ -30,11 +30,11 @@ import {
   FormProps,
   Header,
   LabeledFormInput,
-  Loading,
   ModalDatePicker,
   ModalPicker,
   ProfileAvatarEditableFormElement,
 } from '../components';
+import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
@@ -295,7 +295,7 @@ class ProfileEditView extends Component<Props> {
       await this.props.fetchProfile();
       this.props.navigation.goBack();
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 

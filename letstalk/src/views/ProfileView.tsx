@@ -29,7 +29,8 @@ import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, Header } from '../components';
+import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
@@ -64,8 +65,7 @@ class ProfileView extends Component<Props> {
 
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.load = this.load.bind(this);
-    this.renderInner = this.renderInner.bind(this);
-    // this.openQrScannerView = this.openQrScannerView.bind(this);
+    this.renderBody = this.renderBody.bind(this);
   }
 
   private async onLogoutPress() {
@@ -152,8 +152,7 @@ class ProfileView extends Component<Props> {
     )
   }
 
-  private renderInner() {
-
+  private renderBody() {
     const { navigate } = this.props.navigation;
 
     const {
@@ -192,39 +191,25 @@ class ProfileView extends Component<Props> {
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
     return (
-      <View style={styles.contentContainer} >
-        {this.renderQrCode()}
-        <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-        <Header>{headerText}</Header>
-        <Icon
-          name='pencil'
-          type='font-awesome'
-          color={Colors.HIVE_PRIMARY}
-          containerStyle={styles.editButton}
-          onPress={() => navigate('ProfileEdit')} />
-        {/* <ReactNativeButton title="Scan QR Code" onPress={this.openQrScannerView} /> */}
-        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-        {this.renderProfile(String(gradYear), program, bio)}
-        {this.renderContactInfo(email, fbId, phoneNumber)}
-        <View style={styles.sectionContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.contentContainer} >
+          {this.renderQrCode()}
+          <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+          <Header>{headerText}</Header>
+          <Icon
+            name='pencil'
+            type='font-awesome'
+            color={Colors.HIVE_PRIMARY}
+            containerStyle={styles.editButton}
+            onPress={() => navigate('ProfileEdit')} />
+          <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+          {this.renderProfile(String(gradYear), program, bio)}
+          {this.renderContactInfo(email, fbId, phoneNumber)}
+          <View style={styles.sectionContainer}>
+          </View>
+          <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
         </View>
-        <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
-      </View>
-    );
-  }
-
-  renderBody() {
-    const {
-      state,
-      errorMsg,
-    } = this.props.fetchState;
-    return (
-      <Loading
-        state={state}
-        errorMsg={errorMsg}
-        load={this.load}
-        renderBody={this.renderInner}
-      />
+      </ScrollView>
     );
   }
 
@@ -241,17 +226,22 @@ class ProfileView extends Component<Props> {
   };
 
   render() {
-    const body = this.renderBody();
+    const {
+      state,
+      errorMsg,
+      errorType,
+    } = this.props.fetchState;
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        {body}
-      </ScrollView>
+      <Loading
+        state={state}
+        errorMsg={errorMsg}
+        errorType={errorType}
+        load={this.load}
+        renderBody={this.renderBody}
+        navigation={this.props.navigation}
+      />
     );
   }
-
-  // private async openQrScannerView() {
-  //   this.props.navigation.navigate('QrScanner');
-  // }
 }
 
 export default connect(({ profile }: RootState) => profile, { fetchProfile })(ProfileView);

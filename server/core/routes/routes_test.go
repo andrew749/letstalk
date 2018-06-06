@@ -111,7 +111,7 @@ func TestHandlerClientError(t *testing.T) {
 	g, _ := gin.CreateTestContext(&writer)
 	handler(g)
 	assert.Equal(t, code.StatusBadRequest, writer.StatusCode)
-	assert.Equal(t, fmt.Sprintf(`{"Error":{"Code":400,"Message":"%s"}}`, msg), writer.Output)
+	assert.Equal(t, fmt.Sprintf(`{"Error":{"code":400,"message":"%s"}}`, msg), writer.Output)
 }
 
 func TestHandlerInternalError(t *testing.T) {

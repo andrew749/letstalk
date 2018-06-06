@@ -8,6 +8,7 @@ import {
   FetchTypeKeys,
   FetchActionCreators,
 } from '../actions';
+import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH = 'CREDENTIAL_OPTIONS/FETCH',
@@ -27,11 +28,11 @@ function receive(data: Credentials): CredentialOptionsReceiveAction {
   };
 }
 
-function error(errorMsg: string): CredentialOptionsErrorAction {
+function error(error: APIError): CredentialOptionsErrorAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.ERROR,
-    errorMsg,
+    error,
   };
 }
 
