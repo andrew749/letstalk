@@ -127,7 +127,8 @@
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
-    "dialects/mysql"
+    "dialects/mysql",
+    "dialects/sqlite"
   ]
   revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
   version = "v1.9.1"
@@ -154,6 +155,12 @@
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
   version = "v0.0.3"
+
+[[projects]]
+  name = "github.com/mattn/go-sqlite3"
+  packages = ["."]
+  revision = "323a32be5a2421b8c7087225079c6c900ec397cd"
+  version = "v1.7.0"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -264,6 +271,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7f07ee34605c238d410ba1e02b5cda957e717696183ca7981a38c6642e7003ff"
+  inputs-digest = "9232f198c0148b14a55a5dedbc5326ce3ed1be634f85b1bd2b03c0d7d47edc76"
   solver-name = "gps-cdcl"
   solver-version = 1
