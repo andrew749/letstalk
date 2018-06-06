@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableHighlight,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -14,25 +15,38 @@ import { WrappedFieldProps } from 'redux-form';
 import { Button, ButtonProps, FormValidationMessage } from 'react-native-elements';
 import BottomModal from './BottomModal';
 import Moment from 'moment';
+import Card from './Card';
 
 type Props = WrappedFieldProps & {
   label: string;
   dateObj?: boolean; // whether to return a `Date` or a string
-  defaultDate: Date;
+  defaultDate?: Date;
   mode?: 'date' | 'time' | 'datetime';
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-  bottomPicker: {
-    width: SCREEN_WIDTH,
+  datePickerButton: {
+    borderWidth: 0,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  card: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
   },
 });
 
 const ModalDatePicker: React.SFC<Props> = (props) => {
   const { defaultDate, label, mode, dateObj } = props;
-  const { onChange, value } = props.input;
+  const { onChange, onBlur, value } = props.input;
+  const { error, touched, warning } = props.meta;
   // TODO: make this externally configurable
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   const pickerButtonStyle = {
@@ -41,8 +55,8 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
       borderRadius: 5,
     },
     textStyle: {
-      color:'#000'
-    }
+      color:'#000',
+    },
   }
 
   // TODO: Maybe hold state about what the value is using another onChange, and only call the
@@ -50,8 +64,9 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
 
   const dateValue = (value || defaultDate);
   return (
-    <DatePicker
-        style={{width: '100%'}}
+    <Card style={styles.card}>
+      <Text style={styles.label}>{label}</Text>
+      <DatePicker
         date={ dateValue }
         mode="date"
         showIcon={false}
@@ -64,11 +79,9 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
         // @ts-ignore waiting for https://github.com/DefinitelyTyped/DefinitelyTyped/pull/26237 to land
         getDateStr={(date: Date) => Moment(date).format("MMM Do, YYYY")}
         customStyles={{
-          dateInput: {
-            marginLeft: 20,
-            marginRight: 20
-          },
+          dateInput: styles.datePickerButton,
         }}
+        onCloseModal={onBlur as () => void}
         onDateChange={(dateString, date) => {
           if (!dateObj) {
             onChange(Moment(date).format("YYYY-MM-DD"));
@@ -77,6 +90,10 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
           }
         }}
       />
+      {touched && (
+        (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
+        (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}
+    </Card>
   );
 }
 export default ModalDatePicker;

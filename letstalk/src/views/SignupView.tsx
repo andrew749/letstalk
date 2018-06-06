@@ -152,7 +152,6 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Birthday"
         name="birthdate"
         mode={'date' as 'date'}
-        defaultDate={new Date('1996-11-07T00:00:00.000Z')}
         component={ModalDatePicker}
         validate={required}
       />
