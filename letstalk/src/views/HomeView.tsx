@@ -28,7 +28,8 @@ import {
 } from '../redux/credential-options/reducer';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
-import { ActionButton, Button, Card, Header, Loading, ProfileAvatar } from '../components';
+import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
+import Loading from './Loading';
 import { Relationship } from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
@@ -255,13 +256,16 @@ class HomeView extends Component<Props> {
     const {
       state,
       errorMsg,
+      errorType,
     } = this.props.fetchState;
     return (
       <Loading
         state={state}
         errorMsg={errorMsg}
+        errorType={errorType}
         load={this.load}
         renderBody={this.renderHome}
+        navigation={this.props.navigation}
       />
     );
   }

@@ -29,7 +29,8 @@ import Immutable from 'immutable';
 
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header, Loading } from '../components';
+import { ActionButton, Card, Header } from '../components';
+import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
@@ -228,13 +229,16 @@ class ProfileView extends Component<Props> {
     const {
       state,
       errorMsg,
+      errorType,
     } = this.props.fetchState;
     return (
       <Loading
         state={state}
         errorMsg={errorMsg}
+        errorType={errorType}
         load={this.load}
         renderBody={this.renderBody}
+        navigation={this.props.navigation}
       />
     );
   }

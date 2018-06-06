@@ -30,11 +30,11 @@ import {
   FormProps,
   Header,
   LabeledFormInput,
-  Loading,
   ModalDatePicker,
   ModalPicker,
   ProfileAvatarEditableFormElement,
 } from '../components';
+import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
