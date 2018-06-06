@@ -9,6 +9,7 @@ class LabeledFormInput extends React.Component<Props> {
   private elementRef: React.Ref<FormInput>;
   constructor(props: Props) {
     super(props);
+    // @ts-ignore
     this.elementRef = React.createRef();
   }
   focus() {
