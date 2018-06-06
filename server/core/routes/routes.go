@@ -52,6 +52,14 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/login")
 	v1.POST("/login", hw.wrapHandler(login.LoginUser, false))
 
+	// user forgot password, generate a link to send to email
+	v1.OPTIONS("/forgot_password")
+	v1.POST("/forgot_password", hw.wrapHandler(login.GenerateNewForgotPasswordRequestController, false))
+
+	// handle changin a user password using unique link.
+	v1.OPTIONS("/change_password")
+	v1.POST("/change_password", hw.wrapHandler(login.ForgotPasswordController, false))
+
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
 	v1.POST("/fb_login", hw.wrapHandler(login.FBController, false))

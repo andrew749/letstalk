@@ -15,6 +15,14 @@ func GetUserById(db *gorm.DB, userId int) (*data.User, error) {
 	return &user, nil
 }
 
+func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
+	var user data.User
+	if db.Where(&data.User{Email: email}).First(&user).RecordNotFound() {
+		return nil, errors.New("Unable to find user")
+	}
+	return &user, nil
+}
+
 func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{Secret: secret}).First(&user).RecordNotFound() {
