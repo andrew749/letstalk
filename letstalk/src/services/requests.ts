@@ -3,7 +3,8 @@ import { SessionToken } from './session-service';
 
 export type ErrorTypes =
   | 'UNAUTHORIZED'
-  | 'INVALID_REQUEST';
+  | 'INVALID_REQUEST'
+  | 'NO_NETWORK';
 
 export interface APIError {
   readonly errorMsg: string;
@@ -34,11 +35,17 @@ export class Requestor {
   ): Promise<any> {
     if (!fetchParams.headers) fetchParams.headers = new Headers();
     fetchParams.headers.append('sessionId', sessionToken);
-    const response = await fetch(route, fetchParams);
+    let response: any;
+    try {
+      response = await fetch(route, fetchParams);
+    } catch(_e) {
+      const e: APIError = { errorMsg: 'Could not connect to network', errorType: 'NO_NETWORK' };
+      throw e;
+    }
     if (!response.ok) return response.json().then((data: any) => {
       let errorType: ErrorTypes = 'INVALID_REQUEST';
       if (data.Error.code === 401) errorType = 'UNAUTHORIZED';
-      const e: APIError = { errorMsg: data.Error.message, errorType: errorType };
+      const e: APIError = { errorMsg: data.Error.errorMsg, errorType };
       throw e;
     });
     const data = await response.json();
