@@ -18,7 +18,7 @@ func TestCreateNewUser(t *testing.T) {
 			FirstName: "Andrew",
 			LastName:  "Codispoti",
 			Gender:    0,
-			Birthdate: 0,
+			Birthdate: "1996-10-07",
 		},
 		Email:       "test@test.com",
 		PhoneNumber: "5555555555",
