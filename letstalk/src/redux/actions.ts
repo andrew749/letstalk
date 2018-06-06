@@ -1,10 +1,13 @@
 import { Action } from 'redux';
 
+import { APIError, ErrorTypes } from '../services/requests';
+
 type States = 'prefetch' | 'fetching' | 'error' | 'success';
 
 export type FetchState = {
-  state: States;
-  errorMsg?: string;
+  readonly state: States;
+  readonly errorMsg?: string;
+  readonly errorType?: ErrorTypes;
 }
 
 export enum FetchTypeKeys {
@@ -26,7 +29,7 @@ export interface FetchReceiveAction<P, D> extends FetchAction<P> {
 export interface FetchErrorAction<P> extends FetchAction<P> {
   readonly type: P;
   readonly fetchType: FetchTypeKeys.ERROR;
-  readonly errorMsg: string;
+  readonly error: APIError,
 }
 
 export interface FetchStartAction<P> extends FetchAction<P> {
@@ -63,7 +66,7 @@ export function fetchStateReducer<P, D>(action: FetchActions<P, D>): FetchState 
     case FetchTypeKeys.RECEIVE:
       return { state: 'success' };
     case FetchTypeKeys.ERROR:
-      return { state: 'error', errorMsg: action.errorMsg };
+      return { state: 'error', errorMsg: action.error.errorMsg, errorType: action.error.errorType };
     case FetchTypeKeys.START:
       return { state: 'fetching' };
     default:
@@ -72,18 +75,30 @@ export function fetchStateReducer<P, D>(action: FetchActions<P, D>): FetchState 
   }
 }
 
+function combineErrorTypes(fst: ErrorTypes, snd: ErrorTypes): ErrorTypes {
+  if (fst === 'UNAUTHORIZED' || snd === 'UNAUTHORIZED') {
+    return 'UNAUTHORIZED';
+  } else if (fst === 'INVALID_REQUEST' || snd === 'INVALID_REQUEST') {
+    return 'INVALID_REQUEST';
+  } else {
+    return null;
+  }
+}
+
 export function combineFetchStates(fst: FetchState, snd: FetchState): FetchState {
   const errorMsg = snd.errorMsg ?
     (fst.errorMsg ? fst.errorMsg + ', ' + snd.errorMsg : snd.errorMsg) :
     fst.errorMsg;
+  const errorType = combineErrorTypes(fst.errorType, snd.errorType);
   const possibleStates = ['prefetch', 'fetching', 'error', 'success'] as Array<States>;
   const fstIdx = possibleStates.indexOf(fst.state);
   const sndIdx = possibleStates.indexOf(snd.state);
   const idx = fstIdx < sndIdx ? fstIdx : sndIdx;
   const state = possibleStates[idx];
   return {
-    errorMsg,
     state,
+    errorMsg,
+    errorType,
   };
 }
 

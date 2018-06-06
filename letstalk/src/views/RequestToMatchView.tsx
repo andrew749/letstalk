@@ -141,7 +141,7 @@ class RequestToMatchView extends Component<Props> {
             try {
               await this.props.removeCredential(id);
             } catch(e) {
-              await this.props.errorToast(e.message);
+              await this.props.errorToast(e.errorMsg);
             }
           };
           return (
@@ -191,7 +191,7 @@ class RequestToMatchView extends Component<Props> {
             try {
               await this.props.removeCredentialRequest(id);
             } catch(e) {
-              await this.props.errorToast(e.message);
+              await this.props.errorToast(e.errorMsg);
             }
           };
           return (

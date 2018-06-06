@@ -1,6 +1,15 @@
 import { BASE_URL } from './constants';
 import { SessionToken } from './session-service';
 
+export type ErrorTypes =
+  | 'UNAUTHORIZED'
+  | 'INVALID_REQUEST';
+
+export interface APIError {
+  readonly errorMsg: string;
+  readonly errorType: ErrorTypes;
+}
+
 type Method = 'GET' | 'POST' | 'DELETE';
 
 // TODO: this is incomplete, add stuff as you need. Or, try finding a good type def for fetch.
@@ -27,7 +36,10 @@ export class Requestor {
     fetchParams.headers.append('sessionId', sessionToken);
     const response = await fetch(route, fetchParams);
     if (!response.ok) return response.json().then((data: any) => {
-      throw new Error(data.Error.Message);
+      let errorType: ErrorTypes = 'INVALID_REQUEST';
+      if (data.Error.code === 401) errorType = 'UNAUTHORIZED';
+      const e: APIError = { errorMsg: data.Error.message, errorType: errorType };
+      throw e;
     });
     const data = await response.json();
     return data.Result;

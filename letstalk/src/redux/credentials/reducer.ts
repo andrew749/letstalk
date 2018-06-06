@@ -95,7 +95,7 @@ const fetchCredentials: ActionCreator<
       }).toList();
       return dispatch(fetch.receive(credentialsWithState));
     } catch(e) {
-      return dispatch(fetch.error(e.message));
+      return dispatch(fetch.error(e));
     }
   };
 }

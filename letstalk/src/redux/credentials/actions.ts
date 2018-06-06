@@ -9,6 +9,7 @@ import {
   FetchTypeKeys,
   FetchActionCreators,
 } from '../actions';
+import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH                = 'CREDENTIALS/FETCH',
@@ -53,11 +54,11 @@ function receive(data: CredentialsWithState): CredentialEditReceiveAction {
   };
 }
 
-function error(errorMsg: string): CredentialEditErrorAction {
+function error(error: APIError): CredentialEditErrorAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.ERROR,
-    errorMsg,
+    error,
   };
 }
 

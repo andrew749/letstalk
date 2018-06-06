@@ -49,7 +49,7 @@ const fetchMatchProfile: ActionCreator<
       const data = await profileService.matchProfile(userId);
       return dispatch(fetch.receive(data));
     } catch(e) {
-      return dispatch(fetch.error(e.message));
+      return dispatch(fetch.error(e));
     }
   };
 }

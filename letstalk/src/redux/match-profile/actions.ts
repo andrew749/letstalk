@@ -6,6 +6,7 @@ import {
   FetchTypeKeys,
   FetchActionCreators,
 } from '../actions';
+import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH = 'MATCH_PROFILE/FETCH',
@@ -23,11 +24,11 @@ function receive(data: ProfileData): ProfileReceiveAction {
   };
 }
 
-function error(errorMsg: string): ProfileErrorAction {
+function error(error: APIError): ProfileErrorAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.ERROR,
-    errorMsg,
+    error,
   };
 }
 

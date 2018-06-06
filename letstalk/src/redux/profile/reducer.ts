@@ -49,7 +49,7 @@ const fetchProfile: ActionCreator<
       const data = await profileService.me();
       return dispatch(fetch.receive(data));
     } catch(e) {
-      return dispatch(fetch.error(e.message));
+      return dispatch(fetch.error(e));
     }
   };
 }

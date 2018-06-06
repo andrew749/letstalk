@@ -293,7 +293,7 @@ class OnboardingView extends Component<Props> {
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
@@ -302,7 +302,7 @@ class OnboardingView extends Component<Props> {
       const onboardingStatus = await profileService.updateVector(preferenceType, values);
       this.props.setOnboardingStatusAction(onboardingStatus);
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 

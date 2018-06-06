@@ -50,7 +50,7 @@ const fetchCredentialOptions: ActionCreator<
       const data = await requestToMatchService.getAllCredentials();
       return dispatch(fetch.receive(data));
     } catch(e) {
-      return dispatch(fetch.error(e.message));
+      return dispatch(fetch.error(e));
     }
   };
 }

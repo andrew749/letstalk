@@ -72,7 +72,7 @@ class AllFilterableModals extends Component<Props> {
       await this.props.addCredentialRequest({ id: elem.id, name: elem.value });
       this.selectSuccess();
     } catch (e) {
-      await this.props.errorToast(e.message);
+      await this.props.errorToast(e.errorMsg);
     }
     await this.blurSearchBar();
   }
@@ -82,7 +82,7 @@ class AllFilterableModals extends Component<Props> {
       await this.props.addCredential(elem.value);
       this.selectSuccess();
     } catch (e) {
-      await this.props.errorToast(e.message);
+      await this.props.errorToast(e.errorMsg);
     }
     await this.blurSearchBar();
   }
@@ -92,7 +92,7 @@ class AllFilterableModals extends Component<Props> {
       await this.props.addCredential(value);
       this.selectSuccess();
     } catch (e) {
-      await this.props.errorToast(e.message);
+      await this.props.errorToast(e.errorMsg);
     }
     await this.blurSearchBar();
   }

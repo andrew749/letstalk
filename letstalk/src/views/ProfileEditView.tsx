@@ -295,7 +295,7 @@ class ProfileEditView extends Component<Props> {
       await this.props.fetchProfile();
       this.props.navigation.goBack();
     } catch(e) {
-      throw new SubmissionError({_error: e.message});
+      throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
