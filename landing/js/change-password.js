@@ -23,16 +23,17 @@ $(document).ready(function(){
   var requestId = getPasswordChangeRequestId();
 
   $('form').submit(function(event) {
+    event.preventDefault();
     console.log("got submit click");
     var newPassword = $('#newPassword').val();
     var newPasswordConfirm = $('#newPasswordConfirm').val();
 
-    if (newPassword === "" ||newPassword !== newPasswordConfirm) {
+    if (newPassword === "" || newPassword !== newPasswordConfirm) {
         badPasswordHandler();
+        return;
     }
 
     submitPasswordChange(requestId, newPassword)
-    event.preventDefault();
   });
 
   function badPasswordHandler() {
