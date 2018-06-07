@@ -14,6 +14,14 @@ export interface Relationship {
   readonly phoneNumber: string | null;
   readonly cohort: Cohort | null;
   readonly description: string | null;
+  readonly matchingState: MatchingState;
+}
+
+export enum MatchingState {
+  Unknown = 0,
+  Unverified,
+  Verified,
+  Expired,
 }
 
 export type UserState =

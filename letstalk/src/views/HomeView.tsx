@@ -30,7 +30,7 @@ import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions'
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
-import { Relationship } from '../models/bootstrap';
+import {MatchingState, Relationship} from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
   USER_TYPE_MENTEE,
@@ -163,7 +163,10 @@ class HomeView extends Component<Props> {
       userId,
       firstName,
       lastName,
+      matchingState,
     } = relationship;
+    const isVerified = matchingState === MatchingState.Verified;
+    const isUnverified = matchingState === MatchingState.Unverified;
     const description = this.renderDescription(relationship);
     // TODO: Handle errors for links
     return (
@@ -173,6 +176,8 @@ class HomeView extends Component<Props> {
             <ProfileAvatar userId={userId.toString()} large/>
           </View>
           <View style={{ flex: 2 }}>
+            { isVerified && <Text style={styles.verified}>Verified Match</Text> }
+            { isUnverified && <Text style={styles.unverified}>Unverified Match</Text> }
             <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
             { description }
           </View>
@@ -311,6 +316,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   bold: {
+    fontWeight: 'bold',
+  },
+  verified: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  unverified: {
+    color: 'red',
     fontWeight: 'bold',
   },
 })

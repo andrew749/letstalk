@@ -11,6 +11,7 @@ import (
 
 func convertUserToRelationshipDataModel(
 	user data.User,
+	matchingState data.MatchingState,
 	description *string,
 	userType api.UserType,
 ) *api.BootstrapUserRelationshipDataModel {
@@ -34,15 +35,16 @@ func convertUserToRelationshipDataModel(
 	}
 
 	return &api.BootstrapUserRelationshipDataModel{
-		UserId:      user.UserId,
-		UserType:    userType,
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		Email:       user.Email,
-		FbId:        fbId,
-		PhoneNumber: phoneNumber,
-		Description: description,
-		Cohort:      cohort,
+		UserId:        user.UserId,
+		UserType:      userType,
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		Email:         user.Email,
+		FbId:          fbId,
+		PhoneNumber:   phoneNumber,
+		Description:   description,
+		Cohort:        cohort,
+		MatchingState: matchingState,
 	}
 }
 
@@ -116,13 +118,13 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	for _, mentor := range mentors {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(*mentor.MentorUser, nil, api.USER_TYPE_MENTOR),
+			convertUserToRelationshipDataModel(*mentor.MentorUser, mentor.State, nil, api.USER_TYPE_MENTOR),
 		)
 	}
 	for _, mentee := range mentees {
 		relationships = append(
 			relationships,
-			convertUserToRelationshipDataModel(*mentee.MenteeUser, nil, api.USER_TYPE_MENTEE),
+			convertUserToRelationshipDataModel(*mentee.MenteeUser, mentee.State, nil, api.USER_TYPE_MENTEE),
 		)
 	}
 	for _, asker := range askers {
@@ -131,6 +133,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			relationships,
 			convertUserToRelationshipDataModel(
 				*asker.AskerUser,
+				data.MATCHING_STATE_UNKNKOWN,
 				description,
 				api.USER_TYPE_ASKER,
 			),
@@ -142,6 +145,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			relationships,
 			convertUserToRelationshipDataModel(
 				*answerer.AnswererUser,
+				data.MATCHING_STATE_UNKNKOWN,
 				description,
 				api.USER_TYPE_ANSWERER,
 			),
