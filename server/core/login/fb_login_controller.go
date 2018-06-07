@@ -200,10 +200,11 @@ func FBLinkController(c *ctx.Context) errs.Error {
 	}
 
 	var fbUserID = fbUser.Id
+	var fbLink = fbUser.Link
 	var userID = c.SessionData.UserId
 
 	// link the user
-	if err := linkFBUser(c.Db, userID, fbUserID); err != nil {
+	if err := linkFBUser(c.Db, userID, fbUserID, fbLink); err != nil {
 		return errs.NewInternalError(err.Error())
 	}
 
@@ -211,7 +212,7 @@ func FBLinkController(c *ctx.Context) errs.Error {
 }
 
 // linkFBUser link the specified user to the facebook user with fbUserID
-func linkFBUser(db *gorm.DB, userID int, fbUserID string) error {
+func linkFBUser(db *gorm.DB, userID int, fbUserID string, fbLink string) error {
 	var externalAuthRecord *data.ExternalAuthData
 	var err error
 	if externalAuthRecord, err = query.GetExternalAuthRecord(db, userID); err != nil {
@@ -220,7 +221,7 @@ func linkFBUser(db *gorm.DB, userID int, fbUserID string) error {
 
 	// update the user data
 	if err := db.Model(&externalAuthRecord).
-		Updates(&data.ExternalAuthData{FbUserId: &fbUserID}).Error; err != nil {
+		Updates(&data.ExternalAuthData{FbUserId: &fbUserID, FbProfileLink: &fbLink}).Error; err != nil {
 	}
 
 	return nil
@@ -233,11 +234,12 @@ type FBUser struct {
 	Email     string
 	Gender    int
 	Birthdate string
+	Link      string
 }
 
 func getFBUser(accessToken string) (*FBUser, error) {
 	res, err := fb.Get("/me", fb.Params{
-		"fields":       "id,first_name,last_name,email,gender,birthday",
+		"fields":       "id,first_name,last_name,email,gender,birthday,link",
 		"access_token": accessToken,
 	})
 
@@ -259,5 +261,6 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		Email:     res["email"].(string),
 		Gender:    gender,
 		Birthdate: res["birthday"].(string),
+		Link:      res["link"].(string),
 	}, nil
 }

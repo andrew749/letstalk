@@ -98,7 +98,7 @@ class ProfileView extends Component<Props> {
     )
   }
 
-  private renderContactInfo(email: string, fbId: string, phoneNumber: string) {
+  private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
 
     const buildItem = (label: string, value: string) => {
       return (
@@ -122,11 +122,11 @@ class ProfileView extends Component<Props> {
     ]);
 
 
-    if (fbId !== null) {
+    if (fbLink !== null) {
       contactItems.push(
-        <TouchableOpacity style={styles.listItem}>
+        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
           <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook Linked </Text>
+          <Text style={styles.label}>Facebook</Text>
         </TouchableOpacity>
       );
     } else {
@@ -167,6 +167,7 @@ class ProfileView extends Component<Props> {
       birthdate,
       phoneNumber,
       fbId,
+      fbLink,
       bio,
       hometown,
     } = this.props.profile;
@@ -204,7 +205,7 @@ class ProfileView extends Component<Props> {
             onPress={() => navigate('ProfileEdit')} />
           <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
           {this.renderProfile(String(gradYear), program, bio)}
-          {this.renderContactInfo(email, fbId, phoneNumber)}
+          {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
           <View style={styles.sectionContainer}>
           </View>
           <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />

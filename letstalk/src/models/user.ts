@@ -47,4 +47,5 @@ export interface UserContactInfo {
 	readonly email: string
   readonly phoneNumber: string | null;
   readonly fbId: string | null;
+  readonly fbLink: string | null;
 }
