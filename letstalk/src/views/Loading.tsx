@@ -27,7 +27,7 @@ const Loading: SFC<Props> = props => {
     case 'fetching':
       return (
         <View style={styles.centeredContainer}>
-          <Text style={styles.headline}>Soon...</Text>
+          <Text style={styles.headline}>Loading...</Text>
           <ActivityIndicator size="large" />
         </View>
       );
