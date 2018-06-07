@@ -98,6 +98,7 @@ func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
 	if user.ExternalAuthData != nil {
 		userModel.UserContactInfo.PhoneNumber = user.ExternalAuthData.PhoneNumber
 		userModel.UserContactInfo.FbId = user.ExternalAuthData.FbUserId
+		userModel.UserContactInfo.FbLink = user.ExternalAuthData.FbProfileLink
 	}
 
 	if userCohort != nil {

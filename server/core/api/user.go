@@ -25,6 +25,7 @@ type UserContactInfo struct {
 	Email       string  `json:"email" binding:"required"`
 	PhoneNumber *string `json:"phoneNumber"`
 	FbId        *string `json:"fbId"`
+	FbLink      *string `json:"fbLink"`
 }
 
 type MentorshipPreference uint

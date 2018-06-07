@@ -86,7 +86,7 @@ class MatchProfileView extends Component<Props> {
     )
   }
 
-  private renderContactInfo(email: string, fbId: string, phoneNumber: string) {
+  private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
 
     const buildItem = (label: string, value: string, link: string) => {
       const onPress = () => Linking.openURL(link);
@@ -109,11 +109,21 @@ class MatchProfileView extends Component<Props> {
     const contactInfos: Array<[string, string, string]> = [
       ['Email', email, emailLink],
     ];
+
     if (!!phoneNumber) {
       const smsLink = 'sms:' + phoneNumber;
       contactInfos.push(['Phone', phoneNumber, smsLink]);
     }
     const contactItems = buildItems(contactInfos);
+
+    if (fbLink) {
+      contactItems.push(
+        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+          <MaterialIcons name="face" size={24} />
+          <Text style={styles.label}>Facebook</Text>
+        </TouchableOpacity>
+      );
+    }
 
     return (
       <View style={styles.sectionContainer}>

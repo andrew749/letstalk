@@ -17,11 +17,13 @@ func convertUserToRelationshipDataModel(
 ) *api.BootstrapUserRelationshipDataModel {
 	var (
 		fbId        *string
+		fbLink      *string
 		phoneNumber *string
 		cohort      *api.Cohort
 	)
 	if user.ExternalAuthData != nil {
 		fbId = user.ExternalAuthData.FbUserId
+		fbLink = user.ExternalAuthData.FbProfileLink
 		phoneNumber = user.ExternalAuthData.PhoneNumber
 	}
 
@@ -41,6 +43,7 @@ func convertUserToRelationshipDataModel(
 		LastName:      user.LastName,
 		Email:         user.Email,
 		FbId:          fbId,
+		FBLink:        fbLink,
 		PhoneNumber:   phoneNumber,
 		Description:   description,
 		Cohort:        cohort,

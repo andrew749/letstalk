@@ -18,15 +18,16 @@ const (
 )
 
 type BootstrapUserRelationshipDataModel struct {
-	UserId      int      `json:"userId" binding:"required"`
-	UserType    UserType `json:"userType" binding:"required"`
-	FirstName   string   `json:"firstName" binding:"required"`
-	LastName    string   `json:"lastName" binding:"required"`
-	Email       string   `json:"email" binding:"required"`
-	FbId        *string  `json:"fbId"`
-	PhoneNumber *string  `json:"phoneNumber"`
-	Cohort      *Cohort  `json:"cohort"`
-	Description *string  `json:"description"`
+	UserId        int                `json:"userId" binding:"required"`
+	UserType      UserType           `json:"userType" binding:"required"`
+	FirstName     string             `json:"firstName" binding:"required"`
+	LastName      string             `json:"lastName" binding:"required"`
+	Email         string             `json:"email" binding:"required"`
+	FbId          *string            `json:"fbId"`
+	FBLink        *string            `json:"fbLink" binding:"required"`
+	PhoneNumber   *string            `json:"phoneNumber"`
+	Cohort        *Cohort            `json:"cohort"`
+	Description   *string            `json:"description"`
 	MatchingState data.MatchingState `json:"matchingState"`
 }
 

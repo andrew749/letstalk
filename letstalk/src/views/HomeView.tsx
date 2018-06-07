@@ -130,10 +130,14 @@ class HomeView extends Component<Props> {
       userId,
       email,
       fbId,
+      fbLink,
       phoneNumber,
     } = relationship;
 
-    if (phoneNumber !== null) {
+    if (fbLink != null) {
+      icon = 'face';
+      onPress = () => Linking.openURL(fbLink);
+    } else if (phoneNumber !== null) {
       const smsLink = 'sms:' + phoneNumber;
       icon = 'textsms';
       onPress = () => Linking.openURL(smsLink);
