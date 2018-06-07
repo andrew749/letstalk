@@ -18,6 +18,7 @@ import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 import Immutable from 'immutable';
+import Moment from 'moment';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import auth from '../services/auth';
@@ -316,7 +317,7 @@ class ProfileEditView extends Component<Props> {
       firstName,
       lastName,
       gender,
-      birthdate,
+      birthdate: Moment.utc(birthdate).format("YYYY-MM-DD"),
       phoneNumber,
       programId,
       sequenceId,
