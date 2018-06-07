@@ -148,6 +148,7 @@ class MatchProfileView extends Component<Props> {
       birthdate,
       phoneNumber,
       fbId,
+      fbLink,
       bio,
       hometown,
     } = this.props.profile;
@@ -178,7 +179,7 @@ class MatchProfileView extends Component<Props> {
           <Header>{headerText}</Header>
           <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
           {this.renderProfile(String(gradYear), program, bio)}
-          {this.renderContactInfo(email, fbId, phoneNumber)}
+          {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
           <View style={styles.sectionContainer}>
           </View>
         </View>
