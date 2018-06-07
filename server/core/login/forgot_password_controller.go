@@ -67,6 +67,7 @@ func GenerateNewForgotPasswordRequestController(ctx *ctx.Context) errs.Error {
 		return errs.NewInternalError(err.Error())
 	}
 
+	ctx.Result = "Ok"
 	return nil
 }
 
@@ -111,5 +112,6 @@ func ForgotPasswordController(ctx *ctx.Context) errs.Error {
 	if err := tx.Commit().Error; err != nil {
 		return errs.NewDbError(err)
 	}
+	ctx.Result = "Ok"
 	return nil
 }
