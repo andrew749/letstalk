@@ -1,6 +1,6 @@
 // DEV
 
-export const BASE_URL = 'http://192.168.0.187';
+export const BASE_URL = 'http://192.168.0.10';
 export const ANALYTICS_ID = 'UA-118691527-1';
 // PROD
 // export const BASE_URL = 'http://54.175.152.141';
@@ -12,6 +12,7 @@ export const FB_LOGIN_ROUTE            = '/v1/fb_login';
 export const FB_LINK_ROUTE            = '/v1/fb_link';
 export const LOGIN_ROUTE               = '/v1/login';
 export const LOGOUT_ROUTE              = '/v1/logout';
+export const FORGOT_PASSWORD_ROUTE = '/v1/forgot_password';
 export const MATCH_PROFILE_ROUTE       = '/v1/match_profile';
 export const ME_ROUTE                  = '/v1/me';
 export const PROFILE_PIC_ROUTE         = '/v1/profile_pic';
