@@ -36,6 +36,41 @@ func SendEmail(
 	return nil
 }
 
+func SendForgotPasswordEmail(
+	to *mail.Email,
+	passwordChangeLink string,
+) error {
+	client := sendgrid.NewSendClient(secrets.GetSecrets().SendGrid)
+	// Create message and configure with empty text to force template
+	// body to be used instead. You have to set up a transactional
+	// template on SendGrid's web site and reference its ID below where
+	// it says <template_id>.
+	message := mail.NewV3Mail()
+	message.SetFrom(mail.NewEmail("Hive", "andrew@hiveapp.org"))
+
+	// personalize the email to the user
+	p := mail.NewPersonalization()
+	tos := []*mail.Email{
+		to,
+	}
+	// set recipients
+	p.AddTos(tos...)
+	p.SetSubstitution(":passwordchangelink", passwordChangeLink)
+
+	message.AddPersonalizations(p)
+	message.SetTemplateID(PasswordChangeEmail)
+	response, err := client.Send(message)
+	if err != nil {
+		log.Println(err)
+	} else {
+		fmt.Println(response.StatusCode)
+		fmt.Println(response.Body)
+		fmt.Println(response.Headers)
+	}
+	return err
+
+}
+
 func SendSubscribeEmail(
 	to *mail.Email,
 	name string,
