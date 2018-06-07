@@ -30,6 +30,7 @@ import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
+import ForgotPasswordView from './views/ForgotPasswordView';
 import NotificationService, { Notification } from './services/notification-service';
 
 import Colors from './services/colors';
@@ -141,6 +142,9 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
   },
   Signup: {
     screen: SignupView,
+  },
+  ForgotPassword: {
+    screen: ForgotPasswordView,
   },
   Tabbed: {
     screen: createTabView(),

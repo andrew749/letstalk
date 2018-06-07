@@ -45,7 +45,7 @@ export class Requestor {
     if (!response.ok) return response.json().then((data: any) => {
       let errorType: ErrorTypes = 'INVALID_REQUEST';
       if (data.Error.code === 401) errorType = 'UNAUTHORIZED';
-      const e: APIError = { errorMsg: data.Error.errorMsg, errorType };
+      const e: APIError = { errorMsg: data.Error.errorMsg || data.Error.message, errorType };
       throw e;
     });
     const data = await response.json();

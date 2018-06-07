@@ -4,6 +4,7 @@ import { AsyncStorage } from 'react-native';
 
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
+import {FORGOT_PASSWORD_ROUTE} from './constants';
 
 export class Auth {
   private sessionService: SessionService
@@ -49,6 +50,10 @@ export class Auth {
     const sessionToken = await this.getSessionToken();
     AsyncStorage.removeItem(Auth.tokenLocation);
     await this.sessionService.logout(sessionToken);
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const resp = await requestor.post(FORGOT_PASSWORD_ROUTE, {"email": email});
   }
 
   async linkFB(): Promise<boolean> {

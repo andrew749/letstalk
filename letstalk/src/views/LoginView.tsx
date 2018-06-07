@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Button as ReactNativeButton, View, StyleSheet, Platform } from 'react-native';
-import { FormValidationMessage } from 'react-native-elements';
+import { Button as ReactNativeButton, View, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { FormValidationMessage, Text } from 'react-native-elements';
 import { reduxForm, Field, SubmissionError } from 'redux-form';
 import {
   NavigationScreenProp,
@@ -203,11 +203,18 @@ export default class LoginView extends Component<Props> {
         onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'Signup'}))} />
       : null;
 
+    const forgotPasswordButton = (
+        <TouchableOpacity onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'ForgotPassword'}))}>
+          <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 13, paddingTop: 2 }}>Forgot my password</Text>
+        </TouchableOpacity>
+      );
+
     return (
       <View>
         <LoginFormWithRedux onSubmit={this.onSubmit} />
         {signupButton}
         <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
+        {forgotPasswordButton}
       </View>
     );
   }
