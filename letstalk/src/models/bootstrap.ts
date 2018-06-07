@@ -11,6 +11,7 @@ export interface Relationship {
   readonly lastName: string;
   readonly email: string;
   readonly fbId: string | null;
+  readonly fbLink: string | null;
   readonly phoneNumber: string | null;
   readonly cohort: Cohort | null;
   readonly description: string | null;

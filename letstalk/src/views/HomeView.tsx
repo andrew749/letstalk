@@ -134,7 +134,7 @@ class HomeView extends Component<Props> {
       phoneNumber,
     } = relationship;
 
-    if (fbLink) {
+    if (fbLink != null) {
       icon = 'face';
       onPress = () => Linking.openURL(fbLink);
     } else if (phoneNumber !== null) {
