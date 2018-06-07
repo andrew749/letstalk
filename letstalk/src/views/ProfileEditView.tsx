@@ -19,6 +19,7 @@ import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 import Immutable from 'immutable';
+import Moment from 'moment';
 
 import auth from '../services/auth';
 import profileService from '../services/profile-service';
@@ -316,7 +317,7 @@ class ProfileEditView extends Component<Props> {
       firstName,
       lastName,
       gender,
-      birthdate,
+      birthdate: Moment.utc(birthdate).format("YYYY-MM-DD"),
       phoneNumber,
       programId,
       sequenceId,

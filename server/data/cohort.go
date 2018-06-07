@@ -13,22 +13,24 @@ type Cohort struct {
 }
 
 func PopulateCohort(db *gorm.DB) {
-	cohorts := []*Cohort{
-		&Cohort{
+	cohorts := make([]*Cohort, 0, 3*(2023-2018+1))
+
+	for gradYear := 2018; gradYear <= 2023; gradYear++ {
+		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "SOFTWARE_ENGINEERING",
-			GradYear:   2019,
+			GradYear:   gradYear,
 			SequenceId: "8STREAM",
-		},
-		&Cohort{
+		})
+		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "COMPUTER_ENGINEERING",
-			GradYear:   2019,
+			GradYear:   gradYear,
 			SequenceId: "8STREAM",
-		},
-		&Cohort{
+		})
+		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "COMPUTER_ENGINEERING",
-			GradYear:   2019,
+			GradYear:   gradYear,
 			SequenceId: "4STREAM",
-		},
+		})
 	}
 
 	// add cohorts

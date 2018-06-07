@@ -90,10 +90,17 @@ export function getCohortId(
   return row.cohortId;
 }
 
-const COHORTS = Immutable.List([
-  { cohortId: 1, programId: 'SOFTWARE_ENGINEERING', sequenceId: '8STREAM', gradYear: 2018},
-  { cohortId: 2, programId: 'COMPUTER_ENGINEERING', sequenceId: '8STREAM', gradYear: 2018},
-  { cohortId: 3, programId: 'COMPUTER_ENGINEERING', sequenceId: '4STREAM', gradYear: 2018},
-]);
+var cohortId = 1;
+const COHORTS = Immutable.List(
+  [2018, 2019, 2020, 2021, 2022, 2023],
+).flatMap(gradYear => {
+  const cohorts = Immutable.List([
+    { cohortId: cohortId, programId: 'SOFTWARE_ENGINEERING', sequenceId: '8STREAM', gradYear},
+    { cohortId: cohortId + 1, programId: 'COMPUTER_ENGINEERING', sequenceId: '8STREAM', gradYear},
+    { cohortId: cohortId + 2, programId: 'COMPUTER_ENGINEERING', sequenceId: '4STREAM', gradYear},
+  ]);
+  cohortId = cohortId + 3;
+  return cohorts;
+}).toList();
 
 export { COHORTS };
