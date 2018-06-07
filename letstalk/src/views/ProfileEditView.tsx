@@ -1,6 +1,5 @@
 import React, { Component, SFC } from 'react';
 import {
-  KeyboardAvoidingView,
   Picker,
   ScrollView,
   StyleSheet,
@@ -19,6 +18,7 @@ import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 import Immutable from 'immutable';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import auth from '../services/auth';
 import profileService from '../services/profile-service';
@@ -111,7 +111,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   const fieldRefs = new EditFormRefs();
   return (
-    <ScrollView>
+    <KeyboardAwareScrollView>
       <Field
         label="First name"
         name="firstName"
@@ -226,7 +226,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         title={submitting ? null : "Save"}
         onPress={handleSubmit(onSubmit)}
       />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -326,9 +326,7 @@ class ProfileEditView extends Component<Props> {
       hometown,
     });
     return (
-      <KeyboardAvoidingView behavior="padding">
-        <EditFormWithRedux onSubmit={this.onSubmit} />
-      </KeyboardAvoidingView>
+      <EditFormWithRedux onSubmit={this.onSubmit} />
     );
   }
 }

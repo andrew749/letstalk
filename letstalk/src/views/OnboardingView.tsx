@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Picker, ScrollView, StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
+import { Picker, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -16,6 +16,7 @@ import {
 } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
 import Immutable from 'immutable';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { RootState } from '../redux';
 import { State as State } from '../redux/onboarding/reducer';
@@ -312,16 +313,14 @@ class OnboardingView extends Component<Props> {
       case ONBOARDING_COHORT:
         // TODO: Update copy here
         return (
-          <KeyboardAvoidingView behavior="padding">
-            <ScrollView>
-              <Header>Your Cohort</Header>
-              <InfoText>
-                Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
-                students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
-              </InfoText>
-              <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
-            </ScrollView>
-          </KeyboardAvoidingView>
+          <KeyboardAwareScrollView>
+            <Header>Your Cohort</Header>
+            <InfoText>
+              Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
+              students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
+            </InfoText>
+            <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
+          </KeyboardAwareScrollView>
         );
       case ONBOARDING_VECTOR_ME:
         // NOTE: This will not show up now
