@@ -110,14 +110,14 @@ class ProfileView extends Component<Props> {
     };
 
     const buildItems = (name_values: Array<[string, string]>) => {
-      const items = name_values.map(([label, value]) => {
+      const items = name_values.filter(x => x != null).map(([label, value]) => {
         return buildItem(label, value);
       });
       return items;
     };
 
     const contactItems = buildItems([
-      ['Phone', phoneNumber],
+      phoneNumber ? ['Phone', phoneNumber] : undefined,
       ['Email', email]
     ]);
 
