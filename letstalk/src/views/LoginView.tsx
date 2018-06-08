@@ -22,9 +22,24 @@ import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle } from './TopHeader';
 
+const styles = StyleSheet.create({
+  forgotPasswordButton: {
+    marginLeft: 20,
+    marginTop: 2,
+  },
+  forgotPasswordText: {
+    color: Colors.HIVE_PRIMARY,
+    fontSize: 14,
+  },
+});
+
 interface LoginFormData {
   email: string;
   password: string;
+}
+
+interface NavProps {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
 // TODO: move elsewhere
@@ -34,12 +49,24 @@ const email = (value: string) =>
     ? 'Invalid email address'
     : undefined
 
-const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
+const LoginForm: React.SFC<FormProps<LoginFormData, NavProps>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid, pristine } = props;
   const onSubmitWithReset = async (values: LoginFormData): Promise<void> => {
     await onSubmit(values);
     reset();
   };
+
+  const forgotPasswordButton = (
+    <TouchableOpacity
+      style={styles.forgotPasswordButton}
+      onPress={() => {
+        props.navigation.dispatch(NavigationActions.navigate({routeName: 'ForgotPassword'}))
+      }}
+    >
+      <Text style={styles.forgotPasswordText}>Forgot my password</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View>
       <Field
@@ -60,6 +87,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
         autoCapitalize={'none' as 'none'}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
+      {forgotPasswordButton}
       <ActionButton
         buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
         textStyle={{color: Colors.HIVE_MAIN_FONT}}
@@ -72,7 +100,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData>> = props => {
   );
 }
 
-const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
+const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData, NavProps>>({
   // TODO: Enum with these to make sure there are no conflicts
   form: 'login',
 })(LoginForm);
@@ -203,18 +231,11 @@ export default class LoginView extends Component<Props> {
         onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'Signup'}))} />
       : null;
 
-    const forgotPasswordButton = (
-        <TouchableOpacity onPress={() => this.props.navigation.dispatch(NavigationActions.navigate({routeName: 'ForgotPassword'}))}>
-          <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 13, paddingTop: 2 }}>Forgot my password</Text>
-        </TouchableOpacity>
-      );
-
     return (
       <View>
-        <LoginFormWithRedux onSubmit={this.onSubmit} />
+        <LoginFormWithRedux onSubmit={this.onSubmit} navigation={this.props.navigation} />
         {signupButton}
         <FBLoginFormWithRedux onSubmit={this.onSubmitFb} />
-        {forgotPasswordButton}
       </View>
     );
   }
