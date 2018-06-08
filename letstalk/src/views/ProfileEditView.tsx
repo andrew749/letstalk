@@ -57,6 +57,7 @@ import {
 } from '../models/user';
 import Colors from '../services/colors';
 import { headerStyle } from './TopHeader';
+import { AnalyticsHelper } from '../services';
 
 interface EditFormData {
   firstName: string;
@@ -254,6 +255,8 @@ interface Props extends ProfileState, DispatchActions {
 }
 
 class ProfileEditView extends Component<Props> {
+  EDIT_PROFILE_VIEW_IDENTIFIER = "ProfileEditView";
+
   static navigationOptions = () => ({
     headerTitle: 'Edit Profile',
     headerStyle,
@@ -263,6 +266,10 @@ class ProfileEditView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.EDIT_PROFILE_VIEW_IDENTIFIER);
   }
 
   async onSubmit(values: EditFormData) {

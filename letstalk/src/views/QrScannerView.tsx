@@ -15,6 +15,7 @@ import {connect, Dispatch} from "react-redux";
 import {RootState} from "../redux/index";
 import meetingService from "../services/meeting";
 import { headerStyle } from './TopHeader';
+import { AnalyticsHelper } from '../services';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -26,6 +27,8 @@ interface Props extends DispatchActions {
 }
 
 class QrScannerView extends Component<Props> {
+  QR_SCANNER_VIEW_IDENTIFIER = "QrScannerView";
+
   static navigationOptions = () => ({
     headerTitle: 'Scan A Code',
     headerStyle,
@@ -42,6 +45,7 @@ class QrScannerView extends Component<Props> {
   }
 
   async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.QR_SCANNER_VIEW_IDENTIFIER);
     await this.load();
   }
 

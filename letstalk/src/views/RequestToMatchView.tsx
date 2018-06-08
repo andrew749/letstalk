@@ -62,6 +62,7 @@ import { Credential } from '../models/credential';
 import Colors from '../services/colors';
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
+import { AnalyticsHelper } from '../services';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -91,6 +92,8 @@ interface Props extends DispatchActions {
 }
 
 class RequestToMatchView extends Component<Props> {
+  REQUEST_TO_MATCH_VIEW_IDENTIFIER = "RequestToMatchView";
+
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
@@ -104,6 +107,7 @@ class RequestToMatchView extends Component<Props> {
   }
 
   async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.REQUEST_TO_MATCH_VIEW_IDENTIFIER);
     this.load();
   }
 

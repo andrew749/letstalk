@@ -66,6 +66,7 @@ import {
   MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
 import { headerStyle } from './TopHeader';
+import { AnalyticsHelper } from '../services';
 
 interface CohortFormData {
   programId: string,
@@ -266,6 +267,8 @@ interface Props extends State, DispatchActions {
 }
 
 class OnboardingView extends Component<Props> {
+  ONBOARDING_VIEW_IDENTIFIER = "OnboardingView";
+
   static navigationOptions = {
     headerTitle: 'Onboarding',
     headerStyle,
@@ -275,6 +278,10 @@ class OnboardingView extends Component<Props> {
     super(props);
 
     this.onSubmitCohort = this.onSubmitCohort.bind(this);
+  }
+
+  async componentDidMount() {
+    AnalyticsHelper.getInstance().recordPage(this.ONBOARDING_VIEW_IDENTIFIER);
   }
 
   async onSubmitCohort(values: CohortFormData) {
