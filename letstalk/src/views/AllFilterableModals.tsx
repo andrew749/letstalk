@@ -32,6 +32,7 @@ import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/acti
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import Colors from '../services/colors';
+import { AnalyticsActions, logAnalyticsThenExecuteAsync } from '../services/analytics';
 
 interface DispatchActions {
   addCredentialRequest: ActionCreator<
@@ -69,7 +70,13 @@ class AllFilterableModals extends Component<Props> {
 
   private async onReqSelect(elem: FilterableElement): Promise<void> {
     try {
-      await this.props.addCredentialRequest({ id: elem.id, name: elem.value });
+      logAnalyticsThenExecuteAsync(
+        "Credentials",
+        AnalyticsActions.ADD,
+        "CredentialRequest",
+        1,
+        this.props.addCredentialRequest({ id: elem.id, name: elem.value }).bind(this)
+      );
       this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.errorMsg);
@@ -79,7 +86,13 @@ class AllFilterableModals extends Component<Props> {
 
   private async onCredSelect(elem: { id: number, value: string }): Promise<void> {
     try {
-      await this.props.addCredential(elem.value);
+      logAnalyticsThenExecuteAsync(
+        "Credentials",
+        AnalyticsActions.SELECT,
+        "Credential",
+        1,
+        this.props.addCredential(elem.value).bind(this)
+      );
       this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.errorMsg);
@@ -89,7 +102,13 @@ class AllFilterableModals extends Component<Props> {
 
   private async onRawCredSelect(value: string) {
     try {
-      await this.props.addCredential(value);
+      logAnalyticsThenExecuteAsync(
+        "Credentials",
+        AnalyticsActions.SELECT,
+        "RawCredential",
+        1,
+        this.props.addCredential(value).bind(this)
+      )
       this.selectSuccess();
     } catch (e) {
       await this.props.errorToast(e.errorMsg);

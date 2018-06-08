@@ -2,7 +2,12 @@ import { Analytics, PageHit, Event } from 'expo-analytics';
 import {ANALYTICS_ID} from './constants';
 
 export const AnalyticsActions = {
+    // ui events
     CLICK: "click",
+    FOCUS: "focus",
+    // logical event
+    ADD: "add",
+    SELECT: "select",
 };
 
 export function logAnalyticsThenExecute<P> (

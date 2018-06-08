@@ -30,6 +30,7 @@ import {
 } from '../redux/search-bar/actions';
 import Colors from '../services/colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import { logAnalyticsThenExecute, AnalyticsActions } from '../services/analytics';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -103,7 +104,7 @@ class TopHeader extends Component<Props> {
           value={this.props.value}
           placeholder={placeholder}
           placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-          onFocus={() => this.props.updateFocus(true)}
+          onFocus={logAnalyticsThenExecute.bind(this, "SearchBar", AnalyticsActions.FOCUS, "", 1, this.props.updateFocus.bind(this, true))}
           onBlur={() => {
             this.props.updateFocus(false);
             this.props.updateValue('');
