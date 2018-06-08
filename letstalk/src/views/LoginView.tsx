@@ -154,36 +154,12 @@ export default class LoginView extends Component<Props> {
     AnalyticsHelper.getInstance().recordPage(this.LOGIN_VIEW_IDENTIFIER);
   }
 
-  async registerForPushNotificationsAsync(): Promise<string> {
-    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS as any);
-    let finalStatus = existingStatus;
-
-    // only ask if permissions have not already been determined, because
-    // iOS won't necessarily prompt the user a second time.
-    if (existingStatus !== 'granted') {
-      // Android remote notification permissions are granted during the app
-      // install, so this will only ask on iOS
-      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS as any);
-      finalStatus = status;
-    }
-
-    // Stop here if the user did not grant permissions
-    if (finalStatus !== 'granted') {
-      return;
-    }
-
-    // Get the token that uniquely identifies this device
-    let token = await Notifications.getExpoPushTokenAsync();
-    console.log("Registered with expo notification service: " + token);
-    return token;
-  }
-
   async onSubmitFb() {
     try {
       let token: string = null;
       // don't fail if expo is down
       try {
-        token = await this.registerForPushNotificationsAsync();
+        token = await auth.registerForPushNotificationsAsync();
       } catch(e){
         console.log("Failed to register for notification")
       }
@@ -208,7 +184,7 @@ export default class LoginView extends Component<Props> {
       let token: string = null;
       // don't fail if expo is down
       try {
-        token = await this.registerForPushNotificationsAsync();
+        token = await auth.registerForPushNotificationsAsync();
       } catch(e){
         console.log("Failed to register for notification")
       }

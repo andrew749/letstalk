@@ -5,6 +5,7 @@ import { AsyncStorage } from 'react-native';
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
 import {FORGOT_PASSWORD_ROUTE} from './constants';
+import {Notifications, Permissions} from "expo";
 
 export class Auth {
   private sessionService: SessionService
@@ -59,6 +60,30 @@ export class Auth {
   async linkFB(): Promise<boolean> {
     const sessionToken = await this.getSessionToken();
     return await this.sessionService.linkFb(sessionToken);
+  }
+
+  async registerForPushNotificationsAsync(): Promise<string> {
+    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS as any);
+    let finalStatus = existingStatus;
+
+    // only ask if permissions have not already been determined, because
+    // iOS won't necessarily prompt the user a second time.
+    if (existingStatus !== 'granted') {
+      // Android remote notification permissions are granted during the app
+      // install, so this will only ask on iOS
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS as any);
+      finalStatus = status;
+    }
+
+    // Stop here if the user did not grant permissions
+    if (finalStatus !== 'granted') {
+      return;
+    }
+
+    // Get the token that uniquely identifies this device
+    let token = await Notifications.getExpoPushTokenAsync();
+    console.log("Registered with expo notification service: " + token);
+    return token;
   }
 };
 

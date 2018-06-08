@@ -25,6 +25,7 @@ import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle } from './TopHeader';
+import auth from "../services/auth";
 
 interface SignupFormData {
   firstName: string;
@@ -209,11 +210,23 @@ export default class SignupView extends Component<Props> {
           "birthdate": values.birthdate,
         }
       });
-      // TODO: have a prompt saying successfully signed up
+    } catch(e) {
+      throw new SubmissionError({_error: e.errorMsg});
+    }
+    // TODO: have a prompt saying successfully signed up
+    // Immediately log in.
+    try {
+      let token: string = null;
+      // Don't fail if expo is down
+      try {
+        token = await auth.registerForPushNotificationsAsync();
+      } catch(e){
+        console.log("Failed to register for notifications");
+      }
+      await auth.login(values.email, values.password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        key: null,
-        actions: [NavigationActions.navigate({ routeName: 'Login' })]
+        actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
       throw new SubmissionError({_error: e.errorMsg});
