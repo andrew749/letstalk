@@ -32,7 +32,7 @@ import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions'
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
-import {MatchingState, Relationship} from '../models/bootstrap';
+import {MatchingState, Relationship, getHumanReadableUserType} from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
   USER_TYPE_MENTEE,
@@ -44,7 +44,7 @@ import {
   sequenceById,
 } from '../models/cohort';
 import Colors from '../services/colors';
-import { AnalyticsHelper } from '../services/analytics';
+import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 
@@ -149,22 +149,42 @@ class HomeView extends Component<Props, State> {
       phoneNumber,
     } = relationship;
 
+    let profileType;
     if (fbLink != null) {
       icon = 'face';
+      profileType = "Facebook";
       onPress = () => Linking.openURL(fbLink);
     } else if (phoneNumber !== null) {
       const smsLink = 'sms:' + phoneNumber;
+      profileType = "Phone";
       icon = 'textsms';
       onPress = () => Linking.openURL(smsLink);
     } else {
       const emailLink = 'mailto:' + email;
+      profileType = "Email";
       icon = 'email';
       onPress = () => Linking.openURL(emailLink);
     }
 
-    const viewProfile = () => {
-      this.props.navigation.navigate('MatchProfile', { userId });
-    }
+    // record user clicking to view mentor/mentee profile
+    const viewProfile =
+      logAnalyticsThenExecute.bind(
+        this,
+        "Profile",
+        AnalyticsActions.CLICK,
+        getHumanReadableUserType(relationship.userType),
+        1,
+        () => {
+          this.props.navigation.navigate('MatchProfile', { userId });}
+      );
+      onPress = logAnalyticsThenExecute.bind(
+        this,
+        "ContactProfile_" + profileType,
+        AnalyticsActions.CLICK,
+        getHumanReadableUserType(relationship.userType),
+        1,
+        onPress,
+      );
 
     // TODO: Move into styles
     return (

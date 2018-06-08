@@ -18,6 +18,10 @@ export interface Relationship {
   readonly matchingState: MatchingState;
 }
 
+export function getHumanReadableUserType(userType: number): string {
+    return userType == 1 ? "Mentor" : "Mentee";
+}
+
 export enum MatchingState {
   Unknown = 0,
   Unverified,
