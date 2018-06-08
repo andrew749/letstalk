@@ -55,6 +55,7 @@ func SendForgotPasswordEmail(
 	}
 	// set recipients
 	p.AddTos(tos...)
+	p.SetSubstitution(":recipientemail", to.Address)
 	p.SetSubstitution(":passwordchangelink", passwordChangeLink)
 
 	message.AddPersonalizations(p)
