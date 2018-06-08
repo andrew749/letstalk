@@ -1,14 +1,16 @@
 package matching
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/query"
-	"letstalk/server/core/api"
-	"letstalk/server/data"
 	"letstalk/server/core/onboarding"
+	"letstalk/server/core/query"
+	"letstalk/server/data"
 
 	"github.com/romana/rlog"
+	"letstalk/server/core/sessions"
+	"letstalk/server/notifications"
 )
 
 /**
@@ -61,12 +63,15 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	matching := &data.Matching{
 		Mentee: mentee.UserId,
 		Mentor: mentor.UserId,
-		State: data.MATCHING_STATE_UNVERIFIED,
+		State:  data.MATCHING_STATE_UNVERIFIED,
 	}
 
 	if err := c.Db.Create(matching).Error; err != nil {
 		return errs.NewDbError(err)
 	}
+
+	// Send push notifications asynchronously.
+	go sendMatchNotifications(c, mentor.UserId, mentee.UserId)
 
 	c.Result = convertMatchingDataToApi(matching)
 	return nil
@@ -80,6 +85,28 @@ func convertMatchingDataToApi(matching *data.Matching) *api.Matching {
 	return &api.Matching{
 		Mentor: matching.Mentor,
 		Mentee: matching.Mentee,
-		State: matching.State,
+		State:  matching.State,
 	}
+}
+
+func sendMatchNotifications(
+	c *ctx.Context,
+	mentorId int,
+	menteeId int,
+) errs.Error {
+	mentorDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, mentorId)
+	if err != nil {
+		return err
+	}
+	menteeDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, menteeId)
+	if err != nil {
+		return err
+	}
+	for _, token := range mentorDeviceTokens {
+		notifications.NewMenteeNotification(token)
+	}
+	for _, token := range menteeDeviceTokens {
+		notifications.NewMentorNotification(token)
+	}
+	return nil
 }

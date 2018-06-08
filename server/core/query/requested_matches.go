@@ -13,6 +13,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"letstalk/server/core/sessions"
 )
 
 type ResolveType int
@@ -98,24 +99,6 @@ func getPotentialMatchUserIds(
 	}
 }
 
-func getDeviceTokensForUser(c *ctx.Context, userId int) ([]string, errs.Error) {
-	sessions, err := (*c.SessionManager).GetUserSessions(userId)
-	if err != nil {
-		return nil, errs.NewClientError(err.Error())
-	}
-	uniqueDeviceTokens := make(map[string]interface{})
-	for _, session := range sessions {
-		if session.NotificationToken != nil {
-			uniqueDeviceTokens[*session.NotificationToken] = nil
-		}
-	}
-	deviceTokens := make([]string, 0, len(uniqueDeviceTokens))
-	for token, _ := range uniqueDeviceTokens {
-		deviceTokens = append(deviceTokens, token)
-	}
-	return deviceTokens, nil
-}
-
 func sendNotifications(
 	c *ctx.Context,
 	askerId int,
@@ -123,11 +106,11 @@ func sendNotifications(
 	credentialId uint,
 	name string,
 ) errs.Error {
-	askerDeviceTokens, err := getDeviceTokensForUser(c, askerId)
+	askerDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, askerId)
 	if err != nil {
 		return err
 	}
-	answererDeviceTokens, err := getDeviceTokensForUser(c, answererId)
+	answererDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, answererId)
 	if err != nil {
 		return err
 	}
