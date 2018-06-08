@@ -78,6 +78,7 @@ type NotifType string
 
 const (
 	NOTIF_TYPE_REQUEST_TO_MATCH NotifType = "REQUEST_TO_MATCH"
+	NOTIF_TYPE_NEW_MATCH        NotifType = "NEW_MATCH"
 )
 
 func CreateAndSendNotificationWithData(
@@ -144,4 +145,23 @@ func RequestToMatchNotification(
 		NOTIF_TYPE_REQUEST_TO_MATCH,
 		extraData,
 	)
+}
+
+func NewMatchNotification(deviceToken string, message string) error {
+	title := "You got a match!"
+	return CreateAndSendNotificationWithData(
+		deviceToken,
+		message,
+		title,
+		NOTIF_TYPE_NEW_MATCH,
+		nil,
+	)
+}
+
+func NewMentorNotification(deviceToken string) error {
+	return NewMatchNotification(deviceToken, "You were matched with a new mentor.")
+}
+
+func NewMenteeNotification(deviceToken string) error {
+	return NewMatchNotification(deviceToken, "You were matched with a new mentee.")
 }
