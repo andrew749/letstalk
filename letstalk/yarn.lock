@@ -6393,6 +6393,17 @@ react-native-in-app-notification@^2.2.0:
   dependencies:
     react-native-swipe-gestures "^1.0.2"
 
+react-native-iphone-x-helper@^1.0.1:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.0.3.tgz#7a2f1e0574e899a0f1d426e6167fd98990083214"
+
+react-native-keyboard-aware-scroll-view@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-aware-scroll-view/-/react-native-keyboard-aware-scroll-view-0.5.0.tgz#57ab933089375bf62f4324797e8be949ad97849d"
+  dependencies:
+    prop-types "^15.6.0"
+    react-native-iphone-x-helper "^1.0.1"
+
 react-native-keychain@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/react-native-keychain/-/react-native-keychain-2.0.0.tgz#5e6ae75d66d2737a0b38a95c903b6d6f966dd475"

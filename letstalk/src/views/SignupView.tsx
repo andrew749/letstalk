@@ -1,6 +1,6 @@
 import {FileSystem} from 'expo';
 import React, { Component } from 'react';
-import { Picker, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { Picker, ScrollView, StyleSheet } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -8,6 +8,7 @@ import {
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput } from 'react-native-elements';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import {
   ActionButton,
@@ -63,7 +64,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   };
   const fieldRefs = new SignupFormRefs();
   return (
-    <ScrollView>
+    <KeyboardAwareScrollView>
       <Field
         name="profilePic"
         component={ProfileAvatarEditableFormElement}
@@ -164,7 +165,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         title={submitting ? null : "Sign up"}
         onPress={handleSubmit(onSubmitWithReset)}
       />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -221,9 +222,7 @@ export default class SignupView extends Component<Props> {
 
   render() {
     return (
-      <KeyboardAvoidingView behavior="padding">
-        <SignupFormWithRedux onSubmit={this.onSubmit} />
-      </KeyboardAvoidingView>
+      <SignupFormWithRedux onSubmit={this.onSubmit} />
     );
   }
 }

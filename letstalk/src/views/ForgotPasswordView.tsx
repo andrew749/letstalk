@@ -4,7 +4,6 @@ import { View, StyleSheet } from 'react-native';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage, Text } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
-import { KeyboardAvoidingView } from 'react-native';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
 import { headerStyle } from './TopHeader';
@@ -13,6 +12,7 @@ import { ScrollView } from 'react-native';
 import auth from '../services/auth';
 import { connect, Dispatch } from 'react-redux';
 import { RootState } from '../redux';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
@@ -35,7 +35,7 @@ const ForgotPasswordForm: React.SFC<FormProps<ForgotPasswordFormData>> = props =
     await onSubmit(values);
   };
   return (
-    <ScrollView>
+    <KeyboardAwareScrollView>
       <Field
         label="Email"
         name="email"
@@ -54,7 +54,7 @@ const ForgotPasswordForm: React.SFC<FormProps<ForgotPasswordFormData>> = props =
         title={submitting ? null : "Reset Password"}
         onPress={handleSubmit(onSubmitWithReset)}
       />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -97,9 +97,7 @@ export class ForgotPasswordView extends Component<Props> {
 
   render() {
     return (
-      <KeyboardAvoidingView behavior="padding">
-        <ForgotPasswordFormWithRedux onSubmit={this.onSubmit} />
-      </KeyboardAvoidingView>
+      <ForgotPasswordFormWithRedux onSubmit={this.onSubmit} />
     );
   }
 }
