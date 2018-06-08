@@ -1,4 +1,9 @@
 import { Store } from 'redux';
+import {
+  NavigationActions,
+  NavigationContainerComponent,
+  NavigationParams,
+} from 'react-navigation';
 
 import { RootState } from '../redux';
 import { credentialRequestRemove } from '../redux/credential-requests/actions';
@@ -26,12 +31,30 @@ export interface Notification {
 }
 
 export default class NotificationService {
-  private notification: any
-  private store: Store<RootState>
+  private notification: any;
+  private store: Store<RootState>;
+  private navContainer: NavigationContainerComponent;
 
-  constructor(notification: any, store: Store<RootState>) {
-    this.notification = notification;
+  constructor(store: Store<RootState>) {
+    this.notification = null;
     this.store = store;
+    this.navContainer = null;
+
+    this.onPress = this.onPress.bind(this);
+  }
+
+  setNotifContainer(notifContainer: any) {
+    this.notification = notifContainer;
+  }
+
+  setNavContainer(navContainer: NavigationContainerComponent) {
+    this.navContainer = navContainer;
+  }
+
+  navigate(routeName: string, params?: NavigationParams) {
+    if (!!this.navContainer) {
+      this.navContainer.dispatch(NavigationActions.navigate({ routeName, params }));
+    }
   }
 
   private async actOnNotification(notification: Notification): Promise<void> {
@@ -50,11 +73,28 @@ export default class NotificationService {
     }
   }
 
+  private onPress(notification: Notification) {
+    return () => {
+      switch (notification.data.type) {
+        case 'REQUEST_TO_MATCH':
+          this.navigate('Home');
+          break;
+        default:
+          // Ensure exhaustiveness of select
+          const _: never = notification.data.type;
+          // This case could happen, but we wouldn't do anything anyways
+      }
+    };
+  }
+
   async handleNotification(notification: Notification): Promise<void> {
-    this.notification.show({
-      title: notification.data.title,
-      message: notification.data.message,
-    });
+    if (!!this.notification) {
+      this.notification.show({
+        title: notification.data.title,
+        message: notification.data.message,
+        onPress: this.onPress(notification),
+      });
+    }
 
     await this.actOnNotification(notification);
   }

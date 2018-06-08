@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   Button as ReactNativeButton,
   Linking,
+  RefreshControl,
+  RefreshControlProps,
   ScrollView,
   StyleSheet,
   Text,
@@ -56,7 +58,11 @@ interface Props extends BootstrapState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class HomeView extends Component<Props> {
+interface State {
+  refreshing: boolean;
+}
+
+class HomeView extends Component<Props, State> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
@@ -67,9 +73,12 @@ class HomeView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
+    this.state = { refreshing: false };
+
     this.load = this.load.bind(this);
     this.renderHome = this.renderHome.bind(this);
     this.renderMatch = this.renderMatch.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
   }
 
   async componentDidMount() {
@@ -92,6 +101,12 @@ class HomeView extends Component<Props> {
       this.props.fetchBootstrap(),
       this.props.fetchCredentialOptions(),
     ]);
+  }
+
+  private async onRefresh() {
+    this.setState({refreshing: true});
+    await this.load();
+    this.setState({refreshing: false});
   }
 
   private renderDescription(relationship: Relationship) {
@@ -243,9 +258,17 @@ class HomeView extends Component<Props> {
         );
       case 'account_matched':
         const matches = this.renderMatches();
+        // Watch out! Typescript hack below.
         return (
           <View style={styles.container}>
-            <ScrollView>
+            <ScrollView
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this.onRefresh}
+                /> as React.ReactElement<RefreshControlProps>
+              }
+            >
               { matches }
             </ScrollView>
             <AllFilterableModals
@@ -267,9 +290,11 @@ class HomeView extends Component<Props> {
       errorMsg,
       errorType,
     } = this.props.fetchState;
+    // If `this.state.refreshing` is true, it means that we are reloading data using the pull
+    // down, which means that we want to still display the ScrollView.
     return (
       <Loading
-        state={state}
+        state={this.state.refreshing ? 'success' : state}
         errorMsg={errorMsg}
         errorType={errorType}
         load={this.load}

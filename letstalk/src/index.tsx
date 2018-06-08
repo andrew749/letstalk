@@ -14,7 +14,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Notifications } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
-import { StackNavigator, TabNavigator, TabBarBottomProps, TabBarBottom } from 'react-navigation';
+import {
+  NavigationContainerComponent,
+  StackNavigator,
+  TabNavigator,
+  TabBarBottomProps,
+  TabBarBottom,
+} from 'react-navigation';
 import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
 import { Toast } from 'react-native-redux-toast';
@@ -136,7 +142,10 @@ const createTabView = () => TabNavigator({
   tabBarComponent: TabBar,
 });
 
-const createAppNavigation = (loggedIn: boolean) => StackNavigator({
+const createAppNavigation = (initialRouteName: string) => StackNavigator({
+  BlankDoNotUse: {
+    screen: View,
+  },
   Login: {
     screen: LoginView,
   },
@@ -164,7 +173,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: MatchProfileView,
   },
 }, {
-  initialRouteName: loggedIn ? "Tabbed" : "Login",
+  initialRouteName,
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
@@ -185,7 +194,7 @@ class App extends React.Component<Props, AppState> {
     };
 
     this.handleNotification = this.handleNotification.bind(this);
-    this.notificationService = null;
+    this.notificationService = new NotificationService(store);
   }
 
   async handleNotification(notification: any) {
@@ -200,13 +209,23 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-    const AppNavigation = createAppNavigation(loggedIn);
+
+    let initialRouteName = 'BlankDoNotUse';
+    if (loggedIn === true) initialRouteName = 'Tabbed';
+    else if (loggedIn === false) initialRouteName = 'Login';
+
+    const AppNavigation = createAppNavigation(initialRouteName);
+
+    const addNavContainer = (navContainer: NavigationContainerComponent) => {
+      this.notificationService.setNavContainer(navContainer);
+    }
+
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
-          <AppNavigation />
+          <AppNavigation ref={addNavContainer} />
           <NotificationComponent ref={(ref: any) => {
-            this.notificationService = new NotificationService(ref, store);
+            this.notificationService.setNotifContainer(ref);
           }} />
           <Toast messageStyle={styles.toastMessageStyle} />
         </View>

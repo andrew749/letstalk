@@ -1,6 +1,8 @@
 import React, { ReactNode } from 'react';
 import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
 
+import Colors from '../services/colors';
+
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Props {
@@ -25,7 +27,7 @@ const PADDING = 20;
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: Colors.WHITE,
     padding: PADDING,
     marginHorizontal: MARGIN_HOR,
     marginVertical: MARGIN_VER,

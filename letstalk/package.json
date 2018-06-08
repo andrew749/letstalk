@@ -67,7 +67,7 @@
     "@types/react-native-datepicker": "^1.6.2",
     "@types/react-native-qrcode": "^0.2.1",
     "@types/react-native-vector-icons": "^4.4.2",
-    "@types/react-navigation": "^1.0.23",
+    "@types/react-navigation": "^2.0.4",
     "@types/react-redux": "^5.0.13",
     "@types/react-test-renderer": "^16.0.0",
     "@types/redux-form": "^7.0.13",
