@@ -6,6 +6,8 @@ import {
   Button as ReactNativeButton,
   Dimensions,
   Linking,
+  RefreshControl,
+  RefreshControlProps,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -90,7 +92,11 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class RequestToMatchView extends Component<Props> {
+interface State {
+  refreshing: boolean;
+}
+
+class RequestToMatchView extends Component<Props, State> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
@@ -99,8 +105,11 @@ class RequestToMatchView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
+    this.state = { refreshing: false };
+
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
   }
 
   async componentDidMount() {
@@ -113,6 +122,12 @@ class RequestToMatchView extends Component<Props> {
       this.props.fetchCredentialRequests(),
       this.props.fetchCredentialOptions(),
     ]);
+  }
+
+  private async onRefresh() {
+    this.setState({refreshing: true});
+    await this.load();
+    this.setState({refreshing: false});
   }
 
   private renderCredentials() {
@@ -223,9 +238,17 @@ class RequestToMatchView extends Component<Props> {
       this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
     }
 
+    // Watch out! Typescript hack below.
     return (
       <View style={styles.container}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.onRefresh}
+            /> as React.ReactElement<RefreshControlProps>
+          }
+        >
           <Header>Active Requests</Header>
           <View style={styles.credentialContainer}>
             {this.renderCredentialRequests()}
@@ -254,9 +277,11 @@ class RequestToMatchView extends Component<Props> {
       this.props.credentialRequests.fetchState,
       this.props.credentialOptions.fetchState,
     );
+    // If `this.state.refreshing` is true, it means that we are reloading data using the pull
+    // down, which means that we want to still display the ScrollView.
     return (
       <Loading
-        state={state}
+        state={this.state.refreshing ? 'success' : state}
         errorMsg={errorMsg}
         errorType={errorType}
         load={this.load}
