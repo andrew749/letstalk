@@ -142,7 +142,10 @@ const createTabView = () => TabNavigator({
   tabBarComponent: TabBar,
 });
 
-const createAppNavigation = (loggedIn: boolean) => StackNavigator({
+const createAppNavigation = (initialRouteName: string) => StackNavigator({
+  BlankDoNotUse: {
+    screen: View,
+  },
   Login: {
     screen: LoginView,
   },
@@ -170,7 +173,7 @@ const createAppNavigation = (loggedIn: boolean) => StackNavigator({
     screen: MatchProfileView,
   },
 }, {
-  initialRouteName: loggedIn ? "Tabbed" : "Login",
+  initialRouteName,
 });
 
 const store = createStore(appReducer, applyMiddleware(thunk));
@@ -206,7 +209,12 @@ class App extends React.Component<Props, AppState> {
 
   render() {
     const { loggedIn } = this.state;
-    const AppNavigation = createAppNavigation(loggedIn);
+
+    let initialRouteName = 'BlankDoNotUse';
+    if (loggedIn === true) initialRouteName = 'Tabbed';
+    else if (loggedIn === false) initialRouteName = 'Login';
+
+    const AppNavigation = createAppNavigation(initialRouteName);
 
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
       this.notificationService.setNavContainer(navContainer);
