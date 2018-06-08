@@ -108,11 +108,11 @@ func sendNotifications(
 ) errs.Error {
 	askerDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, askerId)
 	if err != nil {
-		return err
+		return errs.NewDbError(err)
 	}
 	answererDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, answererId)
 	if err != nil {
-		return err
+		return errs.NewDbError(err)
 	}
 	for _, token := range askerDeviceTokens {
 		notifications.RequestToMatchNotification(

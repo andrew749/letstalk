@@ -96,11 +96,11 @@ func sendMatchNotifications(
 ) errs.Error {
 	mentorDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, mentorId)
 	if err != nil {
-		return err
+		return errs.NewDbError(err)
 	}
 	menteeDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, menteeId)
 	if err != nil {
-		return err
+		return errs.NewDbError(err)
 	}
 	for _, token := range mentorDeviceTokens {
 		notifications.NewMenteeNotification(token)

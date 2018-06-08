@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"letstalk/server/core/errs"
 )
 
 type ISessionStore interface {
@@ -30,10 +29,10 @@ func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
 // default expiry time in days
 const DEFAULT_EXPIRY = 7 * 24
 
-func GetDeviceTokensForUser(manager ISessionManagerBase, userId int) ([]string, errs.Error) {
+func GetDeviceTokensForUser(manager ISessionManagerBase, userId int) ([]string, error) {
 	userSessions, err := manager.GetUserSessions(userId)
 	if err != nil {
-		return nil, errs.NewClientError(err.Error())
+		return nil, err
 	}
 	uniqueDeviceTokens := make(map[string]interface{})
 	for _, session := range userSessions {
