@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -58,6 +59,8 @@ class ProfileView extends Component<Props> {
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'My Profile',
     headerStyle,
+    headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Edit"
+      onPress={() => navigation.navigate('ProfileEdit')} /> : null,
   })
 
   constructor(props: Props) {
@@ -191,25 +194,28 @@ class ProfileView extends Component<Props> {
 
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
+    const editButton = Platform.OS === 'ios' ? null : <Icon
+      name='pencil'
+      type='font-awesome'
+      color={Colors.HIVE_PRIMARY}
+      containerStyle={styles.editButton}
+      onPress={() => navigate('ProfileEdit')}
+    />;
+
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.contentContainer} >
+        <Card style={styles.contentContainer} >
           {this.renderQrCode()}
           <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
           <Header>{headerText}</Header>
-          <Icon
-            name='pencil'
-            type='font-awesome'
-            color={Colors.HIVE_PRIMARY}
-            containerStyle={styles.editButton}
-            onPress={() => navigate('ProfileEdit')} />
+          {editButton}
           <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
           {this.renderProfile(String(gradYear), program, bio)}
           {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
           <View style={styles.sectionContainer}>
           </View>
           <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
-        </View>
+        </Card>
       </ScrollView>
     );
   }
@@ -258,9 +264,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     margin: 20,
     padding: 20,
-    borderWidth: 2,
-    borderColor: Colors.HIVE_PRIMARY,
-    backgroundColor: Colors.WHITE
   },
   description: {
     fontSize: 18,
@@ -287,8 +290,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end'
   },
   profilePicture: {
-    borderWidth: 2,
-    borderColor: Colors.HIVE_PRIMARY,
     margin: 20
   },
   sectionHeader: {

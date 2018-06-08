@@ -174,7 +174,7 @@ class MatchProfileView extends Component<Props> {
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.contentContainer} >
+        <Card style={styles.contentContainer} >
           <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
           <Header>{headerText}</Header>
           <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
@@ -182,7 +182,7 @@ class MatchProfileView extends Component<Props> {
           {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
           <View style={styles.sectionContainer}>
           </View>
-        </View>
+        </Card>
       </ScrollView>
     );
   }
@@ -222,9 +222,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     margin: 20,
     padding: 20,
-    borderWidth: 2,
-    borderColor: Colors.HIVE_PRIMARY,
-    backgroundColor: Colors.WHITE
   },
   description: {
     fontSize: 18,
@@ -250,8 +247,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end'
   },
   profilePicture: {
-    borderWidth: 2,
-    borderColor: Colors.HIVE_PRIMARY,
     margin: 20
   },
   sectionHeader: {

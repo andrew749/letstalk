@@ -113,6 +113,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const fieldRefs = new EditFormRefs();
   return (
     <KeyboardAwareScrollView>
+      <Header>Personal Info</Header>
       <Field
         label="First name"
         name="firstName"
@@ -170,6 +171,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         component={ModalDatePicker}
         validate={required}
       />
+      <Header>Your Cohort</Header>
       <Field
         label="Program"
         name="programId"
@@ -204,6 +206,8 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
         <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
+      <Header>Additional Info</Header>
+      <Text style={styles.hint}>Optional</Text>
       <Field
         label="Hometown"
         name="hometown"
@@ -343,5 +347,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     marginLeft: 20,
-  }
+  },
+  hint: {
+    color: 'gray',
+    fontSize: 14,
+    marginTop: -10,
+    marginLeft: 10,
+  },
 });
