@@ -1,11 +1,21 @@
 {
-  "name": "letsTalk",
-  "displayName": "letsTalk",
+  "name": "Hive",
+  "displayName": "Hive",
   "expo": {
+    "name": "Hive",
+    "icon": "./src/img/logo.png",
+    "version": "0.0.0",
+    "slug": "hive-alpha",
+    "sdkVersion": "27.0.0",
+    "ios": {
+      "bundleIdentifier": "org.hiveapp.hive"
+    },
+    "android": {
+      "package": "org.hiveapp.hive"
+    },
     "androidStatusBar": {
       "backgroundColor": "#FFB52A"
     },
-    "sdkVersion": "27.0.0",
     "packagerOpts": {
       "sourceExts": [
         "ts",
