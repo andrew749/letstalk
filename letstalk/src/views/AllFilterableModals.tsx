@@ -75,7 +75,7 @@ class AllFilterableModals extends Component<Props> {
         AnalyticsActions.ADD,
         "CredentialRequest",
         1,
-        this.props.addCredentialRequest({ id: elem.id, name: elem.value }).bind(this)
+        this.props.addCredentialRequest.bind(this, { id: elem.id, name: elem.value })
       );
       this.selectSuccess();
     } catch (e) {
@@ -91,7 +91,7 @@ class AllFilterableModals extends Component<Props> {
         AnalyticsActions.SELECT,
         "Credential",
         1,
-        this.props.addCredential(elem.value).bind(this)
+        this.props.addCredential.bind(this, elem.value),
       );
       this.selectSuccess();
     } catch (e) {
@@ -107,7 +107,7 @@ class AllFilterableModals extends Component<Props> {
         AnalyticsActions.SELECT,
         "RawCredential",
         1,
-        this.props.addCredential(value).bind(this)
+        this.props.addCredential.bind(this, value),
       )
       this.selectSuccess();
     } catch (e) {
