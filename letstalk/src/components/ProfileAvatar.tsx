@@ -34,11 +34,13 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarSta
     }
   }
 
-  async componentWillReceiveProps(props: ProfileAvatarProps) {
-    this.setState({avatarSource: props.source});
+  async getDerivedStateFromProps(props: ProfileAvatarProps) {
+    if (props.source) {
+      this.setState({avatarSource: props.source});
+    }
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
     let props = this.props;
     if (props.userId) {
       const profilePicUrl = await profileService.getProfilePicUrl(props.userId);
