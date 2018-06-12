@@ -34,9 +34,9 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarSta
     }
   }
 
-  async getDerivedStateFromProps(props: ProfileAvatarProps) {
-    if (props.source) {
-      this.setState({avatarSource: props.source});
+  async componentDidUpdate(prevProps: ProfileAvatarProps, prevState: ProfileAvatarState) {
+    if (prevProps.source !== this.props.source) {
+      this.setState({avatarSource: this.props.source});
     }
   }
 
