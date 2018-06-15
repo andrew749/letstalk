@@ -3,12 +3,14 @@ import {
   Dimensions,
   Modal,
   Platform,
+  StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
+  ViewStyle
 } from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { WrappedFieldProps } from 'redux-form';
@@ -22,6 +24,7 @@ type Props = WrappedFieldProps & {
   dateObj?: boolean; // whether to return a `Date` or a string
   defaultDate?: Date;
   mode?: 'date' | 'time' | 'datetime';
+  cardStyle?: StyleProp<ViewStyle>
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -64,7 +67,7 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
 
   const dateValue = (value || defaultDate);
   return (
-    <Card style={styles.card}>
+    <Card style={[styles.card, props.cardStyle]}>
       <Text style={styles.label}>{label}</Text>
       <DatePicker
         date={ dateValue }

@@ -146,7 +146,6 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
       <Header>Additional Info</Header>
-      <Text style={styles.hint}>Optional</Text>
       <Field
         label="Hometown"
         name="hometown"
@@ -159,7 +158,10 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         name="bio"
         component={LabeledFormInput}
         autoCorrect={false}
-        placeholder="e.g. I enjoy long walks on the beach"
+        placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
+        multiline={true}
+        numberOfLines={10}
+        inputStyle={{width: "100%"}}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
@@ -323,8 +325,7 @@ class OnboardingView extends Component<Props> {
           <KeyboardAwareScrollView>
             <Header>Your Cohort</Header>
             <InfoText>
-              Based on your cohort, you will either be a big <Emoji name="man"/>, mentoring other
-              students, or a small <Emoji name="baby"/>, being mentored by an upper year student.
+              Based on your information, we'll be better able to match you with a mentor/mentee!
             </InfoText>
             <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
           </KeyboardAwareScrollView>
@@ -384,15 +385,18 @@ const styles = StyleSheet.create({
   actionButton: {
     marginBottom: 10,
   },
+  cohortForm: {
+    paddingBottom: 100,
+  },
   hint: {
     color: 'gray',
     fontSize: 14,
     marginTop: -10,
     marginLeft: 10,
   },
-  cohortForm: {
-    paddingBottom: 100,
-  },
+  longForm: {
+    height: 40
+  }
 });
 
 export default connect(({ onboarding }: RootState) => onboarding,
