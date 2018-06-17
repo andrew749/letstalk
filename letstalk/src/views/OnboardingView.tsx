@@ -67,6 +67,7 @@ import {
 } from '../models/user';
 import { headerStyle } from './TopHeader';
 import { AnalyticsHelper } from '../services';
+import Colors from '../services/colors';
 
 interface CohortFormData {
   programId: string,
@@ -163,6 +164,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
+        backgroundColor={Colors.HIVE_PRIMARY}
         disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Submit"}
