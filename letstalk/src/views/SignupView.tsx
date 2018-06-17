@@ -1,6 +1,6 @@
 import {FileSystem} from 'expo';
 import React, { Component } from 'react';
-import { Picker, ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, Picker, ScrollView, StyleSheet } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -26,6 +26,8 @@ import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle } from './TopHeader';
 import auth from "../services/auth";
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface SignupFormData {
   firstName: string;
@@ -65,7 +67,8 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   };
   const fieldRefs = new SignupFormRefs();
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.scrollView}>
       <Field
         name="profilePic"
         component={ProfileAvatarEditableFormElement}
@@ -83,6 +86,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         withRef={true}
         autoCorrect={false}
         validate={required}
+        containerStyle={styles.fieldContainer}
       />
       <Field
         label="Last name"
@@ -96,6 +100,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         withRef={true}
         autoCorrect={false}
         validate={required}
+        containerStyle={styles.fieldContainer}
       />
       <Field
         label="Email"
@@ -111,6 +116,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
         validate={[required, email]}
+        containerStyle={styles.fieldContainer}
       />
       <Field
         label="Phone number"
@@ -124,6 +130,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         component={LabeledFormInput}
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={[required, phoneNumber]}
+        containerStyle={styles.fieldContainer}
       />
       <Field
         label="Password"
@@ -134,12 +141,14 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         secureTextEntry={true}
         validate={required} // Add some rules for password
         autoCapitalize={'none' as 'none'}
+        containerStyle={[styles.fieldContainer, {marginBottom: 10}]}
       />
       <Field
         label="Gender"
         name="gender"
         component={ButtonPicker}
         validate={required}
+        style={styles.fieldContainer}
       >
         <Picker.Item
           label="Male"
@@ -156,6 +165,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         mode={'date' as 'date'}
         component={ModalDatePicker}
         validate={required}
+        cardStyle={styles.fieldContainer}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
@@ -165,6 +175,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         loading={submitting}
         title={submitting ? null : "Sign up"}
         onPress={handleSubmit(onSubmitWithReset)}
+        containerStyle={styles.fieldContainer}
       />
     </KeyboardAwareScrollView>
   );
@@ -242,13 +253,19 @@ export default class SignupView extends Component<Props> {
 
 // Hack to make submit button available when keyboard is open.
 const styles = StyleSheet.create({
-  submitButton: {
-    marginBottom: 100,
+  fieldContainer: {
+    width: SCREEN_WIDTH * .9
   },
   profilePicContainerStyle: {
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
     marginLeft: 20,
-  }
+  },
+  scrollView: {
+    alignItems: 'center'
+  },
+  submitButton: {
+    marginBottom: 100,
+  },
 });
