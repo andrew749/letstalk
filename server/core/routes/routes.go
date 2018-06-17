@@ -86,6 +86,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/match_profile/:userId")
 	v1.GET("/match_profile/:userId", hw.wrapHandler(controller.GetMatchProfileController, true))
 
+	// gets profile data about a match for signed in user
+	v1.OPTIONS("/remove_rtm_matches/:userId")
+	v1.DELETE("/remove_rtm_matches/:userId", hw.wrapHandler(controller.RemoveRtmMatches, true))
+
 	v1.OPTIONS("/profile_pic")
 	v1.GET("/profile_pic", hw.wrapHandler(controller.GetProfilePicUrl, true))
 

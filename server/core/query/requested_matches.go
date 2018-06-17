@@ -264,3 +264,17 @@ func GetAskersByAnswererId(
 	}
 	return matchings, nil
 }
+
+func RemoveAllMatches(db *gorm.DB, fstUserId int, sndUserId int) errs.Error {
+	err := db.Where(
+		"(answerer = ? and asker = ?) or (asker = ? and answerer = ?)",
+		fstUserId,
+		sndUserId,
+		fstUserId,
+		sndUserId,
+	).Delete(data.RequestMatching{}).Error
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	return nil
+}

@@ -145,6 +145,7 @@ export class RemoteProfileService implements ProfileService {
     const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
     return response;
   }
+
   async matchProfile(userId: number): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
     const url = MATCH_PROFILE_ROUTE + '/' + userId;
