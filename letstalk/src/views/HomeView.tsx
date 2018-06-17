@@ -3,6 +3,7 @@ import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
+  Alert,
   Button as ReactNativeButton,
   Linking,
   RefreshControl,
@@ -23,7 +24,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
 import { RootState } from '../redux';
-import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
+import {
+  State as BootstrapState,
+  fetchBootstrap,
+  removeRtmMatches,
+} from '../redux/bootstrap/reducer';
 import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
@@ -52,6 +57,7 @@ interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchCredentialOptions: ActionCreator<
     ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
+  removeRtmMatches: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
 }
 
 interface Props extends BootstrapState, DispatchActions {
@@ -200,6 +206,7 @@ class HomeView extends Component<Props, State> {
   private renderMatch(relationship: Relationship) {
     const {
       userId,
+      userType,
       firstName,
       lastName,
       matchingState,
@@ -207,6 +214,30 @@ class HomeView extends Component<Props, State> {
     const isVerified = matchingState === MatchingState.Verified;
     const isUnverified = matchingState === MatchingState.Unverified;
     const description = this.renderDescription(relationship);
+
+    const onCloseAccept = async () => {
+      await this.props.removeRtmMatches(userId);
+    }
+
+    const onClosePress = () => {
+      Alert.alert(
+        'Unmatch',
+        'Are you sure you want to unmatch? This will permanently remove ' + firstName +
+        ' from your list of connections',
+        [
+          {text: 'Cancel', onPress: () => null, style: 'cancel'},
+          {text: 'Unmatch', onPress: onCloseAccept, style: 'destructive'},
+        ],
+      );
+    }
+
+    const closeButton = (userType === USER_TYPE_ASKER || userType === USER_TYPE_ANSWERER) ? (
+      <TouchableOpacity style={styles.deleteRtmMatch} onPress={onClosePress}>
+        <MaterialIcons name="close" size={18} />
+      </TouchableOpacity>
+    ) : null;
+
+
     // TODO: Handle errors for links
     return (
       <Card key={userId}>
@@ -222,6 +253,7 @@ class HomeView extends Component<Props, State> {
           </View>
         </View>
         { this.renderContactButton(relationship) }
+        { closeButton }
       </Card>
     );
   }
@@ -333,7 +365,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { fetchBootstrap, fetchCredentialOptions })(HomeView);
+  { fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
 
 const styles = StyleSheet.create({
   container: {
@@ -381,5 +413,10 @@ const styles = StyleSheet.create({
   unverified: {
     color: 'red',
     fontWeight: 'bold',
+  },
+  deleteRtmMatch: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
 })

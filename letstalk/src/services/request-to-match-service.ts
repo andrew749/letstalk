@@ -9,6 +9,7 @@ import {
   CREDENTIALS_ROUTE,
   CREDENTIAL_REQUEST_ROUTE,
   CREDENTIAL_REQUESTS_ROUTE,
+  REMOVE_RTM_MATCHES_ROUTE,
 } from './constants';
 
 type GetAllCredentialsResponse = Array<Credential>;
@@ -75,6 +76,12 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const request: RemoveCredentialRequestRequest = { credentialId };
     await this.requestor.delete(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
+  }
+
+  async removeRtmMatches(userId: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const url = REMOVE_RTM_MATCHES_ROUTE + '/' + userId;
+    await this.requestor.delete(url, null, sessionToken);
   }
 }
 
