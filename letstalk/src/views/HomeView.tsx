@@ -259,6 +259,15 @@ class HomeView extends Component<Props, State> {
   }
 
   private renderHome() {
+    // A little sketchy to be pasting this in all the cases, but haven't found an easy work around
+    // yet.
+    const allModals = (
+      <AllFilterableModals
+        onSelectSuccess={() => {
+          this.props.navigation.navigate({ routeName: 'Requests' });
+        }}
+      />
+    );
     const { state } = this.props.bootstrap;
     switch (state) {
       case 'account_created':
@@ -267,6 +276,7 @@ class HomeView extends Component<Props, State> {
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for you to finish onboarding</Text>
             <ActionButton onPress={() => this.load()} title="Check again" />
+            { allModals }
           </View>
         );
       case 'account_setup':
@@ -274,6 +284,7 @@ class HomeView extends Component<Props, State> {
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for your match</Text>
             <ActionButton onPress={() => this.load()} title="Check again" />
+            { allModals }
           </View>
         );
       case 'account_matched':
@@ -291,11 +302,7 @@ class HomeView extends Component<Props, State> {
             >
               { matches }
             </ScrollView>
-            <AllFilterableModals
-              onSelectSuccess={() => {
-                this.props.navigation.navigate({ routeName: 'Requests' });
-              }}
-            />
+            { allModals }
           </View>
         );
       default:
