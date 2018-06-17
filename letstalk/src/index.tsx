@@ -37,10 +37,11 @@ import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 import ForgotPasswordView from './views/ForgotPasswordView';
-import NotificationService, { Notification } from './services/notification-service';
-
-import Colors from './services/colors';
 import QrScannerView from "./views/QrScannerView";
+
+import NotificationService, { Notification } from './services/notification-service';
+import Colors from './services/colors';
+import { NotificationBody } from './components';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -224,9 +225,10 @@ class App extends React.Component<Props, AppState> {
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
           <AppNavigation ref={addNavContainer} />
-          <NotificationComponent ref={(ref: any) => {
-            this.notificationService.setNotifContainer(ref);
-          }} />
+          <NotificationComponent
+            ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
+            notificationBodyComponent={ NotificationBody }
+          />
           <Toast messageStyle={styles.toastMessageStyle} />
         </View>
       </Provider>
