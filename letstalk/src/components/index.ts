@@ -12,6 +12,7 @@ import ModalPicker from './ModalPicker';
 import ModalDatePicker from './ModalDatePicker';
 import Rating from './Rating';
 import ProfileAvatar, {ProfileAvatarEditableFormElement} from './ProfileAvatar';
+import NotificationBody from './NotificationBody';
 
 export {
   ActionButton,
@@ -28,6 +29,7 @@ export {
   LabeledFormInput,
   ModalDatePicker,
   ModalPicker,
+  NotificationBody,
   Rating,
   ProfileAvatar,
   ProfileAvatarEditableFormElement,

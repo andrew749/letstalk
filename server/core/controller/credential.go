@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strconv"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -115,5 +117,21 @@ func GetUserCredentialsController(c *ctx.Context) errs.Error {
 	}
 
 	c.Result = credentials
+	return nil
+}
+
+func RemoveRtmMatches(c *ctx.Context) errs.Error {
+	userIdStr := c.GinContext.Param("userId")
+	userId, convErr := strconv.Atoi(userIdStr)
+	if convErr != nil {
+		return errs.NewClientError(convErr.Error())
+	}
+
+	meUserId := c.SessionData.UserId
+
+	if err := query.RemoveAllMatches(c.Db, meUserId, userId); err != nil {
+		return err
+	}
+
 	return nil
 }

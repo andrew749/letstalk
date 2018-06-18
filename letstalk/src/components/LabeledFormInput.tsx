@@ -1,5 +1,5 @@
 import React, { SFC } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput, FormLabel } from 'react-native-elements';
 
@@ -31,6 +31,8 @@ class LabeledFormInput extends React.Component<Props> {
           onChangeText={onChange}
           value={value}
           onSubmitEditing={props.onSubmitEditing}
+          underlineColorAndroid="gray"
+          inputStyle={Platform.OS === 'ios' ? {} : {paddingLeft: 5, paddingRight: 5}}
         />
         {touched && (
           (error && <FormValidationMessage>{error}</FormValidationMessage>) ||

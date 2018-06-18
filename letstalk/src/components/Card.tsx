@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native';
+import { Dimensions, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 import Colors from '../services/colors';
 
@@ -7,7 +7,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Props {
   children?: ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 const Card: React.SFC<Props> = props => {
