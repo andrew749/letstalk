@@ -231,13 +231,14 @@ func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string
 }
 
 type FBUser struct {
-	Id        string
-	FirstName string
-	LastName  string
-	Email     string
-	Gender    data.GenderID
-	Birthdate string
-	Link      string
+	Id         string
+	FirstName  string
+	LastName   string
+	Email      string
+	Gender     data.GenderID
+	Birthdate  string
+	Link       string
+	ProfilePic string
 }
 
 func getFBUser(accessToken string) (*FBUser, error) {
@@ -256,7 +257,6 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, errors.New("Unable to parse gender")
 	}
 
-	rlog.Debug(res)
 	return &FBUser{
 		Id:        res["id"].(string),
 		FirstName: res["first_name"].(string),
@@ -265,5 +265,6 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		Gender:    gender,
 		Birthdate: res["birthday"].(string),
 		Link:      res["link"].(string),
+		// ProfilePic: res["profile_pic"].(string),
 	}, nil
 }
