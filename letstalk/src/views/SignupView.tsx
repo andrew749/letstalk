@@ -65,7 +65,9 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   };
   const fieldRefs = new SignupFormRefs();
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+      keyboardShouldPersistTaps={true}
+    >
       <Field
         name="profilePic"
         component={ProfileAvatarEditableFormElement}

@@ -113,7 +113,9 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   const fieldRefs = new EditFormRefs();
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+      keyboardShouldPersistTaps={true}
+      >
       <Header>Personal Info</Header>
       <Field
         label="First name"
