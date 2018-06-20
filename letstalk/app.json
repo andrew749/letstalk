@@ -8,7 +8,8 @@
     "slug": "hive-alpha",
     "sdkVersion": "27.0.0",
     "ios": {
-      "bundleIdentifier": "org.hiveapp.hive"
+      "bundleIdentifier": "org.hiveapp.hive",
+      "buildNumber": "2"
     },
     "android": {
       "package": "org.hiveapp.hive"
