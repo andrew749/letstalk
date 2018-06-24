@@ -1,4 +1,11 @@
 #!/bin/bash
+usage() {
+echo << EOF
+  Installs LetsEncrypt software and tries to get key for application's domain
+EOF
+  exit
+}
+
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:certbot/certbot
 sudo apt-get update
