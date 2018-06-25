@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-  let baseUrl = "https://api.hiveapp.org/";
+  var baseUrl = "https://api.hiveapp.org/";
 
   function getPasswordChangeRequestId() {
     var searchParams = new URLSearchParams(window.location.search);
