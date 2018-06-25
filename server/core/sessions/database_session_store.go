@@ -31,7 +31,7 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 		return e
 	}
 
-	if e := tx.Create(sessionModel).Error; e != nil {
+	if e := tx.FirstOrCreate(&sessionModel).Error; e != nil {
 		return e
 	}
 
