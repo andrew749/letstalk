@@ -91,13 +91,18 @@ export class Requestor {
     return this.withData('POST', endpoint, data, sessionToken, undefined, true);
   }
 
-  async postBinary(
+  async postFormData(
     endpoint: string,
-    data: object,
-    headers: Headers,
+    data: FormData,
     sessionToken?: SessionToken,
   ) {
-    return this.withData('POST', endpoint, data, sessionToken, headers, false)
+    const headers = new Headers();
+    headers.append('sessionId', sessionToken);
+    return await fetch(this.serverUrl + endpoint, {
+      method:'POST',
+      body: data,
+      headers: headers,
+    });
   }
 
   async delete(endpoint: string, data: object, sessionToken?: SessionToken): Promise<any> {

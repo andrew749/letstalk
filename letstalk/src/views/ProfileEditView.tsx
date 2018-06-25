@@ -23,6 +23,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 import auth from '../services/auth';
 import profileService from '../services/profile-service';
+
 import {
   ActionButton,
   ButtonPicker,
@@ -71,6 +72,7 @@ interface EditFormData {
   mentorshipPreference: number;
   bio: string | null;
   hometown: string | null;
+  profilePic: PhotoResult;
 }
 
 // TODO: move elsewhere
@@ -117,6 +119,11 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
       keyboardShouldPersistTaps={true}
       >
       <Header>Personal Info</Header>
+      <Field
+        name="profilePic"
+        component={ProfileAvatarEditableFormElement}
+        containerStyle={styles.profilePicContainerStyle}
+      />
       <Field
         label="First name"
         name="firstName"
@@ -292,6 +299,7 @@ class ProfileEditView extends Component<Props> {
         mentorshipPreference,
         bio,
         hometown,
+        profilePic,
       } = values;
       const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
       await profileService.profileEdit({
@@ -305,6 +313,8 @@ class ProfileEditView extends Component<Props> {
         bio,
         hometown,
       });
+      // update profile pic
+      await photoService.uploadProfilePhoto(profilePic.uri);
       await this.props.fetchProfile();
       this.props.navigation.goBack();
     } catch(e) {
@@ -325,6 +335,7 @@ class ProfileEditView extends Component<Props> {
       mentorshipPreference,
       bio,
       hometown,
+      profilePic,
     } = this.props.profile;
     const EditFormWithRedux = EditFormWithReduxBuilder({
       firstName,
@@ -338,6 +349,7 @@ class ProfileEditView extends Component<Props> {
       mentorshipPreference,
       bio,
       hometown,
+      profilePic: {uri: profilePic, data: null},
     });
     return (
       <EditFormWithRedux onSubmit={this.onSubmit} />
