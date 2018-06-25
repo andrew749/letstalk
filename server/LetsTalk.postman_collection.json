@@ -196,7 +196,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "87d4bTatzriXoAZKDz9nwP5H6LYp6FzL4Lf_j5c0QjA="
+						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
 					}
 				],
 				"body": {},
@@ -340,7 +340,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "b_AGBuoU_uenfMftN41H26mbiEFQtwVWCVrHxS-ZTVo="
+						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
 					},
 					{
 						"key": "Content-Type",
@@ -435,6 +435,109 @@
 					]
 				},
 				"description": "Subscribe new user to mailing list."
+			},
+			"response": []
+		},
+		{
+			"name": "Me",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{server_ip}}/v1/me",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProfilePic",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{server_ip}}/v1/profile_pic?userId=1",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"profile_pic"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Forgot Password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"andrew.codispoti@gmail.com\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/forgot_password",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"forgot_password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change password",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"requestId\":\"09e6f568-49e3-41df-9e90-59874419c617\",\n\t\"password\":\"test2\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/change_password",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"change_password"
+					]
+				}
 			},
 			"response": []
 		}
