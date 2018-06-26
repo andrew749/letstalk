@@ -30,7 +30,7 @@ func generateNewForgotPasswordRequest(db *gorm.DB, userId int) (*data.ForgotPass
 
 func sendForgotPasswordEmail(db *gorm.DB, requestId *data.ForgotPasswordId, user *data.User) error {
 	passwordChangeLink := fmt.Sprintf(
-		"%s/change_password?requestId=%s",
+		"%s/change_password.html?requestId=%s",
 		utility.BaseUrl,
 		requestId.Id,
 	)

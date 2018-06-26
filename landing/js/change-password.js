@@ -1,7 +1,6 @@
 $(document).ready(function(){
 
-  // let baseUrl = "https://api.hiveapp.org/";
-  var baseUrl = "http://localhost:3000";
+  var baseUrl = "https://api.hiveapp.org/v1";
 
   function getPasswordChangeRequestId() {
     var searchParams = new URLSearchParams(window.location.search);
@@ -10,10 +9,10 @@ $(document).ready(function(){
 
   function submitPasswordChange(requestId, newPassword) {
     console.log("sending password change");
-    $.post( baseUrl + "/change_password", {
+    $.post( baseUrl + "/change_password", JSON.stringify({
       "requestId": requestId,
       "password": newPassword,
-    }, function( data ) {
+    }), function( data ) {
       // on success change ui
       console.log("Successfully submitted change password request")
       passwordChangeHandler();

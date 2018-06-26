@@ -2,9 +2,10 @@ package sessions
 
 import (
 	"errors"
-	"github.com/romana/rlog"
 	"letstalk/server/core/errs"
 	"time"
+
+	"github.com/romana/rlog"
 )
 
 type CompositeSessionManager struct {
@@ -83,10 +84,11 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 	sessionId string,
 ) (*SessionData, error) {
 	var session *SessionData
+	var emptyStore = false
 	err := sm.forEverySmPredicate(func(x ISessionStore) (bool, error) {
 		res, err := x.GetSessionForSessionId(sessionId)
-		rlog.Debug(err)
 		if err != nil {
+			emptyStore = true
 			return false, err
 		}
 		if res != nil {
@@ -98,6 +100,12 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 
 	if err != nil || session == nil {
 		return nil, errors.New("Unable to get session")
+	}
+
+	if emptyStore {
+		// FIXME: ignore for now if there is an error
+		rlog.Debug("Updating session across stores")
+		_ = sm.AddNewSession(session)
 	}
 
 	return session, nil

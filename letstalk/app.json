@@ -4,14 +4,15 @@
   "expo": {
     "name": "Hive",
     "icon": "./src/img/logo.png",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "slug": "hive-alpha",
     "sdkVersion": "27.0.0",
     "ios": {
       "bundleIdentifier": "org.hiveapp.hive",
-      "buildNumber": "2"
+      "buildNumber": "3"
     },
     "android": {
+      "versionCode": 2,
       "package": "org.hiveapp.hive"
     },
     "androidStatusBar": {

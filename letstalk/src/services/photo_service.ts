@@ -44,17 +44,12 @@ export class PhotoServiceImpl implements PhotoService {
   async uploadProfilePhoto(uri: string) {
     // Upload the image using the fetch and FormData APIs
     let formData = new FormData();
-    let photoData = await FileSystem.readAsStringAsync(uri);
+    const sessionToken = await auth.getSessionToken();
 
     // sends a base 64 encoded string
-    formData.append('photo', photoData);
+    formData.append('photo', {uri: uri, name: "new_pic", type: 'image/jpeg'});
 
-    return await this._requestor.postBinary(PROFILE_PIC_UPLOAD_ROUTE, {
-      body: formData,
-      headers: {
-        'content-type': 'multipart/form-data',
-      },
-    }, null);
+    return await this._requestor.postFormData(PROFILE_PIC_UPLOAD_ROUTE, formData, sessionToken);
   }
 }
 
