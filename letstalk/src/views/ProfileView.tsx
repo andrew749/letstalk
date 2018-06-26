@@ -41,7 +41,7 @@ import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
 import QRCode from "react-native-qrcode";
-import { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle } from './TopHeader';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -57,11 +57,9 @@ class ProfileView extends Component<Props> {
   PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'My Profile',
+    headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
-    headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Edit"
-      onPress={() => navigation.navigate('ProfileEdit')} /> : null,
-  })
+  });
 
   constructor(props: Props) {
     super(props);
@@ -194,7 +192,7 @@ class ProfileView extends Component<Props> {
 
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
-    const editButton = Platform.OS === 'ios' ? null : <Icon
+    const editButton = <Icon
       name='pencil'
       type='font-awesome'
       color={Colors.HIVE_PRIMARY}
