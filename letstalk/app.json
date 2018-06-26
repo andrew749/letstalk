@@ -12,7 +12,7 @@
       "buildNumber": "3"
     },
     "android": {
-      "versionCode": 3,
+      "versionCode": 4,
       "package": "org.hiveapp.hive"
     },
     "androidStatusBar": {
