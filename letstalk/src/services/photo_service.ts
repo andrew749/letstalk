@@ -22,7 +22,7 @@ export class PhotoServiceImpl implements PhotoService {
   async getPhotoFromPicker(): Promise<PhotoResult> {
     // Display the camera to the user and wait for them to take a photo or to cancel
     // the action
-    const cameraPermission = await Permissions.askAsync(Permissions.CAMERA);
+    const cameraPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL as any);
 
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,

@@ -76,12 +76,12 @@ export class ProfileAvatarEditableFormElement extends React.Component<FormElemen
     let onChange = this.props.input.onChange;
 
     let pressAction = async() => {
-        let photoResult = await photoService.getPhotoFromPicker();
-        onChange(photoResult);
-      };
+      let photoResult = await photoService.getPhotoFromPicker();
+      onChange(photoResult);
+    };
 
     // the user changed the form contents to an image
-    if (props.input.value) {
+    if (props.input.value && props.input.value.uri) {
       let uri = (props.input.value as PhotoResult).uri;
       avatarSource = {uri: uri};
     }
