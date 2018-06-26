@@ -1,6 +1,6 @@
 // DEV
 
-export const BASE_URL = 'http://192.168.0.10';
+export const BASE_URL = 'https://api.hiveapp.org';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
 // Routes
