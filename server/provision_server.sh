@@ -24,7 +24,7 @@ create_admin_user() {
 
 # install dependencies
 install_dependencies() {
-    sudo apt-get install docker docker-compose
+    sudo apt-get install docker docker-compose jq
 }
 
 setup_docker() {
