@@ -37,11 +37,11 @@ $(document).ready(function(){
 
   function badPasswordHandler() {
     console.log("Bad password");
-      // TODO: change styling of page to indicate bad password
+    $("#message-container").html($('<div/>', {class: 'alert alert-danger'}).text("Failed to change password.").appendTo("#message-container"));
   }
 
   function passwordChangeHandler() {
     console.log("password changed");
-      // TODO: change styling of page to indicate a good password
+    $("#message-container").html($('<div/>', {class: 'alert alert-success'}).text("Successfully changed password."));
   }
 });
