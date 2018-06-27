@@ -6,7 +6,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
-	"letstalk/server/push"
+	"letstalk/server/email"
 
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -53,7 +53,7 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 		subscriber.Email,
 	)
 
-	err = push.SendSubscribeEmail(to, subscriber.FirstName)
+	err = email.SendSubscribeEmail(to, subscriber.FirstName)
 	if err != nil {
 		rlog.Error("Unable to send email to ", subscriber.Email)
 	}

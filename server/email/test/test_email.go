@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"letstalk/server/core/secrets"
-	"letstalk/server/push"
 	"os"
+
+	email_util "letstalk/server/email"
 
 	"github.com/namsral/flag"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -16,7 +17,7 @@ func SendTestEmail() {
 	subject := "SUBJECT"
 	plainTextContent := "BOIIIIII"
 	htmlContent := "<strong>BOIIIIII</strong>"
-	err := push.SendEmail(from, to, subject, plainTextContent, htmlContent)
+	err := email_util.SendEmail(from, to, subject, plainTextContent, htmlContent)
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -25,7 +26,7 @@ func SendTestEmail() {
 func SendTestSubscriptionEmail() {
 	recipient := mail.NewEmail("Andrew Codispoti", "andrewcod749@gmail.com")
 	name := "Andrew"
-	err := push.SendSubscribeEmail(recipient, name)
+	err := email_util.SendSubscribeEmail(recipient, name)
 	if err != nil {
 		fmt.Printf(err.Error())
 	}

@@ -9,7 +9,7 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
-	"letstalk/server/push"
+	"letstalk/server/email"
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -37,7 +37,7 @@ func sendForgotPasswordEmail(db *gorm.DB, requestId *data.ForgotPasswordId, user
 
 	// send email to user with link to change password
 	to := mail.NewEmail(user.FirstName, user.Email)
-	if err := push.SendForgotPasswordEmail(to, passwordChangeLink); err != nil {
+	if err := email.SendForgotPasswordEmail(to, passwordChangeLink); err != nil {
 		return err
 	}
 	return nil
