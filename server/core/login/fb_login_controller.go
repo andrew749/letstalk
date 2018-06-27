@@ -9,6 +9,7 @@ import (
 	"errors"
 	"time"
 
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
@@ -23,21 +24,8 @@ import (
 	"github.com/romana/rlog"
 )
 
-type FBLoginRequestDataCore struct {
-	Token  string `json:"token" binding:"required"`
-	Expiry int64  `json:"expiry" binding:"required"`
-}
-
-/**
- * Login with fb
- */
-type FBLoginRequestData struct {
-	FBLoginRequestDataCore
-	NotificationToken string `json:"notificationToken"`
-}
-
 func FBController(c *ctx.Context) errs.Error {
-	var loginRequest FBLoginRequestData
+	var loginRequest api.FBLoginRequestData
 	var externalAuthRecord data.ExternalAuthData
 	var userId int
 
@@ -181,14 +169,17 @@ func FBController(c *ctx.Context) errs.Error {
 		return errs.NewInternalError("%s", err)
 	}
 
-	c.Result = LoginResponse{*session.SessionId, session.ExpiryDate}
+	c.Result = api.LoginResponse{
+		SessionId:  *session.SessionId,
+		ExpiryDate: session.ExpiryDate,
+	}
 
 	return nil
 }
 
 // FBLinkController Link the currently logged in user with the facebook user specified in the request
 func FBLinkController(c *ctx.Context) errs.Error {
-	var loginRequest FBLoginRequestData
+	var loginRequest api.FBLoginRequestData
 	var err error
 	if err = c.GinContext.BindJSON(&loginRequest); err != nil {
 		return errs.NewClientError("Request is invalid")

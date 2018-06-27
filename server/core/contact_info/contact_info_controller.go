@@ -1,19 +1,14 @@
 package contact_info
 
 import (
-	"letstalk/server/core/query"
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"strconv"
 
 	"github.com/jinzhu/gorm"
 )
-
-type ContactInfo struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-}
 
 /**
  * Get request required the requested userId data as a url parameter
@@ -44,7 +39,11 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 		if err != nil {
 			return errs.NewClientError("Unable to get user: %s", err)
 		}
-		c.Result = ContactInfo{user.FirstName, user.LastName, user.Email}
+		c.Result = api.ContactInfo{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+		}
 	} else if err != nil {
 		return errs.NewInternalError(err.Error())
 	} else {

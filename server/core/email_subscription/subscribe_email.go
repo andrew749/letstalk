@@ -2,6 +2,7 @@ package email_subscription
 
 import (
 	"fmt"
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -11,20 +12,8 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-type SubscriptionRequest struct {
-	ClassYear    int    `json:"classYear" binding:"required"`
-	ProgramName  string `json:"programName" binding:"required"`
-	EmailAddress string `json:"emailAddress" binding:"required"`
-	FirstName    string `json:"firstName" binding:"required"`
-	LastName     string `json:"lastName" binding:"required"`
-}
-
-type SubscriptionResponse struct {
-	Status string `json:"status"`
-}
-
 func AddSubscription(ctx *ctx.Context) errs.Error {
-	var request SubscriptionRequest
+	var request api.SubscriptionRequest
 
 	var err error
 
@@ -69,6 +58,8 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 		rlog.Error("Unable to send email to ", subscriber.Email)
 	}
 
-	ctx.Result = SubscriptionResponse{"Ok"}
+	ctx.Result = api.SubscriptionResponse{
+		Status: "Ok",
+	}
 	return nil
 }

@@ -6,9 +6,6 @@ import (
 	"letstalk/server/data"
 )
 
-type LogoutResponse struct {
-}
-
 func LogoutHandler(c *ctx.Context) errs.Error {
 	if c.SessionData.SessionId == nil {
 		return errs.NewInternalError("Bad session token.")

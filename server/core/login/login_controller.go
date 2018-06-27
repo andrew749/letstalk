@@ -1,27 +1,15 @@
 package login
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
-
-type LoginRequestData struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	// optional token to associate with this session
-	NotificationToken *string `json:"notificationToken"`
-}
-
-type LoginResponse struct {
-	SessionId  string    `json:"sessionId"`
-	ExpiryDate time.Time `json:"expiry"`
-}
 
 func invalidPassError() errs.Error {
 	return errs.NewClientError("Invalid Password. Try again.")
@@ -37,7 +25,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 	// create new session
 	sm := c.SessionManager
 
-	var req LoginRequestData
+	var req api.LoginRequestData
 	err := c.GinContext.BindJSON(&req)
 	if err != nil {
 		return errs.NewClientError("Bad login request data %s", err)
@@ -63,7 +51,10 @@ func LoginUser(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewClientError("%s", err)
 	}
-	c.Result = LoginResponse{*session.SessionId, session.ExpiryDate}
+	c.Result = api.LoginResponse{
+		SessionId:  *session.SessionId,
+		ExpiryDate: session.ExpiryDate,
+	}
 
 	return nil
 }
