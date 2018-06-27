@@ -35,7 +35,7 @@ func getSecrets(path string) Secrets {
 		rlog.Error(err)
 		return Secrets{}
 	}
-	rlog.Debug("Successfully loaded secrets")
+	rlog.Info("Successfully loaded secrets")
 	return secrets
 }
 

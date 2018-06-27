@@ -53,8 +53,9 @@ func main() {
 
 	defer db.Close()
 
-	rlog.Info("Migrating database")
-	db.LogMode(true)
+	// log in development
+	db.LogMode(!*production)
+
 	// create the database
 	data.CreateDB(db)
 
@@ -67,13 +68,21 @@ func main() {
 
 	secrets.LoadSecrets(*secretsPath)
 
+	// setup sentry logging
+	raven.SetDSN(secrets.GetSecrets().SentryDSN)
+
 	// production specific setup
 	if *production {
-		rlog.Debug("Running in Production")
+		rlog.Info("Running in Production")
+		raven.SetTagsContext(map[string]string{
+			"environment": "production",
+		})
 		// setup sentry
-		raven.SetDSN(secrets.GetSecrets().SentryDSN)
 	} else {
-		rlog.Debug("Running in Development mode")
+		rlog.Info("Running in Development mode")
+		raven.SetTagsContext(map[string]string{
+			"environment": "development",
+		})
 	}
 
 	// Start server
