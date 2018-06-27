@@ -4,7 +4,6 @@ import sys
 from argparse import ArgumentParser
 from subprocess import run
 from shutil import copytree
-from utils.utils import template_file
 import subprocess
 import os
 import logging
