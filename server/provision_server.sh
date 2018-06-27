@@ -24,7 +24,7 @@ create_admin_user() {
 
 # install dependencies
 install_dependencies() {
-    sudo apt-get install docker
+    sudo apt-get install docker docker-compose
 }
 
 setup_docker() {
@@ -39,4 +39,4 @@ create_admin_user
 install_dependencies
 setup_docker
 
-echo "Remember to manually add secrets to this server"
+echo "\033[91mRemember to manually add secrets to this server\033[0m"
