@@ -6,6 +6,7 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/api"
 	"letstalk/server/data"
+	"github.com/jinzhu/gorm"
 )
 
 // PostMeetingConfirmation lets users confirm that a scheduled meeting occurred.
@@ -30,12 +31,25 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 		return errs.NewClientError("No existing match with this user")
 	}
 
-	// Verify the matching if this is the first confirmed meeting.
-	if matchingObj.State == data.MATCHING_STATE_UNVERIFIED {
-		// TODO: do in transaction
-		if err := saveVerifiedMatch(c, matchingObj); err != nil {
+	// Store a confirmation of the meeting for future reference.
+	conf := &data.MeetingConfirmation{
+		MatchingId: matchingObj.ID,
+	}
+
+	dbErr := c.WithinTx(func(tx *gorm.DB) error {
+		if err := tx.Model(&data.MeetingConfirmation{}).Create(conf).Error; err != nil {
 			return err
 		}
+		// Verify the matching if this is the first confirmed meeting.
+		if matchingObj.State == data.MATCHING_STATE_UNVERIFIED {
+			if err := saveVerifiedMatch(tx, matchingObj); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if dbErr != nil {
+		return errs.NewDbError(err)
 	}
 
 	c.Result = input
@@ -43,21 +57,18 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 }
 
 // Updates the matching to Verified state in database.
-func saveVerifiedMatch(c *ctx.Context, matching *data.Matching) errs.Error {
+func saveVerifiedMatch(tx *gorm.DB, matching *data.Matching) error {
 	matching.State = data.MATCHING_STATE_VERIFIED
-	if err := updateMatchingObject(c, matching); err != nil {
-		return errs.NewDbError(err)
-	}
-	return nil
+	return updateMatchingObject(tx, matching)
 }
 
 // Update the matching object in database.
-func updateMatchingObject(c *ctx.Context, matching *data.Matching) error {
+func updateMatchingObject(tx *gorm.DB, matching *data.Matching) error {
 	if matching == nil {
 		return nil
 	}
 	// Strip composite fields from matching struct.
 	matching.MenteeUser = nil
 	matching.MentorUser = nil
-	return c.Db.Model(&data.Matching{}).UpdateColumns(matching).Error
+	return tx.Model(&data.Matching{}).UpdateColumns(matching).Error
 }

@@ -23,6 +23,7 @@ func migrateDB(db *gorm.DB) {
 	db.AutoMigrate(&UserCredentialRequest{})
 	db.AutoMigrate(&Subscriber{})
 	db.AutoMigrate(&ForgotPasswordId{})
+	db.AutoMigrate(&MeetingConfirmation{})
 }
 
 func CreateDB(db *gorm.DB) {
