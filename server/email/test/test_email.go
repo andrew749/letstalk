@@ -17,7 +17,7 @@ func SendTestEmail() {
 	subject := "SUBJECT"
 	plainTextContent := "BOIIIIII"
 	htmlContent := "<strong>BOIIIIII</strong>"
-	err := email_util.SendEmail(from, to, subject, plainTextContent, htmlContent)
+	err := email_util.SendBasicEmail(from, to, subject, plainTextContent, htmlContent)
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
