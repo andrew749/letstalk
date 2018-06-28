@@ -70,7 +70,7 @@ func CreateBasicTemplatedEmail(
 			Email: recipient.Address,
 		}
 	} else {
-		context = emailContext
+		context = *emailContext
 	}
 
 	p.Substitutions = MarshallEmailSubstitutions(context)
