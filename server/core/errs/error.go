@@ -1,46 +1,43 @@
 package errs
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 )
 
-type Error interface {
-	error
-	GetHTTPCode() int
+type BadRequest struct{ IError }        // 400
+type UnauthorizedError struct{ IError } // 401
+type ForbiddenError struct{ IError }    // 403
+type NotFoundError struct{ IError }     // 404
+
+func (e *BadRequest) GetHTTPCode() int        { return http.StatusBadRequest }
+func (e *UnauthorizedError) GetHTTPCode() int { return http.StatusUnauthorized }
+func (e *ForbiddenError) GetHTTPCode() int    { return http.StatusForbidden }
+func (e *NotFoundError) GetHTTPCode() int     { return http.StatusNotFound }
+
+func NewRequestError(msg string, args ...interface{}) IError {
+	return &BadRequest{NewBaseError(msg, args...)}
+}
+func NewUnauthorizedError(msg string, args ...interface{}) IError {
+	return &UnauthorizedError{NewBaseError(msg, args...)}
+}
+func NewForbiddenError(msg string, args ...interface{}) IError {
+	return &ForbiddenError{NewBaseError(msg, args...)}
+}
+func NewNotFoundError(msg string, args ...interface{}) IError {
+	return &NotFoundError{NewBaseError(msg, args...)}
 }
 
-type ClientError struct {
-	error
-}
-
-func (e *ClientError) GetHTTPCode() int { return http.StatusBadRequest }
-
-func NewClientError(msg string, args ...interface{}) Error {
-	return &ClientError{errors.New(fmt.Sprintf(msg, args...))}
-}
-
-type InternalError struct {
-	error
-}
+type InternalError struct{ IError }
+type DatabaseError struct{ IError }
 
 func (e *InternalError) GetHTTPCode() int { return http.StatusInternalServerError }
 
-func NewInternalError(msg string, args ...interface{}) Error {
-	return &InternalError{errors.New(fmt.Sprintf(msg, args...))}
+func NewInternalError(msg string, args ...interface{}) IError {
+	return &InternalError{
+		NewBaseError(msg, args...),
+	}
 }
 
-func NewDbError(err error) Error {
-	return NewInternalError("encountered database error: %s", err)
-}
-
-type UnauthorizedError struct {
-	error
-}
-
-func (e *UnauthorizedError) GetHTTPCode() int { return http.StatusUnauthorized }
-
-func NewUnauthorizedError(msg string, args ...interface{}) Error {
-	return &UnauthorizedError{errors.New(fmt.Sprintf(msg, args...))}
+func NewDbError(err error) IError {
+	return &DatabaseError{NewInternalError("Encountered database error: %s", err)}
 }

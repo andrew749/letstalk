@@ -14,7 +14,7 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 	var request api.ProfileEditRequest
 	err := c.GinContext.BindJSON(&request)
 	if err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	if err := query.UpdateProfile(c.Db, c.SessionData.UserId, request); err != nil {
@@ -37,7 +37,7 @@ func GetMatchProfileController(c *ctx.Context) errs.Error {
 	matchUserIdStr := c.GinContext.Param("userId")
 	matchUserId, convErr := strconv.Atoi(matchUserIdStr)
 	if convErr != nil {
-		return errs.NewClientError(convErr.Error())
+		return errs.NewRequestError(convErr.Error())
 	}
 
 	userModel, err := query.GetMatchProfile(c.Db, c.SessionData.UserId, matchUserId)
@@ -57,13 +57,13 @@ func GetProfilePicUrl(ctx *ctx.Context) errs.Error {
 	if valTemp, ok := params["userId"]; ok {
 		val = valTemp[0]
 	} else {
-		return errs.NewClientError("Missing userId parameter")
+		return errs.NewRequestError("Missing userId parameter")
 	}
 
 	if userIdTemp, err := strconv.Atoi(val); err == nil {
 		userId = userIdTemp
 	} else {
-		return errs.NewClientError("Malformed userId")
+		return errs.NewRequestError("Malformed userId")
 	}
 
 	db := ctx.Db

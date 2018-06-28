@@ -12,13 +12,13 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func AddSubscription(ctx *ctx.Context) errs.Error {
+func AddSubscription(ctx *ctx.Context) errs.IError {
 	var request api.SubscriptionRequest
 
 	var err error
 
 	if err = ctx.GinContext.BindJSON(&request); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	var subscribers []data.Subscriber
@@ -32,7 +32,7 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 	}
 
 	if len(subscribers) > 0 {
-		return errs.NewClientError("Subscription already created")
+		return errs.NewRequestError("Subscription already created")
 	}
 
 	var subscriber data.Subscriber
@@ -44,7 +44,7 @@ func AddSubscription(ctx *ctx.Context) errs.Error {
 		FirstName:   request.FirstName,
 		LastName:    request.LastName,
 	}).Error; err != nil {
-		return errs.NewClientError("Unable to create new subscription")
+		return errs.NewRequestError("Unable to create new subscription")
 	}
 
 	// send verification email

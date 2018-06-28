@@ -24,7 +24,7 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 	var req api.AddUserCredentialRequestRequest
 
 	if err := c.GinContext.BindJSON(&req); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	if err := query.AddUserCredentialRequest(
@@ -49,7 +49,7 @@ func RemoveUserCredentialRequestController(c *ctx.Context) errs.Error {
 	var req api.RemoveUserCredentialRequestRequest
 
 	if err := c.GinContext.BindJSON(&req); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	if err := query.RemoveUserCredentialRequest(
@@ -77,7 +77,7 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 	var req api.AddUserCredentialRequest
 
 	if err := c.GinContext.BindJSON(&req); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	credentialId, err := query.AddUserCredential(c.Db, c.SessionData.UserId, req.Name)
@@ -100,7 +100,7 @@ func RemoveUserCredentialController(c *ctx.Context) errs.Error {
 	var req api.RemoveUserCredentialRequest
 
 	if err := c.GinContext.BindJSON(&req); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	if err := query.RemoveUserCredential(c.Db, c.SessionData.UserId, req.CredentialId); err != nil {
@@ -124,7 +124,7 @@ func RemoveRtmMatches(c *ctx.Context) errs.Error {
 	userIdStr := c.GinContext.Param("userId")
 	userId, convErr := strconv.Atoi(userIdStr)
 	if convErr != nil {
-		return errs.NewClientError(convErr.Error())
+		return errs.NewRequestError(convErr.Error())
 	}
 
 	meUserId := c.SessionData.UserId

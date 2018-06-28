@@ -52,7 +52,7 @@ func UploadProfilePic(userID int, dataReader io.Reader) (*string, error) {
 		Key:    aws.String(pictureID), // user id as key
 		Body:   dataReader,
 	}); err != nil {
-		return nil, errs.NewInternalError(fmt.Sprintf("failed to upload file, %v", err))
+		return nil, errs.NewInternalError("failed to upload file, %v", err)
 	}
 
 	rlog.Debug("Successfully uploaded profile picture under ", pictureID)

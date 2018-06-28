@@ -49,7 +49,7 @@ func AddUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.E
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return errs.NewDbError(err)
 	} else if err == nil {
-		return errs.NewClientError("You have already requested this credential")
+		return errs.NewRequestError("You have already requested this credential")
 	}
 
 	userRequest = data.UserCredentialRequest{UserId: userId, CredentialId: credentialId}
@@ -114,7 +114,7 @@ func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error)
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, errs.NewDbError(err)
 	} else if err == nil {
-		return nil, errs.NewClientError("You already have this credential")
+		return nil, errs.NewRequestError("You already have this credential")
 	}
 
 	userCredential = data.UserCredential{UserId: userId, CredentialId: credential.ID}

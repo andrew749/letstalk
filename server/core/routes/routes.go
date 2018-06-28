@@ -29,7 +29,7 @@ type handlerWrapper struct {
 	sm *sessions.ISessionManagerBase
 }
 
-type handlerFunc func(*ctx.Context) errs.Error
+type handlerFunc func(*ctx.Context) errs.IError
 
 func debugAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) gin.HandlerFunc {
 	return func(g *gin.Context) {

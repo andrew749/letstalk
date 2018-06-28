@@ -67,7 +67,7 @@ func UpdateProfile(db *gorm.DB, userId int, request api.ProfileEditRequest) errs
 func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
 	user, err := GetUserProfileById(db, userId)
 	if err != nil {
-		return nil, errs.NewClientError("Unable to get user data.")
+		return nil, errs.NewRequestError("Unable to get user data.")
 	}
 	userCohort, err := GetUserCohort(db, userId)
 	if err != nil {
@@ -158,7 +158,7 @@ func GetMatchProfile(
 
 	// Check if the user profile being request is actually matched with the calling user
 	if _, ok := userIds[matchUserId]; !ok {
-		return nil, errs.NewClientError("You are not matched with this user")
+		return nil, errs.NewRequestError("You are not matched with this user")
 	}
 
 	return GetProfile(db, matchUserId)

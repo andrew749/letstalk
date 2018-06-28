@@ -21,13 +21,13 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 	if valTemp, ok := params["userId"]; ok {
 		val = valTemp[0]
 	} else {
-		return errs.NewClientError("Missing userId parameter")
+		return errs.NewRequestError("Missing userId parameter")
 	}
 
 	if userIdTemp, err := strconv.Atoi(val); err == nil {
 		userId = userIdTemp
 	} else {
-		return errs.NewClientError("Malformed userId")
+		return errs.NewRequestError("Malformed userId")
 	}
 
 	if res, err := isAllowedToAccessContactInfo(
@@ -37,7 +37,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 	); err == nil && res == true {
 		user, err := query.GetUserById(c.Db, userId)
 		if err != nil {
-			return errs.NewClientError("Unable to get user: %s", err)
+			return errs.NewRequestError("Unable to get user: %s", err)
 		}
 		c.Result = api.ContactInfo{
 			FirstName: user.FirstName,
@@ -47,7 +47,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 	} else if err != nil {
 		return errs.NewInternalError(err.Error())
 	} else {
-		return errs.NewClientError("Not allowed to access this user's contact info")
+		return errs.NewRequestError("Not allowed to access this user's contact info")
 	}
 	return nil
 }
