@@ -16,12 +16,14 @@ import (
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+	"letstalk/server/email"
 
 	"github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	fb "github.com/huandu/facebook"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func FBController(c *ctx.Context) errs.Error {
@@ -99,6 +101,14 @@ func FBController(c *ctx.Context) errs.Error {
 		if err := tx.Commit().Error; err != nil {
 			rlog.Error(err)
 			return errs.NewDbError(err)
+		}
+		//send email
+		if err := email.SendNewAccountEmail(
+			mail.NewEmail(appUser.FirstName, appUser.Email),
+			appUser.FirstName,
+		); err != nil {
+			raven.CaptureError(err, nil)
+			rlog.Error(err)
 		}
 		// get a long lived access token from this short term token
 		// do not fail if we cant do this
