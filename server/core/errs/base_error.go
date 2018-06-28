@@ -14,7 +14,7 @@ type IError interface {
 type Error = IError
 
 type BaseError struct {
-	error
+	err       error
 	ExtraData map[string]interface{}
 }
 
@@ -23,7 +23,7 @@ func (e *BaseError) SetExtra(key string, value interface{}) {
 }
 
 func (e *BaseError) Error() string {
-	return ""
+	return e.err.Error()
 }
 
 func (e *BaseError) GetHTTPCode() int { panic("Abstract Error") }
