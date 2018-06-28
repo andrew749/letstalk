@@ -35,6 +35,7 @@ func SendTestSubscriptionEmail() {
 var (
 	testSubscription   = flag.Bool("subscribe", false, "Whether to send a subscription email")
 	testForgotPassword = flag.Bool("forgotPass", false, "Whether to send a forgot password email")
+	testNewAccount     = flag.Bool("newAccount", false, "Whether to send a new account email")
 	email              = flag.String("email", "", "email to send to")
 	name               = flag.String("name", "", "name to use in the email")
 )
@@ -42,6 +43,14 @@ var (
 func SendTestForgotPasswordEmail() {
 	recipient := mail.NewEmail("Andrew Codispoti", "andrewcod749@gmail.com")
 	err := email_util.SendForgotPasswordEmail(recipient, "test.com")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+}
+
+func SendNewAccountEmail() {
+	recipient := mail.NewEmail("Andrew Codispoti", "andrewcod749@gmail.com")
+	err := email_util.SendNewAccountEmail(recipient, "Andrew")
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -60,5 +69,8 @@ func main() {
 
 	if *testForgotPassword {
 		SendTestForgotPasswordEmail()
+	}
+	if *testNewAccount {
+		SendNewAccountEmail()
 	}
 }
