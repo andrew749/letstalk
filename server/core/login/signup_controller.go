@@ -8,12 +8,15 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+	"letstalk/server/email"
 
 	"letstalk/server/core/api"
 
+	raven "github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 /**
@@ -70,6 +73,17 @@ func SignupUser(c *ctx.Context) errs.Error {
 	err = writeUser(user, c)
 	if err != nil {
 		return errs.NewInternalError(err.Error())
+	}
+
+	err = email.SendNewAccountEmail(
+		mail.NewEmail(user.FirstName, user.Email),
+		user.FirstName,
+	)
+
+	// don't fail if we can't send an email
+	if err != nil {
+		raven.CaptureError(err, nil)
+		rlog.Error(err)
 	}
 
 	return nil

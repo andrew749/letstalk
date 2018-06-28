@@ -32,3 +32,17 @@ func SendForgotPasswordEmail(
 
 	return SendEmail(message)
 }
+
+func SendNewAccountEmail(
+	to *mail.Email,
+	name string,
+) error {
+	var emailContext interface{} = struct {
+		Name string `email_sub:":name"`
+	}{
+		Name: name,
+	}
+
+	message := CreateBasicTemplatedEmail(to, NewAccount, &emailContext)
+	return SendEmail(message)
+}
