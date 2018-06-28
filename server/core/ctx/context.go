@@ -28,3 +28,13 @@ func NewContext(
 		SessionManager: sm,
 	}
 }
+
+// WithinTx provides a transaction object to the given function and automatically performs rollback if an error is returned.
+func (c *Context) WithinTx(f func(*gorm.DB) error) error {
+	tx := c.Db.Begin()
+	if err := f(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
+}
