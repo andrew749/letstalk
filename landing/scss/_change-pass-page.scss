@@ -1,4 +1,4 @@
-.about {
+.change-pass {
   margin-top: 100px !important;
   display: flex;
   border-radius: 5px;
@@ -6,16 +6,20 @@
   background-color: $primary;
   justify-content: center;
   text-align: center;
+  flex-direction: column;
+  max-width: 600px;
 
-  p {
-    font-size: .9rem;
-    padding: 20px;
-    margin: 0;
+  h3 {
+    color: white;
   }
 }
 
 .single-page-about {
   margin-bottom: 20px;
+}
+
+.row.center {
+  justify-content: center;
 }
 
 #logo {
@@ -30,13 +34,6 @@
 .overlay-about {
   height: 1000px;
   top: 0;
-}
-
-.privacy-page {
-  height: 100%;
-  margin-top: 40px;
-  background-color: $primary;
-  color: white;
 }
 
 @media (min-width: 768px) {
