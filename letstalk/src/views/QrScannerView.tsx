@@ -11,13 +11,20 @@ import {BarCodeScanner, Permissions} from 'expo';
 import { ToastActionsCreators } from 'react-native-redux-toast';
 import { errorToast, infoToast } from '../redux/toast';
 import {NavigationActions, NavigationScreenProp, NavigationStackAction} from "react-navigation";
-import {connect, Dispatch} from "react-redux";
+import {ActionCreator, connect, Dispatch} from "react-redux";
 import {RootState} from "../redux/index";
 import meetingService from "../services/meeting";
 import { headerStyle } from './TopHeader';
 import { AnalyticsHelper } from '../services';
+import { ThunkAction } from "redux-thunk";
+import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
+import {
+  State as BootstrapState,
+  fetchBootstrap,
+} from '../redux/bootstrap/reducer';
 
 interface DispatchActions {
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -68,6 +75,7 @@ class QrScannerView extends Component<Props> {
       try {
         await meetingService.postMeetingConfirmation({secret: barcode});
         await this.props.infoToast('Meeting confirmed!');
+        await this.props.fetchBootstrap(); // Update connections list following meeting confirmation.
         await this.props.navigation.dispatch(NavigationActions.back());
       } catch(error) {
         await this.props.errorToast('Failed to confirm meeting, please try again')
@@ -106,7 +114,7 @@ class QrScannerView extends Component<Props> {
   }
 }
 
-export default connect(null, { errorToast, infoToast })(QrScannerView);
+export default connect(null, { errorToast, infoToast, fetchBootstrap })(QrScannerView);
 
 const styles = StyleSheet.create({
   container: {
