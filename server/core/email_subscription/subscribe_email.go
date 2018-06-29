@@ -12,7 +12,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func AddSubscription(ctx *ctx.Context) errs.IError {
+func AddSubscription(ctx *ctx.Context) errs.Error {
 	var request api.SubscriptionRequest
 
 	var err error

@@ -14,15 +14,15 @@ type HashingError struct {
 }
 
 // ChangeUserPassword update the specified user password
-func ChangeUserPassword(db *gorm.DB, userID int, newPassword string) error {
+func ChangeUserPassword(db *gorm.DB, userId int, newPassword string) error {
 	var err error
 	var hashedPassword string
 	if hashedPassword, err = utility.HashPassword(newPassword); err != nil {
-		return HashingError{errs.NewInternalError(err.Error())}
+		return &HashingError{errs.NewInternalError(err.Error())}
 	}
 
 	authData := data.AuthenticationData{
-		UserId:       userID,
+		UserId:       userId,
 		PasswordHash: hashedPassword,
 	}
 
@@ -30,7 +30,7 @@ func ChangeUserPassword(db *gorm.DB, userID int, newPassword string) error {
 		return errs.NewDbError(err)
 	}
 
-	rlog.Infof("Changed user password for user %d to %s", userID, hashedPassword)
+	rlog.Infof("Changed user password for user %d to %s", userId, hashedPassword)
 
 	return nil
 }

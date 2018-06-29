@@ -61,7 +61,7 @@ func getDescriptionForRequestToMatch(requestMatching data.RequestMatching) *stri
 /**
  * Returns what the current status of a user is
  */
-func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.IError {
+func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	var (
 		err      error
 		response = api.BootstrapResponse{State: api.ACCOUNT_CREATED}

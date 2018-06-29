@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func GetOnboardingInfo(db *gorm.DB, userId int) (*api.OnboardingInfo, errs.IError) {
+func GetOnboardingInfo(db *gorm.DB, userId int) (*api.OnboardingInfo, errs.Error) {
 	var user data.User
 
 	err := db.Where(&data.User{UserId: userId}).Preload(

@@ -56,7 +56,6 @@ func GenerateNewForgotPasswordRequestController(ctx *ctx.Context) errs.Error {
 
 	var user *data.User
 	if user, err = query.GetUserByEmail(db, req.Email); err != nil {
-		// return errs.NewRequestError("Can not find a user with that email")
 		// this user email does not exist
 		return nil
 	}
