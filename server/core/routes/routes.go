@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"letstalk/server/core/auth"
 	"letstalk/server/core/bootstrap"
 	"letstalk/server/core/contact_info"
 	"letstalk/server/core/controller"
@@ -9,14 +10,13 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/login"
 	"letstalk/server/core/matching"
+	"letstalk/server/core/meeting"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
 	"net/http"
 	"time"
-
-	"letstalk/server/core/meeting"
 
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
@@ -30,6 +30,22 @@ type handlerWrapper struct {
 }
 
 type handlerFunc func(*ctx.Context) errs.Error
+
+func debugAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) gin.HandlerFunc {
+	return func(g *gin.Context) {
+		session, err := getSessionData(g, sessionManager)
+		if err != nil {
+			abortWithError(g, err)
+			return
+		}
+		authUser, _ := query.GetUserById(db, session.UserId)
+		if !auth.HasAdminAccess(authUser) {
+			g.AbortWithStatusJSON(http.StatusNotFound, "404 page not found")
+			return
+		}
+		g.Next()
+	}
+}
 
 func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.Engine {
 	hw := handlerWrapper{db, sessionManager}
@@ -187,9 +203,10 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// Debug route group.
 	debug := router.Group("/debug")
+	debug.Use(debugAuthMiddleware(hw.db, hw.sm))
 
 	debug.OPTIONS("/matching")
-	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, true /* auth required */))
+	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
 
 	return router
 }
@@ -201,56 +218,35 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.HandlerFunc {
 	return func(g *gin.Context) {
 		var session *sessions.SessionData
+		var err errs.Error
 
 		c := ctx.NewContext(g, hw.db, session, hw.sm)
 
-		rlog.Debug("Checking if Auth needed")
-		// the api route requires authentication so we have a session Id
+		// The api route requires authentication so we add session data from the header.
 		if needAuth {
-			sessionId := g.GetHeader("sessionId")
-
-			// check that the user provided a session id
-			if sessionId == "" {
-				rlog.Info("No session id provided.")
-				c.GinContext.JSON(
-					401,
-					gin.H{"Error": query.Error{Code: 401, Message: "No session id provided. This is required."}},
-				)
-				return
-			}
-
-			session, err := (*hw.sm).GetSessionForSessionId(sessionId)
-
-			// check that the session Id corresponds to an existing session
-			if err != nil {
-				rlog.Infof("%s", err)
-				c.GinContext.JSON(401, gin.H{"Error": query.Error{Code: 401, Message: "Bad session Id."}})
-				return
-			}
-
-			// check that the session token is not expired.
-			if session.ExpiryDate.Before(time.Now()) {
-				rlog.Error("Session token expired.")
-				c.GinContext.JSON(401, gin.H{"Error": query.Error{Code: 401, Message: "Session token expired."}})
-				return
-			}
+			session, err = getSessionData(g, hw.sm)
 			c.SessionData = session
-
 		}
 
-		rlog.Debug("Running handler")
-
-		err := handler(c)
+		if err == nil {
+			rlog.Debug("Running handler")
+			err = handler(c)
+		}
 
 		if err != nil {
-			rlog.Infof("Returning error: %s\n", err)
-			raven.CaptureError(err, nil)
-			c.GinContext.JSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
+			abortWithError(c.GinContext, err)
 			return
 		}
+
 		rlog.Infof("Returning result: %v\n", c.Result)
 		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
 	}
+}
+
+func abortWithError(g *gin.Context, err errs.Error) {
+	rlog.Infof("Returning error: %s\n", err)
+	raven.CaptureError(err, nil)
+	g.AbortWithStatusJSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 }
 
 func convertError(e errs.Error) query.Error {
@@ -258,4 +254,29 @@ func convertError(e errs.Error) query.Error {
 		Code:    e.GetHTTPCode(),
 		Message: e.Error(),
 	}
+}
+
+func getSessionData(g *gin.Context, sessionManager *sessions.ISessionManagerBase) (*sessions.SessionData, errs.Error) {
+	sessionId := g.GetHeader("sessionId")
+
+	// check that the user provided a session id
+	if sessionId == "" {
+		rlog.Info("No session id provided.")
+		return nil, errs.NewUnauthorizedError("Required session id not provided")
+	}
+
+	session, err := (*sessionManager).GetSessionForSessionId(sessionId)
+
+	// check that the session Id corresponds to an existing session
+	if err != nil {
+		rlog.Infof("%s", err)
+		return nil, errs.NewUnauthorizedError("Bad session id")
+	}
+
+	// check that the session token is not expired.
+	if session.ExpiryDate.Before(time.Now()) {
+		rlog.Error("Session token expired.")
+		return nil, errs.NewUnauthorizedError("Session token expired.")
+	}
+	return session, nil
 }
