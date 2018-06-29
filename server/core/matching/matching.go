@@ -8,9 +8,10 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
-	"github.com/romana/rlog"
 	"letstalk/server/core/sessions"
 	"letstalk/server/notifications"
+
+	"github.com/romana/rlog"
 )
 
 /**
@@ -32,10 +33,10 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	var mentor, mentee *data.User
 	var err error
 	if mentee, err = query.GetUserById(c.Db, input.Mentee); err != nil {
-		return errs.NewRequestError("Mentee not found")
+		return errs.NewNotFoundError("Mentee not found")
 	}
 	if mentor, err = query.GetUserById(c.Db, input.Mentor); err != nil {
-		return errs.NewRequestError("Mentor not found")
+		return errs.NewNotFoundError("Mentor not found")
 	}
 
 	// Ensure a matching doesn't already exist between these users.
