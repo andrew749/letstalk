@@ -34,7 +34,7 @@ func FBController(c *ctx.Context) errs.Error {
 	err := c.GinContext.BindJSON(&loginRequest)
 
 	if err != nil {
-		return errs.NewClientError("%s", err)
+		return errs.NewRequestError("%s", err)
 	}
 
 	authToken := loginRequest.Token
@@ -44,7 +44,7 @@ func FBController(c *ctx.Context) errs.Error {
 	db := c.Db
 
 	if err != nil {
-		return errs.NewClientError("%s", err)
+		return errs.NewRequestError("%s", err)
 	}
 
 	tx := c.Db.Begin()
@@ -71,7 +71,7 @@ func FBController(c *ctx.Context) errs.Error {
 		if err := tx.Where(&appUser).FirstOrCreate(&appUser).Error; err != nil {
 			tx.Rollback()
 			rlog.Error("Unable to insert new user")
-			return errs.NewClientError("Unable to create user")
+			return errs.NewRequestError("Unable to create user")
 		}
 
 		userId = appUser.UserId
@@ -82,7 +82,7 @@ func FBController(c *ctx.Context) errs.Error {
 		// insert the user's fb auth data
 		if err := tx.Create(&externalAuthRecord).Error; err != nil {
 			rlog.Error(err)
-			return errs.NewClientError("Unable to create user")
+			return errs.NewRequestError("Unable to create user")
 		}
 		rlog.Debug("created auth record")
 
@@ -193,7 +193,7 @@ func FBLinkController(c *ctx.Context) errs.Error {
 	var loginRequest api.FBLoginRequestData
 	var err error
 	if err = c.GinContext.BindJSON(&loginRequest); err != nil {
-		return errs.NewClientError("Request is invalid")
+		return errs.NewRequestError("Request is invalid")
 	}
 
 	var fbUser *FBUser

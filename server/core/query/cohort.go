@@ -16,7 +16,7 @@ func GetCohortController(c *ctx.Context) errs.Error {
 	userId := c.SessionData.UserId
 	cohort, err := GetUserCohort(c.Db, userId)
 	if err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	c.Result = cohort

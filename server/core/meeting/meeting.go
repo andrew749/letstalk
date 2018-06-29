@@ -14,11 +14,11 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 	authUserId := c.SessionData.UserId
 	var input api.MeetingConfirmation
 	if err := c.GinContext.BindJSON(&input); err != nil {
-		return errs.NewClientError("Failed to parse input")
+		return errs.NewRequestError("Failed to parse input")
 	}
 	matchedUser, err := query.GetUserBySecret(c.Db, input.Secret)
 	if err != nil {
-		return errs.NewClientError("Could not find user")
+		return errs.NewRequestError("Could not find user")
 	}
 
 	// TODO: find and confirm existing meeting with this user, if exists.
@@ -28,7 +28,7 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 	if matchingObj == nil {
-		return errs.NewClientError("No existing match with this user")
+		return errs.NewRequestError("No existing match with this user")
 	}
 
 	// Store a confirmation of the meeting for future reference.

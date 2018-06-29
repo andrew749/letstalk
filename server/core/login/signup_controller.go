@@ -60,12 +60,12 @@ func SignupUser(c *ctx.Context) errs.Error {
 	user, err := getUserDataFromRequest(c)
 
 	if err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	err = c.Db.Model(&data.User{}).Where("email = ?", user.Email).First(&data.User{}).Error
 	if err == nil {
-		return errs.NewClientError("a user already exists with email: %s", user.Email)
+		return errs.NewRequestError("a user already exists with email: %s", user.Email)
 	} else if err != nil && !gorm.IsRecordNotFoundError(err) { // Some other db error
 		return errs.NewDbError(err)
 	}

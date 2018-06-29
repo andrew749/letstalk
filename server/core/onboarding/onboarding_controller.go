@@ -5,9 +5,10 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
+	"letstalk/server/core/api"
+
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"letstalk/server/core/api"
 )
 
 // i.e. fetch a onboarding type and the possible options
@@ -30,17 +31,16 @@ func isValidCohort(db *gorm.DB, cohortId int) bool {
 // try to match this data to an existing sequence.
 func UpdateUserCohort(c *ctx.Context) errs.Error {
 	var newCohortRequest api.UpdateCohortRequest
-	err := c.GinContext.BindJSON(&newCohortRequest)
 
-	if err != nil {
-		return errs.NewClientError("%s", err)
+	if err := c.GinContext.BindJSON(&newCohortRequest); err != nil {
+		return errs.NewRequestError("%s", err.Error())
 	}
 
 	newCohortId := newCohortRequest.CohortId
 
 	// check that the new cohort is valid
 	if !isValidCohort(c.Db, newCohortId) {
-		return errs.NewClientError("Unknown cohort.")
+		return errs.NewRequestError("Unknown cohort: %s", newCohortId)
 	}
 
 	userId := c.SessionData.UserId
@@ -127,7 +127,7 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 	var updateUserVectorRequest UpdateUserVectorRequest
 	err := c.GinContext.BindJSON(&updateUserVectorRequest)
 	if err != nil {
-		return errs.NewClientError("Unable to parse request %s", err)
+		return errs.NewRequestError("Unable to parse request %s", err)
 	}
 
 	// check if the user already has a vector for this
@@ -144,7 +144,7 @@ func UserVectorUpdateController(c *ctx.Context) errs.Error {
 	}).FirstOrCreate(&data.UserVector{}).Error
 
 	if err != nil {
-		return errs.NewClientError("Unable to insert new user vector")
+		return errs.NewRequestError("Unable to insert new user vector")
 	}
 
 	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)

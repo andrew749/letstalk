@@ -20,7 +20,7 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 	var request NotificationTokenSubmissionRequest
 	err := c.GinContext.BindJSON(&request)
 	if err != nil {
-		return errs.NewClientError("Bad Request: %s", err)
+		return errs.NewRequestError("Bad Request: %s", err)
 	}
 
 	db := c.Db
@@ -38,7 +38,7 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 		Update("notification_token", request.Token)
 	if tx.Error != nil {
 		tx.Rollback()
-		return errs.NewClientError(tx.Error.Error())
+		return errs.NewRequestError(tx.Error.Error())
 	}
 
 	c.Result = "Ok"

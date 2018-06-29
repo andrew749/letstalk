@@ -12,7 +12,7 @@ import (
 )
 
 func invalidPassError() errs.Error {
-	return errs.NewClientError("Invalid Password. Try again.")
+	return errs.NewRequestError("Invalid Password. Try again.")
 }
 
 /**
@@ -28,7 +28,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 	var req api.LoginRequestData
 	err := c.GinContext.BindJSON(&req)
 	if err != nil {
-		return errs.NewClientError("Bad login request data %s", err)
+		return errs.NewRequestError("Bad login request data %s", err)
 	}
 
 	var userModel data.User
@@ -49,7 +49,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 
 	session, err := (*sm).CreateNewSessionForUserId(userModel.UserId, req.NotificationToken)
 	if err != nil {
-		return errs.NewClientError("%s", err)
+		return errs.NewRequestError("%s", err)
 	}
 	c.Result = api.LoginResponse{
 		SessionId:  *session.SessionId,

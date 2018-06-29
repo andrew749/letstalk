@@ -9,12 +9,16 @@ import (
 	"github.com/romana/rlog"
 )
 
-// ChangeUserPassword: update the specified user password
+type HashingError struct {
+	errs.IError
+}
+
+// ChangeUserPassword update the specified user password
 func ChangeUserPassword(db *gorm.DB, userId int, newPassword string) error {
 	var err error
 	var hashedPassword string
 	if hashedPassword, err = utility.HashPassword(newPassword); err != nil {
-		return errs.NewInternalError("Unable to hash password")
+		return &HashingError{errs.NewInternalError(err.Error())}
 	}
 
 	authData := data.AuthenticationData{
@@ -23,7 +27,7 @@ func ChangeUserPassword(db *gorm.DB, userId int, newPassword string) error {
 	}
 
 	if err := db.Save(&authData).Error; err != nil {
-		return err
+		return errs.NewDbError(err)
 	}
 
 	rlog.Infof("Changed user password for user %d to %s", userId, hashedPassword)
