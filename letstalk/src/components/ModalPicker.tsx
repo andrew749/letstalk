@@ -94,7 +94,7 @@ class StatefulModalPicker extends Component<Props, State> {
       ),
       'android': (
         <View>
-          <RNPickerSelect items={items} onValueChange={onChange} value={value} />
+          <RNPickerSelect placeholder={{label: label, value: null}} items={items} onValueChange={onChange} value={value} />
           {touched && (
             (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
             (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}

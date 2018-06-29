@@ -79,6 +79,7 @@ type NotifType string
 const (
 	NOTIF_TYPE_REQUEST_TO_MATCH NotifType = "REQUEST_TO_MATCH"
 	NOTIF_TYPE_NEW_MATCH        NotifType = "NEW_MATCH"
+	NOTIF_TYPE_MATCH_VERIFIED   NotifType = "MATCH_VERIFIED"
 )
 
 func CreateAndSendNotificationWithData(
@@ -164,4 +165,16 @@ func NewMentorNotification(deviceToken string) error {
 
 func NewMenteeNotification(deviceToken string) error {
 	return NewMatchNotification(deviceToken, "You were matched with a new mentee.")
+}
+
+func MatchVerifiedNotification(deviceToken string, userName string) error {
+	title := "You verified a match!"
+	message := fmt.Sprintf("Your match with %s is now verified.", userName)
+	return CreateAndSendNotificationWithData(
+		deviceToken,
+		message,
+		title,
+		NOTIF_TYPE_MATCH_VERIFIED,
+		nil,
+	)
 }

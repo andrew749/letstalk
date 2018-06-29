@@ -11,9 +11,10 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/notifications"
 
+	"letstalk/server/core/sessions"
+
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"letstalk/server/core/sessions"
 )
 
 type ResolveType int
@@ -95,7 +96,7 @@ func getPotentialMatchUserIds(
 		}
 		return userCredentialIds, nil
 	} else {
-		return nil, errs.NewClientError("invalid resolveType %d", resolveType)
+		return nil, errs.NewRequestError("invalid resolveType %d", resolveType)
 	}
 }
 
@@ -178,7 +179,7 @@ func ResolveRequestToMatch(
 			askerId = userCredentialIds[0].userId
 			answererId = userId
 		} else {
-			return errs.NewClientError("invalid resolveType %d", resolveType)
+			return errs.NewRequestError("invalid resolveType %d", resolveType)
 		}
 
 		tx := c.Db.Begin()

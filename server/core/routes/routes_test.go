@@ -105,7 +105,7 @@ func TestHandlerClientError(t *testing.T) {
 	hw := handlerWrapper{db, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
-		return errs.NewClientError(msg)
+		return errs.NewRequestError(msg)
 	}, false)
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)

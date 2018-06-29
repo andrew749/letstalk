@@ -1,7 +1,7 @@
 package query
 
 import (
-	"errors"
+	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -10,7 +10,7 @@ import (
 func GetUserById(db *gorm.DB, userId int) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{UserId: userId}).First(&user).RecordNotFound() {
-		return nil, errors.New("Unable to find user")
+		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 	return &user, nil
 }
@@ -18,7 +18,7 @@ func GetUserById(db *gorm.DB, userId int) (*data.User, error) {
 func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{Email: email}).First(&user).RecordNotFound() {
-		return nil, errors.New("Unable to find user")
+		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 	return &user, nil
 }
@@ -26,7 +26,7 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{Secret: secret}).First(&user).RecordNotFound() {
-		return nil, errors.New("Unable to find user")
+		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 	return &user, nil
 }
@@ -37,7 +37,7 @@ func GetUserProfileById(db *gorm.DB, userId int) (*data.User, error) {
 	if db.Where(
 		&data.User{UserId: userId},
 	).Preload("ExternalAuthData").Preload("AdditionalData").First(&user).RecordNotFound() {
-		return nil, errors.New("Unable to find user")
+		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 
 	return &user, nil

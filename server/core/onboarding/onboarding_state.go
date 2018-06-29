@@ -4,8 +4,9 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
-	"github.com/jinzhu/gorm"
 	"letstalk/server/core/api"
+
+	"github.com/jinzhu/gorm"
 )
 
 func GetOnboardingInfo(db *gorm.DB, userId int) (*api.OnboardingInfo, errs.Error) {

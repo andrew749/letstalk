@@ -8,12 +8,15 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+	"letstalk/server/email"
 
 	"letstalk/server/core/api"
 
+	raven "github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 /**
@@ -57,12 +60,12 @@ func SignupUser(c *ctx.Context) errs.Error {
 	user, err := getUserDataFromRequest(c)
 
 	if err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	err = c.Db.Model(&data.User{}).Where("email = ?", user.Email).First(&data.User{}).Error
 	if err == nil {
-		return errs.NewClientError("a user already exists with email: %s", user.Email)
+		return errs.NewRequestError("a user already exists with email: %s", user.Email)
 	} else if err != nil && !gorm.IsRecordNotFoundError(err) { // Some other db error
 		return errs.NewDbError(err)
 	}
@@ -70,6 +73,17 @@ func SignupUser(c *ctx.Context) errs.Error {
 	err = writeUser(user, c)
 	if err != nil {
 		return errs.NewInternalError(err.Error())
+	}
+
+	err = email.SendNewAccountEmail(
+		mail.NewEmail(user.FirstName, user.Email),
+		user.FirstName,
+	)
+
+	// don't fail if we can't send an email
+	if err != nil {
+		raven.CaptureError(err, nil)
+		rlog.Error(err)
 	}
 
 	return nil
@@ -87,6 +101,7 @@ func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 		LastName:  user.LastName,
 		Gender:    user.Gender,
 		Birthdate: user.Birthdate,
+		Role:      data.USER_ROLE_DEFAULT,
 	}
 
 	// Generate UUID for each user.

@@ -16,12 +16,14 @@ import (
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
+	"letstalk/server/email"
 
 	"github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	fb "github.com/huandu/facebook"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func FBController(c *ctx.Context) errs.Error {
@@ -32,7 +34,7 @@ func FBController(c *ctx.Context) errs.Error {
 	err := c.GinContext.BindJSON(&loginRequest)
 
 	if err != nil {
-		return errs.NewClientError("%s", err)
+		return errs.NewRequestError("%s", err)
 	}
 
 	authToken := loginRequest.Token
@@ -42,7 +44,7 @@ func FBController(c *ctx.Context) errs.Error {
 	db := c.Db
 
 	if err != nil {
-		return errs.NewClientError("%s", err)
+		return errs.NewRequestError("%s", err)
 	}
 
 	tx := c.Db.Begin()
@@ -56,6 +58,7 @@ func FBController(c *ctx.Context) errs.Error {
 			Email:     user.Email,
 			Gender:    user.Gender,
 			Birthdate: user.Birthdate,
+			Role:      data.USER_ROLE_DEFAULT,
 		}
 
 		// Generate UUID for FB user.
@@ -68,7 +71,7 @@ func FBController(c *ctx.Context) errs.Error {
 		if err := tx.Where(&appUser).FirstOrCreate(&appUser).Error; err != nil {
 			tx.Rollback()
 			rlog.Error("Unable to insert new user")
-			return errs.NewClientError("Unable to create user")
+			return errs.NewRequestError("Unable to create user")
 		}
 
 		userId = appUser.UserId
@@ -79,7 +82,7 @@ func FBController(c *ctx.Context) errs.Error {
 		// insert the user's fb auth data
 		if err := tx.Create(&externalAuthRecord).Error; err != nil {
 			rlog.Error(err)
-			return errs.NewClientError("Unable to create user")
+			return errs.NewRequestError("Unable to create user")
 		}
 		rlog.Debug("created auth record")
 
@@ -99,6 +102,14 @@ func FBController(c *ctx.Context) errs.Error {
 		if err := tx.Commit().Error; err != nil {
 			rlog.Error(err)
 			return errs.NewDbError(err)
+		}
+		//send email
+		if err := email.SendNewAccountEmail(
+			mail.NewEmail(appUser.FirstName, appUser.Email),
+			appUser.FirstName,
+		); err != nil {
+			raven.CaptureError(err, nil)
+			rlog.Error(err)
 		}
 		// get a long lived access token from this short term token
 		// do not fail if we cant do this
@@ -182,7 +193,7 @@ func FBLinkController(c *ctx.Context) errs.Error {
 	var loginRequest api.FBLoginRequestData
 	var err error
 	if err = c.GinContext.BindJSON(&loginRequest); err != nil {
-		return errs.NewClientError("Request is invalid")
+		return errs.NewRequestError("Request is invalid")
 	}
 
 	var fbUser *FBUser

@@ -49,20 +49,19 @@ func GenerateNewForgotPasswordRequestController(ctx *ctx.Context) errs.Error {
 	var err error
 	var req *api.GenerateForgotPasswordRequest
 	if err = ctx.GinContext.BindJSON(&req); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	var forgotPasswordId *data.ForgotPasswordId
 
 	var user *data.User
 	if user, err = query.GetUserByEmail(db, req.Email); err != nil {
-		// return errs.NewClientError("Can not find a user with that email")
 		// this user email does not exist
 		return nil
 	}
 
 	if forgotPasswordId, err = generateNewForgotPasswordRequest(db, user.UserId); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 
 	if err := sendForgotPasswordEmail(db, forgotPasswordId, user); err != nil {
@@ -77,7 +76,7 @@ func GenerateNewForgotPasswordRequestController(ctx *ctx.Context) errs.Error {
 func ForgotPasswordController(ctx *ctx.Context) errs.Error {
 	var forgotPasswordRequestChangeId api.ForgotPasswordChangeRequest
 	if err := ctx.GinContext.BindJSON(&forgotPasswordRequestChangeId); err != nil {
-		return errs.NewClientError(err.Error())
+		return errs.NewRequestError(err.Error())
 	}
 	tx := ctx.Db.Begin()
 
@@ -88,12 +87,12 @@ func ForgotPasswordController(ctx *ctx.Context) errs.Error {
 
 	if err := tx.First(&forgotPasswordId).Error; err != nil {
 		tx.Rollback()
-		return errs.NewClientError("Invalid password change token")
+		return errs.NewRequestError("Invalid password change token")
 	}
 
 	if forgotPasswordId.Used {
 		tx.Rollback()
-		return errs.NewClientError("Password change token already used.")
+		return errs.NewRequestError("Password change token already used.")
 	}
 
 	if err := auth.ChangeUserPassword(

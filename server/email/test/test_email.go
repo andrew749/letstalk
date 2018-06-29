@@ -17,7 +17,7 @@ func SendTestEmail() {
 	subject := "SUBJECT"
 	plainTextContent := "BOIIIIII"
 	htmlContent := "<strong>BOIIIIII</strong>"
-	err := email_util.SendEmail(from, to, subject, plainTextContent, htmlContent)
+	err := email_util.SendBasicEmail(from, to, subject, plainTextContent, htmlContent)
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -33,10 +33,28 @@ func SendTestSubscriptionEmail() {
 }
 
 var (
-	testSubscription = flag.Bool("subscribe", false, "Whether to send a subscription email")
-	email            = flag.String("email", "", "email to send to")
-	name             = flag.String("name", "", "name to use in the email")
+	testSubscription   = flag.Bool("subscribe", false, "Whether to send a subscription email")
+	testForgotPassword = flag.Bool("forgotPass", false, "Whether to send a forgot password email")
+	testNewAccount     = flag.Bool("newAccount", false, "Whether to send a new account email")
+	email              = flag.String("email", "", "email to send to")
+	name               = flag.String("name", "", "name to use in the email")
 )
+
+func SendTestForgotPasswordEmail() {
+	recipient := mail.NewEmail("Andrew Codispoti", "andrewcod749@gmail.com")
+	err := email_util.SendForgotPasswordEmail(recipient, "test.com")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+}
+
+func SendNewAccountEmail() {
+	recipient := mail.NewEmail("Andrew Codispoti", "andrewcod749@gmail.com")
+	err := email_util.SendNewAccountEmail(recipient, "Andrew")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+}
 
 func main() {
 	// preload secrets so we can send using api
@@ -47,5 +65,12 @@ func main() {
 	// SendTestEmail()
 	if *testSubscription {
 		SendTestSubscriptionEmail()
+	}
+
+	if *testForgotPassword {
+		SendTestForgotPasswordEmail()
+	}
+	if *testNewAccount {
+		SendNewAccountEmail()
 	}
 }

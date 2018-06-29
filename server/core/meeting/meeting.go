@@ -6,36 +6,62 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/api"
 	"letstalk/server/data"
+	"github.com/jinzhu/gorm"
+	"letstalk/server/core/sessions"
+	"letstalk/server/notifications"
 )
 
 // PostMeetingConfirmation lets users confirm that a scheduled meeting occurred.
 func PostMeetingConfirmation(c *ctx.Context) errs.Error {
-	authUserId := c.SessionData.UserId
+	authUser, err := query.GetUserById(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
 	var input api.MeetingConfirmation
 	if err := c.GinContext.BindJSON(&input); err != nil {
-		return errs.NewClientError("Failed to parse input")
+		return errs.NewRequestError("Failed to parse input")
 	}
 	matchedUser, err := query.GetUserBySecret(c.Db, input.Secret)
 	if err != nil {
-		return errs.NewClientError("Could not find user")
+		return errs.NewRequestError("Could not find user")
 	}
 
 	// TODO: find and confirm existing meeting with this user, if exists.
 
-	matchingObj, err := query.GetMatchingByUserIds(c.Db, authUserId, matchedUser.UserId)
+	matchingObj, err := query.GetMatchingByUserIds(c.Db, authUser.UserId, matchedUser.UserId)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
 	if matchingObj == nil {
-		return errs.NewClientError("No existing match with this user")
+		return errs.NewRequestError("No existing match with this user")
+	}
+	isFirstMeeting := matchingObj.State == data.MATCHING_STATE_UNVERIFIED
+
+	// Store a confirmation of the meeting for future reference.
+	conf := &data.MeetingConfirmation{
+		MatchingId: matchingObj.ID,
 	}
 
-	// Verify the matching if this is the first confirmed meeting.
-	if matchingObj.State == data.MATCHING_STATE_UNVERIFIED {
-		// TODO: do in transaction
-		if err := saveVerifiedMatch(c, matchingObj); err != nil {
+	dbErr := c.WithinTx(func(tx *gorm.DB) error {
+		if err := tx.Model(&data.MeetingConfirmation{}).Create(conf).Error; err != nil {
 			return err
 		}
+		// Verify the matching if this is the first confirmed meeting.
+		if isFirstMeeting {
+			if err := saveVerifiedMatch(tx, *matchingObj); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if dbErr != nil {
+		return errs.NewDbError(err)
+	}
+
+	// Also send a notification now that the match is verified.
+	if isFirstMeeting {
+		sendMatchVerifiedNotifications(c, authUser, matchedUser)
 	}
 
 	c.Result = input
@@ -43,21 +69,34 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 }
 
 // Updates the matching to Verified state in database.
-func saveVerifiedMatch(c *ctx.Context, matching *data.Matching) errs.Error {
+func saveVerifiedMatch(tx *gorm.DB, matching data.Matching) error {
 	matching.State = data.MATCHING_STATE_VERIFIED
-	if err := updateMatchingObject(c, matching); err != nil {
-		return errs.NewDbError(err)
-	}
-	return nil
+	return updateMatchingObject(tx, matching)
 }
 
 // Update the matching object in database.
-func updateMatchingObject(c *ctx.Context, matching *data.Matching) error {
-	if matching == nil {
-		return nil
-	}
+func updateMatchingObject(tx *gorm.DB, matching data.Matching) error {
 	// Strip composite fields from matching struct.
 	matching.MenteeUser = nil
 	matching.MentorUser = nil
-	return c.Db.Model(&data.Matching{}).UpdateColumns(matching).Error
+	return tx.Model(&data.Matching{}).UpdateColumns(matching).Error
+}
+
+// Send notifications to the two users in a newly verified match.
+func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, matchedUser *data.User) errs.Error {
+	verifierDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, verifyingUser.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	matchedDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, matchedUser.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	for _, token := range verifierDeviceTokens {
+		notifications.MatchVerifiedNotification(token, matchedUser.FirstName)
+	}
+	for _, token := range matchedDeviceTokens {
+		notifications.MatchVerifiedNotification(token, verifyingUser.FirstName)
+	}
+	return nil
 }
