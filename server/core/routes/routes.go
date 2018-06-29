@@ -38,8 +38,8 @@ func debugAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBa
 			abortWithError(g, err)
 			return
 		}
-		authUser, _ := query.GetUserById(db, session.UserId)
-		if !auth.HasAdminAccess(authUser) {
+		authUser, e := query.GetUserById(db, session.UserId)
+		if e != nil || !auth.HasAdminAccess(authUser) {
 			g.AbortWithStatusJSON(http.StatusNotFound, "404 page not found")
 			return
 		}
@@ -217,21 +217,20 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
  */
 func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.HandlerFunc {
 	return func(g *gin.Context) {
-		var session *sessions.SessionData
-		var err errs.Error
-
-		c := ctx.NewContext(g, hw.db, session, hw.sm)
+		c := ctx.NewContext(g, hw.db, nil /* session */, hw.sm)
 
 		// The api route requires authentication so we add session data from the header.
 		if needAuth {
-			session, err = getSessionData(g, hw.sm)
+			session, err := getSessionData(g, hw.sm)
+			if err != nil {
+				abortWithError(c.GinContext, err)
+				return
+			}
 			c.SessionData = session
 		}
 
-		if err == nil {
-			rlog.Debug("Running handler")
-			err = handler(c)
-		}
+		rlog.Debug("Running handler")
+		err := handler(c)
 
 		if err != nil {
 			abortWithError(c.GinContext, err)
@@ -244,7 +243,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 }
 
 func abortWithError(g *gin.Context, err errs.Error) {
-	rlog.Infof("Returning error: %s\n", err)
+	rlog.Errorf("Returning error: %s\n", err)
 	raven.CaptureError(err, nil)
 	g.AbortWithStatusJSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 }

@@ -4,12 +4,11 @@ import (
 	"time"
 )
 
-type UserRole int
+type UserRole string
 
 const (
-	USER_ROLE_UNKNOWN UserRole = iota
-	USER_ROLE_DEFAULT
-	USER_ROLE_ADMIN
+	USER_ROLE_DEFAULT UserRole = "DEFAULT"
+	USER_ROLE_ADMIN   UserRole = "ADMIN"
 )
 
 type User struct {
