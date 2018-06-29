@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+type UserRole string
+
+const (
+	USER_ROLE_DEFAULT UserRole = "DEFAULT"
+	USER_ROLE_ADMIN   UserRole = "ADMIN"
+)
+
 type User struct {
 	CreatedAt        time.Time `gorm:"not null"`
 	UserId           int       `gorm:"not null;primary_key;auto_increment"`
@@ -13,6 +20,7 @@ type User struct {
 	Secret           string    `gorm:"type:char(36);not null;unique"`
 	Gender           int       `gorm:"not null"`
 	Birthdate        string    `gorm:"type:varchar(100);not null"`
+	Role             UserRole  `gorm:"not null"`
 	ProfilePic       *string
 	Sessions         []Session           `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	AuthData         *AuthenticationData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`

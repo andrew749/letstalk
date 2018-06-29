@@ -58,6 +58,7 @@ func FBController(c *ctx.Context) errs.Error {
 			Email:     user.Email,
 			Gender:    user.Gender,
 			Birthdate: user.Birthdate,
+			Role:      data.USER_ROLE_DEFAULT,
 		}
 
 		// Generate UUID for FB user.

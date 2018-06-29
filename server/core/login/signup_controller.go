@@ -101,6 +101,7 @@ func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 		LastName:  user.LastName,
 		Gender:    user.Gender,
 		Birthdate: user.Birthdate,
+		Role:      data.USER_ROLE_DEFAULT,
 	}
 
 	// Generate UUID for each user.
