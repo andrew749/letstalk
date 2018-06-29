@@ -9,6 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"letstalk/server/core/sessions"
 	"letstalk/server/notifications"
+	"github.com/romana/rlog"
+	"github.com/getsentry/raven-go"
 )
 
 // PostMeetingConfirmation lets users confirm that a scheduled meeting occurred.
@@ -61,7 +63,12 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 
 	// Also send a notification now that the match is verified.
 	if isFirstMeeting {
-		sendMatchVerifiedNotifications(c, authUser, matchedUser)
+		go func() {
+			if err := sendMatchVerifiedNotifications(c, authUser, matchedUser); err != nil {
+				rlog.Errorf("Error sending notification: %s", err)
+				raven.CaptureError(err, nil)
+			}
+		}()
 	}
 
 	c.Result = input
@@ -93,10 +100,14 @@ func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, ma
 		return errs.NewDbError(err)
 	}
 	for _, token := range verifierDeviceTokens {
-		notifications.MatchVerifiedNotification(token, matchedUser.FirstName)
+		if err := notifications.MatchVerifiedNotification(token, matchedUser.FirstName); err != nil {
+			return errs.NewInternalError("Error while sending match verified notification")
+		}
 	}
 	for _, token := range matchedDeviceTokens {
-		notifications.MatchVerifiedNotification(token, verifyingUser.FirstName)
+		if err := notifications.MatchVerifiedNotification(token, verifyingUser.FirstName); err != nil {
+			return errs.NewInternalError("Error while sending match verified notification")
+		}
 	}
 	return nil
 }
