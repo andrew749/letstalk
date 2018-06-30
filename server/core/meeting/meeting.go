@@ -9,6 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"letstalk/server/core/sessions"
 	"letstalk/server/notifications"
+	"github.com/romana/rlog"
+	"github.com/getsentry/raven-go"
 )
 
 // PostMeetingConfirmation lets users confirm that a scheduled meeting occurred.
@@ -59,9 +61,14 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	// Also send a notification now that the match is verified.
 	if isFirstMeeting {
-		sendMatchVerifiedNotifications(c, authUser, matchedUser)
+		// Also send a notification now that the match is verified.
+		go func() {
+			if err := sendMatchVerifiedNotifications(c, authUser, matchedUser); err != nil {
+				rlog.Errorf("Error sending verified match notification: %s", err)
+				raven.CaptureError(err, nil)
+			}
+		}()
 	}
 
 	c.Result = input
@@ -83,20 +90,24 @@ func updateMatchingObject(tx *gorm.DB, matching data.Matching) error {
 }
 
 // Send notifications to the two users in a newly verified match.
-func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, matchedUser *data.User) errs.Error {
+func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, matchedUser *data.User) error {
 	verifierDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, verifyingUser.UserId)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 	matchedDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, matchedUser.UserId)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 	for _, token := range verifierDeviceTokens {
-		notifications.MatchVerifiedNotification(token, matchedUser.FirstName)
+		if err := notifications.MatchVerifiedNotification(token, matchedUser.FirstName); err != nil {
+			return err
+		}
 	}
 	for _, token := range matchedDeviceTokens {
-		notifications.MatchVerifiedNotification(token, verifyingUser.FirstName)
+		if err := notifications.MatchVerifiedNotification(token, verifyingUser.FirstName); err != nil {
+			return err
+		}
 	}
 	return nil
 }
