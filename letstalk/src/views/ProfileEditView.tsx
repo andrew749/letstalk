@@ -314,7 +314,9 @@ class ProfileEditView extends Component<Props> {
         hometown,
       });
       // update profile pic
-      await photoService.uploadProfilePhoto(profilePic.uri);
+      if (profilePic && profilePic.uri) {
+        await photoService.uploadProfilePhoto(profilePic.uri);
+      }
       await this.props.fetchProfile();
       this.props.navigation.goBack();
     } catch(e) {
