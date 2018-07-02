@@ -300,6 +300,19 @@ class HomeView extends Component<Props, State> {
         }}
       />
     );
+    const feedbackPrompt = (
+      <View>
+        <Text style={styles.feedbackText}>
+          Thank you for participating in the Alpha of Hive! If you notice any bugs or
+          have any suggestions, please submit feedback.
+        </Text>
+        <Button
+          buttonStyle={styles.feedbackButton}
+          title="Feedback"
+          onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
+        />
+      </View>
+    );
     const { state } = this.props.bootstrap;
     switch (state) {
       case 'account_created':
@@ -316,6 +329,7 @@ class HomeView extends Component<Props, State> {
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for your match</Text>
             <ActionButton onPress={() => this.load()} title="Check again" />
+            { feedbackPrompt }
             { allModals }
           </View>
         );
@@ -332,6 +346,7 @@ class HomeView extends Component<Props, State> {
                 /> as React.ReactElement<RefreshControlProps>
               }
             >
+              { feedbackPrompt }
               { matches }
             </ScrollView>
             { allModals }
@@ -398,6 +413,15 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     marginLeft: 5,
     fontSize: 16,
+  },
+  feedbackButton: {
+    alignSelf: 'center',
+    width: 200,
+    marginTop: 10,
+  },
+  feedbackText: {
+    padding: 10,
+    fontSize: 14,
   },
   cardProfilePicture: {
     flex: 1,
