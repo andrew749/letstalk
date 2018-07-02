@@ -23,6 +23,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 import auth from '../services/auth';
 import profileService from '../services/profile-service';
+import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
+import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 
 import {
   ActionButton,
@@ -44,7 +46,6 @@ import { ActionTypes } from '../redux/profile/actions';
 import photoService, {PhotoResult} from '../services/photo_service';
 import {
   Cohort,
-  COHORTS,
   getCohortId,
   programOptions,
   sequenceOptions,
@@ -255,16 +256,18 @@ const EditFormWithReduxBuilder = (initialValues: EditFormData) => {
     programId: cohortSelector(state, 'programId'),
     sequenceId: cohortSelector(state, 'sequenceId'),
     gradYear: cohortSelector(state, 'gradYear'),
-    cohorts: COHORTS,
+    cohorts: state.cohorts.cohorts,
   }))(EditForm));
 }
 
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
 }
 
 interface Props extends ProfileState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
+  cohorts: CohortsState,
 }
 
 class ProfileEditView extends Component<Props> {
@@ -279,10 +282,17 @@ class ProfileEditView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+    this.load = this.load.bind(this);
+    this.renderBody = this.renderBody.bind(this);
   }
 
   async componentDidMount() {
     AnalyticsHelper.getInstance().recordPage(this.EDIT_PROFILE_VIEW_IDENTIFIER);
+    await this.load();
+  }
+
+  private async load() {
+    await this.props.fetchCohorts();
   }
 
   async onSubmit(values: EditFormData) {
@@ -301,7 +311,7 @@ class ProfileEditView extends Component<Props> {
         hometown,
         profilePic,
       } = values;
-      const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
+      const cohortId = getCohortId(this.props.cohorts.cohorts, programId, sequenceId, gradYear);
       await profileService.profileEdit({
         firstName,
         lastName,
@@ -324,7 +334,7 @@ class ProfileEditView extends Component<Props> {
     }
   }
 
-  render() {
+  renderBody() {
     const {
       firstName,
       lastName,
@@ -357,9 +367,29 @@ class ProfileEditView extends Component<Props> {
       <EditFormWithRedux onSubmit={this.onSubmit} />
     );
   }
+
+  render() {
+    const {
+      state,
+      errorMsg,
+      errorType,
+    } = this.props.cohorts.fetchState;
+    return (
+      <Loading
+        state={state}
+        errorMsg={errorMsg}
+        errorType={errorType}
+        load={this.load}
+        renderBody={this.renderBody}
+        navigation={this.props.navigation}
+      />
+    );
+  }
 }
 
-export default connect(({profile}: RootState) => profile, { fetchProfile })(ProfileEditView);
+export default connect(({profile, cohorts}: RootState) => {
+  return { ...profile, cohorts }
+}, { fetchProfile, fetchCohorts })(ProfileEditView);
 
 const styles = StyleSheet.create({
   submitButton: {

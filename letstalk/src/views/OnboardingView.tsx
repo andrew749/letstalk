@@ -19,7 +19,7 @@ import Immutable from 'immutable';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { RootState } from '../redux';
-import { State as State } from '../redux/onboarding/reducer';
+import { State } from '../redux/onboarding/reducer';
 import {
   ONBOARDING_COHORT,
   ONBOARDING_VECTOR_ME,
@@ -31,11 +31,11 @@ import {
   OnboardingState,
   OnboardingStatus,
 } from '../models';
-import { COHORTS } from '../models/cohort';
 import {
   setOnboardingStatusAction,
   SetOnboardingStatusAction,
 } from '../redux/onboarding/actions';
+import Loading from './Loading';
 import {
   ActionButton,
   Emoji,
@@ -52,7 +52,9 @@ import profileService, {
   UserVectorPreferenceType,
 } from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
-import { ActionTypes } from '../redux/bootstrap/actions';
+import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
+import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
+import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 import {
   getCohortId,
   programOptions,
@@ -184,7 +186,7 @@ const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   programId: cohortSelector(state, 'programId'),
   sequenceId: cohortSelector(state, 'sequenceId'),
   gradYear: cohortSelector(state, 'gradYear'),
-  cohorts: COHORTS,
+  cohorts: state.cohorts.cohorts,
 }))(CohortForm));
 
 type PersonalityFormData = PersonalityVector;
@@ -262,12 +264,14 @@ const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<Personalit
 }))(PersonalityForm));
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<ActionTypes>, BootstrapState, void>>;
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
+  fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
   setOnboardingStatusAction(onboardingStatus: OnboardingStatus): SetOnboardingStatusAction;
 }
 
 interface Props extends State, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
+  cohorts: CohortsState;
 }
 
 class OnboardingView extends Component<Props> {
@@ -282,15 +286,22 @@ class OnboardingView extends Component<Props> {
     super(props);
 
     this.onSubmitCohort = this.onSubmitCohort.bind(this);
+    this.load = this.load.bind(this);
+    this.renderBody = this.renderBody.bind(this);
   }
 
   async componentDidMount() {
     AnalyticsHelper.getInstance().recordPage(this.ONBOARDING_VIEW_IDENTIFIER);
+    await this.load();
+  }
+
+  private async load() {
+    await this.props.fetchCohorts();
   }
 
   async onSubmitCohort(values: CohortFormData) {
     const { programId, sequenceId, gradYear, mentorshipPreference, bio, hometown } = values;
-    const cohortId = getCohortId(COHORTS, programId, sequenceId, gradYear);
+    const cohortId = getCohortId(this.props.cohorts.cohorts, programId, sequenceId, gradYear);
     try {
       const onboardingStatus = await profileService.updateCohort({
         cohortId,
@@ -318,7 +329,7 @@ class OnboardingView extends Component<Props> {
     }
   }
 
-  render() {
+  renderBody() {
     const { state } = this.props.onboardingStatus;
     switch (state) {
       case ONBOARDING_COHORT:
@@ -381,6 +392,24 @@ class OnboardingView extends Component<Props> {
         const _: never = state;
     }
   }
+
+  render() {
+    const {
+      state,
+      errorMsg,
+      errorType,
+    } = this.props.cohorts.fetchState;
+    return (
+      <Loading
+        state={state}
+        errorMsg={errorMsg}
+        errorType={errorType}
+        load={this.load}
+        renderBody={this.renderBody}
+        navigation={this.props.navigation}
+      />
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -401,6 +430,6 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(({ onboarding }: RootState) => onboarding,
-  { fetchBootstrap, setOnboardingStatusAction }
-)(OnboardingView);
+export default connect(({ onboarding, cohorts }: RootState) => {
+  return { ...onboarding, cohorts }
+}, { fetchBootstrap, fetchCohorts, setOnboardingStatusAction })(OnboardingView);

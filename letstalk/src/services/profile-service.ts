@@ -17,6 +17,7 @@ import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
   COHORT_ROUTE,
+  COHORTS_ROUTE,
   MATCH_PROFILE_ROUTE,
   ME_ROUTE,
   SIGNUP_ROUTE,
@@ -138,6 +139,11 @@ export class RemoteProfileService implements ProfileService {
       ...response,
       relationships: Immutable.List(response.relationships),
     };
+  }
+
+  async getAllCohorts(): Promise<Immutable.List<Cohort>> {
+    const response: Array<Cohort> = await this.requestor.get(COHORTS_ROUTE);
+    return Immutable.List(response);
   }
 
   async me(): Promise<ProfileData> {

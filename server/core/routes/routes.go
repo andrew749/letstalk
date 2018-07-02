@@ -91,7 +91,14 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	)
 	v1.GET(
 		"/cohort",
-		hw.wrapHandler(query.GetCohortController, true),
+		hw.wrapHandler(controller.GetCohortController, true),
+	)
+
+	// update user data
+	v1.OPTIONS("/cohorts")
+	v1.GET(
+		"/cohorts",
+		hw.wrapHandler(controller.GetAllCohortsController, false),
 	)
 
 	// gets profile data about signed in user

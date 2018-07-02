@@ -2,26 +2,12 @@ package query
 
 import (
 	"errors"
-	"letstalk/server/core/ctx"
+	"letstalk/server/core/api"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
 )
-
-/**
- * Api controller to get the cohort data for a specific user
- */
-func GetCohortController(c *ctx.Context) errs.Error {
-	userId := c.SessionData.UserId
-	cohort, err := GetUserCohort(c.Db, userId)
-	if err != nil {
-		return errs.NewRequestError(err.Error())
-	}
-
-	c.Result = cohort
-	return nil
-}
 
 /**
  * Try to see if there is school data associated with this account.
@@ -50,4 +36,17 @@ func GetUserCohortMappingById(db *gorm.DB, userId int) (*data.UserCohort, error)
 		return nil, err
 	}
 	return &cohort, nil
+}
+
+func GetAllCohorts(db *gorm.DB) ([]api.Cohort, errs.Error) {
+	var rows []data.Cohort
+	if err := db.Find(&rows).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	cohorts := make([]api.Cohort, len(rows))
+	for i, row := range rows {
+		cohorts[i] = api.Cohort{row.CohortId, row.ProgramId, row.SequenceId, row.GradYear}
+	}
+
+	return cohorts, nil
 }
