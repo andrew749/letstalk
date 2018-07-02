@@ -88,7 +88,10 @@ class HomeView extends Component<Props, State> {
   }
 
   async componentDidMount() {
-    AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
+    this.props.navigation.addListener('willFocus', (route) => {
+      AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
+    });
+
     this.load();
   }
 
