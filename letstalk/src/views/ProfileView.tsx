@@ -81,7 +81,9 @@ class ProfileView extends Component<Props> {
   }
 
   async componentDidMount() {
-    AnalyticsHelper.getInstance().recordPage(this.PROFILE_VIEW_IDENTIFIER);
+    this.props.navigation.addListener('willFocus', (route) => {
+      AnalyticsHelper.getInstance().recordPage(this.PROFILE_VIEW_IDENTIFIER);
+    });
     this.load();
   }
 
