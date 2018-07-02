@@ -89,27 +89,3 @@ export function getCohortId(
   if (row === null) return null;
   return row.cohortId;
 }
-
-// TODO: fetch cohorts from server and store in redux state
-const COHORTS = Immutable.List<Cohort>([
-  { cohortId:  4, programId: 'SOFTWARE_ENGINEERING', gradYear: 2018, sequenceId: '8STREAM'},
-  { cohortId:  5, programId: 'COMPUTER_ENGINEERING', gradYear: 2018, sequenceId: '8STREAM'},
-  { cohortId:  6, programId: 'COMPUTER_ENGINEERING', gradYear: 2018, sequenceId: '4STREAM'},
-  { cohortId:  1, programId: 'SOFTWARE_ENGINEERING', gradYear: 2019, sequenceId: '8STREAM'},
-  { cohortId:  2, programId: 'COMPUTER_ENGINEERING', gradYear: 2019, sequenceId: '8STREAM'},
-  { cohortId:  3, programId: 'COMPUTER_ENGINEERING', gradYear: 2019, sequenceId: '4STREAM'},
-  { cohortId:  7, programId: 'SOFTWARE_ENGINEERING', gradYear: 2020, sequenceId: '8STREAM'},
-  { cohortId:  8, programId: 'COMPUTER_ENGINEERING', gradYear: 2020, sequenceId: '8STREAM'},
-  { cohortId:  9, programId: 'COMPUTER_ENGINEERING', gradYear: 2020, sequenceId: '4STREAM'},
-  { cohortId: 10, programId: 'SOFTWARE_ENGINEERING', gradYear: 2021, sequenceId: '8STREAM'},
-  { cohortId: 11, programId: 'COMPUTER_ENGINEERING', gradYear: 2021, sequenceId: '8STREAM'},
-  { cohortId: 12, programId: 'COMPUTER_ENGINEERING', gradYear: 2021, sequenceId: '4STREAM'},
-  { cohortId: 13, programId: 'SOFTWARE_ENGINEERING', gradYear: 2022, sequenceId: '8STREAM'},
-  { cohortId: 14, programId: 'COMPUTER_ENGINEERING', gradYear: 2022, sequenceId: '8STREAM'},
-  { cohortId: 15, programId: 'COMPUTER_ENGINEERING', gradYear: 2022, sequenceId: '4STREAM'},
-  { cohortId: 16, programId: 'SOFTWARE_ENGINEERING', gradYear: 2023, sequenceId: '8STREAM'},
-  { cohortId: 17, programId: 'COMPUTER_ENGINEERING', gradYear: 2023, sequenceId: '8STREAM'},
-  { cohortId: 18, programId: 'COMPUTER_ENGINEERING', gradYear: 2023, sequenceId: '4STREAM'},
-]);
-
-export { COHORTS };

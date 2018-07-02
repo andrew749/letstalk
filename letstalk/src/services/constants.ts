@@ -1,11 +1,13 @@
 // DEV
 
-export const BASE_URL = 'https://api.hiveapp.org';
+// export const BASE_URL = 'https://api.hiveapp.org';
+export const BASE_URL = 'http://192.168.0.18';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
 // Routes
 export const BOOTSTRAP_ROUTE            = '/v1/bootstrap';
 export const COHORT_ROUTE               = '/v1/cohort';
+export const COHORTS_ROUTE              = '/v1/cohorts';
 export const FB_LOGIN_ROUTE             = '/v1/fb_login';
 export const FB_LINK_ROUTE              = '/v1/fb_link';
 export const LOGIN_ROUTE                = '/v1/login';

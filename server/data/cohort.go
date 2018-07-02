@@ -5,10 +5,10 @@ import (
 )
 
 type Cohort struct {
-	CohortId   int     `json:"cohortId" gorm:"not null;auto_increment;primary_key"`
+	CohortId   uint    `json:"cohortId" gorm:"not null;auto_increment;primary_key"`
 	ProgramId  string  `json:"programId" gorm:"not null;unique_index:cohort_index"`
 	Program    Program `gorm:"foreignkey:ProgramId;"`
-	GradYear   int     `json:"gradYear" gorm:"not null;unique_index:cohort_index"`
+	GradYear   uint    `json:"gradYear" gorm:"not null;unique_index:cohort_index"`
 	SequenceId string  `json:"sequenceId" gorm:"not null;unique_index:cohort_index"`
 }
 
@@ -18,17 +18,17 @@ func PopulateCohort(db *gorm.DB) {
 	for gradYear := 2018; gradYear <= 2023; gradYear++ {
 		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "SOFTWARE_ENGINEERING",
-			GradYear:   gradYear,
+			GradYear:   uint(gradYear),
 			SequenceId: "8STREAM",
 		})
 		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "COMPUTER_ENGINEERING",
-			GradYear:   gradYear,
+			GradYear:   uint(gradYear),
 			SequenceId: "8STREAM",
 		})
 		cohorts = append(cohorts, &Cohort{
 			ProgramId:  "COMPUTER_ENGINEERING",
-			GradYear:   gradYear,
+			GradYear:   uint(gradYear),
 			SequenceId: "4STREAM",
 		})
 	}
