@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 usage(){
   echo "Usage $0 -p[roduction]"
 }

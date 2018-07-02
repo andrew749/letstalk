@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 # To be run from AWS cloud in an EC2 instance
 
 # Group to create for server administration (including running the server)

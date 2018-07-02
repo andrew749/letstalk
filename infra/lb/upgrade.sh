@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # COMMAND line parameters
 get_existing_servers() {

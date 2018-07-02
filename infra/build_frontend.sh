@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 # Build files for the static site frontend.
 
 FRONTEND_DIRECTORY="../landing"

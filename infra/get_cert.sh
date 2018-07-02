@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 usage() {
 echo << EOF
   Installs LetsEncrypt software and tries to get key for application's domain
