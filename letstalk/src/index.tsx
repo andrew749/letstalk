@@ -45,7 +45,9 @@ import { NotificationBody } from './components';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
-Sentry.config('https://444853e4fac84788bbc1247f5c62c82b@sentry.io/1161982').install();
+Sentry.config('https://a851f386142f48c1956ca9f7e06e8a4a:d43e2ccf892644508f4a18e22d8e0df4@sentry.io/305511').install();
+Sentry.setTagsContext({environment: (__DEV__) ? "development" : "production" });
+
 // turn off annoying warnings
 console.disableYellowBox = true;
 
