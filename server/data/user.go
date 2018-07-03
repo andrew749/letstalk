@@ -2,6 +2,7 @@ package data
 
 import (
 	"time"
+	"database/sql/driver"
 )
 
 type UserRole string
@@ -28,3 +29,6 @@ type User struct {
 	Cohort           *UserCohort         `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	AdditionalData   *UserAdditionalData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 }
+
+func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }
+func (u UserRole) Value() (driver.Value, error)  { return string(u), nil }
