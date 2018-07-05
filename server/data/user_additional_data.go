@@ -4,6 +4,6 @@ type UserAdditionalData struct {
 	User                 User `gorm:"foreignkey:UserId"`
 	UserId               int  `json:"userId" gorm:"not null;primary_key;auto_increment:false"`
 	MentorshipPreference *int
-	Bio                  *string
+	Bio                  *string `gorm:"type:text"`
 	Hometown             *string
 }
