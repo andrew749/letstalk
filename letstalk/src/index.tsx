@@ -11,7 +11,7 @@ import {
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Notifications } from 'expo';
+import { Notifications, Font } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import {
@@ -37,11 +37,13 @@ import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 import ForgotPasswordView from './views/ForgotPasswordView';
+import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
+import { AsyncStorage } from 'react-native';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -175,6 +177,12 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   MatchProfile: {
     screen: MatchProfileView,
   },
+  Walkthrough: {
+    screen: WalkthroughView,
+    navigationOptions: {
+      header: null
+    },
+  },
 }, {
   initialRouteName,
 });
@@ -183,6 +191,7 @@ const store = createStore(appReducer, applyMiddleware(thunk));
 
 interface AppState {
   loggedIn: null | boolean;
+  showTutorial: boolean;
 }
 
 type Props = {};
@@ -194,6 +203,7 @@ class App extends React.Component<Props, AppState> {
     super(props);
     this.state = {
       loggedIn: null,
+      showTutorial: true,
     };
 
     this.handleNotification = this.handleNotification.bind(this);
@@ -208,6 +218,14 @@ class App extends React.Component<Props, AppState> {
     const sessionToken = await auth.getSessionToken();
     this.setState({ loggedIn: sessionToken !== null });
     Notifications.addListener(this.handleNotification);
+
+    // load for the walkthrough
+    await Font.loadAsync({
+      'Arial': require('./assets/fonts/Arial.ttf'),
+    });
+
+    // const tutorialState = await AsyncStorage.getItem("tutorial_state");
+    // this.setState({showTutorial: tutorialState !== "seen"});
   }
 
   render() {
@@ -217,12 +235,15 @@ class App extends React.Component<Props, AppState> {
     if (loggedIn === true) initialRouteName = 'Tabbed';
     else if (loggedIn === false) initialRouteName = 'Login';
 
+    if (this.state.showTutorial) {
+      initialRouteName='Walkthrough';
+    }
+
     const AppNavigation = createAppNavigation(initialRouteName);
 
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
       this.notificationService.setNavContainer(navContainer);
     }
-
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
