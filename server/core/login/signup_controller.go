@@ -12,11 +12,13 @@ import (
 
 	"letstalk/server/core/api"
 
+	"errors"
 	raven "github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"time"
 )
 
 /**
@@ -70,6 +72,10 @@ func SignupUser(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
+	if err = validateUserBirthday(user); err != nil {
+		return errs.NewRequestError("Must be at least 13 years old")
+	}
+
 	err = writeUser(user, c)
 	if err != nil {
 		return errs.NewInternalError(err.Error())
@@ -86,6 +92,17 @@ func SignupUser(c *ctx.Context) errs.Error {
 		rlog.Error(err)
 	}
 
+	return nil
+}
+
+func validateUserBirthday(user *api.SignupRequest) error {
+	birthdate, err := time.Parse(utility.BirthdateFormat, user.Birthdate)
+	if err != nil {
+		return err
+	}
+	if utility.Today().AddDate(-13, 0, 0).Before(birthdate) {
+		return errors.New("invalid birthday")
+	}
 	return nil
 }
 

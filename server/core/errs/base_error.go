@@ -11,7 +11,7 @@ type IError interface {
 	GetExtraData() map[string]interface{} // key value attributes associated with error
 }
 
-type Error = IError
+type Error IError
 
 type BaseError struct {
 	err       error

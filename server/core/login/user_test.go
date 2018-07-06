@@ -10,6 +10,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func TestCreateNewUser(t *testing.T) {
@@ -45,4 +46,25 @@ func TestCreateNewUser(t *testing.T) {
 		},
 	}
 	utility.RunTestsWithDb(tests)
+}
+
+func TestBirthdate(t *testing.T) {
+	type test struct {
+		msg       string
+		birthdate string
+		isValid   bool
+	}
+	tests := []test{
+		{"nominal", "1996-01-01", true},
+		{"today", time.Now().Format(utility.BirthdateFormat), false},
+		{"future", time.Now().AddDate(1, 0, 0).Format(utility.BirthdateFormat), false},
+		{"edge valid", time.Now().AddDate(-13, 0, 0).Format(utility.BirthdateFormat), true},
+		{"edge invalid", time.Now().AddDate(-13, 0, 1).Format(utility.BirthdateFormat), false},
+	}
+	user := &api.SignupRequest{}
+	for _, test := range tests {
+		user.Birthdate = test.birthdate
+		isValid := validateUserBirthday(user) == nil
+		assert.Equal(t, test.isValid, isValid, "'%s' failed", test.msg)
+	}
 }
