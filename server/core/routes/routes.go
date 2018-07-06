@@ -8,7 +8,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/login"
+	"letstalk/server/core/user"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
 	"letstalk/server/core/notifications"
@@ -62,26 +62,26 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// create a new user
 	v1.OPTIONS("/signup")
-	v1.POST("/signup", hw.wrapHandler(login.SignupUser, false))
+	v1.POST("/signup", hw.wrapHandler(user.SignupUser, false))
 
 	// create a new session for an existing user
 	v1.OPTIONS("/login")
-	v1.POST("/login", hw.wrapHandler(login.LoginUser, false))
+	v1.POST("/login", hw.wrapHandler(user.LoginUser, false))
 
 	// user forgot password, generate a link to send to email
 	v1.OPTIONS("/forgot_password")
-	v1.POST("/forgot_password", hw.wrapHandler(login.GenerateNewForgotPasswordRequestController, false))
+	v1.POST("/forgot_password", hw.wrapHandler(user.GenerateNewForgotPasswordRequestController, false))
 
 	// handle changin a user password using unique link.
 	v1.OPTIONS("/change_password")
-	v1.POST("/change_password", hw.wrapHandler(login.ForgotPasswordController, false))
+	v1.POST("/change_password", hw.wrapHandler(user.ForgotPasswordController, false))
 
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
-	v1.POST("/fb_login", hw.wrapHandler(login.FBController, false))
+	v1.POST("/fb_login", hw.wrapHandler(user.FBController, false))
 
 	v1.OPTIONS("/fb_link")
-	v1.POST("/fb_link", hw.wrapHandler(login.FBLinkController, true))
+	v1.POST("/fb_link", hw.wrapHandler(user.FBLinkController, true))
 
 	// update user data
 	v1.OPTIONS("/cohort")
@@ -103,22 +103,22 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	// gets profile data about signed in user
 	v1.OPTIONS("/me")
-	v1.GET("/me", hw.wrapHandler(controller.GetMyProfileController, true))
+	v1.GET("/me", hw.wrapHandler(user.GetMyProfileController, true))
 
 	// gets profile data about a match for signed in user
 	v1.OPTIONS("/match_profile/:userId")
-	v1.GET("/match_profile/:userId", hw.wrapHandler(controller.GetMatchProfileController, true))
+	v1.GET("/match_profile/:userId", hw.wrapHandler(user.GetMatchProfileController, true))
 
 	// gets profile data about a match for signed in user
 	v1.OPTIONS("/remove_rtm_matches/:userId")
 	v1.DELETE("/remove_rtm_matches/:userId", hw.wrapHandler(controller.RemoveRtmMatches, true))
 
 	v1.OPTIONS("/profile_pic")
-	v1.GET("/profile_pic", hw.wrapHandler(controller.GetProfilePicUrl, true))
+	v1.GET("/profile_pic", hw.wrapHandler(user.GetProfilePicUrl, true))
 
 	// updates profile data for signed in user
 	v1.OPTIONS("/profile_edit")
-	v1.POST("/profile_edit", hw.wrapHandler(controller.ProfileEditController, true))
+	v1.POST("/profile_edit", hw.wrapHandler(user.ProfileEditController, true))
 
 	v1.OPTIONS("/contact_info")
 	v1.GET("/contact_info", hw.wrapHandler(
@@ -134,7 +134,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	v1.OPTIONS("/logout")
 	v1.POST("/logout", hw.wrapHandler(
-		login.LogoutHandler,
+		user.LogoutHandler,
 		true),
 	)
 

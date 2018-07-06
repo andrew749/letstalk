@@ -1,8 +1,9 @@
-package login
+package user
 
 import (
 	"bytes"
 	"encoding/base64"
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/onboarding"
@@ -10,13 +11,12 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/email"
 
-	"letstalk/server/core/api"
-
 	raven "github.com/getsentry/raven-go"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"time"
 )
 
 /**
@@ -70,6 +70,10 @@ func SignupUser(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
+	if requestErr := validateUserBirthday(user.Birthdate); requestErr != nil {
+		return requestErr
+	}
+
 	err = writeUser(user, c)
 	if err != nil {
 		return errs.NewInternalError(err.Error())
@@ -86,6 +90,18 @@ func SignupUser(c *ctx.Context) errs.Error {
 		rlog.Error(err)
 	}
 
+	return nil
+}
+
+// Birthday must be in YYYY-MM-DD format.
+func validateUserBirthday(birthday string) errs.Error {
+	birthdate, err := time.Parse(utility.BirthdateFormat, birthday)
+	if err != nil {
+		return errs.NewRequestError("Bad user birthday format")
+	}
+	if utility.Today().AddDate(-13, 0, 0).Before(birthdate) {
+		return errs.NewRequestError("Must be at least 13 years old")
+	}
 	return nil
 }
 

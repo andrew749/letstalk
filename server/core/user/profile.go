@@ -1,4 +1,4 @@
-package controller
+package user
 
 import (
 	"strconv"
@@ -15,6 +15,12 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 	err := c.GinContext.BindJSON(&request)
 	if err != nil {
 		return errs.NewRequestError(err.Error())
+	}
+
+	if len(request.Birthdate) != 0 {
+		if requestErr := validateUserBirthday(request.Birthdate); requestErr != nil {
+			return requestErr
+		}
 	}
 
 	if err := query.UpdateProfile(c.Db, c.SessionData.UserId, request); err != nil {
