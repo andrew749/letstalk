@@ -11,7 +11,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"time"
-	"os/user"
 )
 
 func TestCreateNewUser(t *testing.T) {
