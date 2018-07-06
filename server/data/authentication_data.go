@@ -18,7 +18,7 @@ func CreateAuthenticationData(db *gorm.DB, userId int, password string) (*Authen
 	hashedPassword, err := utility.HashPassword(password)
 
 	if err != nil {
-		return errs.NewInternalError("Unable to hash password")
+		return nil, errs.NewInternalError("Unable to hash password %s", err.Error())
 	}
 
 	authData := AuthenticationData{
@@ -28,5 +28,5 @@ func CreateAuthenticationData(db *gorm.DB, userId int, password string) (*Authen
 	if err := db.Create(&authData).Error; err != nil {
 		return nil, err
 	}
-	return authData, nil
+	return &authData, nil
 }

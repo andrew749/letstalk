@@ -13,7 +13,7 @@ func CreateUserWithAuth(
 	lastName string,
 	gender int,
 	birthdate string,
-	role UserRole,
+	role data.UserRole,
 	password string,
 ) (*data.User, error) {
 	user, err := data.CreateUser(db, email, firstName, lastName, gender, birthdate, role)

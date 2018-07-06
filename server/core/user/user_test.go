@@ -4,7 +4,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/query"
-	"letstalk/server/core/utility"
+	"letstalk/server/core/test"
 	"letstalk/server/data"
 	"testing"
 
@@ -25,8 +25,8 @@ func TestCreateNewUser(t *testing.T) {
 		PhoneNumber: "5555555555",
 		Password:    "test",
 	}
-	tests := []utility.Test{
-		utility.Test{
+	tests := []test.Test{
+		test.Test{
 			Test: func(db *gorm.DB) {
 				var err error
 				var user *data.User
@@ -45,7 +45,7 @@ func TestCreateNewUser(t *testing.T) {
 			TestName: "Test user creation",
 		},
 	}
-	utility.RunTestsWithDb(tests)
+	test.RunTestsWithDb(tests)
 }
 
 func TestBirthdate(t *testing.T) {
