@@ -1,4 +1,4 @@
-package login
+package user
 
 import (
 	"letstalk/server/core/api"
@@ -11,6 +11,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"time"
+	"os/user"
 )
 
 func TestCreateNewUser(t *testing.T) {
@@ -61,10 +62,8 @@ func TestBirthdate(t *testing.T) {
 		{"edge valid", time.Now().AddDate(-13, 0, 0).Format(utility.BirthdateFormat), true},
 		{"edge invalid", time.Now().AddDate(-13, 0, 1).Format(utility.BirthdateFormat), false},
 	}
-	user := &api.SignupRequest{}
 	for _, test := range tests {
-		user.Birthdate = test.birthdate
-		isValid := validateUserBirthday(user) == nil
+		isValid := validateUserBirthday(test.birthdate) == nil
 		assert.Equal(t, test.isValid, isValid, "'%s' failed", test.msg)
 	}
 }

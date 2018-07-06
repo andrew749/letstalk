@@ -1,4 +1,4 @@
-package login
+package user
 
 import (
 	"letstalk/server/core/ctx"
