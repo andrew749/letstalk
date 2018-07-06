@@ -177,10 +177,10 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   MatchProfile: {
     screen: MatchProfileView,
   },
-  Walkthrough: {
+  WalkthroughView: {
     screen: WalkthroughView,
     navigationOptions: {
-      header: null
+      header: null,
     },
   },
 }, {
@@ -191,7 +191,6 @@ const store = createStore(appReducer, applyMiddleware(thunk));
 
 interface AppState {
   loggedIn: null | boolean;
-  showTutorial: boolean;
 }
 
 type Props = {};
@@ -203,7 +202,6 @@ class App extends React.Component<Props, AppState> {
     super(props);
     this.state = {
       loggedIn: null,
-      showTutorial: true,
     };
 
     this.handleNotification = this.handleNotification.bind(this);
@@ -218,14 +216,6 @@ class App extends React.Component<Props, AppState> {
     const sessionToken = await auth.getSessionToken();
     this.setState({ loggedIn: sessionToken !== null });
     Notifications.addListener(this.handleNotification);
-
-    // load for the walkthrough
-    await Font.loadAsync({
-      'Arial': require('./assets/fonts/Arial.ttf'),
-    });
-
-    // const tutorialState = await AsyncStorage.getItem("tutorial_state");
-    // this.setState({showTutorial: tutorialState !== "seen"});
   }
 
   render() {
@@ -234,10 +224,6 @@ class App extends React.Component<Props, AppState> {
     let initialRouteName = 'BlankDoNotUse';
     if (loggedIn === true) initialRouteName = 'Tabbed';
     else if (loggedIn === false) initialRouteName = 'Login';
-
-    if (this.state.showTutorial) {
-      initialRouteName='Walkthrough';
-    }
 
     const AppNavigation = createAppNavigation(initialRouteName);
 

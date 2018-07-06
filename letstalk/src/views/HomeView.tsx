@@ -50,6 +50,7 @@ import {
 } from '../models/cohort';
 import Colors from '../services/colors';
 import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
+import AppStateService from '../services/app_state_service';
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 
@@ -93,6 +94,7 @@ class HomeView extends Component<Props, State> {
     });
 
     this.load();
+    AppStateService.launchTutorialIfFirstLaunch(this.props.navigation);
   }
 
   async componentWillReceiveProps(nextProps: Props) {
