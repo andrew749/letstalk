@@ -1,8 +1,11 @@
 package data
 
 import (
-	"time"
 	"database/sql/driver"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
 )
 
 type UserRole string
@@ -32,3 +35,36 @@ type User struct {
 
 func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }
 func (u UserRole) Value() (driver.Value, error)  { return string(u), nil }
+
+func CreateUser(
+	db *gorm.DB,
+	email string,
+	firstName string,
+	lastName string,
+	gender int,
+	birthdate string,
+	role UserRole,
+) (*User, error) {
+	user := User{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Gender:    gender,
+		Birthdate: birthdate,
+		Role:      USER_ROLE_DEFAULT,
+	}
+
+	// Generate UUID for each user.
+	secret, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+
+	user.Secret = secret.String()
+
+	if err := db.Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
