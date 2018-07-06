@@ -7,12 +7,11 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/onboarding"
-	"letstalk/server/core/utility"
+	user_utils "letstalk/server/core/user"
 	"letstalk/server/data"
 	"letstalk/server/email"
 
 	raven "github.com/getsentry/raven-go"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -111,31 +110,22 @@ func validateUserBirthday(birthday string) errs.Error {
 func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
-	userModel := data.User{
-		Email:     user.Email,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Gender:    user.Gender,
-		Birthdate: user.Birthdate,
-		Role:      data.USER_ROLE_DEFAULT,
-	}
-
-	// Generate UUID for each user.
-	secret, err := uuid.NewRandom()
-	if err != nil {
+	// Insert data structures within a transaction.
+	tx := c.Db.Begin()
+	var userModel *data.User
+	var err error
+	if userModel, err = user_utils.CreateUserWithAuth(
+		tx,
+		user.Email,
+		user.FirstName,
+		user.LastName,
+		user.Gender,
+		user.Birthdate,
+		data.USER_ROLE_DEFAULT,
+		user.Password,
+	); err != nil {
+		tx.Rollback()
 		return err
-	}
-	userModel.Secret = secret.String()
-
-	hashedPassword, err := utility.HashPassword(user.Password)
-
-	if err != nil {
-		return errs.NewInternalError("Unable to hash password")
-	}
-
-	authData := data.AuthenticationData{
-		UserId:       userModel.UserId,
-		PasswordHash: hashedPassword,
 	}
 
 	externalAuthRecord := data.ExternalAuthData{
@@ -143,17 +133,6 @@ func writeUser(user *api.SignupRequest, c *ctx.Context) error {
 		PhoneNumber: &user.PhoneNumber,
 	}
 
-	// Insert data structures within a transaction.
-	tx := c.Db.Begin()
-	if err := tx.Create(&userModel).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	authData.UserId = userModel.UserId
-	if err := tx.Create(&authData).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
 	if err := tx.Create(&externalAuthRecord).Error; err != nil {
 		tx.Rollback()
 		return err

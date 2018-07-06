@@ -1,4 +1,4 @@
-package onboarding
+package user
 
 import (
 	"letstalk/server/data"
@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// CreateUserWithAuth creates a user with the following password
 func CreateUserWithAuth(
 	db *gorm.DB,
 	email string,
