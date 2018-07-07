@@ -179,6 +179,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         label="Birthday"
         name="birthdate"
         mode={'date' as 'date'}
+        androidMode={'spinner' as 'spinner'}
         component={ModalDatePicker}
         validate={required}
       />
