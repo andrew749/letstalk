@@ -11,12 +11,12 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/email"
 
+	"time"
+
 	raven "github.com/getsentry/raven-go"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"time"
 )
 
 /**
@@ -108,61 +108,41 @@ func validateUserBirthday(birthday string) errs.Error {
 /**
  * Create a new user given a particular request and insert in the db.
  */
-func writeUser(user *api.SignupRequest, c *ctx.Context) error {
+func writeUser(userData *api.SignupRequest, c *ctx.Context) error {
 	// Create user data structures in the orm.
 
-	userModel := data.User{
-		Email:     user.Email,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Gender:    user.Gender,
-		Birthdate: user.Birthdate,
-		Role:      data.USER_ROLE_DEFAULT,
-	}
-
-	// Generate UUID for each user.
-	secret, err := uuid.NewRandom()
-	if err != nil {
+	// Insert data structures within a transaction.
+	tx := c.Db.Begin()
+	var userModel *data.User
+	var err error
+	if userModel, err = CreateUserWithAuth(
+		tx,
+		userData.Email,
+		userData.FirstName,
+		userData.LastName,
+		userData.Gender,
+		userData.Birthdate,
+		data.USER_ROLE_DEFAULT,
+		userData.Password,
+	); err != nil {
+		tx.Rollback()
 		return err
-	}
-	userModel.Secret = secret.String()
-
-	hashedPassword, err := utility.HashPassword(user.Password)
-
-	if err != nil {
-		return errs.NewInternalError("Unable to hash password")
-	}
-
-	authData := data.AuthenticationData{
-		UserId:       userModel.UserId,
-		PasswordHash: hashedPassword,
 	}
 
 	externalAuthRecord := data.ExternalAuthData{
 		UserId:      userModel.UserId,
-		PhoneNumber: &user.PhoneNumber,
+		PhoneNumber: &userData.PhoneNumber,
 	}
 
-	// Insert data structures within a transaction.
-	tx := c.Db.Begin()
-	if err := tx.Create(&userModel).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	authData.UserId = userModel.UserId
-	if err := tx.Create(&authData).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
 	if err := tx.Create(&externalAuthRecord).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// upload the profile pic
-	if user.ProfilePic != nil {
+	if userData.ProfilePic != nil {
 		var photoData []byte
-		if photoData, err = base64.StdEncoding.DecodeString(*user.ProfilePic); err != nil {
+		if photoData, err = base64.StdEncoding.DecodeString(*userData.ProfilePic); err != nil {
 			return err
 		}
 		reader := bytes.NewReader(photoData)
