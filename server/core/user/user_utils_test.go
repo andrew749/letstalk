@@ -33,6 +33,7 @@ func TestCreateUserWithAuth(t *testing.T) {
 					password,
 				)
 				assert.NoError(t, err)
+				assert.NotNil(t, user)
 				user2, err := query.GetUserById(db, user.UserId)
 				assert.NoError(t, err)
 				assert.Equal(t, email, user2.Email)

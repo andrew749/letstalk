@@ -1,9 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"letstalk/server/data"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
@@ -15,11 +17,9 @@ type Test struct {
 
 // DB flags
 var (
-	dbPath = "/tmp/test.db"
+	databasePrefix = uuid.New().String()
+	dbPath         = fmt.Sprintf("/tmp/%s.db", databasePrefix)
 )
-
-// var databasePrefix = uuid.New().String()
-var databasePrefix = "integration_test"
 
 func createFileIfNotExists(path string) error {
 	f, err := os.Create(path)
