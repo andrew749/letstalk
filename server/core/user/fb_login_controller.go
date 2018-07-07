@@ -1,4 +1,4 @@
-package login
+package user
 
 /**
  * Controller to handle user logging into
