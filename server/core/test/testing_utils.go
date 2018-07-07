@@ -49,7 +49,7 @@ func provisionDatabase(db *gorm.DB) {
 }
 
 func TearDownLocalDatabase() {
-	os.Remove(dbPath)
+	// os.Remove(dbPath)
 }
 
 // RunTestsWithDb: Run the following tests and fail if any fail.
