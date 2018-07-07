@@ -51,7 +51,7 @@ func CreateUser(
 		LastName:  lastName,
 		Gender:    gender,
 		Birthdate: birthdate,
-		Role:      USER_ROLE_DEFAULT,
+		Role:      role,
 	}
 
 	// Generate UUID for each user.
