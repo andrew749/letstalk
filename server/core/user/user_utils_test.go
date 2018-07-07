@@ -22,7 +22,7 @@ func TestCreateUserWithAuth(t *testing.T) {
 				birthdate := "1996-10-07"
 				password := "test"
 
-				user, err := CreateUserWithAuth(
+				tempUser, err := CreateUserWithAuth(
 					db,
 					email,
 					firstName,
@@ -33,15 +33,15 @@ func TestCreateUserWithAuth(t *testing.T) {
 					password,
 				)
 				assert.NoError(t, err)
-				assert.NotNil(t, user)
-				user2, err := query.GetUserById(db, user.UserId)
+				assert.NotNil(t, tempUser)
+				user2, err := query.GetUserById(db, tempUser.UserId)
 				assert.NoError(t, err)
 				assert.Equal(t, email, user2.Email)
 				assert.Equal(t, firstName, user2.FirstName)
 				assert.Equal(t, lastName, user2.LastName)
 				assert.Equal(t, gender, user2.Gender)
 				assert.Equal(t, birthdate, user2.Birthdate)
-				hash, err := query.GetHashForUser(db, user.UserId)
+				hash, err := query.GetHashForUser(db, tempUser.UserId)
 				assert.NoError(t, err)
 				assert.True(t, utility.CheckPasswordHash(password, *hash))
 			},

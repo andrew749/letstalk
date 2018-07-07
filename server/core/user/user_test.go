@@ -5,12 +5,14 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/query"
 	"letstalk/server/core/test"
+	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"testing"
 
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 func TestCreateNewUser(t *testing.T) {
@@ -29,7 +31,7 @@ func TestCreateNewUser(t *testing.T) {
 		test.Test{
 			Test: func(db *gorm.DB) {
 				var err error
-				var user *data.User
+				var tempUser *data.User
 
 				context := ctx.NewContext(nil, db, nil, nil)
 
@@ -37,10 +39,10 @@ func TestCreateNewUser(t *testing.T) {
 				assert.NoError(t, err)
 
 				userID := context.Result.(struct{ UserId int }).UserId
-				user, err = query.GetUserById(db, userID)
+				tempUser, err = query.GetUserById(db, userID)
 
 				assert.NoError(t, err)
-				assert.Equal(t, user.Email, signupRequest.Email)
+				assert.Equal(t, tempUser.Email, signupRequest.Email)
 			},
 			TestName: "Test user creation",
 		},
@@ -49,20 +51,20 @@ func TestCreateNewUser(t *testing.T) {
 }
 
 func TestBirthdate(t *testing.T) {
-	type test struct {
+	type teststruct struct {
 		msg       string
 		birthdate string
 		isValid   bool
 	}
-	tests := []test{
+	tests := []teststruct{
 		{"nominal", "1996-01-01", true},
 		{"today", time.Now().Format(utility.BirthdateFormat), false},
 		{"future", time.Now().AddDate(1, 0, 0).Format(utility.BirthdateFormat), false},
 		{"edge valid", time.Now().AddDate(-13, 0, 0).Format(utility.BirthdateFormat), true},
 		{"edge invalid", time.Now().AddDate(-13, 0, 1).Format(utility.BirthdateFormat), false},
 	}
-	for _, test := range tests {
-		isValid := validateUserBirthday(test.birthdate) == nil
-		assert.Equal(t, test.isValid, isValid, "'%s' failed", test.msg)
+	for _, tempTest := range tests {
+		isValid := validateUserBirthday(tempTest.birthdate) == nil
+		assert.Equal(t, tempTest.isValid, isValid, "'%s' failed", tempTest.msg)
 	}
 }

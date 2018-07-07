@@ -17,14 +17,14 @@ func CreateUserWithAuth(
 	role data.UserRole,
 	password string,
 ) (*data.User, error) {
-	user, err := data.CreateUser(db, email, firstName, lastName, gender, birthdate, role)
+	tempUser, err := data.CreateUser(db, email, firstName, lastName, gender, birthdate, role)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = data.CreateAuthenticationData(db, user.UserId, password)
+	_, err = data.CreateAuthenticationData(db, tempUser.UserId, password)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	return tempUser, nil
 }
