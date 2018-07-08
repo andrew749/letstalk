@@ -24,6 +24,7 @@ type Props = WrappedFieldProps & {
   dateObj?: boolean; // whether to return a `Date` or a string
   defaultDate?: Date;
   mode?: 'date' | 'time' | 'datetime';
+  androidMode?: 'default' | 'calendar' | 'spinner';
   cardStyle?: StyleProp<ViewStyle>
 };
 
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
 });
 
 const ModalDatePicker: React.SFC<Props> = (props) => {
-  const { defaultDate, label, mode, dateObj } = props;
+  const { defaultDate, label, mode, dateObj, androidMode } = props;
   const { onChange, onBlur, value } = props.input;
   const { error, touched, warning } = props.meta;
   // TODO: make this externally configurable
@@ -72,6 +73,7 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
       <DatePicker
         date={ dateValue }
         mode="date"
+        androidMode={ androidMode }
         showIcon={false}
         placeholder="Select Date"
         format="YYYY-MM-DD"
