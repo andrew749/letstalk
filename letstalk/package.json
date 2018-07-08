@@ -29,7 +29,7 @@
     "test-watch": "jest --watchAll",
     "build-test": "yarn build && yarn test",
     "clean-build-test": "yarn run clean && yarn build && yarn test",
-    "copy-assets": "copyfiles -f src/assets/fonts/*.ttf build/dist/assets/fonts && copyfiles -f src/img/*.{jpg,png} build/dist/img",
+    "copy-assets": "copyfiles -f src/assets/images/*.{jpg,png} build/dist/assets/images && copyfiles -f src/assets/fonts/*.ttf build/dist/assets/fonts && copyfiles -f src/img/*.{jpg,png} build/dist/img",
     "postinstall": "./scripts/postinstall.sh"
   },
   "jest": {

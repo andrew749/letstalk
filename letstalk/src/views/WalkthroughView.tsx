@@ -21,40 +21,53 @@ class WalkthroughView extends Component<Props> {
   }
 
   render() {
+    const background = Colors.HIVE_PRIMARY;
     const pageArray = [
       {
         title: 'Welcome to Hive!',
-        text: 'Connect with interesting new people around you',
+        text: '',
         image: require('../img/logo_android.png'),
         imageStyle: {
-          height: 103 * 2.5,
-          width: 103 * 2.5,
+          height: 360,
+          width: 360,
         },
-        backgroundColor: Colors.HIVE_PRIMARY,
+        backgroundColor: background,
         fontColor: '#fff',
         level: 10,
       },
       {
-        title: 'View matches',
-        text: 'Connect with upper years in your program',
-        image: require('../img/profile.jpg'),
+        title: 'Explore your program',
+        text: 'Connect with upper years mentors in your program.',
+        image: require('../assets/images/mentor.jpg'),
         imageStyle: {
-          height: 103 * 2.5,
-          width: 103 * 2.5,
+          height: 200,
+          width: 360,
         },
-        backgroundColor: '#a4b602',
+        backgroundColor: background,
         fontColor: '#fff',
         level: 10,
       },
     {
         title: 'Find new connections',
         text: 'Meet people you want to meet. Search for people based on interests, experiences, etc.',
+        image: require('../assets/images/rtm.jpg'),
+        imageStyle: {
+          height: 400,
+          width: 360,
+        },
+        backgroundColor: background,
+        fontColor: '#fff',
+        level: 10,
+      },
+      {
+        title: 'Built with privacy in mind',
+        text: 'Nobody can view your information until you are matched with them',
         image: require('../img/profile.jpg'),
         imageStyle: {
-          height: 103 * 2.5,
-          width: 103 * 2.5,
+          height: 360,
+          width: 360,
         },
-        backgroundColor: '#a4b602',
+        backgroundColor: background,
         fontColor: '#fff',
         level: 10,
       }
