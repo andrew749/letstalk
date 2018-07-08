@@ -122,16 +122,22 @@ class AllFilterableModals extends Component<Props> {
     const { credentials } = this.props.credentialOptions;
     switch (this.props.searchBar.listType) {
       case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
+        const reqHint = 'Search for people with certain credentials. ' +
+          'E.g. worked at Facebook, went on exchange, plays tennis...';
         return (
           <FilterListModal
+            hint={reqHint}
             curValue={this.props.searchBar.value}
             data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
             onSelect={this.onReqSelect}
           />
         );
       case SEARCH_LIST_TYPE_CREDENTIALS:
+        const hint = 'Let us know who you are. People will be able to find you based on ' +
+          'your credentials. E.g. worked at Facebook, went on exchange, plays tennis...';
         return (
           <FilterListModal
+            hint={hint}
             curValue={this.props.searchBar.value}
             data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
             onSelect={this.onCredSelect}

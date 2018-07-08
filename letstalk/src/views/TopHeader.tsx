@@ -75,7 +75,7 @@ class TopHeader extends Component<Props> {
     let placeholder = '';
     switch (this.props.listType) {
       case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
-        placeholder = 'Find someone who is a...';
+        placeholder = 'Find someone...';
         break;
       case SEARCH_LIST_TYPE_CREDENTIALS:
         placeholder = 'I am a...';

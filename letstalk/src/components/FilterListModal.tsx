@@ -49,13 +49,19 @@ interface RawInputType {
   readonly searchValue: string;
 }
 
-type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputType;
+interface HintType {
+  readonly type: 'HINT';
+  readonly hintText: string;
+}
+
+type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputType | HintType;
 
 interface Props {
   data: Immutable.List<FilterableElement>;
   onSelect(elem: FilterableElement): Promise<void>;
   onRawSelect?(value: string): Promise<void>;
   curValue: string;
+  hint?: string;
 }
 
 interface State {
@@ -63,15 +69,27 @@ interface State {
   keyboardHeight: number;
 }
 
+function shuffle(a: Array<any>) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function filterElements(
   value: string,
   elements: Immutable.List<FilterableElement>,
 ): Immutable.List<FilterableElement> {
-  if (value === '') return elements;
+  if (value === '') {
+    const jsElements = elements.toJS();
+    shuffle(jsElements);
+    return Immutable.List(jsElements);
+  }
 
   const options = {
     shouldSort: true,
-    threshold: 0.6,
+    threshold: 0.2,
     location: 0,
     distance: 100,
     maxPatternLength: 32,
@@ -96,7 +114,7 @@ class FilterListModal extends Component<Props, State> {
     });
 
     this.state = {
-      filteredElements: props.data,
+      filteredElements: filterElements('', props.data),
       keyboardHeight: 0,
     };
 
@@ -143,7 +161,7 @@ class FilterListModal extends Component<Props, State> {
         };
         const options = {
           includeMatches: true,
-          threshold: 0.6,
+          threshold: 0.2,
           location: 0,
           distance: 100,
           maxPatternLength: 32,
@@ -192,7 +210,7 @@ class FilterListModal extends Component<Props, State> {
         };
         return (
           <View style={[styles.noMoreResults, padding]}>
-            <Text>No more results...</Text>
+            <Text style={{color: 'gray'}}>No more results...</Text>
           </View>
         );
       case 'RAW_INPUT':
@@ -207,6 +225,12 @@ class FilterListModal extends Component<Props, State> {
             </Text>
           </TouchableOpacity>
         );
+      case 'HINT':
+        return (
+          <View style={[styles.hint]}>
+            <Text style={{color: 'gray'}}>{ elem.hintText }</Text>
+          </View>
+        )
       default:
         // Ensure exhaustiveness of select
         const _: never = elem;
@@ -214,15 +238,26 @@ class FilterListModal extends Component<Props, State> {
   }
 
   render() {
-    const { curValue, onRawSelect } = this.props;
+    const { hint, curValue, onRawSelect } = this.props;
     const { filteredElements } = this.state;
-    let elements = filteredElements.map(elem => {
-      return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
-    }).toJS();
-    if (filteredElements.size > 0) elements = [{ type: 'GAP' }].concat(elements);
-    if (!!onRawSelect && curValue !== '') {
+    let hasMatch = false;
+    for (let i = 0; i < filteredElements.size; i++) {
+      if (filteredElements.get(i).value.toLowerCase() == curValue.toLowerCase()) {
+        hasMatch = true;
+        break;
+      }
+    }
+    let elements: Array<Element> = [];
+    if (!!hint && curValue === '') {
+      elements = elements.concat([{ type: 'HINT', hintText: hint }]);
+    }
+    if (!hasMatch && !!onRawSelect && curValue !== '') {
       elements = elements.concat([{ type: 'GAP' }, { type: 'RAW_INPUT', searchValue: curValue }]);
     }
+    if (filteredElements.size > 0) elements = elements.concat([{ type: 'GAP' }]);
+    elements = elements.concat(filteredElements.map(elem => {
+      return {...elem, type: 'FILTERABLE_ELEMENT', searchValue: curValue };
+    }).toJS());
     elements = elements.concat([{ type: 'NO_MORE_RESULTS' }]);
     const ds = this.ds.cloneWithRows(elements);
 
@@ -271,6 +306,13 @@ const styles = StyleSheet.create({
   },
   noMoreResults: {
     marginTop: 10,
+    alignItems: 'center',
+  },
+  hint: {
+    paddingTop: 15,
+    paddingLeft: 5,
+    paddingRight: 5,
+    fontSize: 14,
     alignItems: 'center',
   },
 });
