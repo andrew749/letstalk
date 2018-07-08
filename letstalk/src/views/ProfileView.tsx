@@ -16,7 +16,7 @@ import {
   View,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { connect, ActionCreator } from 'react-redux';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import {
@@ -29,8 +29,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
 import auth from '../services/auth';
+import { infoToast, errorToast } from '../redux/toast';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header } from '../components';
+import { Button, Card, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -47,6 +48,8 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
 interface Props extends ProfileState, DispatchActions {
@@ -65,6 +68,7 @@ class ProfileView extends Component<Props> {
     super(props);
 
     this.onLogoutPress = this.onLogoutPress.bind(this);
+    this.onChangePasswordPress = this.onChangePasswordPress.bind(this);
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
   }
@@ -78,6 +82,15 @@ class ProfileView extends Component<Props> {
       key: null,
       actions: [NavigationActions.navigate({ routeName: 'Login' })]
     }));
+  }
+
+  private async onChangePasswordPress() {
+    try {
+      await auth.forgotPassword(this.props.profile.email);
+      await this.props.infoToast("Sent an email with reset instructions.");
+    } catch(e) {
+      await this.props.errorToast(e.errorMsg);
+    }
   }
 
   async componentDidMount() {
@@ -214,7 +227,17 @@ class ProfileView extends Component<Props> {
           {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
           <View style={styles.sectionContainer}>
           </View>
-          <ActionButton buttonStyle={styles.logoutButton} onPress={this.onLogoutPress} title='LOGOUT' />
+          <Button
+            buttonStyle={styles.changePassButton}
+            onPress={this.onChangePasswordPress}
+            title='Change Password'
+          />
+          <Button
+            buttonStyle={styles.logoutButton}
+            textStyle={styles.logoutButtonText}
+            onPress={this.onLogoutPress}
+            title='Logout'
+          />
         </Card>
       </ScrollView>
     );
@@ -251,10 +274,15 @@ class ProfileView extends Component<Props> {
   }
 }
 
-export default connect(({ profile }: RootState) => profile, { fetchProfile })(ProfileView);
+export default connect(
+  ({ profile }: RootState) => profile,
+  { fetchProfile, infoToast, errorToast },
+)(ProfileView);
 
+const BUTTON_WIDTH = SCREEN_WIDTH - 80;
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 10,
     paddingBottom: 10,
     minHeight: '100%'
   },
@@ -280,9 +308,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 8,
   },
+  changePassButton: {
+    width: BUTTON_WIDTH,
+    marginTop: 10,
+  },
+  logoutButtonText: {
+    color: 'white',
+  },
   logoutButton: {
-    // FIXME (skong): not a valid property
-    // color: Colors.HIVE_ERROR
+    width: BUTTON_WIDTH,
+    marginTop: 10,
+    backgroundColor: "gray",
+    borderWidth: 0,
   },
   profileTitle: {
     fontSize: 18,

@@ -213,6 +213,7 @@ export default connect(
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 10,
     paddingBottom: 10,
     minHeight: '100%'
   },
