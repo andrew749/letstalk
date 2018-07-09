@@ -11,7 +11,7 @@ import {
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Notifications } from 'expo';
+import { Notifications, Font } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import {
@@ -37,11 +37,13 @@ import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
 import ForgotPasswordView from './views/ForgotPasswordView';
+import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
+import { AsyncStorage } from 'react-native';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -175,6 +177,12 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   MatchProfile: {
     screen: MatchProfileView,
   },
+  WalkthroughView: {
+    screen: WalkthroughView,
+    navigationOptions: {
+      header: null,
+    },
+  },
 }, {
   initialRouteName,
 });
@@ -222,7 +230,6 @@ class App extends React.Component<Props, AppState> {
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
       this.notificationService.setNavContainer(navContainer);
     }
-
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
