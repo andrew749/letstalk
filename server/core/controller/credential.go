@@ -27,20 +27,38 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 
-	if err := query.AddUserCredentialRequest(
-		c.Db,
-		c.SessionData.UserId,
-		req.CredentialId,
-	); err != nil {
-		return err
+	credentialId := req.CredentialId
+
+	if req.CredentialId > 0 {
+		if err := query.AddUserCredentialRequest(
+			c.Db,
+			c.SessionData.UserId,
+			req.CredentialId,
+		); err != nil {
+			return err
+		}
+	} else if req.Name != "" {
+		credIdPtr, err := query.AddUserCredentialRequestByName(
+			c.Db,
+			c.SessionData.UserId,
+			req.Name,
+		)
+		if err != nil {
+			return err
+		}
+		credentialId = *credIdPtr
+	} else {
+		return errs.NewRequestError("one of credentialId and name must be non-empty")
 	}
 
 	go query.ResolveRequestToMatchWithDelay(
 		c,
 		query.RESOLVE_TYPE_ASKER,
-		req.CredentialId,
+		credentialId,
 		RESOLVE_WAIT_TIME,
 	)
+
+	c.Result = api.AddUserCredentialRequestResponse{credentialId}
 
 	return nil
 }

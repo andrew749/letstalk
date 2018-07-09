@@ -41,6 +41,23 @@ func GetUserCredentialRequests(db *gorm.DB, userId int) ([]api.Credential, errs.
 	return credentials, nil
 }
 
+func AddUserCredentialRequestByName(
+	db *gorm.DB,
+	userId int,
+	name string,
+) (*uint, errs.Error) {
+	credential, err := getOrCreateCredential(db, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := AddUserCredentialRequest(db, userId, credential.ID); err != nil {
+		return nil, err
+	}
+
+	return &credential.ID, nil
+}
+
 func AddUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.Error {
 	var userRequest data.UserCredentialRequest
 	err := db.Where(
@@ -90,7 +107,7 @@ func GetUserCredentials(db *gorm.DB, userId int) ([]api.Credential, errs.Error) 
 	return credentials, nil
 }
 
-func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error) {
+func getOrCreateCredential(db *gorm.DB, name string) (*data.Credential, errs.Error) {
 	var credential data.Credential
 
 	err := db.Where(&data.Credential{Name: name}).First(&credential).Error
@@ -107,13 +124,22 @@ func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error)
 		}
 	}
 
+	return &credential, nil
+}
+
+func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error) {
+	credential, err := getOrCreateCredential(db, name)
+	if err != nil {
+		return nil, err
+	}
+
 	var userCredential data.UserCredential
-	err = db.Where(
+	dbErr := db.Where(
 		&data.UserCredential{UserId: userId, CredentialId: credential.ID},
 	).First(&userCredential).Error
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		return nil, errs.NewDbError(err)
-	} else if err == nil {
+	if dbErr != nil && !gorm.IsRecordNotFoundError(dbErr) {
+		return nil, errs.NewDbError(dbErr)
+	} else if dbErr == nil {
 		return nil, errs.NewRequestError("You already have this credential")
 	}
 

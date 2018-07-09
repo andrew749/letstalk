@@ -103,10 +103,10 @@ const fetchCredentialRequests: ActionCreator<
 }
 
 const addCredentialRequest: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (credential: Credential) => {
+  ThunkAction<Promise<ActionTypes>, State, void>> = (name: string) => {
   return async (dispatch: Dispatch<State>) => {
-    await requestToMatchService.addCredentialRequest(credential.id);
-    return dispatch(credentialRequestAdd(credential));
+    const id = await requestToMatchService.addCredentialRequest(name);
+    return dispatch(credentialRequestAdd({ id, name }));
   };
 }
 

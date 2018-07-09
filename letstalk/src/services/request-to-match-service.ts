@@ -18,7 +18,8 @@ type GetCredentialRequestsResponse = Array<Credential>;
 
 interface AddCredentialRequest { name: string }
 interface AddCredentialResponse { credentialId: number }
-interface AddCredentialRequestRequest { credentialId: number }
+interface AddCredentialRequestRequest { name: string }
+interface AddCredentialRequestResponse { credentialId: number }
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -66,10 +67,12 @@ export class RemoteRequestToMatchService {
     return Immutable.List(response);
   }
 
-  async addCredentialRequest(credentialId: number): Promise<void> {
+  async addCredentialRequest(name: string): Promise<number> {
     const sessionToken = await auth.getSessionToken();
-    const request: AddCredentialRequestRequest = { credentialId };
-    await this.requestor.post(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
+    const request: AddCredentialRequestRequest = { name };
+    const response: AddCredentialRequestResponse =
+      await this.requestor.post(CREDENTIAL_REQUEST_ROUTE, request, sessionToken);
+    return response.credentialId;
   }
 
   async removeCredentialRequest(credentialId: number): Promise<void> {
