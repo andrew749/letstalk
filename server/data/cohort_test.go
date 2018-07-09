@@ -9,6 +9,7 @@ import (
 func TestGetNormalizedProgramMapping(t *testing.T) {
 	mapping := GetNormalizedProgramMapping()
 	assert.Contains(t, mapping, "SOFTWARE_ENGINEERING")
+	assert.Contains(t, mapping, "COMPUTER_ENGINEERING")
 }
 
 func TestGetReverseNormalizedProgramMapping(t *testing.T) {
@@ -19,4 +20,6 @@ func TestGetReverseNormalizedProgramMapping(t *testing.T) {
 	for _, program := range stream8Programs {
 		assert.Contains(t, mapping, program)
 	}
+	assert.Contains(t, mapping, "Software Engineering")
+	assert.Contains(t, mapping, "Computer Engineering")
 }
