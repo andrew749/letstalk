@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
 import {View, Text} from 'react-native';
-import AppIntroSlider from 'react-native-app-intro-slider';
 import { NavigationScreenProp, NavigationStackAction } from 'react-navigation';
 import Colors from '../services/colors';
 import { AsyncStorage } from 'react-native';
 import TutorialService from '../services/tutorial_service';
+
+// @ts-ignore
+import AppIntroSlider from 'react-native-app-intro-slider';
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
