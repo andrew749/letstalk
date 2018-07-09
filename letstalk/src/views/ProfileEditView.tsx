@@ -232,6 +232,9 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         name="bio"
         component={LabeledFormInput}
         autoCorrect={false}
+        numberOfLines={10}
+        multiline={true}
+        inputStyle={{width: "100%"}}
         placeholder="e.g. I enjoy long walks on the beach"
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
