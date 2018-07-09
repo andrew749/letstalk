@@ -58,6 +58,7 @@ class AllFilterableModals extends Component<Props> {
     this.onReqSelect = this.onReqSelect.bind(this);
     this.onCredSelect = this.onCredSelect.bind(this);
     this.onRawCredSelect = this.onRawCredSelect.bind(this);
+    this.onRawCredReqSelect = this.onRawCredReqSelect.bind(this);
   }
 
   private async blurSearchBar() {
@@ -75,7 +76,7 @@ class AllFilterableModals extends Component<Props> {
         AnalyticsActions.ADD,
         "CredentialRequest",
         1,
-        this.props.addCredentialRequest.bind(this, { id: elem.id, name: elem.value })
+        this.props.addCredentialRequest.bind(this, elem.value),
       );
       this.selectSuccess();
     } catch (e) {
@@ -116,6 +117,22 @@ class AllFilterableModals extends Component<Props> {
     await this.blurSearchBar();
   }
 
+  private async onRawCredReqSelect(value: string) {
+    try {
+      logAnalyticsThenExecuteAsync(
+        "Credentials",
+        AnalyticsActions.SELECT,
+        "RawCredentialRequest",
+        1,
+        this.props.addCredentialRequest.bind(this, value),
+      )
+      this.selectSuccess();
+    } catch (e) {
+      await this.props.errorToast(e.errorMsg);
+    }
+    await this.blurSearchBar();
+  }
+
   render() {
     if (!this.props.searchBar.hasFocus) return null;
 
@@ -130,6 +147,7 @@ class AllFilterableModals extends Component<Props> {
             curValue={this.props.searchBar.value}
             data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
             onSelect={this.onReqSelect}
+            onRawSelect={this.onRawCredReqSelect}
           />
         );
       case SEARCH_LIST_TYPE_CREDENTIALS:
