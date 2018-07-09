@@ -12,7 +12,7 @@ type Cohort struct {
 	ProgramId  string  `json:"programId" gorm:"not null;unique_index:cohort_index"`
 	Program    Program `gorm:"foreignkey:ProgramId;"`
 	GradYear   uint    `json:"gradYear" gorm:"not null;unique_index:cohort_index"`
-	SequenceId *string `json:"sequenceId" gorm:"not null;unique_index:cohort_index"`
+	SequenceId string  `json:"sequenceId" gorm:"not null;unique_index:cohort_index"`
 }
 
 // GetPrograms Return all valid programs
@@ -58,7 +58,7 @@ func GetSpecialCohorts() []*Cohort {
 			cohorts = append(cohorts, &Cohort{
 				ProgramId:  program,
 				GradYear:   uint(gradYear),
-				SequenceId: &STREAM4,
+				SequenceId: STREAM4,
 			})
 		}
 
@@ -66,7 +66,7 @@ func GetSpecialCohorts() []*Cohort {
 			cohorts = append(cohorts, &Cohort{
 				ProgramId:  program,
 				GradYear:   uint(gradYear),
-				SequenceId: &STREAM8,
+				SequenceId: STREAM8,
 			})
 		}
 	}
