@@ -33,6 +33,7 @@ import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credentia
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import Colors from '../services/colors';
 import { AnalyticsActions, logAnalyticsThenExecuteAsync } from '../services/analytics';
+import { Alert } from 'react-native';
 
 interface DispatchActions {
   addCredentialRequest: ActionCreator<
@@ -117,6 +118,21 @@ class AllFilterableModals extends Component<Props> {
     await this.blurSearchBar();
   }
 
+  private async confirmationWrapper(
+    confirmCallback: (value: FilterableElement) => Promise<void>,
+    negativeCallback: () => Promise<void>,
+    value: FilterableElement,
+  ): Promise<void> {
+    Alert.alert(
+        'Request a match',
+        'Would you like to request to be matched with "' + value.value + '"',
+        [
+          {text: 'Cancel', onPress: async () => {await negativeCallback()}, style: 'cancel'},
+          {text: 'Request Match', onPress: async () => {await confirmCallback(value)}, style: 'destructive'},
+        ],
+      );
+  }
+
   private async onRawCredReqSelect(value: string) {
     try {
       logAnalyticsThenExecuteAsync(
@@ -146,7 +162,7 @@ class AllFilterableModals extends Component<Props> {
             hint={reqHint}
             curValue={this.props.searchBar.value}
             data={credentials.map(cred => { return { id: cred.id, value: cred.name }}).toList()}
-            onSelect={this.onReqSelect}
+            onSelect={this.confirmationWrapper.bind(this, this.onReqSelect, async () => {})}
             onRawSelect={this.onRawCredReqSelect}
           />
         );
