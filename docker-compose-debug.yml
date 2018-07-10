@@ -25,6 +25,20 @@ services:
       - db_net
     ports:
       - "3306:3306"
+  chat:
+    build:
+      context: chat/docker/tinode
+      args:
+        VERSION: 0.15.2
+        TARGET_DB: mysql
+    container_name: chat-server
+    depends_on:
+      - db
+    networks:
+      - db_net
+    ports:
+      - 6000:18080
+      - 7000:16061
 volumes:
   dbdata:
 networks:
