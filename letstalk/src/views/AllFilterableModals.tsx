@@ -125,7 +125,7 @@ class AllFilterableModals extends Component<Props> {
   ): Promise<void> {
     Alert.alert(
         'Request a match',
-        'Would you like to request to be matched with "' + value.value + '"',
+        'Would you like to request to be matched with "' + value.value + '"?',
         [
           {text: 'Cancel', onPress: async () => {await negativeCallback()}, style: 'cancel'},
           {text: 'Request Match', onPress: async () => {await confirmCallback(value)}, style: 'destructive'},
