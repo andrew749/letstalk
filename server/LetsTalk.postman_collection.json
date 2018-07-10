@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "447164e3-c9d0-d589-5965-ef1b44fc2ede",
+		"_postman_id": "290682ec-c686-4562-801d-698d40c87316",
 		"name": "LetsTalk",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -17,7 +17,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"firstName\": \"Andrew\",\n  \"lastName\": \"Codispoti\",\n  \"email\": \"test@acod.me\",\n  \"phoneNumber\": \"123-555-5555\",\n  \"gender\": \"male\",\n  \"birthday\": 1095379198,\n  \"password\": \"testPassword\"\n}"
+					"raw": "{\n  \"firstName\": \"Andrew\",\n  \"lastName\": \"Codispoti\",\n  \"email\": \"test2@acod.me\",\n  \"phoneNumber\": \"123-555-5555\",\n  \"gender\": 1,\n  \"birthdate\": 1095379198,\n  \"password\": \"foo\"\n}"
 				},
 				"url": {
 					"raw": "{{server_ip}}/v1/signup",
@@ -45,7 +45,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"userId\": 1,\n  \"password\": \"testPassword\"\n}"
+					"raw": "{\n  \"email\": \"test2@acod.me\",\n  \"password\": \"foo\"\n}"
 				},
 				"url": {
 					"raw": "{{server_ip}}/v1/login",
@@ -96,7 +96,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/test",
 					"host": [
@@ -120,7 +123,10 @@
 						"value": "87d4bTatzriXoAZKDz9nwP5H6LYp6FzL4Lf_j5c0QjA="
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/testAuth",
 					"host": [
@@ -141,7 +147,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "tdnMImsqPgj_qgKixMLQOye07sRTgBHQxM-LvMl7lx0="
+						"value": "{{session_id}}"
 					},
 					{
 						"key": "Content-Type",
@@ -150,7 +156,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"cohortId\": 5\n}"
+					"raw": "{\n  \"cohortId\": 1\n}"
 				},
 				"url": {
 					"raw": "{{server_ip}}/v1/cohort",
@@ -175,7 +181,10 @@
 						"value": "tdnMImsqPgj_qgKixMLQOye07sRTgBHQxM-LvMl7lx0="
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/v1/cohort",
 					"host": [
@@ -196,10 +205,13 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
+						"value": "{{session_id}}"
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/v1/bootstrap",
 					"host": [
@@ -223,7 +235,10 @@
 						"value": "wqdSUkczmgPctvGGlWRZoa6K8oaDJmI0LRW6pL2G5VQ="
 					}
 				],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/v1/contact_info?userId=3",
 					"host": [
@@ -281,7 +296,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "nmFHINoBY38JqDTae5fSecdH3Mw1xhxy8F4cmkpezss="
+						"value": "{{session_id}}"
 					},
 					{
 						"key": "Content-Type",
@@ -290,7 +305,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"sociable\": 1,\n\t\"hardWorking\": 1,\n\t\"ambitious\": 1,\n\t\"energetic\": 1,\n\t\"carefree\": 1,\n\t\"confident\": 1,\n\t\"isMenteePreference\": 1\n}"
+					"raw": "{\n\t\"sociable\": 1,\n\t\"hardWorking\": 1,\n\t\"ambitious\": 1,\n\t\"energetic\": 1,\n\t\"carefree\": 1,\n\t\"confident\": 1,\n\t\"preferenceType\": 1\n}"
 				},
 				"url": {
 					"raw": "{{server_ip}}/v1/user_vector",
@@ -300,6 +315,71 @@
 					"path": [
 						"v1",
 						"user_vector"
+					]
+				},
+				"description": "Update the user vector"
+			},
+			"response": []
+		},
+		{
+			"name": "New Matching",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "{{session_id}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"mentor\": 1,\n\t\"mentee\": 2\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/debug/matching",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"debug",
+						"matching"
+					]
+				},
+				"description": "Update the user vector"
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm Meeting",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "{{session_id}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"secret\": \"\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/meeting/confirm",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"meeting",
+						"confirm"
 					]
 				},
 				"description": "Update the user vector"
@@ -340,7 +420,7 @@
 				"header": [
 					{
 						"key": "sessionId",
-						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
+						"value": "b_AGBuoU_uenfMftN41H26mbiEFQtwVWCVrHxS-ZTVo="
 					},
 					{
 						"key": "Content-Type",
@@ -352,8 +432,8 @@
 					"formdata": [
 						{
 							"key": "photo",
-							"description": "",
-							"type": "file"
+							"type": "file",
+							"value": ""
 						}
 					]
 				},
@@ -375,7 +455,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/debug/pprof/heap",
 					"host": [
@@ -395,7 +478,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {},
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{server_ip}}/debug/pprof/profile",
 					"host": [
@@ -435,109 +521,6 @@
 					]
 				},
 				"description": "Subscribe new user to mailing list."
-			},
-			"response": []
-		},
-		{
-			"name": "Me",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "sessionId",
-						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{server_ip}}/v1/me",
-					"host": [
-						"{{server_ip}}"
-					],
-					"path": [
-						"v1",
-						"me"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "ProfilePic",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "sessionId",
-						"value": "RLnh2Xm2Vcyf2SFywoH2kZ_nrd8iAZTnqa4RtUqYIdo="
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{server_ip}}/v1/profile_pic?userId=1",
-					"host": [
-						"{{server_ip}}"
-					],
-					"path": [
-						"v1",
-						"profile_pic"
-					],
-					"query": [
-						{
-							"key": "userId",
-							"value": "1"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Forgot Password",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"email\": \"andrew.codispoti@gmail.com\"\n}"
-				},
-				"url": {
-					"raw": "{{server_ip}}/v1/forgot_password",
-					"host": [
-						"{{server_ip}}"
-					],
-					"path": [
-						"v1",
-						"forgot_password"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "change password",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"requestId\":\"09e6f568-49e3-41df-9e90-59874419c617\",\n\t\"password\":\"test2\"\n}"
-				},
-				"url": {
-					"raw": "{{server_ip}}/v1/change_password",
-					"host": [
-						"{{server_ip}}"
-					],
-					"path": [
-						"v1",
-						"change_password"
-					]
-				}
 			},
 			"response": []
 		}
