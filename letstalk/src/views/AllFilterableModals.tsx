@@ -167,7 +167,7 @@ class AllFilterableModals extends Component<Props> {
           />
         );
       case SEARCH_LIST_TYPE_CREDENTIALS:
-        const hint = 'Let people find you based on ' +
+        const hint = 'Let people match with you based on ' +
           'your credentials. E.g. dev at Facebook or marathon runner';
         return (
           <FilterListModal
