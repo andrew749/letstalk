@@ -43,6 +43,7 @@ import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
 import QRCode from "react-native-qrcode";
 import TopHeader, { headerStyle } from './TopHeader';
+import AllFilterableModals from './AllFilterableModals';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -216,30 +217,37 @@ class ProfileView extends Component<Props> {
     />;
 
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <Card style={styles.contentContainer} >
-          {this.renderQrCode()}
-          <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-          <Header>{headerText}</Header>
-          {editButton}
-          <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-          {this.renderProfile(String(gradYear), program, bio)}
-          {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
-          <View style={styles.sectionContainer}>
-          </View>
-          <Button
-            buttonStyle={styles.changePassButton}
-            onPress={this.onChangePasswordPress}
-            title='Change Password'
-          />
-          <Button
-            buttonStyle={styles.logoutButton}
-            textStyle={styles.logoutButtonText}
-            onPress={this.onLogoutPress}
-            title='Logout'
-          />
-        </Card>
-      </ScrollView>
+      <View>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Card style={styles.contentContainer} >
+            {this.renderQrCode()}
+            <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+            <Header>{headerText}</Header>
+            {editButton}
+            <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+            {this.renderProfile(String(gradYear), program, bio)}
+            {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
+            <View style={styles.sectionContainer}>
+            </View>
+            <Button
+              buttonStyle={styles.changePassButton}
+              onPress={this.onChangePasswordPress}
+              title='Change Password'
+            />
+            <Button
+              buttonStyle={styles.logoutButton}
+              textStyle={styles.logoutButtonText}
+              onPress={this.onLogoutPress}
+              title='Logout'
+            />
+          </Card>
+        </ScrollView>
+        <AllFilterableModals
+          onSelectSuccess={() => {
+            this.props.navigation.navigate({ routeName: 'Requests' });
+          }}
+        />
+      </View>
     );
   }
 

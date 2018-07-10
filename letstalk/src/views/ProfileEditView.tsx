@@ -233,8 +233,9 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
         component={LabeledFormInput}
         autoCorrect={false}
         multiline={true}
+        numberOfLines={10}
         inputStyle={{width: "100%"}}
-        placeholder="e.g. I enjoy long walks on the beach"
+        placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton

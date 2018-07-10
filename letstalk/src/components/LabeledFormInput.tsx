@@ -18,7 +18,7 @@ class LabeledFormInput extends React.Component<Props> {
   }
   render() {
     const props = this.props;
-    const { label } = props;
+    const { label, inputStyle } = props;
     const { onChange, onBlur, value } = props.input;
     const { error, touched, warning } = props.meta;
     return (
@@ -32,7 +32,7 @@ class LabeledFormInput extends React.Component<Props> {
           value={value}
           onSubmitEditing={props.onSubmitEditing}
           underlineColorAndroid="gray"
-          inputStyle={Platform.OS === 'ios' ? {} : {paddingLeft: 5, paddingRight: 5}}
+          inputStyle={[inputStyle, Platform.OS === 'ios' ? {} : {paddingLeft: 5, paddingRight: 5}]}
         />
         {touched && (
           (error && <FormValidationMessage>{error}</FormValidationMessage>) ||

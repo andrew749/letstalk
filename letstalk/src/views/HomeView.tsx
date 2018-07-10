@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { connect, ActionCreator } from 'react-redux';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
@@ -33,6 +33,7 @@ import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
+import { errorToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
@@ -55,6 +56,7 @@ import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 
 interface DispatchActions {
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchCredentialOptions: ActionCreator<
     ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
@@ -221,7 +223,11 @@ class HomeView extends Component<Props, State> {
     const description = this.renderDescription(relationship);
 
     const onCloseAccept = async () => {
-      await this.props.removeRtmMatches(userId);
+      try {
+        await this.props.removeRtmMatches(userId);
+      } catch (e) {
+        await this.props.errorToast(e.errorMsg);
+      }
     }
 
     const onClosePress = () => {
@@ -385,7 +391,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
+  { errorToast, fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
 
 const styles = StyleSheet.create({
   container: {
