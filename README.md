@@ -60,6 +60,11 @@ In the container run the following to see mysql database
 mysql -u letstalk -p
 ```
 
+Alternatively run the following to see mysql database
+```
+mysql -h ::1 -u letstalk -puwletstalk
+```
+
 ### LINUX
 Things should be good to go
 

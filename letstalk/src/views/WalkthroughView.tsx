@@ -38,8 +38,8 @@ class WalkthroughView extends Component<Props> {
         level: 10,
       },
       {
-        title: 'Explore your program',
-        text: 'Connect with upper years mentors in your program.',
+        title: 'Meet other cohorts',
+        text: 'Connect with upper and lower years in your program.',
         image: require('../assets/images/mentor.jpg'),
         imageStyle: {
           height: 200,
@@ -51,7 +51,7 @@ class WalkthroughView extends Component<Props> {
       },
     {
         title: 'Find new connections',
-        text: 'Meet people you want to meet. Search for people based on interests, experiences, etc.',
+        text: 'Meet awesome people in your network.',
         image: require('../assets/images/rtm.jpg'),
         imageStyle: {
           height: 400,
@@ -63,11 +63,11 @@ class WalkthroughView extends Component<Props> {
       },
       {
         title: 'Built with privacy in mind',
-        text: 'Nobody can view your information until you are matched with them',
-        image: require('../img/profile.jpg'),
+        text: 'Nobody can view your information unless you both connect',
+        image: require('../assets/images/lock.png'),
         imageStyle: {
-          height: 360,
-          width: 360,
+          height: 400,
+          width: 355,
         },
         backgroundColor: background,
         fontColor: '#fff',
