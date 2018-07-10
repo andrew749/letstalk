@@ -32,6 +32,7 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 	}
 
 	if e := tx.FirstOrCreate(&sessionModel).Error; e != nil {
+		rlog.Error(e)
 		return e
 	}
 
