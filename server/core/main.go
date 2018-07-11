@@ -43,7 +43,7 @@ func main() {
 
 	db, err := gorm.Open(
 		"mysql",
-		fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr),
+		fmt.Sprintf("%s:%s@%s/letstalk?charset=utf8mb4&parseTime=true", *dbUser, *dbPass, *dbAddr),
 	)
 
 	if err != nil {

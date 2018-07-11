@@ -5,6 +5,7 @@ import (
 )
 
 func migrateDB(db *gorm.DB) {
+	db = db.Set("gorm:table_options", "CHARSET=utf8mb4") // Create all new tables with utf8mb4 encoding.
 	db.AutoMigrate(&AuthenticationData{})
 	db.AutoMigrate(&Cohort{})
 	PopulateCohort(db)
