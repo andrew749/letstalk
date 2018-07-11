@@ -43,7 +43,7 @@ func main() {
 
 	db, err := gorm.Open(
 		"mysql",
-		fmt.Sprintf("%s:%s@%s/letstalk?parseTime=true", *dbUser, *dbPass, *dbAddr),
+		fmt.Sprintf("%s:%s@%s/letstalk?charset=utf8mb4&parseTime=true", *dbUser, *dbPass, *dbAddr),
 	)
 
 	if err != nil {
@@ -57,7 +57,7 @@ func main() {
 	db.LogMode(!*production)
 
 	// create the database
-	data.CreateDB(db)
+	data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4")) // Create tables using utf8mb4 encoding. Only works with MySQL.
 
 	sessionManager := sessions.CreateSessionManager(db)
 	router := routes.Register(db, &sessionManager)

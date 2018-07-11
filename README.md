@@ -22,6 +22,19 @@ docker-compose
 go-dep
 ```
 
+### How to see the dev database
+Starting the server spins up its own mysql instance inside a docker container. If you see an error at startup, make sure to kill any already running instances of mysql.
+```
+mysql -h 127.0.0.1 -P 3306 -u letstalk letstalk -puwletstalk
+```
+
+#### First time database setup
+After starting the server (see below):
+```
+mysql -h 127.0.0.1 -P 3306 -u letstalk -puwletstalk
+msql > CREATE DATABASE letstalk DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+```
+
 ### MAC ONLY
 
 #### Start new docker vm
@@ -44,25 +57,6 @@ VBoxManage modifyvm "default" --natpf1 "hive,tcp,,8000,,80"
 Restart machine with updated options.
 ```
 docker-machine restart
-```
-
-#### How to see mysql tables
-
-Run
-```
-docker exec -it {DOCKER_CONTAINER_ID} bash
-```
-
-Use `docker ps` to list containers
-
-In the container run the following to see mysql database
-```
-mysql -u letstalk -p
-```
-
-Alternatively run the following to see mysql database
-```
-mysql -h ::1 -u letstalk -puwletstalk
 ```
 
 ### LINUX
