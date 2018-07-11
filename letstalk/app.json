@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./src/img/logo.png",
       "bundleIdentifier": "org.hiveapp.hive",
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "icon": "./src/img/logo_android.png",
