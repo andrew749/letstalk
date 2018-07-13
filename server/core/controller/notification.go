@@ -7,7 +7,6 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
-	"letstalk/server/data"
 )
 
 func GetNotifications(c *ctx.Context) errs.Error {
@@ -45,12 +44,6 @@ func GetNotifications(c *ctx.Context) errs.Error {
 		if err != nil {
 			return err
 		}
-	}
-
-	// TODO: Remove
-	_, err = query.CreateNotification(db, userId, data.NOTIF_TYPE_NEW_CREDENTIAL_MATCH, make(map[string]string))
-	if err != nil {
-		return err
 	}
 
 	c.Result = apiNotifs
