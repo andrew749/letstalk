@@ -13,6 +13,7 @@ import {
   UserAdditionalData,
   UserPersonalInfo,
 } from '../models/user';
+import { Notification } from '../models/notification';
 import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
@@ -20,6 +21,7 @@ import {
   COHORTS_ROUTE,
   MATCH_PROFILE_ROUTE,
   ME_ROUTE,
+  NOTIFICATIONS_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
   PROFILE_EDIT_ROUTE,
@@ -78,6 +80,15 @@ export interface ProfileEditRequest extends UserAdditionalData {
 interface OnboardingUpdateResponse {
   readonly message: string;
   readonly onboardingStatus: OnboardingStatus;
+}
+
+interface NotificationRes {
+  notificationId: number;
+  userId: number;
+  type: string;
+  state: string;
+  data: object;
+  createdAt: string;
 }
 
 export interface ProfileService {
@@ -161,9 +172,24 @@ export class RemoteProfileService implements ProfileService {
 
   async getProfilePicUrl(userId: string): Promise<string> {
     const sessionToken = await this.auth.getSessionToken();
-    const profileRequest = `${PROFILE_PIC_ROUTE}?userId=${userId}`
+    const profileRequest = `${PROFILE_PIC_ROUTE}?userId=${userId}`;
     const response: {profilePic: string} = await this.requestor.get(profileRequest, sessionToken);
     return response.profilePic;
+  }
+
+  async getNotifications(limit: number, past?: number): Promise<Immutable.List<Notification>> {
+    const sessionToken = await this.auth.getSessionToken();
+    let notificationsRequest = `${NOTIFICATIONS_ROUTE}?limit=${limit}`;
+    if (!!past) {
+      notificationsRequest = notificationsRequest + `&past=${past}`;
+    }
+
+    const response: Array<NotificationRes> =
+      await this.requestor.get(notificationsRequest, sessionToken);
+
+    return Immutable.List(response.map(notifRes => {
+      return {...notifRes, createdAt: new Date(notifRes.createdAt)};
+    }));
   }
 }
 

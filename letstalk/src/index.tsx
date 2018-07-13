@@ -36,6 +36,7 @@ import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
+import NotificationView from './views/NotificationView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
@@ -148,6 +149,9 @@ const createTabView = () => TabNavigator({
 });
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
+  NotificationView: {
+    screen: NotificationView,
+  },
   BlankDoNotUse: {
     screen: View,
   },
@@ -222,7 +226,7 @@ class App extends React.Component<Props, AppState> {
     const { loggedIn } = this.state;
 
     let initialRouteName = 'BlankDoNotUse';
-    if (loggedIn === true) initialRouteName = 'Tabbed';
+    if (loggedIn === true) initialRouteName = 'NotificationView';
     else if (loggedIn === false) initialRouteName = 'Login';
 
     const AppNavigation = createAppNavigation(initialRouteName);

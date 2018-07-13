@@ -1,7 +1,7 @@
 // DEV
 
-export const BASE_URL = 'https://api.hiveapp.org';
-// export const BASE_URL = 'http://192.168.0.10';
+// export const BASE_URL = 'https://api.hiveapp.org';
+export const BASE_URL = 'http://127.0.0.1';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
 // Routes
@@ -26,4 +26,5 @@ export const CREDENTIAL_REQUEST_ROUTE   = '/v1/credential_request';
 export const PROFILE_PIC_UPLOAD_ROUTE   = '/v1/upload_profile_pic';
 export const PROFILE_EDIT_ROUTE         = '/v1/profile_edit';
 export const MEETING_CONFIRMATION_ROUTE = '/v1/meeting/confirm';
+export const NOTIFICATIONS_ROUTE        = '/v1/notifications';
 export const REMOVE_RTM_MATCHES_ROUTE   = '/v1/remove_rtm_matches';
