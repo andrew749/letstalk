@@ -13,7 +13,7 @@ import {
   UserAdditionalData,
   UserPersonalInfo,
 } from '../models/user';
-import { Notification } from '../models/notification';
+import { Notification, NotifState } from '../models/notification';
 import auth, { Auth } from './auth';
 import {
   BOOTSTRAP_ROUTE,
@@ -22,6 +22,7 @@ import {
   MATCH_PROFILE_ROUTE,
   ME_ROUTE,
   NOTIFICATIONS_ROUTE,
+  NOTIFICATIONS_UPDATE_STATE_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
   PROFILE_EDIT_ROUTE,
@@ -89,6 +90,11 @@ interface NotificationRes {
   state: string;
   data: object;
   createdAt: string;
+}
+
+interface UpdateNotificationStateRequest {
+  notificationId: number;
+  state: string;
 }
 
 export interface ProfileService {
@@ -193,6 +199,12 @@ export class RemoteProfileService implements ProfileService {
         createdAt: new Date(notifRes.createdAt),
       } as Notification;
     }));
+  }
+
+  async updateNotificationState(notificationId: number, state: NotifState): Promise<void> {
+    const sessionToken = await this.auth.getSessionToken();
+    const request: UpdateNotificationStateRequest = { notificationId, state };
+    await this.requestor.post(NOTIFICATIONS_UPDATE_STATE_ROUTE, request, sessionToken);
   }
 }
 

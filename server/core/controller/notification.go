@@ -61,3 +61,22 @@ func GetNotifications(c *ctx.Context) errs.Error {
 	c.Result = apiNotifs
 	return nil
 }
+
+func UpdateNotificationState(c *ctx.Context) errs.Error {
+	var req api.UpdateNotificationStateRequest
+
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	if err := query.UpdateNotificationState(
+		c.Db,
+		c.SessionData.UserId,
+		req.NotificationId,
+		req.State,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}

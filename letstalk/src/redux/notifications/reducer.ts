@@ -11,12 +11,14 @@ import {
 } from '../actions';
 import { Credential } from '../../models/credential';
 import {
+  notificationUpdateState,
   Notifications,
   fetch,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import profileService from '../../services/profile-service';
+import { NotifState } from '../../models/notification';
 
 const NOTIF_BATCH_SIZE = 10;
 
@@ -38,9 +40,20 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         fetchState: fetchStateReducer(action),
         notifications: getDataOrCur(action, state.notifications),
       };
+    case TypeKeys.UPDATE_STATE:
+      return {
+        ...state,
+        notifications: state.notifications.map(notification => {
+          if (notification.notificationId === action.notificationId) {
+            return { ...notification, state: action.state };
+          } else {
+            return notification;
+          }
+        }).toList(),
+      };
     default:
       // Ensure exhaustiveness of select
-      const _: never = action.type;
+      const _: never = action;
       return state;
   }
 };
@@ -58,4 +71,12 @@ const fetchNewestNotifications: ActionCreator<
   };
 }
 
-export { fetchNewestNotifications };
+const updateNotificationState: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (notificationId: number, state: NotifState) => {
+  return async (dispatch: Dispatch<State>) => {
+    await profileService.updateNotificationState(notificationId, state);
+    return dispatch(notificationUpdateState(notificationId, state));
+  };
+}
+
+export { fetchNewestNotifications, updateNotificationState };

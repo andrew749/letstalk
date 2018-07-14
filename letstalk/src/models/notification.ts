@@ -1,4 +1,4 @@
-type NotifState =
+export type NotifState =
   | 'UNREAD'
   | 'READ';
 

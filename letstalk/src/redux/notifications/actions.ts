@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import { Action } from 'redux'
 
-import { Notification } from '../../models/notification';
+import { Notification, NotifState } from '../../models/notification';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -12,7 +12,8 @@ import {
 import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
-  FETCH = 'NOTIFICATIONS/FETCH',
+  FETCH        = 'NOTIFICATIONS/FETCH',
+  UPDATE_STATE = 'NOTIFICATIONS/UPDATE_STATE',
 }
 
 export type Notifications = Immutable.List<Notification>;
@@ -20,6 +21,12 @@ export type Notifications = Immutable.List<Notification>;
 type NotificationEditReceiveAction = FetchReceiveAction<TypeKeys.FETCH, Notifications>;
 type NotificationEditErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type NotificationEditStartAction = FetchStartAction<TypeKeys.FETCH>;
+
+interface NotificationUpdateStateAction extends Action {
+  readonly type: TypeKeys.UPDATE_STATE;
+  readonly notificationId: number;
+  readonly state: NotifState;
+}
 
 function receive(data: Notifications): NotificationEditReceiveAction {
   return {
@@ -44,6 +51,17 @@ function start(): NotificationEditStartAction {
   };
 }
 
+export function notificationUpdateState(
+  notificationId: number,
+  state: NotifState
+): NotificationUpdateStateAction {
+  return {
+    type: TypeKeys.UPDATE_STATE,
+    notificationId,
+    state,
+  };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, Notifications> = {
   receive,
   error,
@@ -56,3 +74,4 @@ export type ActionTypes =
   | NotificationEditReceiveAction
   | NotificationEditErrorAction
   | NotificationEditStartAction
+  | NotificationUpdateStateAction

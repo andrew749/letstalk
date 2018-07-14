@@ -14,3 +14,8 @@ type Notification struct {
 	Data           map[string]string `json:"data"`
 	CreatedAt      *time.Time        `json:"createdAt"`
 }
+
+type UpdateNotificationStateRequest struct {
+	NotificationId uint            `json:"notificationId"`
+	State          data.NotifState `json:"state"`
+}

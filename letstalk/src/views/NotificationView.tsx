@@ -7,6 +7,7 @@ import {
   RefreshControlProps,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import {
   NavigationScreenProp,
@@ -23,6 +24,7 @@ import { RootState } from '../redux';
 import {
   State as NotificationsState,
   fetchNewestNotifications,
+  updateNotificationState,
 } from '../redux/notifications/reducer';
 import { ActionTypes as NotificationsActionTypes } from '../redux/notifications/actions';
 import Loading from './Loading';
@@ -32,6 +34,8 @@ import Colors from '../services/colors';
 
 interface DispatchActions {
   fetchNewestNotifications:
+    ActionCreator<ThunkAction<Promise<NotificationsActionTypes>, NotificationsState, void>>;
+  updateNotificationState:
     ActionCreator<ThunkAction<Promise<NotificationsActionTypes>, NotificationsState, void>>;
 }
 
@@ -58,6 +62,7 @@ class NotificationView extends Component<Props, State> {
 
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+    this.renderNotification = this.renderNotification.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
   }
 
@@ -89,6 +94,7 @@ class NotificationView extends Component<Props, State> {
 
     let notifText: ReactNode = null;
     let icon = 'face';
+    let onPressAction: () => void = null;
 
     switch (notification.type) {
       case 'NEW_CREDENTIAL_MATCH':
@@ -106,6 +112,13 @@ class NotificationView extends Component<Props, State> {
           </Text>
         );
         icon = 'people';
+        onPressAction = (async () => {
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+          }));
+          await this.props.navigation.navigate('Home');
+        }).bind(this);
         break;
       default:
         // Ensure exhaustiveness of select
@@ -113,10 +126,19 @@ class NotificationView extends Component<Props, State> {
     }
 
     const containerStyle = [styles.notifContainer];
-    if (state === 'UNREAD') containerStyle.push(styles.notifContainerUnread);
+    if (state === 'UNREAD') {
+      containerStyle.push(styles.notifContainerUnread);
+    }
+
+    let onPress = (async () => {
+      await onPressAction();
+      if (state === 'UNREAD') {
+        await this.props.updateNotificationState(notificationId, 'READ');
+      }
+    }).bind(this);
 
     return (
-      <View key={notification.notificationId} style={containerStyle}>
+      <TouchableOpacity key={notification.notificationId} style={containerStyle} onPress={onPress}>
         <View style={styles.leftContainer}>
           <MaterialIcons name={icon} size={48} />
         </View>
@@ -124,7 +146,7 @@ class NotificationView extends Component<Props, State> {
           {notifText}
           <Text style={styles.ago}>{Moment(createdAt).fromNow()}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 
@@ -168,7 +190,7 @@ class NotificationView extends Component<Props, State> {
 }
 
 export default connect(({ notifications }: RootState) => notifications,
-  { fetchNewestNotifications })(NotificationView);
+  { fetchNewestNotifications, updateNotificationState })(NotificationView);
 
 const styles = StyleSheet.create({
   ago: {

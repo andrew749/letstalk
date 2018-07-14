@@ -143,3 +143,21 @@ func GetNotificationsForUser(
 
 	return apiNotifs, nil
 }
+
+func UpdateNotificationState(
+	db *gorm.DB,
+	userId int,
+	notificationId uint,
+	state data.NotifState,
+) errs.Error {
+	err := db.Model(&data.Notification{}).Where(&data.Notification{
+		Model: gorm.Model{
+			ID: notificationId,
+		},
+		UserId: userId,
+	}).Updates(&data.Notification{State: state}).Error
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	return nil
+}
