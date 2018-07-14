@@ -11,7 +11,7 @@ const (
 )
 
 type Matching struct {
-	Mentor int                `json:"mentor" binding:"required"`
-	Mentee int                `json:"mentee" binding:"required"`
+	Mentor data.TUserID       `json:"mentor" binding:"required"`
+	Mentee data.TUserID       `json:"mentee" binding:"required"`
 	State  data.MatchingState `json:"state"`
 }

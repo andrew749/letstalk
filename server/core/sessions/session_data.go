@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"letstalk/server/core/utility"
+	"letstalk/server/data"
 	"time"
 )
 
@@ -10,13 +11,13 @@ import (
  */
 type SessionData struct {
 	SessionId         *string
-	UserId            int
+	UserId            data.TUserID
 	NotificationToken *string
 	ExpiryDate        time.Time
 }
 
 func CreateSessionData(
-	userId int,
+	userId data.TUserID,
 	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, error) {

@@ -80,7 +80,7 @@ func (sm DatabaseSessionStore) GetSessionForSessionId(
 }
 
 func (sm DatabaseSessionStore) GetUserSessions(
-	userId int,
+	userId data.TUserID,
 ) ([]*SessionData, error) {
 	sessions := make([]data.Session, 0)
 	if err := sm.DB.Where(

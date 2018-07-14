@@ -159,6 +159,6 @@ func writeUser(userData *api.SignupRequest, c *ctx.Context) error {
 		}
 	}
 	tx.Commit()
-	c.Result = struct{ UserId int }{userModel.UserId}
+	c.Result = struct{ UserId data.TUserID }{userModel.UserId}
 	return nil
 }

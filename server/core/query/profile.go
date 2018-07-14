@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func UpdateProfile(db *gorm.DB, userId int, request api.ProfileEditRequest) errs.Error {
+func UpdateProfile(db *gorm.DB, userId data.TUserID, request api.ProfileEditRequest) errs.Error {
 	tx := db.Begin()
 	err := tx.Model(&data.User{}).Where(&data.User{
 		UserId: userId,
@@ -64,7 +64,7 @@ func UpdateProfile(db *gorm.DB, userId int, request api.ProfileEditRequest) errs
 	return nil
 }
 
-func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
+func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Error) {
 	user, err := GetUserProfileById(db, userId)
 	if err != nil {
 		return nil, errs.NewRequestError("Unable to get user data.")
@@ -113,8 +113,8 @@ func GetProfile(db *gorm.DB, userId int) (*api.ProfileResponse, errs.Error) {
 
 func GetMatchProfile(
 	db *gorm.DB,
-	meUserId int,
-	matchUserId int,
+	meUserId data.TUserID,
+	matchUserId data.TUserID,
 ) (*api.ProfileResponse, errs.Error) {
 
 	// Fetch mentors and mentees.
@@ -142,7 +142,7 @@ func GetMatchProfile(
 		return nil, errs.NewDbError(err)
 	}
 
-	userIds := make(map[int]interface{})
+	userIds := make(map[data.TUserID]interface{})
 	for _, mentor := range mentors {
 		userIds[mentor.MentorUser.UserId] = nil
 	}

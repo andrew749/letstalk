@@ -2,19 +2,20 @@ package sessions
 
 import (
 	"errors"
+	"letstalk/server/data"
 )
 
 type InMemorySessionStore struct {
 	// map session Id to a particular session
 	SessionIdMapping map[string]SessionData
 	// map user id to all the sessions for this user
-	UserIdToSessions map[int][]*SessionData
+	UserIdToSessions map[data.TUserID][]*SessionData
 }
 
 func CreateInMemorySessionStore() ISessionStore {
 	sm := InMemorySessionStore{
 		make(map[string]SessionData),
-		make(map[int][]*SessionData),
+		make(map[data.TUserID][]*SessionData),
 	}
 	return sm
 }
@@ -39,7 +40,7 @@ func (sm InMemorySessionStore) GetSessionForSessionId(
 }
 
 func (sm InMemorySessionStore) GetUserSessions(
-	userId int,
+	userId data.TUserID,
 ) ([]*SessionData, error) {
 	sessions, ok := sm.UserIdToSessions[userId]
 	if !ok {

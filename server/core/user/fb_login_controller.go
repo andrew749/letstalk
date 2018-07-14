@@ -29,7 +29,7 @@ import (
 func FBController(c *ctx.Context) errs.Error {
 	var loginRequest api.FBLoginRequestData
 	var externalAuthRecord data.ExternalAuthData
-	var userId int
+	var userId data.TUserID
 
 	err := c.GinContext.BindJSON(&loginRequest)
 
@@ -214,7 +214,7 @@ func FBLinkController(c *ctx.Context) errs.Error {
 }
 
 // linkFBUser link the specified user to the facebook user with fbUserID
-func linkFBUser(db *gorm.DB, userID int, fbUserID string, fbLink string) error {
+func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string) error {
 	var externalAuthRecord *data.ExternalAuthData
 	var err error
 	if externalAuthRecord, err = query.GetExternalAuthRecord(db, userID); err != nil {

@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"letstalk/server/data"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -8,15 +9,15 @@ import (
 
 type ISessionStore interface {
 	GetSessionForSessionId(sessionId string) (*SessionData, error)
-	GetUserSessions(userId int) ([]*SessionData, error)
+	GetUserSessions(userId data.TUserID) ([]*SessionData, error)
 	AddNewSession(session *SessionData) error
 }
 
 type ISessionManagerBase interface {
-	CreateNewSessionForUserId(userId int, notificationToken *string) (*SessionData, error)
-	CreateNewSessionForUserIdWithExpiry(userId int, notificationToken *string, expiry time.Time) (*SessionData, error)
+	CreateNewSessionForUserId(userId data.TUserID, notificationToken *string) (*SessionData, error)
+	CreateNewSessionForUserIdWithExpiry(userId data.TUserID, notificationToken *string, expiry time.Time) (*SessionData, error)
 	GetSessionForSessionId(sessionId string) (*SessionData, error)
-	GetUserSessions(userId int) ([]*SessionData, error)
+	GetUserSessions(userId data.TUserID) ([]*SessionData, error)
 }
 
 func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
@@ -29,7 +30,7 @@ func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
 // default expiry time in days
 const DEFAULT_EXPIRY = 7 * 24
 
-func GetDeviceTokensForUser(manager ISessionManagerBase, userId int) ([]string, error) {
+func GetDeviceTokensForUser(manager ISessionManagerBase, userId data.TUserID) ([]string, error) {
 	userSessions, err := manager.GetUserSessions(userId)
 	if err != nil {
 		return nil, err

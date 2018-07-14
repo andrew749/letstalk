@@ -8,12 +8,12 @@ import (
 )
 
 type AuthenticationData struct {
-	UserId       int    `json:"user_id" gorm:"not null;primary_key;"`
-	User         User   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
-	PasswordHash string `json:"password_hash" gorm:"not null;type:varchar(128);"`
+	UserId       TUserID `json:"user_id" gorm:"not null;primary_key;"`
+	User         User    `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
+	PasswordHash string  `json:"password_hash" gorm:"not null;type:varchar(128);"`
 }
 
-func CreateAuthenticationData(db *gorm.DB, userId int, password string) (*AuthenticationData, error) {
+func CreateAuthenticationData(db *gorm.DB, userId TUserID, password string) (*AuthenticationData, error) {
 
 	hashedPassword, err := utility.HashPassword(password)
 

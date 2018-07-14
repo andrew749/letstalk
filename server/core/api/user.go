@@ -1,14 +1,16 @@
 package api
 
+import "letstalk/server/data"
+
 /**
  * Holds all the data that we currently associate with a user.
  */
 type UserPersonalInfo struct {
-	UserId    int    `json:"userId"`
-	FirstName string `json:"firstName" binding:"required"`
-	LastName  string `json:"lastName" binding:"required"`
-	Gender    int    `json:"gender" binding:"required"`
-	Birthdate string `json:"birthdate" binding:"required"` // unix time
+	UserId    data.TUserID `json:"userId"`
+	FirstName string       `json:"firstName" binding:"required"`
+	LastName  string       `json:"lastName" binding:"required"`
+	Gender    int          `json:"gender" binding:"required"`
+	Birthdate string       `json:"birthdate" binding:"required"` // unix time
 
 	// TODO: Does this belong here?
 	Secret     string  `json:"secret"`

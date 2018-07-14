@@ -8,7 +8,7 @@ import (
 )
 
 // GetExternalAuth Returns a matching external auth.
-func GetExternalAuthRecord(db *gorm.DB, userID int) (*data.ExternalAuthData, error) {
+func GetExternalAuthRecord(db *gorm.DB, userID data.TUserID) (*data.ExternalAuthData, error) {
 	var auth data.ExternalAuthData
 	if err := db.Where(&data.ExternalAuthData{UserId: userID}).First(&auth).Error; err != nil {
 		return nil, errors.Errorf("Unable to get User with id")

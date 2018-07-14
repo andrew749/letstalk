@@ -16,7 +16,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func generateNewForgotPasswordRequest(db *gorm.DB, userId int) (*data.ForgotPasswordId, error) {
+func generateNewForgotPasswordRequest(db *gorm.DB, userId data.TUserID) (*data.ForgotPasswordId, error) {
 	var id = uuid.New()
 	forgotPasswordRequest := data.ForgotPasswordId{
 		Id:     id.String(),

@@ -22,7 +22,7 @@ func GetAllCredentials(db *gorm.DB) ([]api.Credential, errs.Error) {
 	return credentials, nil
 }
 
-func GetUserCredentialRequests(db *gorm.DB, userId int) ([]api.Credential, errs.Error) {
+func GetUserCredentialRequests(db *gorm.DB, userId data.TUserID) ([]api.Credential, errs.Error) {
 	var userRequests []data.UserCredentialRequest
 	if err := db.Where(
 		&data.UserCredentialRequest{UserId: userId},
@@ -43,7 +43,7 @@ func GetUserCredentialRequests(db *gorm.DB, userId int) ([]api.Credential, errs.
 
 func AddUserCredentialRequestByName(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	name string,
 ) (*uint, errs.Error) {
 	credential, err := getOrCreateCredential(db, name)
@@ -58,7 +58,7 @@ func AddUserCredentialRequestByName(
 	return &credential.ID, nil
 }
 
-func AddUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.Error {
+func AddUserCredentialRequest(db *gorm.DB, userId data.TUserID, credentialId uint) errs.Error {
 	var userRequest data.UserCredentialRequest
 	err := db.Where(
 		&data.UserCredentialRequest{UserId: userId, CredentialId: credentialId},
@@ -78,7 +78,7 @@ func AddUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.E
 	return nil
 }
 
-func RemoveUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) errs.Error {
+func RemoveUserCredentialRequest(db *gorm.DB, userId data.TUserID, credentialId uint) errs.Error {
 	err := db.Where(
 		&data.UserCredentialRequest{UserId: userId, CredentialId: credentialId},
 	).Delete(&data.UserCredentialRequest{}).Error
@@ -88,7 +88,7 @@ func RemoveUserCredentialRequest(db *gorm.DB, userId int, credentialId uint) err
 	return nil
 }
 
-func GetUserCredentials(db *gorm.DB, userId int) ([]api.Credential, errs.Error) {
+func GetUserCredentials(db *gorm.DB, userId data.TUserID) ([]api.Credential, errs.Error) {
 	var userCredentials []data.UserCredential
 	if err := db.Where(
 		&data.UserCredential{UserId: userId},
@@ -127,7 +127,7 @@ func getOrCreateCredential(db *gorm.DB, name string) (*data.Credential, errs.Err
 	return &credential, nil
 }
 
-func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error) {
+func AddUserCredential(db *gorm.DB, userId data.TUserID, name string) (*uint, errs.Error) {
 	credential, err := getOrCreateCredential(db, name)
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func AddUserCredential(db *gorm.DB, userId int, name string) (*uint, errs.Error)
 	return &credential.ID, nil
 }
 
-func RemoveUserCredential(db *gorm.DB, userId int, credentialId uint) errs.Error {
+func RemoveUserCredential(db *gorm.DB, userId data.TUserID, credentialId uint) errs.Error {
 	err := db.Where(
 		&data.UserCredential{UserId: userId, CredentialId: credentialId},
 	).Delete(&data.UserCredential{}).Error
