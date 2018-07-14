@@ -89,6 +89,10 @@ class TopHeader extends Component<Props> {
       this.props.navigation.navigate({routeName: 'QrScanner'});
     };
 
+    const openNotif = () => {
+      this.props.navigation.navigate({routeName: 'NotificationView'});
+    };
+
     return (
       <View style={styles.header}>
         <SearchBar
@@ -114,6 +118,9 @@ class TopHeader extends Component<Props> {
         <TouchableOpacity style={styles.qrButton} onPress={openQr}>
           <MaterialIcons name="camera-enhance" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
         </TouchableOpacity>
+        <TouchableOpacity style={styles.notifButton} onPress={openNotif}>
+          <MaterialIcons name="notifications" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
+        </TouchableOpacity>
       </View>
     );
   }
@@ -123,7 +130,7 @@ export default connect(({ searchBar }: RootState) => searchBar,
   { updateValue, updateFocus, updateListType })(TopHeader);
 
 const SEARCH_BAR_LEFT_MARGIN = 36;
-const SEARCH_BAR_RIGHT_MARGIN = 8;
+const SEARCH_BAR_RIGHT_MARGIN = 36;
 
 const styles = StyleSheet.create({
   searchBarTextInput: {
@@ -136,6 +143,11 @@ const styles = StyleSheet.create({
   qrButton: {
     position: 'absolute',
     padding: 8,
+  },
+  notifButton: {
+    position: 'absolute',
+    padding: 8,
+    right: 0,
   },
   icon: {
     top: 11.5, // 15.5 - 4 (hard coded top - decrease in margin)

@@ -149,9 +149,6 @@ const createTabView = () => TabNavigator({
 });
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
-  NotificationView: {
-    screen: NotificationView,
-  },
   BlankDoNotUse: {
     screen: View,
   },
@@ -180,6 +177,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   MatchProfile: {
     screen: MatchProfileView,
+  },
+  NotificationView: {
+    screen: NotificationView,
   },
   WalkthroughView: {
     screen: WalkthroughView,
@@ -226,7 +226,7 @@ class App extends React.Component<Props, AppState> {
     const { loggedIn } = this.state;
 
     let initialRouteName = 'BlankDoNotUse';
-    if (loggedIn === true) initialRouteName = 'NotificationView';
+    if (loggedIn === true) initialRouteName = 'Tabbed';
     else if (loggedIn === false) initialRouteName = 'Login';
 
     const AppNavigation = createAppNavigation(initialRouteName);
