@@ -188,7 +188,10 @@ export class RemoteProfileService implements ProfileService {
       await this.requestor.get(notificationsRequest, sessionToken);
 
     return Immutable.List(response.map(notifRes => {
-      return {...notifRes, createdAt: new Date(notifRes.createdAt)};
+      return {
+        ...notifRes,
+        createdAt: new Date(notifRes.createdAt),
+      } as Notification;
     }));
   }
 }

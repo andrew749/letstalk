@@ -1,6 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  RefreshControl,
+  RefreshControlProps,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import {
   NavigationScreenProp,
   NavigationScreenDetails,
@@ -8,6 +15,8 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { ThunkAction } from 'redux-thunk';
+import Moment from 'moment';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { AnalyticsHelper } from '../services/analytics';
 import { RootState } from '../redux';
@@ -19,6 +28,7 @@ import { ActionTypes as NotificationsActionTypes } from '../redux/notifications/
 import Loading from './Loading';
 import { headerStyle } from './TopHeader';
 import { Notification } from '../models/notification';
+import Colors from '../services/colors';
 
 interface DispatchActions {
   fetchNewestNotifications:
@@ -29,7 +39,11 @@ interface Props extends NotificationsState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class NotificationView extends Component<Props> {
+interface State {
+  refreshing: boolean;
+}
+
+class NotificationView extends Component<Props, State> {
   NOTIFICATIONS_VIEW_IDENTIFIER = "HomeView";
 
   static navigationOptions = {
@@ -40,8 +54,11 @@ class NotificationView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
+    this.state = { refreshing: false };
+
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
   }
 
   async componentDidMount() {
@@ -52,24 +69,60 @@ class NotificationView extends Component<Props> {
     this.load();
   }
 
-  async load() {
+  private async load() {
     await this.props.fetchNewestNotifications();
+  }
+
+  private async onRefresh() {
+    this.setState({refreshing: true});
+    await this.load();
+    this.setState({refreshing: false});
   }
 
   renderNotification(notification: Notification) {
     const {
       notificationId,
-      type,
       state,
+      data,
+      createdAt,
     } = notification;
 
+    let notifText: ReactNode = null;
+    let icon = 'face';
+
+    switch (notification.type) {
+      case 'NEW_CREDENTIAL_MATCH':
+        const pronoun = data.side === 'ASKER' ? 'You' : 'They';
+        notifText = (
+          <Text>
+            {`You were matched with `}
+            <Text style={{fontWeight: 'bold'}}>
+              {`${data.userName}`}
+            </Text>
+            {`! ${pronoun} requested the credential `}
+            <Text style={{fontWeight: 'bold'}}>
+              {`"${data.credentialName}"`}
+            </Text>
+          </Text>
+        );
+        icon = 'people';
+        break;
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = notification.type;
+    }
+
+    const containerStyle = [styles.notifContainer];
+    if (state === 'UNREAD') containerStyle.push(styles.notifContainerUnread);
+
     return (
-      <View style={styles.notifContainer}>
+      <View key={notification.notificationId} style={containerStyle}>
         <View style={styles.leftContainer}>
-          <Text key={notification.notificationId}>{notification.type}</Text>;
+          <MaterialIcons name={icon} size={48} />
         </View>
         <View style={styles.rightContainer}>
-          <Text key={notification.notificationId}>{notification.type}</Text>;
+          {notifText}
+          <Text style={styles.ago}>{Moment(createdAt).fromNow()}</Text>
         </View>
       </View>
     );
@@ -77,7 +130,20 @@ class NotificationView extends Component<Props> {
 
   renderBody() {
     const notifs = this.props.notifications.map(this.renderNotification).toJS();
-    return <ScrollView>{notifs}</ScrollView>;
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.onRefresh}
+          /> as React.ReactElement<RefreshControlProps>
+        }
+      >
+        <View style={styles.container}>
+          {notifs}
+        </View>
+      </ScrollView>
+    );
   }
 
   render() {
@@ -86,10 +152,11 @@ class NotificationView extends Component<Props> {
       errorMsg,
       errorType,
     } = this.props.fetchState;
-
+    // If `this.state.refreshing` is true, it means that we are reloading data using the pull
+    // down, which means that we want to still display the ScrollView.
     return (
       <Loading
-        state={state}
+        state={this.state.refreshing ? 'success' : state}
         errorMsg={errorMsg}
         errorType={errorType}
         load={this.load}
@@ -104,19 +171,31 @@ export default connect(({ notifications }: RootState) => notifications,
   { fetchNewestNotifications })(NotificationView);
 
 const styles = StyleSheet.create({
+  ago: {
+    paddingTop: 5,
+    color: Colors.DARK_GRAY,
+  },
+  container: {
+    borderTopWidth: 0.5,
+    borderColor: Colors.HIVE_SUBDUED,
+  },
   notifContainer: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.WHITE,
     padding: 10,
     flexDirection: 'row',
     borderBottomWidth: 0.5,
-    borderColor: 'gray',
+    borderColor: Colors.HIVE_SUBDUED,
+  },
+  notifContainerUnread: {
+    backgroundColor: Colors.HIVE_PRIMARY_LIGHT,
   },
   leftContainer: {
+    paddingRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
     flex: 1,
-    backgroundColor: 'red',
   },
   rightContainer: {
-    flex: 4,
-    backgroundColor: 'green',
+    flex: 5,
   },
 });

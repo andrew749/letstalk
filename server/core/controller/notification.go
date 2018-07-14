@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
+	// "letstalk/server/data"
 )
 
 func GetNotifications(c *ctx.Context) errs.Error {
@@ -45,6 +46,17 @@ func GetNotifications(c *ctx.Context) errs.Error {
 			return err
 		}
 	}
+
+	// dataMap := make(map[string]string)
+	// dataMap["credentialName"] = "Software Engineer at Quora"
+	// dataMap["userName"] = "Wojtek Swiderski"
+	// dataMap["side"] = "ASKER"
+
+	// // TODO: Remove
+	// _, err = query.CreateNotification(db, userId, data.NOTIF_TYPE_NEW_CREDENTIAL_MATCH, dataMap)
+	// if err != nil {
+	// 	return err
+	// }
 
 	c.Result = apiNotifs
 	return nil
