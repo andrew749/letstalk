@@ -11,26 +11,26 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "1",
 			Migrate: func(tx *gorm.DB) error {
-				db.AutoMigrate(&AuthenticationData{})
-				db.AutoMigrate(&Cohort{})
-				PopulateCohort(db)
-				db.AutoMigrate(&User{})
-				db.AutoMigrate(&Session{})
-				db.AutoMigrate(&UserVector{})
-				db.AutoMigrate(&UserCohort{})
-				db.AutoMigrate(&UserAdditionalData{})
-				db.AutoMigrate(&NotificationToken{})
-				db.AutoMigrate(&ExternalAuthData{})
-				db.AutoMigrate(&FbAuthToken{})
-				db.AutoMigrate(&Matching{})
-				db.AutoMigrate(&RequestMatching{})
-				db.AutoMigrate(&Credential{})
-				db.AutoMigrate(&UserCredential{})
-				db.AutoMigrate(&UserCredentialRequest{})
-				db.AutoMigrate(&Subscriber{})
-				db.AutoMigrate(&ForgotPasswordId{})
-				db.AutoMigrate(&MeetingConfirmation{})
-				return nil
+				tx.AutoMigrate(&AuthenticationData{})
+				tx.AutoMigrate(&Cohort{})
+				PopulateCohort(tx)
+				tx.AutoMigrate(&User{})
+				tx.AutoMigrate(&Session{})
+				tx.AutoMigrate(&UserVector{})
+				tx.AutoMigrate(&UserCohort{})
+				tx.AutoMigrate(&UserAdditionalData{})
+				tx.AutoMigrate(&NotificationToken{})
+				tx.AutoMigrate(&ExternalAuthData{})
+				tx.AutoMigrate(&FbAuthToken{})
+				tx.AutoMigrate(&Matching{})
+				tx.AutoMigrate(&RequestMatching{})
+				tx.AutoMigrate(&Credential{})
+				tx.AutoMigrate(&UserCredential{})
+				tx.AutoMigrate(&UserCredentialRequest{})
+				tx.AutoMigrate(&Subscriber{})
+				tx.AutoMigrate(&ForgotPasswordId{})
+				tx.AutoMigrate(&MeetingConfirmation{})
+				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
