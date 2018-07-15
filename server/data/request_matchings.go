@@ -7,9 +7,9 @@ import (
 type RequestMatching struct {
 	gorm.Model
 	AskerUser    *User       `gorm:"foreignkey:Asker"`
-	Asker        int         `gorm:"not null"`
+	Asker        TUserID     `gorm:"not null"`
 	AnswererUser *User       `gorm:"foreignkey:Answerer"`
-	Answerer     int         `gorm:"not null"`
+	Answerer     TUserID     `gorm:"not null"`
 	Credential   *Credential `gorm:"foreignkey:CredentialId"`
 	CredentialId uint        `gorm:"not null"`
 }

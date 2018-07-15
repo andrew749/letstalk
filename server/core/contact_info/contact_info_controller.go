@@ -5,6 +5,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
+	"letstalk/server/data"
 	"strconv"
 
 	"github.com/jinzhu/gorm"
@@ -16,7 +17,7 @@ import (
  */
 func GetContactInfoController(c *ctx.Context) errs.Error {
 	params := c.GinContext.Request.URL.Query()
-	var userId int
+	var userId data.TUserID
 	var val string
 	if valTemp, ok := params["userId"]; ok {
 		val = valTemp[0]
@@ -25,7 +26,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 	}
 
 	if userIdTemp, err := strconv.Atoi(val); err == nil {
-		userId = userIdTemp
+		userId = data.TUserID(userIdTemp)
 	} else {
 		return errs.NewRequestError("Malformed userId")
 	}
@@ -60,7 +61,7 @@ func GetContactInfoController(c *ctx.Context) errs.Error {
 /**
  * Determine if a user is allowed to access specific information
  */
-func isAllowedToAccessContactInfo(db *gorm.DB, requestorId int, requestedId int) (bool, error) {
+func isAllowedToAccessContactInfo(db *gorm.DB, requestorId data.TUserID, requestedId data.TUserID) (bool, error) {
 	var count int
 	// find who this person is a mentor for
 	if err := db.Table("mentors").

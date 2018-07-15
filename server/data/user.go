@@ -15,9 +15,12 @@ const (
 	USER_ROLE_ADMIN   UserRole = "ADMIN"
 )
 
+// TUserID type of a user id
+type TUserID EntID
+
 type User struct {
 	CreatedAt        time.Time `gorm:"not null"`
-	UserId           int       `gorm:"not null;primary_key;auto_increment"`
+	UserId           TUserID   `gorm:"not null;primary_key;auto_increment"`
 	FirstName        string    `gorm:"not null"`
 	LastName         string    `gorm:"not null"`
 	Email            string    `gorm:"type:varchar(128);not null;unique"`

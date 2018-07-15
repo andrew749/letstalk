@@ -20,7 +20,7 @@ import (
 type ResolveType int
 
 type userWithCredentialId struct {
-	userId       int
+	userId       data.TUserID
 	credentialId uint
 }
 
@@ -41,7 +41,7 @@ func Shuffle(vals []userWithCredentialId) {
 
 func getPotentialMatchUserIds(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	resolveType ResolveType,
 	credentialId uint,
 ) ([]userWithCredentialId, errs.Error) {
@@ -102,8 +102,8 @@ func getPotentialMatchUserIds(
 
 func sendNotifications(
 	c *ctx.Context,
-	askerId int,
-	answererId int,
+	askerId data.TUserID,
+	answererId data.TUserID,
 	credentialId uint,
 	name string,
 ) errs.Error {
@@ -169,8 +169,8 @@ func ResolveRequestToMatch(
 		Shuffle(userCredentialIds)
 
 		var (
-			askerId    int
-			answererId int
+			askerId    data.TUserID
+			answererId data.TUserID
 		)
 		if resolveType == RESOLVE_TYPE_ASKER {
 			askerId = userId
@@ -226,7 +226,7 @@ func ResolveRequestToMatch(
 
 func GetAnswerersByAskerId(
 	db *gorm.DB,
-	askerId int,
+	askerId data.TUserID,
 	flag api.ReqMatchingInfoFlag,
 ) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
@@ -247,7 +247,7 @@ func GetAnswerersByAskerId(
 
 func GetAskersByAnswererId(
 	db *gorm.DB,
-	answererId int,
+	answererId data.TUserID,
 	flag api.ReqMatchingInfoFlag,
 ) ([]data.RequestMatching, error) {
 	matchings := make([]data.RequestMatching, 0)
@@ -266,7 +266,7 @@ func GetAskersByAnswererId(
 	return matchings, nil
 }
 
-func RemoveAllMatches(db *gorm.DB, fstUserId int, sndUserId int) errs.Error {
+func RemoveAllMatches(db *gorm.DB, fstUserId data.TUserID, sndUserId data.TUserID) errs.Error {
 	err := db.Where(
 		"(answerer = ? and asker = ?) or (asker = ? and answerer = ?)",
 		fstUserId,

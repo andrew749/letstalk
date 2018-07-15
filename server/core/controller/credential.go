@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
+	"letstalk/server/data"
 )
 
 const RESOLVE_WAIT_TIME = 5000 // ms
@@ -140,7 +141,9 @@ func GetUserCredentialsController(c *ctx.Context) errs.Error {
 
 func RemoveRtmMatches(c *ctx.Context) errs.Error {
 	userIdStr := c.GinContext.Param("userId")
-	userId, convErr := strconv.Atoi(userIdStr)
+	tempUserId, convErr := strconv.Atoi(userIdStr)
+	userId := data.TUserID(tempUserId)
+
 	if convErr != nil {
 		return errs.NewRequestError(convErr.Error())
 	}

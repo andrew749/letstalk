@@ -41,10 +41,12 @@ func GetMyProfileController(c *ctx.Context) errs.Error {
 
 func GetMatchProfileController(c *ctx.Context) errs.Error {
 	matchUserIdStr := c.GinContext.Param("userId")
-	matchUserId, convErr := strconv.Atoi(matchUserIdStr)
+	tempMatchUserId, convErr := strconv.Atoi(matchUserIdStr)
 	if convErr != nil {
 		return errs.NewRequestError(convErr.Error())
 	}
+
+	matchUserId := data.TUserID(tempMatchUserId)
 
 	userModel, err := query.GetMatchProfile(c.Db, c.SessionData.UserId, matchUserId)
 	if err != nil {

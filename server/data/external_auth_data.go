@@ -6,7 +6,7 @@ import (
 
 type ExternalAuthData struct {
 	User          User    `gorm:"foreignkey:UserId"`
-	UserId        int     `gorm:"primary_key;not null"`
+	UserId        TUserID `gorm:"primary_key;not null"`
 	FbUserId      *string `gorm:"null"`
 	FbProfileLink *string `gorm:"null"`
 	PhoneNumber   *string `gorm:"null"`
@@ -14,7 +14,7 @@ type ExternalAuthData struct {
 
 func CreateExternalAuthData(
 	db *gorm.DB,
-	userId int,
+	userId TUserID,
 	fbUserId *string,
 	fbProfileLink *string,
 	phoneNumber *string,

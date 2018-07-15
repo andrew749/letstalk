@@ -8,7 +8,7 @@ import (
 )
 
 // GetMatchingByUserIds returns details on a matching between two users.
-func GetMatchingByUserIds(db *gorm.DB, firstUser int, secondUser int) (*data.Matching, error) {
+func GetMatchingByUserIds(db *gorm.DB, firstUser data.TUserID, secondUser data.TUserID) (*data.Matching, error) {
 	matchings := make([]data.Matching, 0)
 	err := db.
 		Where(&data.Matching{Mentor: firstUser, Mentee: secondUser}).
@@ -27,7 +27,7 @@ func GetMatchingByUserIds(db *gorm.DB, firstUser int, secondUser int) (*data.Mat
 
 func GetMenteesByMentorId(
 	db *gorm.DB,
-	mentorId int,
+	mentorId data.TUserID,
 	flag api.MatchingInfoFlag,
 ) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
@@ -48,7 +48,7 @@ func GetMenteesByMentorId(
 
 func GetMentorsByMenteeId(
 	db *gorm.DB,
-	menteeId int,
+	menteeId data.TUserID,
 	flag api.MatchingInfoFlag,
 ) ([]data.Matching, error) {
 	matchings := make([]data.Matching, 0)
