@@ -28,7 +28,7 @@ func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
 }
 
 // default expiry time in days
-const DEFAULT_EXPIRY = 7 * 24
+const DEFAULT_EXPIRY = 20 * 7 * 24
 
 func GetDeviceTokensForUser(manager ISessionManagerBase, userId data.TUserID) ([]string, error) {
 	userSessions, err := manager.GetUserSessions(userId)
