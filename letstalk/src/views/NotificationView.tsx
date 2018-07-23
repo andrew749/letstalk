@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
+  Dimensions,
   View,
   Text,
   RefreshControl,
@@ -160,6 +161,14 @@ class NotificationView extends Component<Props, State> {
             onRefresh={this.onRefresh}
           /> as React.ReactElement<RefreshControlProps>
         }
+        onScroll={(e)=>{
+          var windowHeight = Dimensions.get('window').height,
+            height = e.nativeEvent.contentSize.height,
+            offset = e.nativeEvent.contentOffset.y;
+          if( windowHeight + offset >= height ){
+            console.log('scrolled to end');
+          }
+        }}
       >
         <View style={styles.container}>
           {notifs}
