@@ -5,8 +5,11 @@ export type NotifState =
 interface BaseNotification {
   notificationId: number;
   userId: number;
+  type: string;
   state: NotifState;
-  createdAt: Date;
+  message: string;
+  timestamp: Date;
+  thumbnail: string;
 }
 
 interface NewCredentialMatchData {

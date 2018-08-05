@@ -38,12 +38,11 @@ func GetQueueLocation(sess *sqs.SQS, queueName *string) (*string, error) {
 
 func AddNewMessage(
 	sess *sqs.SQS,
-	queueId *string,
-	queueUrl *string,
-	recipient *string,
-	message interface{},
+	queueId string,
+	queueUrl string,
+	payload interface{},
 ) (*sqs.SendMessageOutput, error) {
-	marshalledPayload, err := json.Marshal(message)
+	marshalledPayload, err := json.Marshal(payload)
 
 	if err != nil {
 		return nil, err
@@ -51,7 +50,7 @@ func AddNewMessage(
 
 	stringPayload := string(marshalledPayload)
 	input := &sqs.SendMessageInput{
-		QueueUrl:    queueUrl,
+		QueueUrl:    &queueUrl,
 		MessageBody: &stringPayload,
 	}
 	output, err := sess.SendMessage(input)
