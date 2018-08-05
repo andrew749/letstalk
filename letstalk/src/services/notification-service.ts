@@ -9,6 +9,9 @@ import { RootState } from '../redux';
 import { credentialRequestRemove } from '../redux/credential-requests/actions';
 import { credentialRemove } from '../redux/credentials/actions';
 import { fetchBootstrap } from '../redux/bootstrap/reducer';
+import requestor, { Requestor } from './requests';
+import auth, {Auth} from './auth';
+import Immutable from 'immutable';
 
 interface BaseNotificationData {
   readonly title: string;
