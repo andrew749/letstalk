@@ -10,6 +10,7 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
