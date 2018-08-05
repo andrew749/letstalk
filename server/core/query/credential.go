@@ -16,7 +16,10 @@ func GetAllCredentials(db *gorm.DB) ([]api.Credential, errs.Error) {
 
 	credentials := make([]api.Credential, len(rawCredentials))
 	for i, rawCredential := range rawCredentials {
-		credentials[i] = api.Credential{rawCredential.ID, rawCredential.Name}
+		credentials[i] = api.Credential{
+			Id:   rawCredential.ID,
+			Name: rawCredential.Name,
+		}
 	}
 
 	return credentials, nil

@@ -45,7 +45,12 @@ func GetAllCohorts(db *gorm.DB) ([]api.Cohort, errs.Error) {
 	}
 	cohorts := make([]api.Cohort, len(rows))
 	for i, row := range rows {
-		cohorts[i] = api.Cohort{row.CohortId, row.ProgramId, row.SequenceId, row.GradYear}
+		cohorts[i] = api.Cohort{
+			CohortId:   row.CohortId,
+			ProgramId:  row.ProgramId,
+			SequenceId: row.SequenceId,
+			GradYear:   row.GradYear,
+		}
 	}
 
 	return cohorts, nil
