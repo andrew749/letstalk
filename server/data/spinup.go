@@ -30,6 +30,15 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&Subscriber{})
 				tx.AutoMigrate(&ForgotPasswordId{})
 				tx.AutoMigrate(&MeetingConfirmation{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "2",
+			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&Notification{})
 				return tx.Error
 			},
