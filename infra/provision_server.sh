@@ -1,5 +1,6 @@
 #!/bin/bash
 
+FOLDER=/var/app/letstalk
 set -e
 # To be run from AWS cloud in an EC2 instance
 
@@ -37,6 +38,11 @@ generate_ssh() {
   echo "BEGIN PUBLIC KEY"
   cat ~/.ssh/id_rsa.pub
   echo "END PUBLIC KEY"
+}
+
+setup_startup() {
+  cp $FOLDER/infra/startup.sh /ets/init.d/server.sh
+  update-rc.d server.sh defaults
 }
 
 
