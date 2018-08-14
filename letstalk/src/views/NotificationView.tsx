@@ -2,11 +2,11 @@ import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
   Dimensions,
+  ListView,
   View,
   Text,
   RefreshControl,
   RefreshControlProps,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
@@ -25,6 +25,7 @@ import { RootState } from '../redux';
 import {
   State as NotificationsState,
   fetchNewestNotifications,
+  fetchAdditionalNotifications,
   updateNotificationState,
 } from '../redux/notifications/reducer';
 import { ActionTypes as NotificationsActionTypes } from '../redux/notifications/actions';
@@ -34,6 +35,8 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 
 interface DispatchActions {
+  fetchAdditionalNotifications:
+    ActionCreator<ThunkAction<Promise<NotificationsActionTypes>, NotificationsState, void>>;
   fetchNewestNotifications:
     ActionCreator<ThunkAction<Promise<NotificationsActionTypes>, NotificationsState, void>>;
   updateNotificationState:
@@ -47,6 +50,8 @@ interface Props extends NotificationsState, DispatchActions {
 interface State {
   refreshing: boolean;
 }
+
+type Row = Notification | "LOAD_MORE" | "NO_MORE";
 
 class NotificationView extends Component<Props, State> {
   NOTIFICATIONS_VIEW_IDENTIFIER = "HomeView";
@@ -63,6 +68,7 @@ class NotificationView extends Component<Props, State> {
 
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+    this.renderRow = this.renderRow.bind(this);
     this.renderNotification = this.renderNotification.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
   }
@@ -85,7 +91,7 @@ class NotificationView extends Component<Props, State> {
     this.setState({refreshing: false});
   }
 
-  renderNotification(notification: Notification) {
+  private renderNotification(notification: Notification) {
     const {
       notificationId,
       state,
@@ -151,29 +157,53 @@ class NotificationView extends Component<Props, State> {
     );
   }
 
+  private renderRow(r: Row) {
+    switch (r) {
+      case "LOAD_MORE":
+        return (
+          <View style={styles.loadingMoreContainer}>
+            <Text style={styles.loadingMore}>Loading more...</Text>
+          </View>
+        );
+      case "NO_MORE":
+        return (
+          <View style={styles.loadingMoreContainer}>
+            <Text style={styles.loadingMore}>No more notifications</Text>
+          </View>
+        );
+      default:
+        return this.renderNotification(r);
+    }
+  }
+
   renderBody() {
-    const notifs = this.props.notifications.map(this.renderNotification).toJS();
+    const ds = new ListView.DataSource({rowHasChanged: (n1: Notification, n2: Notification) => {
+      return n1.notificationId !== n2.notificationId;
+    }});
+    const footer: Row = this.props.hasAll ? 'NO_MORE' : 'LOAD_MORE';
+    const data = ds.cloneWithRows(this.props.notifications.toJS().concat([footer]));
+    const onEndReached = (() => {
+      // TODO: Error toast
+      if (!this.props.hasAll && this.props.notifications.size > 0) {
+        const oldestNotifId = this.props.notifications.last().notificationId;
+        this.props.fetchAdditionalNotifications(oldestNotifId);
+      }
+    }).bind(this);
+
     return (
-      <ScrollView
+      <ListView
+        contentContainerStyle={styles.container}
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
             onRefresh={this.onRefresh}
           /> as React.ReactElement<RefreshControlProps>
         }
-        onScroll={(e)=>{
-          var windowHeight = Dimensions.get('window').height,
-            height = e.nativeEvent.contentSize.height,
-            offset = e.nativeEvent.contentOffset.y;
-          if( windowHeight + offset >= height ){
-            console.log('scrolled to end');
-          }
-        }}
-      >
-        <View style={styles.container}>
-          {notifs}
-        </View>
-      </ScrollView>
+        dataSource={data}
+        renderRow={this.renderRow}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={40}
+      />
     );
   }
 
@@ -184,7 +214,7 @@ class NotificationView extends Component<Props, State> {
       errorType,
     } = this.props.fetchState;
     // If `this.state.refreshing` is true, it means that we are reloading data using the pull
-    // down, which means that we want to still display the ScrollView.
+    // down, which means that we want to still display the ListView.
     return (
       <Loading
         state={this.state.refreshing ? 'success' : state}
@@ -199,7 +229,11 @@ class NotificationView extends Component<Props, State> {
 }
 
 export default connect(({ notifications }: RootState) => notifications,
-  { fetchNewestNotifications, updateNotificationState })(NotificationView);
+  {
+    fetchAdditionalNotifications,
+    fetchNewestNotifications,
+    updateNotificationState,
+  })(NotificationView);
 
 const styles = StyleSheet.create({
   ago: {
@@ -229,4 +263,12 @@ const styles = StyleSheet.create({
   rightContainer: {
     flex: 5,
   },
+  loadingMoreContainer: {
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingMore: {
+    color: 'gray',
+  }
 });

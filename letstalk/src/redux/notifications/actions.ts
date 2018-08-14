@@ -14,6 +14,7 @@ import { APIError } from '../../services/requests';
 export enum TypeKeys {
   FETCH        = 'NOTIFICATIONS/FETCH',
   UPDATE_STATE = 'NOTIFICATIONS/UPDATE_STATE',
+  APPEND       = 'NOTIFICATIONS/APPEND',
 }
 
 export type Notifications = Immutable.List<Notification>;
@@ -26,6 +27,11 @@ interface NotificationUpdateStateAction extends Action {
   readonly type: TypeKeys.UPDATE_STATE;
   readonly notificationId: number;
   readonly state: NotifState;
+}
+
+interface NotificationAppendAction extends Action {
+  readonly type: TypeKeys.APPEND;
+  readonly data: Notifications;
 }
 
 function receive(data: Notifications): NotificationEditReceiveAction {
@@ -62,6 +68,13 @@ export function notificationUpdateState(
   };
 }
 
+export function appendNotifications(notifications: Notifications): NotificationAppendAction {
+  return {
+    type: TypeKeys.APPEND,
+    data: notifications,
+  };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, Notifications> = {
   receive,
   error,
@@ -75,3 +88,4 @@ export type ActionTypes =
   | NotificationEditErrorAction
   | NotificationEditStartAction
   | NotificationUpdateStateAction
+  | NotificationAppendAction
