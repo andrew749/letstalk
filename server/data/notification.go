@@ -24,7 +24,7 @@ type JSONBlob json.RawMessage
 
 type Notification struct {
 	gorm.Model
-	UserId int        `gorm:"not null"`
+	UserId TUserID    `gorm:"not null"`
 	User   User       `gorm:"foreignkey:UserId"`
 	Type   NotifType  `gorm:"not null"`
 	State  NotifState `gorm:"not null"`

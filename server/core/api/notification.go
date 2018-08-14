@@ -8,7 +8,7 @@ import (
 
 type Notification struct {
 	NotificationId uint              `json:"notificationId"`
-	UserId         int               `json:"userId"`
+	UserId         data.TUserID      `json:"userId"`
 	Type           data.NotifType    `json:"type"`
 	State          data.NotifState   `json:"state"`
 	Data           map[string]string `json:"data"`

@@ -67,7 +67,7 @@ func notificationsDataToApi(dataNotifs []data.Notification) ([]api.Notification,
 
 func CreateNotification(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	tpe data.NotifType,
 	dataMap map[string]string,
 ) (*api.Notification, errs.Error) {
@@ -99,7 +99,7 @@ func CreateNotification(
 
 func GetNewestNotificationsForUser(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	limit int,
 ) ([]api.Notification, errs.Error) {
 	var dataNotifs []data.Notification
@@ -121,7 +121,7 @@ func GetNewestNotificationsForUser(
 
 func GetNotificationsForUser(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	past int,
 	limit int,
 ) ([]api.Notification, errs.Error) {
@@ -146,7 +146,7 @@ func GetNotificationsForUser(
 
 func UpdateNotificationState(
 	db *gorm.DB,
-	userId int,
+	userId data.TUserID,
 	notificationIds []uint,
 	state data.NotifState,
 ) errs.Error {
