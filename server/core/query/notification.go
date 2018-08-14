@@ -20,11 +20,13 @@ func NotificationApiToData(notification api.Notification) (*data.Notification, e
 		Model: gorm.Model{
 			ID: notification.NotificationId,
 		},
-		UserId:    notification.UserId,
-		Type:      notification.Type,
-		State:     notification.State,
-		Timestamp: notification.Timestamp,
-		Data:      notifData,
+		UserId:        notification.UserId,
+		Type:          notification.Type,
+		State:         notification.State,
+		Message:       notification.Message,
+		ThumbnailLink: notification.ThumbnailLink,
+		Timestamp:     notification.Timestamp,
+		Data:          notifData,
 	}
 
 	return dataNotif, nil
