@@ -7,6 +7,7 @@ import { reducer as cohorts, State as CohortsState } from './cohorts/reducer';
 import { reducer as credentials, State as CredentialsState } from './credentials/reducer';
 import { reducer as onboarding, State as OnboardingState } from './onboarding/reducer';
 import { reducer as matchProfile, State as MatchProfileState } from './match-profile/reducer';
+import { reducer as notifications, State as NotificationsState } from './notifications/reducer';
 import { reducer as profile, State as ProfileState } from './profile/reducer';
 import {
   reducer as credentialRequests,
@@ -27,6 +28,7 @@ export interface RootState {
   form: FormState;
   onboarding: OnboardingState;
   matchProfile: MatchProfileState;
+  notifications: NotificationsState;
   profile: ProfileState;
   searchBar: SearchBarState;
 };
@@ -41,6 +43,7 @@ const reducers = {
   toast,
   onboarding,
   matchProfile,
+  notifications,
   profile,
   searchBar,
 };

@@ -36,6 +36,7 @@ import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
 import RequestToMatchView from './views/RequestToMatchView';
+import NotificationView from './views/NotificationView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
@@ -176,6 +177,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   MatchProfile: {
     screen: MatchProfileView,
+  },
+  NotificationView: {
+    screen: NotificationView,
   },
   WalkthroughView: {
     screen: WalkthroughView,

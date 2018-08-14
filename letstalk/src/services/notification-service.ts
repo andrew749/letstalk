@@ -77,6 +77,7 @@ export default class NotificationService {
     return () => {
       switch (notification.data.type) {
         case 'REQUEST_TO_MATCH':
+          // TODO: Make this do a reset instead
           this.navigate('Home');
           break;
         default:

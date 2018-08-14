@@ -208,6 +208,13 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/meeting/confirm")
 	v1.POST("/meeting/confirm", hw.wrapHandler(meeting.PostMeetingConfirmation, true /* auth required */))
 
+	// Notifications
+	v1.OPTIONS("/notifications")
+	v1.GET("/notifications", hw.wrapHandler(controller.GetNotifications, true))
+
+	v1.OPTIONS("/notifications/update_state")
+	v1.POST("/notifications/update_state", hw.wrapHandler(controller.UpdateNotificationState, true))
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))

@@ -9,7 +9,8 @@ const Colors = {
   HIVE_PRIMARY: "#FFB52A",
   FB_BG: "#3B5998",
   WHITE: "#FFFFFF",
-  HIVE_SUBDUED: "#808080"
+  HIVE_SUBDUED: "#808080",
+  DARK_GRAY: "#404040",
 };
 
 export default Colors;
