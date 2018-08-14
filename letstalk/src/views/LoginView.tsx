@@ -161,9 +161,8 @@ export default class LoginView extends Component<Props> {
       try {
         token = await auth.registerForPushNotificationsAsync();
       } catch(e){
-        console.log("Failed to register for notification " + e);
+        console.log("Failed to register for notification")
       }
-      console.log("Logging in with Facebook")
       if (await auth.loginWithFb(token)) {
         this.props.navigation.dispatch(NavigationActions.reset({
           index: 0,
@@ -171,7 +170,6 @@ export default class LoginView extends Component<Props> {
         }));
       }
     } catch(e) {
-      console.log("Unable to login: " + e)
       throw new SubmissionError({_error: e.errorMsg});
     }
   }
@@ -188,7 +186,7 @@ export default class LoginView extends Component<Props> {
       try {
         token = await auth.registerForPushNotificationsAsync();
       } catch(e){
-        console.log("Failed to register for notification " + e);
+        console.log("Failed to register for notification")
       }
       await auth.login(email, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
@@ -196,7 +194,6 @@ export default class LoginView extends Component<Props> {
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
-      console.log("Unable to login: " + e)
       throw new SubmissionError({_error: e.errorMsg});
     }
   }

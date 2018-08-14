@@ -40,7 +40,6 @@ import NotificationView from './views/NotificationView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
-import NotificationContentView from './views/NotificationContentView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
@@ -187,9 +186,6 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     navigationOptions: {
       header: null,
     },
-  },
-  NotificationContent: {
-    screen: NotificationContentView,
   },
 }, {
   initialRouteName,
