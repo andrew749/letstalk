@@ -7,8 +7,7 @@ class TutorialService {
 
     static async shouldShowTutorial(): Promise<boolean> {
       const tutorialState = await AsyncStorage.getItem(this.SHOW_TUTORIAL_KEY);
-      // return __DEV__ || tutorialState !== "true";
-      return tutorialState !== "true";
+      return __DEV__ || tutorialState !== "true";
     }
 
     static async ackShowTutorial(): Promise<void> {
