@@ -15,9 +15,9 @@ const (
 
 type Matching struct {
 	gorm.Model
-	MentorUser *User `gorm:"foreignkey:Mentor"`
-	Mentor     int  `gorm:"not null"`
-	MenteeUser *User `gorm:"foreignkey:Mentee"`
-	Mentee     int  `gorm:"not null"`
-	State MatchingState `gorm:"not null"`
+	MentorUser *User         `gorm:"foreignkey:Mentor"`
+	Mentor     TUserID       `gorm:"not null"`
+	MenteeUser *User         `gorm:"foreignkey:Mentee"`
+	Mentee     TUserID       `gorm:"not null"`
+	State      MatchingState `gorm:"not null"`
 }

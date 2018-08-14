@@ -30,7 +30,7 @@ const (
 )
 
 // UploadProfilePic uploads profile pic for userId to s3 and returns url
-func UploadProfilePic(userID int, dataReader io.Reader) (*string, error) {
+func UploadProfilePic(userID data.TUserID, dataReader io.Reader) (*string, error) {
 	var s3Client *s3.S3
 	var err error
 

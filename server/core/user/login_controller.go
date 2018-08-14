@@ -11,8 +11,14 @@ import (
 	"github.com/romana/rlog"
 )
 
+type InvalidPasswordError struct {
+	errs.IError
+}
+
 func invalidPassError() errs.Error {
-	return errs.NewRequestError("Invalid Password. Try again.")
+	return &InvalidPasswordError{
+		errs.NewRequestError("Invalid Password. Try again."),
+	}
 }
 
 /**

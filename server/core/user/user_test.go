@@ -38,7 +38,7 @@ func TestCreateNewUser(t *testing.T) {
 				err = writeUser(&signupRequest, context)
 				assert.NoError(t, err)
 
-				userID := context.Result.(struct{ UserId int }).UserId
+				userID := context.Result.(struct{ UserId data.TUserID }).UserId
 				tempUser, err = query.GetUserById(db, userID)
 
 				assert.NoError(t, err)

@@ -13,7 +13,7 @@ import (
  * Try to see if there is school data associated with this account.
  * If there is no data, return nil
  */
-func GetUserCohort(db *gorm.DB, userId int) (*data.Cohort, error) {
+func GetUserCohort(db *gorm.DB, userId data.TUserID) (*data.Cohort, error) {
 	cohortIdMapping, err := GetUserCohortMappingById(db, userId)
 
 	if err != nil {
@@ -30,7 +30,7 @@ func GetUserCohort(db *gorm.DB, userId int) (*data.Cohort, error) {
 /**
  * Get the particular cohort for a user.
  */
-func GetUserCohortMappingById(db *gorm.DB, userId int) (*data.UserCohort, error) {
+func GetUserCohortMappingById(db *gorm.DB, userId data.TUserID) (*data.UserCohort, error) {
 	var cohort data.UserCohort
 	if err := db.Where("user_id = ?", userId).First(&cohort).Error; err != nil {
 		return nil, err

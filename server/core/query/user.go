@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func GetUserById(db *gorm.DB, userId int) (*data.User, error) {
+func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{UserId: userId}).First(&user).RecordNotFound() {
 		return nil, errs.NewNotFoundError("Unable to find user")
@@ -31,7 +31,7 @@ func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
 	return &user, nil
 }
 
-func GetUserProfileById(db *gorm.DB, userId int) (*data.User, error) {
+func GetUserProfileById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 	var user data.User
 
 	if db.Where(

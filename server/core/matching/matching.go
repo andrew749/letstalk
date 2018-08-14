@@ -92,8 +92,8 @@ func convertMatchingDataToApi(matching *data.Matching) *api.Matching {
 
 func sendMatchNotifications(
 	c *ctx.Context,
-	mentorId int,
-	menteeId int,
+	mentorId data.TUserID,
+	menteeId data.TUserID,
 ) errs.Error {
 	mentorDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, mentorId)
 	if err != nil {

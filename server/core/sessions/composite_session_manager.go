@@ -3,6 +3,7 @@ package sessions
 import (
 	"errors"
 	"letstalk/server/core/errs"
+	"letstalk/server/data"
 	"time"
 
 	"github.com/romana/rlog"
@@ -58,7 +59,7 @@ func (sm CompositeSessionManager) AddNewSession(session *SessionData) error {
 }
 
 func (sm CompositeSessionManager) CreateNewSessionForUserId(
-	userId int,
+	userId data.TUserID,
 	notificationToken *string,
 ) (*SessionData, error) {
 	defaultExpiry := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
@@ -66,7 +67,7 @@ func (sm CompositeSessionManager) CreateNewSessionForUserId(
 }
 
 func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
-	userId int,
+	userId data.TUserID,
 	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, error) {
@@ -112,7 +113,7 @@ func (sm CompositeSessionManager) GetSessionForSessionId(
 }
 
 func (sm CompositeSessionManager) GetUserSessions(
-	userId int,
+	userId data.TUserID,
 ) ([]*SessionData, error) {
 	var res []*SessionData = make([]*SessionData, 0)
 	err := sm.forEverySm(func(x ISessionStore) error {

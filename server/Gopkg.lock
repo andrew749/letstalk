@@ -263,6 +263,12 @@
   version = "v8.18.2"
 
 [[projects]]
+  name = "gopkg.in/gormigrate.v1"
+  packages = ["."]
+  revision = "21b0b93e8253d575d9185974835423f98d30158d"
+  version = "v1.2.0"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -271,6 +277,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9232f198c0148b14a55a5dedbc5326ce3ed1be634f85b1bd2b03c0d7d47edc76"
+  inputs-digest = "63708f787d05e30076198226c825ec3e6e4a5435ab6e575b5984535fa8bae510"
   solver-name = "gps-cdcl"
   solver-version = 1

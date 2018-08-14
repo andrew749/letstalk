@@ -14,7 +14,7 @@ type HashingError struct {
 }
 
 // ChangeUserPassword update the specified user password
-func ChangeUserPassword(db *gorm.DB, userId int, newPassword string) error {
+func ChangeUserPassword(db *gorm.DB, userId data.TUserID, newPassword string) error {
 	var err error
 	var hashedPassword string
 	if hashedPassword, err = utility.HashPassword(newPassword); err != nil {

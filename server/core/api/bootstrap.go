@@ -18,7 +18,7 @@ const (
 )
 
 type BootstrapUserRelationshipDataModel struct {
-	UserId        int                `json:"userId" binding:"required"`
+	UserId        data.TUserID       `json:"userId" binding:"required"`
 	UserType      UserType           `json:"userType" binding:"required"`
 	FirstName     string             `json:"firstName" binding:"required"`
 	LastName      string             `json:"lastName" binding:"required"`
