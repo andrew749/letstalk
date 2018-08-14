@@ -16,6 +16,6 @@ type Notification struct {
 }
 
 type UpdateNotificationStateRequest struct {
-	NotificationId uint            `json:"notificationId"`
-	State          data.NotifState `json:"state"`
+	NotificationIds []uint          `json:"notificationIds"`
+	State           data.NotifState `json:"state"`
 }

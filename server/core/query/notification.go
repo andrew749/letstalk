@@ -147,15 +147,13 @@ func GetNotificationsForUser(
 func UpdateNotificationState(
 	db *gorm.DB,
 	userId int,
-	notificationId uint,
+	notificationIds []uint,
 	state data.NotifState,
 ) errs.Error {
-	err := db.Model(&data.Notification{}).Where(&data.Notification{
-		Model: gorm.Model{
-			ID: notificationId,
-		},
-		UserId: userId,
-	}).Updates(&data.Notification{State: state}).Error
+	err := db.Model(&data.Notification{}).Where("id in (?) and user_id = ?",
+		notificationIds,
+		userId,
+	).Updates(&data.Notification{State: state}).Error
 	if err != nil {
 		return errs.NewDbError(err)
 	}

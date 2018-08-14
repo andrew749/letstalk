@@ -25,7 +25,7 @@ type NotificationEditStartAction = FetchStartAction<TypeKeys.FETCH>;
 
 interface NotificationUpdateStateAction extends Action {
   readonly type: TypeKeys.UPDATE_STATE;
-  readonly notificationId: number;
+  readonly notificationIds: Immutable.List<number>;
   readonly state: NotifState;
 }
 
@@ -58,12 +58,12 @@ function start(): NotificationEditStartAction {
 }
 
 export function notificationUpdateState(
-  notificationId: number,
+  notificationIds: Immutable.List<number>,
   state: NotifState
 ): NotificationUpdateStateAction {
   return {
     type: TypeKeys.UPDATE_STATE,
-    notificationId,
+    notificationIds,
     state,
   };
 }

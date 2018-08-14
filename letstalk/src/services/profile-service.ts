@@ -93,7 +93,7 @@ interface NotificationRes {
 }
 
 interface UpdateNotificationStateRequest {
-  notificationId: number;
+  notificationIds: Array<number>;
   state: string;
 }
 
@@ -201,9 +201,15 @@ export class RemoteProfileService implements ProfileService {
     }));
   }
 
-  async updateNotificationState(notificationId: number, state: NotifState): Promise<void> {
+  async updateNotificationState(
+    notificationIds: Immutable.List<number>,
+    state: NotifState,
+  ): Promise<void> {
     const sessionToken = await this.auth.getSessionToken();
-    const request: UpdateNotificationStateRequest = { notificationId, state };
+    const request: UpdateNotificationStateRequest = {
+      notificationIds: notificationIds.toJS(),
+      state,
+    };
     await this.requestor.post(NOTIFICATIONS_UPDATE_STATE_ROUTE, request, sessionToken);
   }
 }

@@ -19,9 +19,12 @@ import {
 import { ThunkAction } from 'redux-thunk';
 import Moment from 'moment';
 import { MaterialIcons } from '@expo/vector-icons';
+import Immutable from 'immutable';
 
+import { Button } from '../components';
 import { AnalyticsHelper } from '../services/analytics';
 import { RootState } from '../redux';
+import { errorToast } from '../redux/toast';
 import {
   State as NotificationsState,
   fetchNewestNotifications,
@@ -35,6 +38,7 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 
 interface DispatchActions {
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchAdditionalNotifications:
     ActionCreator<ThunkAction<Promise<NotificationsActionTypes>, NotificationsState, void>>;
   fetchNewestNotifications:
@@ -51,7 +55,7 @@ interface State {
   refreshing: boolean;
 }
 
-type Row = Notification | "LOAD_MORE" | "NO_MORE";
+type Row = "HEADER" | Notification | "LOAD_MORE" | "NO_MORE";
 
 class NotificationView extends Component<Props, State> {
   NOTIFICATIONS_VIEW_IDENTIFIER = "HomeView";
@@ -140,7 +144,7 @@ class NotificationView extends Component<Props, State> {
     let onPress = (async () => {
       await onPressAction();
       if (state === 'UNREAD') {
-        await this.props.updateNotificationState(notificationId, 'READ');
+        await this.props.updateNotificationState(Immutable.List([notificationId]), 'READ');
       }
     }).bind(this);
 
@@ -159,6 +163,25 @@ class NotificationView extends Component<Props, State> {
 
   private renderRow(r: Row) {
     switch (r) {
+      case "HEADER":
+        const getUnread = () => this.props.notifications.filter(n => n.state === 'UNREAD');
+        const hasUnread = !getUnread().isEmpty();
+        const onPress = async () => {
+          const unreadNotifIds = getUnread().map(n => n.notificationId).toList();
+          try {
+            await this.props.updateNotificationState(unreadNotifIds, 'READ');
+          } catch (e) {
+            await this.props.errorToast(e.errorMsg);
+          }
+        }
+        const button = hasUnread ? (
+          <Button
+            buttonStyle={styles.markAllReadButton}
+            onPress={onPress}
+            title="Mark all as read"
+          />
+        ) : null;
+        return <View style={styles.header}>{ button }</View>;
       case "LOAD_MORE":
         return (
           <View style={styles.loadingMoreContainer}>
@@ -181,18 +204,22 @@ class NotificationView extends Component<Props, State> {
       return n1.notificationId !== n2.notificationId;
     }});
     const footer: Row = this.props.hasAll ? 'NO_MORE' : 'LOAD_MORE';
-    const data = ds.cloneWithRows(this.props.notifications.toJS().concat([footer]));
-    const onEndReached = (() => {
-      // TODO: Error toast
+    const data = ds.cloneWithRows(
+      ['HEADER'].concat(this.props.notifications.toJS().concat([footer])),
+    );
+    const onEndReached = (async () => {
       if (!this.props.hasAll && this.props.notifications.size > 0) {
         const oldestNotifId = this.props.notifications.last().notificationId;
-        this.props.fetchAdditionalNotifications(oldestNotifId);
+        try {
+          await this.props.fetchAdditionalNotifications(oldestNotifId);
+        } catch (e) {
+          await this.props.errorToast(e.errorMsg);
+        }
       }
     }).bind(this);
 
     return (
       <ListView
-        contentContainerStyle={styles.container}
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
@@ -233,16 +260,13 @@ export default connect(({ notifications }: RootState) => notifications,
     fetchAdditionalNotifications,
     fetchNewestNotifications,
     updateNotificationState,
+    errorToast,
   })(NotificationView);
 
 const styles = StyleSheet.create({
   ago: {
     paddingTop: 5,
     color: Colors.DARK_GRAY,
-  },
-  container: {
-    borderTopWidth: 0.5,
-    borderColor: Colors.HIVE_SUBDUED,
   },
   notifContainer: {
     backgroundColor: Colors.WHITE,
@@ -270,5 +294,15 @@ const styles = StyleSheet.create({
   },
   loadingMore: {
     color: 'gray',
-  }
+  },
+  header: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 0.5,
+    borderColor: Colors.HIVE_SUBDUED,
+  },
+  markAllReadButton: {
+    width: 200,
+    margin: 10,
+  },
 });

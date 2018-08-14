@@ -72,7 +72,7 @@ func UpdateNotificationState(c *ctx.Context) errs.Error {
 	if err := query.UpdateNotificationState(
 		c.Db,
 		c.SessionData.UserId,
-		req.NotificationId,
+		req.NotificationIds,
 		req.State,
 	); err != nil {
 		return err

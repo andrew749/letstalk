@@ -63,10 +63,11 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         hasAll: action.data.size < NOTIF_BATCH_SIZE,
       };
     case TypeKeys.UPDATE_STATE:
+      const notifIdSet = Immutable.Set(action.notificationIds);
       return {
         ...state,
         notifications: state.notifications.map(notification => {
-          if (notification.notificationId === action.notificationId) {
+          if (notifIdSet.contains(notification.notificationId)) {
             return { ...notification, state: action.state };
           } else {
             return notification;
@@ -102,10 +103,11 @@ const fetchAdditionalNotifications: ActionCreator<
 }
 
 const updateNotificationState: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (notificationId: number, state: NotifState) => {
+  ThunkAction<Promise<ActionTypes>, State, void>> =
+  (notificationIds: Immutable.List<number>, state: NotifState) => {
   return async (dispatch: Dispatch<State>) => {
-    await profileService.updateNotificationState(notificationId, state);
-    return dispatch(notificationUpdateState(notificationId, state));
+    await profileService.updateNotificationState(notificationIds, state);
+    return dispatch(notificationUpdateState(notificationIds, state));
   };
 }
 
