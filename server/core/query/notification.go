@@ -10,7 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func notificationApiToData(notification api.Notification) (*data.Notification, error) {
+func NotificationApiToData(notification api.Notification) (*data.Notification, error) {
 	notifData, err := json.Marshal(notification.Data)
 	if err != nil {
 		return nil, err
@@ -20,19 +20,19 @@ func notificationApiToData(notification api.Notification) (*data.Notification, e
 		Model: gorm.Model{
 			ID: notification.NotificationId,
 		},
-		UserId: notification.UserId,
-		Type:   notification.Type,
-		State:  notification.State,
-		Data:   notifData,
-	}
-	if notification.CreatedAt != nil {
-		dataNotif.CreatedAt = *notification.CreatedAt
+		UserId:        notification.UserId,
+		Type:          notification.Type,
+		State:         notification.State,
+		Message:       notification.Message,
+		ThumbnailLink: notification.ThumbnailLink,
+		Timestamp:     notification.Timestamp,
+		Data:          notifData,
 	}
 
 	return dataNotif, nil
 }
 
-func notificationDataToApi(notification data.Notification) (*api.Notification, error) {
+func NotificationDataToApi(notification data.Notification) (*api.Notification, error) {
 	dataMap := make(map[string]string)
 
 	err := json.Unmarshal(notification.Data, &dataMap)
@@ -41,21 +41,23 @@ func notificationDataToApi(notification data.Notification) (*api.Notification, e
 	}
 
 	apiNotif := &api.Notification{
-		notification.ID,
-		notification.UserId,
-		notification.Type,
-		notification.State,
-		dataMap,
-		&notification.CreatedAt,
+		NotificationId: notification.ID,
+		UserId:         notification.UserId,
+		Type:           notification.Type,
+		State:          notification.State,
+		Timestamp:      notification.Timestamp,
+		Message:        notification.Message,
+		ThumbnailLink:  notification.ThumbnailLink,
+		Data:           dataMap,
 	}
 
 	return apiNotif, nil
 }
 
-func notificationsDataToApi(dataNotifs []data.Notification) ([]api.Notification, error) {
+func NotificationsDataToApi(dataNotifs []data.Notification) ([]api.Notification, error) {
 	apiNotifs := make([]api.Notification, len(dataNotifs))
 	for i, dataNotif := range dataNotifs {
-		apiNotif, err := notificationDataToApi(dataNotif)
+		apiNotif, err := NotificationDataToApi(dataNotif)
 		if err != nil {
 			return nil, err
 		}
@@ -63,38 +65,6 @@ func notificationsDataToApi(dataNotifs []data.Notification) ([]api.Notification,
 	}
 
 	return apiNotifs, nil
-}
-
-func CreateNotification(
-	db *gorm.DB,
-	userId data.TUserID,
-	tpe data.NotifType,
-	dataMap map[string]string,
-) (*api.Notification, errs.Error) {
-	notifData, err := json.Marshal(dataMap)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
-
-	dataNotif := &data.Notification{
-		UserId: userId,
-		Type:   tpe,
-		State:  data.NOTIF_STATE_UNREAD,
-		Data:   notifData,
-	}
-
-	if err := db.Create(dataNotif).Error; err != nil {
-		return nil, errs.NewDbError(err)
-	}
-
-	// NOTE: This should not error since we just marshalled the data, so didn't add any logic for
-	// deleting corrupt notifications.
-	apiNotif, err := notificationDataToApi(*dataNotif)
-	if err != nil {
-		return nil, errs.NewInternalError(err.Error())
-	}
-
-	return apiNotif, nil
 }
 
 func GetNewestNotificationsForUser(
@@ -111,7 +81,7 @@ func GetNewestNotificationsForUser(
 		return nil, errs.NewDbError(err)
 	}
 
-	apiNotifs, err := notificationsDataToApi(dataNotifs)
+	apiNotifs, err := NotificationsDataToApi(dataNotifs)
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
@@ -136,26 +106,10 @@ func GetNotificationsForUser(
 		return nil, errs.NewDbError(err)
 	}
 
-	apiNotifs, err := notificationsDataToApi(dataNotifs)
+	apiNotifs, err := NotificationsDataToApi(dataNotifs)
 	if err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
 
 	return apiNotifs, nil
-}
-
-func UpdateNotificationState(
-	db *gorm.DB,
-	userId data.TUserID,
-	notificationIds []uint,
-	state data.NotifState,
-) errs.Error {
-	err := db.Model(&data.Notification{}).Where("id in (?) and user_id = ?",
-		notificationIds,
-		userId,
-	).Updates(&data.Notification{State: state}).Error
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	return nil
 }
