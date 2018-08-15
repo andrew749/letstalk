@@ -15,7 +15,8 @@
     "android": {
       "icon": "./src/img/logo_android.png",
       "versionCode": 7,
-      "package": "org.hiveapp.hive"
+      "package": "org.hiveapp.hive",
+      "googleServicesFile": "./google-services.json"
     },
     "androidStatusBar": {
       "backgroundColor": "#FFB52A"
