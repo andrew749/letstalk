@@ -28,4 +28,5 @@ export const PROFILE_EDIT_ROUTE               = '/v1/profile_edit';
 export const MEETING_CONFIRMATION_ROUTE       = '/v1/meeting/confirm';
 export const NOTIFICATIONS_ROUTE              = '/v1/notifications';
 export const NOTIFICATIONS_UPDATE_STATE_ROUTE = '/v1/notifications/update_state';
+export const NOTIFICATION_ROUTE               = 'v1/notifciations/page';
 export const REMOVE_RTM_MATCHES_ROUTE         = '/v1/remove_rtm_matches';
