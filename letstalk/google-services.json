@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "589082090233",
+    "firebase_url": "https://hive-3faaf.firebaseio.com",
+    "project_id": "hive-3faaf",
+    "storage_bucket": "hive-3faaf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589082090233:android:0925776c73cf7008",
+        "android_client_info": {
+          "package_name": "org.hiveapp.hive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "589082090233-0joeaah865ogesspk126c0tl35dhpfd2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB7WIh2UOWNplznU_07mv349SpkG8Anck"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
