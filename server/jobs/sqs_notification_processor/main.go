@@ -16,7 +16,7 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 	rlog.Printf("Received message %#v\n", sqsEvent)
 	var notification notifications.Notification
 	records := sqsEvent.Records
-	// FIXME: only handles one record
+	// Only handles one record since each sqs message only contains at most notification.
 	for _, record := range records {
 		err := json.Unmarshal([]byte(record.Body), &notification)
 		if err != nil {
