@@ -28,7 +28,7 @@ interface AdhocNotificationData {
 }
 
 export interface AdhocNotification extends BaseNotification {
-  type: 'NEW_ADHOC_NOTIFICATION',
+  type: 'ADHOC_NOTIFICATION',
   data: AdhocNotificationData,
 }
 

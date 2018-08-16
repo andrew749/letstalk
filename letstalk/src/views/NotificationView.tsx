@@ -140,7 +140,7 @@ class NotificationView extends Component<Props, State> {
           await this.props.navigation.navigate('Home');
         }).bind(this);
         break;
-      case 'NEW_ADHOC_NOTIFICATION':
+      case 'ADHOC_NOTIFICATION':
         const {thumbnail} = notification;
         notifText = <Text>{message}</Text>;
         if (thumbnail) {

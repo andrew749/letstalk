@@ -13,7 +13,7 @@ type NotifType string
 
 const (
 	NOTIF_TYPE_NEW_CREDENTIAL_MATCH NotifType = "NEW_CREDENTIAL_MATCH"
-	NOTIF_TYPE_ADHOC                NotifType = "NEW_ADHOC_NOTIFICATION"
+	NOTIF_TYPE_ADHOC                NotifType = "ADHOC_NOTIFICATION"
 )
 
 type NotifState string

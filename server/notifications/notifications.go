@@ -89,6 +89,7 @@ const (
 	NOTIF_TYPE_REQUEST_TO_MATCH NotifType = "REQUEST_TO_MATCH"
 	NOTIF_TYPE_NEW_MATCH        NotifType = "NEW_MATCH"
 	NOTIF_TYPE_MATCH_VERIFIED   NotifType = "MATCH_VERIFIED"
+	NOTIF_TYPE_ADHOC_NOT        NotifType = "ADHOC_NOTIFICATION"
 )
 
 func CreateAndSendNotificationWithData(
