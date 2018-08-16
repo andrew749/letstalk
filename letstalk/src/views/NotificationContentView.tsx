@@ -42,8 +42,6 @@ class NotificationContentView extends React.Component<Props, State> {
     render() {
       const url = this.getNotificationPage(this.notificationId);
       if (this.state.sessionId !== undefined && this.state.sessionId !== null) {
-        console.log("AAA")
-        console.log(this.state.sessionId)
         return <WebView source={{
           uri: url,
           headers: {"sessionId": this.state.sessionId}
