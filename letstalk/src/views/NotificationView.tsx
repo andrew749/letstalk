@@ -111,6 +111,7 @@ class NotificationView extends Component<Props, State> {
         state,
         timestamp,
         type,
+        thumbnail,
         message,
     } = notification;
 
@@ -141,7 +142,6 @@ class NotificationView extends Component<Props, State> {
         }).bind(this);
         break;
       case 'ADHOC_NOTIFICATION':
-        const {thumbnail} = notification;
         notifText = <Text>{message}</Text>;
         if (thumbnail) {
           icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
