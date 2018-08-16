@@ -4,49 +4,52 @@ import {Notification} from '../models/notification';
 import { NavigationScreenProp, NavigationStackAction } from 'react-navigation';
 import { headerStyle } from './TopHeader';
 import { View, Text } from 'react-native';
+import {BASE_URL, NOTIFICATION_PAGE_ROUTE} from '../services/constants';
+import auth from '../services/auth';
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   notification: Notification;
 }
 
-interface NotificationContent {
-  page: string;
-}
-
-interface State extends NotificationContent {
-}
-
 export const NotificationContentViewRoute = "NotificationContent";
+interface State {
+  sessionId: string;
+}
 
 class NotificationContentView extends React.Component<Props, State> {
     static navigationOptions = () => ({
       headerStyle,
     })
+    private notificationId: number;
+    private sessionId: string;
 
     constructor(props: Props) {
       super(props);
       //@ts-ignore
-      const content = this.props.notification || this.props.navigation.getParam("notification", undefined);
+      this.notificationId = (this.props.notification && this.props.notification.notificationId) || this.props.navigation.getParam("notificationId", undefined);
+      this.state = {sessionId: undefined}
+    }
+    async componentDidMount() {
+      const token = await auth.getSessionToken();
+      this.setState({sessionId: token});
     }
 
-    async componentDidMount() {
-      // load page
-      // const content = await notificationAPIService.getNotificationContent();
-      // this.setState({
-      //   ...content,
-      // })
+    private getNotificationPage(notificationId: number): string {
+      return `${BASE_URL}${NOTIFICATION_PAGE_ROUTE}?notificationId=${notificationId}`;
     }
 
     render() {
-      if (!this.state.page) {
-          return  (
-            <View>
-              <Text>{"Loading"}</Text>
-            </View>
-          );
+      const url = this.getNotificationPage(this.notificationId);
+      if (this.state.sessionId !== undefined && this.state.sessionId !== null) {
+        console.log("AAA")
+        console.log(this.state.sessionId)
+        return <WebView source={{
+          uri: url,
+          headers: {"sessionId": this.state.sessionId}
+        }} />;
       }
-      return <WebView html={this.state.page} />;
+      return <View/>;
     }
 }
 

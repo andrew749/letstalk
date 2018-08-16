@@ -27,10 +27,11 @@ interface AdhocNotificationData {
 
 }
 
-export interface AdhocNotification {
-  type: 'ADHOC_NOTIFICATION',
+export interface AdhocNotification extends BaseNotification {
+  type: 'NEW_ADHOC_NOTIFICATION',
   data: AdhocNotificationData,
 }
 
 export type Notification =
-  | NewCredentialMatchNotification;
+  | NewCredentialMatchNotification
+  | AdhocNotification;

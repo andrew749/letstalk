@@ -96,22 +96,22 @@ class NotificationView extends Component<Props, State> {
   }
 
   private renderNotification(notification: Notification) {
-    const {
-      notificationId,
-      state,
-      data,
-      timestamp,
-      type,
-      message,
-    } = notification;
 
     let notifText: ReactNode = null;
     let icon = 'face';
     let onPressAction: () => void = null;
+    const {
+        notificationId,
+        state,
+        timestamp,
+        type,
+        message,
+    } = notification;
 
     // TODO: enforce stricter typing with metadata
-    switch (type) {
+    switch (notification.type) {
       case 'NEW_CREDENTIAL_MATCH':
+        const { data } = notification;
         const pronoun = data.side === 'ASKER' ? 'You' : 'They';
         notifText = (
           <Text>
@@ -134,9 +134,20 @@ class NotificationView extends Component<Props, State> {
           await this.props.navigation.navigate('Home');
         }).bind(this);
         break;
+      case 'NEW_ADHOC_NOTIFICATION':
+        notifText = <Text>{message}</Text>;
+        onPressAction =  (async () => {
+          console.log(notificationId)
+          this.props.navigation.navigate('NotificationContent', {
+            notificationId: notificationId,
+          });
+        }).bind(this);
+        break;
       default:
-        // Ensure exhaustiveness of select
-        const _: never = type;
+
+        onPressAction =  (async () => {
+        }).bind(this);
+        break;
     }
 
     const containerStyle = [styles.notifContainer];
