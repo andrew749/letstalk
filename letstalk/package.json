@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "exp": "^56.0.0",
     "flow-bin": "0.53.0",
     "jest": "^22.4.1",
     "jest-expo": "^21.0.0",
@@ -17,7 +18,7 @@
   },
   "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "start": "yarn clean-build-test && react-native-scripts start",
+    "start": "yarn clean-build-test && exp start",
     "eject": "react-native-scripts eject",
     "android": "react-native-scripts android",
     "ios": "react-native-scripts ios",
