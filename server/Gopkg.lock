@@ -15,7 +15,7 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:dd90f0d41fb8c7676592a38e37be23a8a4fa011e62c0f3403b1a56efb28b8bfc"
+  digest = "1:8c99ab26d85eaab2284257d2590f63cbefda36eefd9165d6a5b36a21562bd81f"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -46,6 +46,7 @@
     "private/protocol/restjson",
     "private/protocol/restxml",
     "private/protocol/xml/xmlutil",
+    "service/elasticsearchservice",
     "service/lambda",
     "service/s3",
     "service/s3/s3iface",
@@ -358,6 +359,7 @@
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/endpoints",
     "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/elasticsearchservice",
     "github.com/aws/aws-sdk-go/service/lambda",
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
