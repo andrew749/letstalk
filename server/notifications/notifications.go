@@ -17,6 +17,8 @@ const (
 	API_URL             = "/--/api/v2"
 	PUSH_API            = "/push/send"
 	PUSH_RECEIPT_STATUS = "/push/getReceipts"
+	OK_STATUS           = "ok"
+	ERROR_STATUS        = "error"
 )
 
 type Notification struct {
@@ -43,6 +45,29 @@ type Notification struct {
 	Badge *int `json:"badge,omitempty"`
 }
 
+type NotificationStatusDetails struct {
+	Error string `json:"error"`
+}
+
+type NotificationStatusResponse struct {
+	Id      string `json:"id"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Details string `json:"details"`
+}
+
+type NotificationStatus struct {
+	Data map[string]NotificationStatusResponse `json:"data"`
+}
+
+type NotificationSend struct {
+	Data []NotificationStatusResponse `json:"data"`
+}
+
+type NotificationStatusRequest struct {
+	Ids []string `json:"ids"`
+}
+
 // FromNotificationDataModel Convert a notification data model to a version that the expo API expects
 func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notification {
 	n.To = string(orig.UserId)
@@ -52,7 +77,7 @@ func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notifi
 }
 
 // SendNotification Send a notification to the expo api and serialize response
-func SendNotification(notification Notification) (*NotificationStatusResponse, error) {
+func SendNotification(notification Notification) (*NotificationSend, error) {
 	marshalledNotification, err := json.Marshal(notification)
 	if err != nil {
 		return nil, err
@@ -83,7 +108,7 @@ func SendNotification(notification Notification) (*NotificationStatusResponse, e
 	}
 	rlog.Debug("Successfully sent notification to client: %s", notification.To)
 
-	var res NotificationStatusResponse
+	var res NotificationSend
 	err = json.Unmarshal(bodyBytes, &res)
 
 	if err != nil {
@@ -91,25 +116,6 @@ func SendNotification(notification Notification) (*NotificationStatusResponse, e
 	}
 
 	return &res, nil
-}
-
-type NotificationStatusDetails struct {
-	Error string `json:"error"`
-}
-
-type NotificationStatusResponse struct {
-	Id      string `json:"id"`
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Details string `json:"details"`
-}
-
-type NotificationStatus struct {
-	Data map[string]NotificationStatusResponse `json:"data"`
-}
-
-type NotificationStatusRequest struct {
-	Ids []string `json:"ids"`
 }
 
 // GetNotificationStatus Get the status on expo for the notification wrt it being delivered to apple or google.
@@ -145,8 +151,12 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatusRespons
 
 	var res NotificationStatusResponse
 	err = json.Unmarshal(bodyBytes, &res)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
 
-	return &res, err
+	return &res, nil
 }
 
 type NotifType string
