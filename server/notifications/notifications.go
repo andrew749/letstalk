@@ -187,8 +187,9 @@ func CreateAndSendNotificationWithData(
 		Data:  data,
 	}
 
-	resp, err := SendNotification(notification)
-	// TODO: get the id and write to the notification
+	_, err := SendNotification(notification)
+
+	return err
 }
 
 func CreateAndSendNotification(
