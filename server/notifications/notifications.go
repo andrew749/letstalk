@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	EXPO_HOST = "https://exp.host"
-	API_URL   = "/--/api/v2"
-	PUSH_API  = "/push/send"
+	EXPO_HOST           = "https://exp.host"
+	API_URL             = "/--/api/v2"
+	PUSH_API            = "/push/send"
+	PUSH_RECEIPT_STATUS = "/push/getReceipts"
 )
 
 type Notification struct {
@@ -100,6 +101,62 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 	}
 
 	return &res, nil
+}
+
+type NotificationStatusDetails struct {
+	Error string `json:"error"`
+}
+
+type NotificationStatusResponse struct {
+	Id      string `json:"id"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Details string `json:"details"`
+}
+
+type NotificationStatus struct {
+	Data map[string]NotificationStatusResponse `json:"data"`
+}
+
+type NotificationStatusRequest struct {
+	Ids []string `json:"ids"`
+}
+
+// GetNotificationStatus Get the status on expo for the notification wrt it being delivered to apple or google.
+func GetNotificationStatus(notificationIds []string) (*NotificationStatusResponse, error) {
+	reqBody, err := json.Marshal(&NotificationStatusRequest{notificationIds})
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	req, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s%s%s", EXPO_HOST, API_URL, PUSH_API),
+		bytes.NewBuffer(reqBody),
+	)
+	client := &http.Client{}
+	req.Header.Add("content-type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	// cleanup
+	defer resp.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	var res NotificationStatusResponse
+	err = json.Unmarshal(bodyBytes, &res)
+
+	return &res, err
 }
 
 type NotifType string
