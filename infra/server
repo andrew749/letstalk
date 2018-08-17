@@ -32,7 +32,7 @@ case "$1" in
     echo "Restarting server..."
     ;;
   *)
-    echo "Usage: /etc/init.d/foo {start|stop}"
+    echo "Usage: $0 {start|stop|reload}"
     exit 1
     ;;
 esac
