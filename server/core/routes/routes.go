@@ -10,6 +10,7 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
@@ -56,6 +57,8 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	router.OPTIONS("/testAuth")
 	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
+
+	router.LoadHTMLGlob("templates/*")
 
 	v1 := router.Group("/v1")
 
@@ -214,6 +217,9 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/notifications/update_state")
 	v1.POST("/notifications/update_state", hw.wrapHandler(controller.UpdateNotificationState, true))
 
+	v1.OPTIONS("/notification_page")
+	v1.GET("/notification_page", hw.wrapHandlerHTML(notifications.GetNotificationContentPage, true))
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))
@@ -253,6 +259,38 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 		rlog.Infof("Returning result: %v\n", c.Result)
 		c.GinContext.JSON(http.StatusOK, gin.H{"Result": c.Result})
 	}
+}
+
+func (hw handlerWrapper) wrapHandlerHTML(handler handlerFunc, needAuth bool) gin.HandlerFunc {
+	return func(g *gin.Context) {
+		c := ctx.NewContext(g, hw.db, nil /* session */, hw.sm)
+
+		// The api route requires authentication so we add session data from the header.
+		if needAuth {
+			session, err := getSessionData(g, hw.sm)
+			if err != nil {
+				abortWithErrorHTML(c.GinContext, err)
+				return
+			}
+			c.SessionData = session
+		}
+
+		rlog.Debug("Running handler")
+		err := handler(c)
+
+		if err != nil {
+			abortWithErrorHTML(c.GinContext, err)
+			return
+		}
+
+		rlog.Infof("Returning result: %v\n", c.Result)
+	}
+}
+
+func abortWithErrorHTML(g *gin.Context, err errs.Error) {
+	rlog.Errorf("Returning error: %s\n", err)
+	raven.CaptureError(err, nil)
+	g.AbortWithStatus(err.GetHTTPCode())
 }
 
 func abortWithError(g *gin.Context, err errs.Error) {
