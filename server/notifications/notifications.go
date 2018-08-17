@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"letstalk/server/data"
-	"log"
 	"net/http"
+
+	"github.com/romana/rlog"
 )
 
 const (
@@ -48,10 +49,22 @@ func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notifi
 	return n
 }
 
-func SendNotification(notification Notification) error {
+// NotificationSendResponse Response when sending messages using batch api
+type NotificationSendResponse struct {
+	Data []NotificationResponse `json:"data" binding:"required"`
+}
+
+// NotificationResponse Response for an individual message
+type NotificationResponse struct {
+	Status string `json:"status" binding:"required"`
+	Id     string `json:"id" binding:"required"`
+}
+
+// SendNotification Send a notification to the expo api and serialize response
+func SendNotification(notification Notification) (*NotificationSendResponse, error) {
 	marshalledNotification, err := json.Marshal(notification)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req, err := http.NewRequest(
@@ -64,23 +77,29 @@ func SendNotification(notification Notification) error {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("accept-encoding", "gzip, deflate")
-	log.Print("Sending Notification to Expo")
+	rlog.Debug("Sending Notification to Expo")
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Fatal(err)
-		return err
+		rlog.Error(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	bodyString := string(bodyBytes)
-	log.Print(bodyString)
 	if err != nil {
-		log.Fatal(err)
-		return err
+		rlog.Error(err)
+		return nil, err
 	}
-	log.Printf("Successfully sent notification to client: %s", notification.To)
-	return nil
+	rlog.Debug("Successfully sent notification to client: %s", notification.To)
+
+	var res NotificationSendResponse
+	err = json.Unmarshal(bodyBytes, &res)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 type NotifType string
@@ -111,7 +130,8 @@ func CreateAndSendNotificationWithData(
 		Data:  data,
 	}
 
-	return SendNotification(notification)
+	resp, err := SendNotification(notification)
+	// TODO: get the id and write to the notification
 }
 
 func CreateAndSendNotification(
