@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"letstalk/server/data"
+	"log"
 	"net/http"
 
 	"github.com/romana/rlog"
@@ -50,19 +51,8 @@ func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notifi
 	return n
 }
 
-// NotificationSendResponse Response when sending messages using batch api
-type NotificationSendResponse struct {
-	Data []NotificationResponse `json:"data" binding:"required"`
-}
-
-// NotificationResponse Response for an individual message
-type NotificationResponse struct {
-	Status string `json:"status" binding:"required"`
-	Id     string `json:"id" binding:"required"`
-}
-
 // SendNotification Send a notification to the expo api and serialize response
-func SendNotification(notification Notification) (*NotificationSendResponse, error) {
+func SendNotification(notification Notification) (*NotificationStatusResponse, error) {
 	marshalledNotification, err := json.Marshal(notification)
 	if err != nil {
 		return nil, err
@@ -93,7 +83,7 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 	}
 	rlog.Debug("Successfully sent notification to client: %s", notification.To)
 
-	var res NotificationSendResponse
+	var res NotificationStatusResponse
 	err = json.Unmarshal(bodyBytes, &res)
 
 	if err != nil {
