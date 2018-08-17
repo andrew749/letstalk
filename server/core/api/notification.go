@@ -11,8 +11,10 @@ type Notification struct {
 	UserId         data.TUserID      `json:"userId"`
 	Type           data.NotifType    `json:"type"`
 	State          data.NotifState   `json:"state"`
+	Message        string            `json:"message"`
+	Timestamp      time.Time         `json:"timestamp"`
+	ThumbnailLink  *string           `json:"thumbnail"`
 	Data           map[string]string `json:"data"`
-	CreatedAt      *time.Time        `json:"createdAt"`
 }
 
 type UpdateNotificationStateRequest struct {

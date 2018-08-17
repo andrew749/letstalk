@@ -10,7 +10,6 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
-	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
@@ -128,7 +127,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 
 	v1.OPTIONS("/register_notification")
 	v1.POST("/register_notification", hw.wrapHandler(
-		notifications.GetNewNotificationToken,
+		controller.GetNewNotificationToken,
 		true),
 	)
 

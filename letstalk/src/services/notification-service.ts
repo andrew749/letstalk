@@ -100,5 +100,3 @@ export default class NotificationService {
     await this.actOnNotification(notification);
   }
 }
-
-

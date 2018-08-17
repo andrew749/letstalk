@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"letstalk/server/data"
 	"log"
 	"net/http"
 )
@@ -37,6 +38,14 @@ type Notification struct {
 
 	// unread notification count
 	Badge *int `json:"badge,omitempty"`
+}
+
+// FromNotificationDataModel Convert a notification data model to a version that the expo API expects
+func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notification {
+	n.To = string(orig.UserId)
+	n.Title = orig.Message
+	n.Data = orig
+	return n
 }
 
 func SendNotification(notification Notification) error {

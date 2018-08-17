@@ -100,14 +100,17 @@ class NotificationView extends Component<Props, State> {
       notificationId,
       state,
       data,
-      createdAt,
+      timestamp,
+      type,
+      message,
     } = notification;
 
     let notifText: ReactNode = null;
     let icon = 'face';
     let onPressAction: () => void = null;
 
-    switch (notification.type) {
+    // TODO: enforce stricter typing with metadata
+    switch (type) {
       case 'NEW_CREDENTIAL_MATCH':
         const pronoun = data.side === 'ASKER' ? 'You' : 'They';
         notifText = (
@@ -133,7 +136,7 @@ class NotificationView extends Component<Props, State> {
         break;
       default:
         // Ensure exhaustiveness of select
-        const _: never = notification.type;
+        const _: never = type;
     }
 
     const containerStyle = [styles.notifContainer];
@@ -155,7 +158,7 @@ class NotificationView extends Component<Props, State> {
         </View>
         <View style={styles.rightContainer}>
           {notifText}
-          <Text style={styles.ago}>{Moment(createdAt).fromNow()}</Text>
+          <Text style={styles.ago}>{Moment(timestamp).fromNow()}</Text>
         </View>
       </TouchableOpacity>
     );

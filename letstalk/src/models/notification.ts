@@ -5,8 +5,11 @@ export type NotifState =
 interface BaseNotification {
   notificationId: number;
   userId: number;
+  type: string;
   state: NotifState;
-  createdAt: Date;
+  message: string;
+  timestamp: Date;
+  thumbnail: string;
 }
 
 interface NewCredentialMatchData {
@@ -18,6 +21,15 @@ interface NewCredentialMatchData {
 export interface NewCredentialMatchNotification extends BaseNotification {
   type: 'NEW_CREDENTIAL_MATCH',
   data: NewCredentialMatchData,
+}
+
+interface AdhocNotificationData {
+
+}
+
+export interface AdhocNotification {
+  type: 'ADHOC_NOTIFICATION',
+  data: AdhocNotificationData,
 }
 
 export type Notification =

@@ -89,7 +89,9 @@ interface NotificationRes {
   type: string;
   state: string;
   data: object;
-  createdAt: string;
+  message: string;
+  thumbnail: string;
+  timestamp: string;
 }
 
 interface UpdateNotificationStateRequest {
@@ -196,7 +198,7 @@ export class RemoteProfileService implements ProfileService {
     return Immutable.List(response.map(notifRes => {
       return {
         ...notifRes,
-        createdAt: new Date(notifRes.createdAt),
+        timestamp: new Date(notifRes.timestamp),
       } as Notification;
     }));
   }
