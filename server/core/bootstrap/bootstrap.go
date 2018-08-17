@@ -28,10 +28,16 @@ func convertUserToRelationshipDataModel(
 	}
 
 	if user.Cohort != nil && user.Cohort.Cohort != nil {
+		// NOTE: New API will allow for null sequence ids.
+		sequenceId := ""
+		if user.Cohort.Cohort.SequenceId != nil {
+			sequenceId = *user.Cohort.Cohort.SequenceId
+		}
+
 		cohort = &api.Cohort{
 			CohortId:   user.Cohort.Cohort.CohortId,
 			ProgramId:  user.Cohort.Cohort.ProgramId,
-			SequenceId: user.Cohort.Cohort.SequenceId,
+			SequenceId: sequenceId,
 			GradYear:   user.Cohort.Cohort.GradYear,
 		}
 	}

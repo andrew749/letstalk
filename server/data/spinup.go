@@ -13,7 +13,6 @@ func migrateDB(db *gorm.DB) {
 			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&AuthenticationData{})
 				tx.AutoMigrate(&Cohort{})
-				PopulateCohort(tx)
 				tx.AutoMigrate(&User{})
 				tx.AutoMigrate(&Session{})
 				tx.AutoMigrate(&UserVector{})
@@ -31,6 +30,26 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&ForgotPasswordId{})
 				tx.AutoMigrate(&MeetingConfirmation{})
 				tx.AutoMigrate(&Notification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "2",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&Organization{})
+				tx.AutoMigrate(&Role{})
+				tx.AutoMigrate(&UserPosition{})
+				tx.AutoMigrate(&SimpleTrait{})
+				tx.AutoMigrate(&UserSimpleTrait{})
+				tx.AutoMigrate(&UserLocation{})
+				tx.AutoMigrate(&Cohort{})
+				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
+				// exists.
+				tx.Exec("ALTER TABLE cohorts MODIFY sequence_id VARCHAR(255)")
+				tx.AutoMigrate(&UserCohort{})
 				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {

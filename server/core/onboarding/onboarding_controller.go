@@ -21,7 +21,8 @@ import (
  }
 */
 
-func isValidCohort(db *gorm.DB, cohortId int) bool {
+// TODO: Move into `query`
+func isValidCohort(db *gorm.DB, cohortId data.TCohortID) bool {
 	var numCohorts int = 0
 	db.Model(&data.Cohort{}).Where("cohort_id = ?", cohortId).Count(&numCohorts)
 	return numCohorts > 0
