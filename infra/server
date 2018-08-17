@@ -30,6 +30,7 @@ case "$1" in
     ;;
   reload)
     echo "Restarting server..."
+    sudo bash -c "cd $APP && ./lb/reload_lb.sh"
     ;;
   *)
     echo "Usage: $0 {start|stop|reload}"
