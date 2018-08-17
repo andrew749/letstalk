@@ -47,8 +47,8 @@ generate_ssh() {
 }
 
 setup_startup() {
-  cp $FOLDER/infra/startup.sh /etc/init.d/server.sh
-  update-rc.d server.sh defaults
+  cp $FOLDER/infra/server /etc/init.d/server
+  update-rc.d server defaults
 }
 
 
