@@ -50,10 +50,10 @@ type NotificationStatusDetails struct {
 }
 
 type NotificationStatusResponse struct {
-	Id      string `json:"id"`
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Details string `json:"details"`
+	Id      string                     `json:"id,omitempty"`
+	Status  string                     `json:"status"`
+	Message *string                    `json:"message,omitempty"`
+	Details *NotificationStatusDetails `json:"details,omitempty"`
 }
 
 type NotificationStatus struct {
@@ -61,11 +61,28 @@ type NotificationStatus struct {
 }
 
 type NotificationSend struct {
-	Data []NotificationStatusResponse `json:"data"`
+	Data []NotificationStatusResponse `json:"-"`
 }
 
 type NotificationStatusRequest struct {
 	Ids []string `json:"ids"`
+}
+
+func (s *NotificationSend) UnmarshalJSON(data []byte) error {
+	res := struct {
+		Data NotificationStatusResponse `json:"data"`
+	}{}
+	err := json.Unmarshal(data, &res)
+	// if we were able to deserialize a single response
+	if err == nil {
+		fmt.Print("%#v", res.Data)
+		s.Data = []NotificationStatusResponse{res.Data}
+		return nil
+	}
+	s.Data = make([]NotificationStatusResponse, 0)
+
+	fmt.Println("WHATT")
+	return json.Unmarshal(data, &s.Data)
 }
 
 // FromNotificationDataModel Convert a notification data model to a version that the expo API expects
