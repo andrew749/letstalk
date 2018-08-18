@@ -135,7 +135,7 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 }
 
 // GetNotificationStatus Get the status on expo for the notification wrt it being delivered to apple or google.
-func GetNotificationStatus(notificationIds []string) (*NotificationStatusResponse, error) {
+func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error) {
 	reqBody, err := json.Marshal(&NotificationStatusRequest{notificationIds})
 	if err != nil {
 		log.Fatal(err)
@@ -144,7 +144,7 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatusRespons
 
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s%s%s", EXPO_HOST, API_URL, PUSH_API),
+		fmt.Sprintf("%s%s%s", EXPO_HOST, API_URL, PUSH_RECEIPT_STATUS),
 		bytes.NewBuffer(reqBody),
 	)
 	client := &http.Client{}
@@ -165,7 +165,7 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatusRespons
 		return nil, err
 	}
 
-	var res NotificationStatusResponse
+	var res NotificationStatus
 	err = json.Unmarshal(bodyBytes, &res)
 	if err != nil {
 		log.Fatal(err)
