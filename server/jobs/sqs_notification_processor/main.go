@@ -22,7 +22,7 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 		if err != nil {
 			return err
 		}
-		err = notifications.SendNotification(notification)
+		_, err = notifications.SendNotification(notification)
 		if err != nil {
 			rlog.Error(err)
 			return err
