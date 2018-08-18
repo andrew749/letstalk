@@ -7,6 +7,7 @@ type TRoleID EntID
 // traits) table to get information about available roles (to show in UI) and to get the names of
 // roles by ID (since they need to be denormalized into the user_position table).
 type Role struct {
-	Id   TRoleID `gorm:"primary_key;not null;auto_increment:true"`
-	Name string  `gorm:"not null"`
+	Id              TRoleID `gorm:"primary_key;not null;auto_increment:true"`
+	Name            string  `gorm:"not null"`
+	IsUserGenerated bool    `gorm:"not null"`
 }

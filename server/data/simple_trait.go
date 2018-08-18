@@ -17,7 +17,9 @@ const (
 // user_simple_trait table to display a list of possible traits in the UI (when adding traits),
 // and to pull the names of traits by ID for denormalization.
 type SimpleTrait struct {
-	Id   TSimpleTraitID  `gorm:"primary_key;not null;auto_increment:true"`
-	Name string          `gorm:"not null"`
-	Type SimpleTraitType `gorm:"not null"`
+	Id              TSimpleTraitID  `gorm:"primary_key;not null;auto_increment:true"`
+	Name            string          `gorm:"not null"`
+	Type            SimpleTraitType `gorm:"not null"`
+	IsSensitive     bool            `gorm:"not null"`
+	IsUserGenerated bool            `gorm:"not null"`
 }

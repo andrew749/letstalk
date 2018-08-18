@@ -15,7 +15,8 @@ const (
 // traits) table to get information about available organizations (to show in UI) and to get the
 // names of organizations by ID (since they need to be denormalized into the user_position table).
 type Organization struct {
-	Id   TOrganizationID  `gorm:"primary_key;not null;auto_increment:true"`
-	Name string           `gorm:"not null"`
-	Type OrganizationType `gorm:"not null"`
+	Id              TOrganizationID  `gorm:"primary_key;not null;auto_increment:true"`
+	Name            string           `gorm:"not null"`
+	Type            OrganizationType `gorm:"not null"`
+	IsUserGenerated bool             `gorm:"not null"`
 }
