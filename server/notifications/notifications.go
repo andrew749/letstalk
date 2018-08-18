@@ -60,7 +60,7 @@ type NotificationStatus struct {
 	Data map[string]NotificationStatusResponse `json:"data"`
 }
 
-type NotificationSend struct {
+type NotificationSendResponse struct {
 	Data []NotificationStatusResponse `json:"-"`
 }
 
@@ -69,7 +69,7 @@ type NotificationStatusRequest struct {
 }
 
 //UnmarshalJSON Custom unmarshalling since expo api could return an array or single item.
-func (s *NotificationSend) UnmarshalJSON(data []byte) error {
+func (s *NotificationSendResponse) UnmarshalJSON(data []byte) error {
 	res := struct {
 		Data NotificationStatusResponse `json:"data"`
 	}{}
@@ -93,7 +93,7 @@ func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notifi
 }
 
 // SendNotification Send a notification to the expo api and serialize response
-func SendNotification(notification Notification) (*NotificationSend, error) {
+func SendNotification(notification Notification) (*NotificationSendResponse, error) {
 	marshalledNotification, err := json.Marshal(notification)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func SendNotification(notification Notification) (*NotificationSend, error) {
 	}
 	rlog.Debug("Successfully sent notification to client: %s", notification.To)
 
-	var res NotificationSend
+	var res NotificationSendResponse
 	err = json.Unmarshal(bodyBytes, &res)
 
 	if err != nil {
