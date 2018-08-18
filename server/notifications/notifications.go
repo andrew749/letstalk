@@ -68,6 +68,7 @@ type NotificationStatusRequest struct {
 	Ids []string `json:"ids"`
 }
 
+//UnmarshalJSON Custom unmarshalling since expo api could return an array or single item.
 func (s *NotificationSend) UnmarshalJSON(data []byte) error {
 	res := struct {
 		Data NotificationStatusResponse `json:"data"`
@@ -75,13 +76,11 @@ func (s *NotificationSend) UnmarshalJSON(data []byte) error {
 	err := json.Unmarshal(data, &res)
 	// if we were able to deserialize a single response
 	if err == nil {
-		fmt.Print("%#v", res.Data)
 		s.Data = []NotificationStatusResponse{res.Data}
 		return nil
 	}
 	s.Data = make([]NotificationStatusResponse, 0)
 
-	fmt.Println("WHATT")
 	return json.Unmarshal(data, &s.Data)
 }
 
