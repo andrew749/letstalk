@@ -16,6 +16,9 @@ var db *gorm.DB
 
 // HandleRequest Handle the message data passed to the lambda from sqs
 func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
+	if db == nil {
+		// TODO: establish connection
+	}
 	// TODO: handle error
 	rlog.Printf("Received message %#v\n", sqsEvent)
 	var notification data.Notification
