@@ -11,16 +11,12 @@ import (
 
 type NotifType string
 
-const (
-	NOTIF_TYPE_NEW_CREDENTIAL_MATCH NotifType = "NEW_CREDENTIAL_MATCH"
-	NOTIF_TYPE_ADHOC                NotifType = "ADHOC_NOTIFICATION"
-)
-
 type NotifState string
 
 const (
-	NOTIF_STATE_UNREAD NotifState = "UNREAD"
-	NOTIF_STATE_READ              = "READ"
+	NOTIF_STATE_UNREAD       NotifState = "UNREAD"
+	NOTIF_STATE_READ                    = "READ"
+	NOTIF_STATE_PENDING_SEND            = "PENDING_SEND"
 )
 
 type JSONBlob json.RawMessage
@@ -32,9 +28,11 @@ type Notification struct {
 	Type          NotifType  `gorm:"not null"`
 	State         NotifState `gorm:"not null"`
 	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
+	Title         string     `gorm:"not null"`
 	Message       string     `gorm:"not null"`
 	ThumbnailLink *string    `gorm:""`
 	Data          JSONBlob   `gorm:"not null" sql:"type:json"`
+	Receipt       *string    `gorm:""`
 }
 
 func (u *NotifType) Scan(value interface{}) error { *u = NotifType(value.([]byte)); return nil }
