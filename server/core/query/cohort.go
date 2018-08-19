@@ -50,7 +50,12 @@ func GetAllCohorts(db *gorm.DB) ([]api.Cohort, errs.Error) {
 		if row.SequenceId != nil {
 			sequenceId = *row.SequenceId
 		}
-		cohorts[i] = api.Cohort{row.CohortId, row.ProgramId, sequenceId, row.GradYear}
+		cohorts[i] = api.Cohort{
+			row.CohortId,
+			row.ProgramId,
+			sequenceId,
+			row.GradYear,
+		}
 	}
 
 	return cohorts, nil

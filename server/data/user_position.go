@@ -2,7 +2,7 @@ package data
 
 type TUserPositionID EntID
 
-// On of the trait entity types. Describes positions that the user has held or currently holds.
+// One of the trait entity types. Describes positions that the user has held or currently holds.
 type UserPosition struct {
 	Id               TUserPositionID  `gorm:"primary_key;not null;auto_increment:true"`
 	OrganizationId   TOrganizationID  `gorm:"not null"`
@@ -11,7 +11,7 @@ type UserPosition struct {
 	RoleId           TRoleID          `gorm:"not null"`
 	RoleName         string           `gorm:"not null"` // Denormalized
 	StartDate        string           `gorm:"not null"` // YYYY-MM-DD
-	EndDate          string           // YYYY-MM-DD (optional)
+	EndDate          *string          // YYYY-MM-DD (optional)
 	Times
 	// Untested
 	Organization *Organization `gorm:"foreignkey:OrganizationId;association_foreignkey:Id"`

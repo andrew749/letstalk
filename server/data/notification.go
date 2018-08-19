@@ -2,8 +2,10 @@ package data
 
 import (
 	"encoding/json"
+	"time"
 
 	"database/sql/driver"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -11,6 +13,7 @@ type NotifType string
 
 const (
 	NOTIF_TYPE_NEW_CREDENTIAL_MATCH NotifType = "NEW_CREDENTIAL_MATCH"
+	NOTIF_TYPE_ADHOC                NotifType = "ADHOC_NOTIFICATION"
 )
 
 type NotifState string
@@ -24,11 +27,14 @@ type JSONBlob json.RawMessage
 
 type Notification struct {
 	gorm.Model
-	UserId TUserID    `gorm:"not null"`
-	User   User       `gorm:"foreignkey:UserId"`
-	Type   NotifType  `gorm:"not null"`
-	State  NotifState `gorm:"not null"`
-	Data   JSONBlob   `gorm:"not null" sql:"type:json"`
+	UserId        TUserID    `gorm:"not null"`
+	User          User       `gorm:"foreignkey:UserId"`
+	Type          NotifType  `gorm:"not null"`
+	State         NotifState `gorm:"not null"`
+	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
+	Message       string     `gorm:"not null"`
+	ThumbnailLink *string    `gorm:""`
+	Data          JSONBlob   `gorm:"not null" sql:"type:json"`
 }
 
 func (u *NotifType) Scan(value interface{}) error { *u = NotifType(value.([]byte)); return nil }

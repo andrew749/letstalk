@@ -5,6 +5,7 @@ import {
   ListView,
   View,
   Text,
+  Image,
   RefreshControl,
   RefreshControlProps,
   StyleSheet,
@@ -36,6 +37,8 @@ import Loading from './Loading';
 import { headerStyle } from './TopHeader';
 import { Notification } from '../models/notification';
 import Colors from '../services/colors';
+import { ViewStyle } from 'react-native';
+import { TextStyle } from 'react-native';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -56,6 +59,8 @@ interface State {
 }
 
 type Row = "HEADER" | Notification | "LOAD_MORE" | "NO_MORE";
+
+const ICON_SIZE = 48;
 
 class NotificationView extends Component<Props, State> {
   NOTIFICATIONS_VIEW_IDENTIFIER = "HomeView";
@@ -95,20 +100,25 @@ class NotificationView extends Component<Props, State> {
     this.setState({refreshing: false});
   }
 
+
   private renderNotification(notification: Notification) {
-    const {
-      notificationId,
-      state,
-      data,
-      createdAt,
-    } = notification;
 
     let notifText: ReactNode = null;
-    let icon = 'face';
+    let icon = <MaterialIcons size={ICON_SIZE} name='face'/>;
     let onPressAction: () => void = null;
+    const {
+        notificationId,
+        state,
+        timestamp,
+        type,
+        thumbnail,
+        message,
+    } = notification;
 
+    // TODO: enforce stricter typing with metadata
     switch (notification.type) {
       case 'NEW_CREDENTIAL_MATCH':
+        const { data } = notification;
         const pronoun = data.side === 'ASKER' ? 'You' : 'They';
         notifText = (
           <Text>
@@ -122,7 +132,7 @@ class NotificationView extends Component<Props, State> {
             </Text>
           </Text>
         );
-        icon = 'people';
+        icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
         onPressAction = (async () => {
           await this.props.navigation.dispatch(NavigationActions.reset({
             index: 0,
@@ -131,9 +141,23 @@ class NotificationView extends Component<Props, State> {
           await this.props.navigation.navigate('Home');
         }).bind(this);
         break;
+      case 'ADHOC_NOTIFICATION':
+        notifText = <Text>{message}</Text>;
+        if (thumbnail) {
+          icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
+        } else {
+          icon = <MaterialIcons size={ICON_SIZE} name='message'/>;
+        }
+        onPressAction =  (async () => {
+          this.props.navigation.navigate('NotificationContent', {
+            notificationId: notificationId,
+          });
+        }).bind(this);
+        break;
       default:
-        // Ensure exhaustiveness of select
-        const _: never = notification.type;
+        onPressAction =  (async () => {
+        }).bind(this);
+        break;
     }
 
     const containerStyle = [styles.notifContainer];
@@ -151,11 +175,11 @@ class NotificationView extends Component<Props, State> {
     return (
       <TouchableOpacity key={notification.notificationId} style={containerStyle} onPress={onPress}>
         <View style={styles.leftContainer}>
-          <MaterialIcons name={icon} size={48} />
+          {icon}
         </View>
         <View style={styles.rightContainer}>
           {notifText}
-          <Text style={styles.ago}>{Moment(createdAt).fromNow()}</Text>
+          <Text style={styles.ago}>{Moment(timestamp).fromNow()}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -277,6 +301,10 @@ const styles = StyleSheet.create({
   },
   notifContainerUnread: {
     backgroundColor: Colors.HIVE_PRIMARY_LIGHT,
+  },
+  notifImageStyle: {
+    width: ICON_SIZE,
+    height: ICON_SIZE,
   },
   leftContainer: {
     paddingRight: 10,

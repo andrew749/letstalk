@@ -1,14 +1,69 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
 
+	"letstalk/server/aws_utils"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	notification_helper "letstalk/server/core/notifications"
 	"letstalk/server/core/query"
+	"letstalk/server/data"
+	"letstalk/server/jobs"
+	"letstalk/server/notifications"
+
+	"github.com/romana/rlog"
 	// "letstalk/server/data"
 )
+
+type NotificationTokenSubmissionRequest struct {
+	Token string `json:"token" binding:"required"`
+}
+
+func GetNewNotificationToken(c *ctx.Context) errs.Error {
+	var request NotificationTokenSubmissionRequest
+	err := c.GinContext.BindJSON(&request)
+	if err != nil {
+		return errs.NewRequestError("Bad Request: %s", err)
+	}
+
+	db := c.Db
+
+	tx := db.Begin()
+	// TODO(acod): remove hardcoded
+	var notificationToken = &data.NotificationToken{
+		Token:   request.Token,
+		Service: "expo", // hardcoded for now
+	}
+	// add the token to the
+	tx.Create(&notificationToken)
+	tx.Model(&data.Session{}).
+		Where("session_id = ?", c.SessionData.SessionId).
+		Update("notification_token", request.Token)
+	if tx.Error != nil {
+		tx.Rollback()
+		return errs.NewRequestError(tx.Error.Error())
+	}
+
+	c.Result = "Ok"
+	tx.Commit()
+
+	rlog.Debug("Dispatching notification lambda")
+	if err := aws_utils.DispatchLambdaJob(
+		jobs.SendNotification,
+		notifications.Notification{
+			To:    fmt.Sprintf("ExponentPushToken[%s]", notificationToken.Token),
+			Body:  "Subscribed for notifications.",
+			Title: "Hive",
+		},
+	); err != nil {
+		rlog.Error(err)
+	}
+
+	return nil
+}
 
 func GetNotifications(c *ctx.Context) errs.Error {
 	db := c.Db
@@ -51,9 +106,9 @@ func GetNotifications(c *ctx.Context) errs.Error {
 	// dataMap["credentialName"] = "Software Engineer at Quora"
 	// dataMap["userName"] = "Wojtek Swiderski"
 	// dataMap["side"] = "ASKER"
-
+	//
 	// // TODO: Remove
-	// _, err = query.CreateNotification(db, userId, data.NOTIF_TYPE_NEW_CREDENTIAL_MATCH, dataMap)
+	// _, err = notification_helper.CreateNotification(db, userId, data.NOTIF_TYPE_NEW_CREDENTIAL_MATCH, "New match", nil, time.Now(), dataMap)
 	// if err != nil {
 	// 	return err
 	// }
@@ -69,7 +124,7 @@ func UpdateNotificationState(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 
-	if err := query.UpdateNotificationState(
+	if err := notification_helper.UpdateNotificationState(
 		c.Db,
 		c.SessionData.UserId,
 		req.NotificationIds,

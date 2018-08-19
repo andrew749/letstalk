@@ -22,6 +22,6 @@ type UserLocation struct {
 	PlaceName string          `gorm:"not null"` // Plaintext description of the place (e.g. Waterloo, Ontario, Canada)
 	Type      LocationType    `gorm:"not null"`
 	StartDate string          `gorm:"not null"` // YYYY-MM-DD
-	EndDate   string          // YYYY-MM-DD (optional)
+	EndDate   *string         // YYYY-MM-DD (optional)
 	Times
 }

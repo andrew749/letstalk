@@ -2,14 +2,15 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/aws/aws-lambda-go"
   packages = [
+    "events",
     "lambda",
     "lambda/messages",
     "lambdacontext"
   ]
-  revision = "ea03c2814414b2223eff860ed2286a83ed8a195c"
+  revision = "e630af386f8aad6ec9fc899b951cf62d37cfe56f"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -42,6 +43,7 @@
     "private/protocol/restjson",
     "private/protocol/restxml",
     "private/protocol/xml/xmlutil",
+    "service/elasticsearchservice",
     "service/lambda",
     "service/s3",
     "service/s3/s3iface",
@@ -277,6 +279,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cf56d3994f691cd4eb842977c452f1842cebdaddde20ae41381417e5c0cd1b2f"
+  inputs-digest = "e8af493fe82508e4d7a51119bc774fa73166970cc00131849c4d955cbd77cf91"
   solver-name = "gps-cdcl"
   solver-version = 1
