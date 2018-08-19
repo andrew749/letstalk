@@ -88,11 +88,12 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 		UserContactInfo: api.UserContactInfo{
 			Email: user.Email,
 		},
-		UserAdditionalData: api.UserAdditionalData{
-			MentorshipPreference: user.AdditionalData.MentorshipPreference,
-			Bio:                  user.AdditionalData.Bio,
-			Hometown:             user.AdditionalData.Hometown,
-		},
+	}
+
+	if user.AdditionalData != nil {
+		userModel.UserAdditionalData.MentorshipPreference = user.AdditionalData.MentorshipPreference
+		userModel.UserAdditionalData.Bio = user.AdditionalData.Bio
+		userModel.UserAdditionalData.Hometown = user.AdditionalData.Hometown
 	}
 
 	if user.ExternalAuthData != nil {

@@ -41,6 +41,8 @@ import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
 import NotificationContentView from './views/NotificationContentView';
+import EditTraitsSelectorView from './views/EditTraitsSelectorView';
+import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
@@ -190,6 +192,12 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   NotificationContent: {
     screen: NotificationContentView,
+  },
+  EditTraitsSelector: {
+    screen: EditTraitsSelectorView,
+  },
+  ChangeCohort: {
+    screen: ChangeCohortView,
   },
 }, {
   initialRouteName,
