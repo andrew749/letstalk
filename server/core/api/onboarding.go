@@ -27,10 +27,10 @@ type OnboardingStatus struct {
 }
 
 type UpdateCohortRequest struct {
-	CohortId             int     `json:"cohortId" binding:"required"`
-	MentorshipPreference int     `json:"mentorshipPreference" binding:"required"`
-	Bio                  *string `json:"bio"`
-	Hometown             *string `json:"hometown"`
+	CohortId             data.TCohortID `json:"cohortId" binding:"required"`
+	MentorshipPreference int            `json:"mentorshipPreference" binding:"required"`
+	Bio                  *string        `json:"bio"`
+	Hometown             *string        `json:"hometown"`
 }
 
 type OnboardingUpdateResponse struct {

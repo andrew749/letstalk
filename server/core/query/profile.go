@@ -102,10 +102,16 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 	}
 
 	if userCohort != nil {
+		// NOTE: New API will allow for null sequence ids.
+		sequenceId := ""
+		if userCohort.SequenceId != nil {
+			sequenceId = *userCohort.SequenceId
+		}
+
 		userModel.Cohort.CohortId = userCohort.CohortId
 		userModel.Cohort.ProgramId = userCohort.ProgramId
 		userModel.Cohort.GradYear = userCohort.GradYear
-		userModel.Cohort.SequenceId = userCohort.SequenceId
+		userModel.Cohort.SequenceId = sequenceId
 	}
 
 	return &userModel, nil
