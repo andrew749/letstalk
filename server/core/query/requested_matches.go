@@ -8,8 +8,8 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/data"
-	"letstalk/server/notifications"
 
 	"letstalk/server/core/sessions"
 

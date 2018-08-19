@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"letstalk/server/data"
 	"log"
 	"net/http"
 
@@ -82,14 +81,6 @@ func (s *NotificationSendResponse) UnmarshalJSON(data []byte) error {
 	s.Data = make([]NotificationStatusResponse, 0)
 
 	return json.Unmarshal(data, &s.Data)
-}
-
-// FromNotificationDataModel Convert a notification data model to a version that the expo API expects
-func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notification {
-	n.To = string(orig.UserId)
-	n.Title = orig.Message
-	n.Data = orig
-	return n
 }
 
 // SendNotification Send a notification to the expo api and serialize response

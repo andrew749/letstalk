@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"letstalk/server/core/notifications"
 	"letstalk/server/data"
-	"letstalk/server/notifications"
+	notification_api "letstalk/server/notifications"
+	"letstalk/server/utility"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -16,8 +18,16 @@ var db *gorm.DB
 
 // HandleRequest Handle the message data passed to the lambda from sqs
 func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
+	// if this is a lambda job in a new execution environment then create a new
+	// db connection
+	// See https://docs.aws.amazon.com/lambda/latest/dg/running-lambda-code.html
+	// which explains execution environments and variable reuse between lambda methods
 	if db == nil {
-		// TODO: establish connection
+		conn, err := utility.GetDB()
+		if err != nil {
+			return err
+		}
+		db = conn
 	}
 	// TODO: handle error
 	rlog.Printf("Received message %#v\n", sqsEvent)
@@ -30,14 +40,24 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 			return err
 		}
 
-		var sendNotification = &notifications.Notification{}
-		sendNotification = sendNotification.FromNotificationDataModel(notification)
+		sendNotifications, err := notifications.NotificationsFromNotificationDataModel(db, notification)
 
-		_, err = notifications.SendNotification(*sendNotification)
 		if err != nil {
-			rlog.Error(err)
 			return err
 		}
+
+		for _, not := range *sendNotifications {
+			res, err := notification_api.SendNotification(not)
+			if err != nil {
+				rlog.Error(err)
+				return err
+			}
+			// update notification state
+
+			// currently only one message being sent at a time
+			notification.UpdateReceipt(db, res.Data[0].Id)
+		}
+
 		return nil
 	}
 	// will never reach here

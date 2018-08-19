@@ -75,6 +75,51 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "User Devices Creation From Session",
+			Migrate: func(tx *gorm.DB) error {
+				// for every session create a new user device entry
+
+				// create required table
+				tx.AutoMigrate(&UserDevice{})
+
+				// row to scan results into
+				type Row struct {
+					token string
+					uid   uint
+				}
+
+				rows, err := tx.Table("notification_tokens").
+					Select("notification_tokens.token as token, sessions.user_id as uid").
+					Joins("left join sessions on sessions.session_id=notification_tokens.session_id").
+					Rows()
+
+				if err != nil {
+					return err
+				}
+
+				for rows.Next() {
+					res := Row{}
+
+					err := rows.Scan(&res)
+					if err != nil {
+						return err
+					}
+
+					// insert row into devices table
+					err = AddExpoDeviceTokenforUser(tx, TUserID(res.uid), res.token)
+
+					if err != nil {
+						return err
+					}
+				}
+
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

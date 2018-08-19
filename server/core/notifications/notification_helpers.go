@@ -5,6 +5,7 @@ import (
 	"letstalk/server/aws_utils"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/notifications"
 	"letstalk/server/queue/queues/notification_queue"
 	"time"
 
@@ -83,4 +84,26 @@ func CreateNotification(
 	}
 
 	return dataNotif, nil
+}
+
+// FromNotificationDataModel Convert a notification data model to a version that the expo API expects
+func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification) (*[]notifications.Notification, error) {
+	// create a bunch of notifications to send based on how many registered ids the device has
+	deviceIds, err := data.GetDeviceNotificationTokensForUser(db, orig.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	// allocate storage
+	res := make([]notifications.Notification, len(*deviceIds))
+
+	// create new notification for each device id
+	for i, deviceId := range *deviceIds {
+		res[i] = notifications.Notification{
+			To:    deviceId,
+			Title: orig.Message,
+			Data:  orig,
+		}
+	}
+	return &res, nil
 }

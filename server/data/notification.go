@@ -46,3 +46,8 @@ func (u *JSONBlob) Scan(value interface{}) error {
 	return nil
 }
 func (u JSONBlob) Value() (driver.Value, error) { return string(u), nil }
+
+func (n *Notification) UpdateReceipt(db *gorm.DB, receipt string) error {
+	n.Receipt = &receipt
+	return db.Save(n).Error
+}
