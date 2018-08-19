@@ -29,7 +29,6 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&Subscriber{})
 				tx.AutoMigrate(&ForgotPasswordId{})
 				tx.AutoMigrate(&MeetingConfirmation{})
-				tx.AutoMigrate(&Notification{})
 				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {
@@ -38,6 +37,26 @@ func migrateDB(db *gorm.DB) {
 		},
 		{
 			ID: "2",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&Notification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "3",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&NotificationPage{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "TRAITS_DATA_MODELS_V1_5",
 			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&Organization{})
 				tx.AutoMigrate(&Role{})

@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+### BEGIN INIT INFO
+# Provides:          server
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $network $time
+# Should-Stop:       $network $time
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop the server daemon
+# Description:       Controls the main server
+### END INIT INFO
+#
+set -e
+set -u
+
+APP=/var/app/letstalk/infra
+START_SCRIPT=deploy.sh
+STOP_SCRIPT=bring_down.sh
+
+case "$1" in
+  start)
+    echo "Starting Server..."
+    sudo bash -c "cd $APP && ./$START_SCRIPT"
+    ;;
+  stop)
+    echo "Stopping server..."
+    sudo bash -c "cd $APP && ./$STOP_SCRIPT"
+    ;;
+  reload)
+    echo "Restarting server..."
+    sudo bash -c "cd $APP && ./lb/reload_lb.sh"
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|reload}"
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,15 +1,17 @@
 package aws_utils
 
 import (
+	"letstalk/server/core/secrets"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/elasticsearchservice"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"letstalk/server/core/secrets"
 )
 
 func getDefaultConfiguration() *aws.Config {
@@ -88,4 +90,13 @@ func GetS3ServiceClient() (*s3.S3, error) {
 	s3Client := s3.New(sess, config)
 
 	return s3Client, nil
+}
+
+func GetElasticSearchClient() (*elasticsearchservice.ElasticsearchService, error) {
+	sess, err := getDefaultSession()
+	if err != nil {
+		return nil, err
+	}
+	esClient := elasticsearchservice.New(sess)
+	return esClient, nil
 }

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+FOLDER=/var/app/letstalk
 set -e
 # To be run from AWS cloud in an EC2 instance
 
@@ -23,7 +24,13 @@ create_admin_user() {
 
 # install dependencies
 install_dependencies() {
-    sudo apt-get install docker docker-compose jq
+    sudo add-apt-repository ppa:certbot/certbot
+    sudo apt-get update
+    sudo apt-get install docker \
+      docker-compose \
+      jq \
+      software-properties-common \
+      python-certbot-nginx
 }
 
 setup_docker() {
@@ -39,6 +46,11 @@ generate_ssh() {
   echo "END PUBLIC KEY"
 }
 
+setup_startup() {
+  cp $FOLDER/infra/server /etc/init.d/server
+  update-rc.d server defaults
+}
+
 
 # start of actual program
 create_admin_group
@@ -50,4 +62,4 @@ setup_docker
 echo "\033[92mAdding source code.\033[0m"
 git clone git@github.com:andrew749/letstalk.git
 
-echo "\033[91mRemember to manually add secrets to this server\033[0m"
+echo "\033[91mRemember to manually add secrets to this server in the server root!!!\033[0m"
