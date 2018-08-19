@@ -1,6 +1,6 @@
 import React, { Component, SFC } from 'react';
 import { Picker, Text } from 'react-native';
-import { connect, ActionCreator } from 'react-redux';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -17,6 +17,7 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThunkAction } from 'redux-thunk';
 
+import { infoToast } from '../../redux/toast';
 import { RootState } from '../../redux';
 import {
   Cohort,
@@ -132,6 +133,7 @@ const ChangeCohortFormWithReduxBuilder = (initialValues: ChangeCohortFormData) =
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
 // TODO: Maybe take current cohort info as a prop instead of pulling from redux. Makes this more
@@ -179,6 +181,7 @@ class ChangeCohortView extends Component<Props> {
       } = values;
       const cohortId = getCohortId(this.props.cohorts.cohorts, programId, sequenceId, gradYear);
       await profileService.updateCohort({ cohortId });
+      await this.props.infoToast('Successfully changed cohort');
       await this.props.fetchProfile();
       await this.props.navigation.goBack();
     } catch (e) {
@@ -223,4 +226,4 @@ class ChangeCohortView extends Component<Props> {
 
 export default connect(({profile, cohorts}: RootState) => {
   return { profile, cohorts }
-}, { fetchProfile, fetchCohorts })(ChangeCohortView);
+}, { fetchProfile, fetchCohorts, infoToast })(ChangeCohortView);
