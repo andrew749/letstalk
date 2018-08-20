@@ -21,11 +21,13 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
 )
 
 type handlerWrapper struct {
 	db *gorm.DB
+	es *elastic.Client
 	sm *sessions.ISessionManagerBase
 }
 
@@ -47,8 +49,12 @@ func debugAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBa
 	}
 }
 
-func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.Engine {
-	hw := handlerWrapper{db, sessionManager}
+func Register(
+	db *gorm.DB,
+	es *elastic.Client,
+	sessionManager *sessions.ISessionManagerBase,
+) *gin.Engine {
+	hw := handlerWrapper{db, es, sessionManager}
 
 	router := gin.Default()
 
@@ -250,7 +256,7 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
  */
 func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.HandlerFunc {
 	return func(g *gin.Context) {
-		c := ctx.NewContext(g, hw.db, nil /* session */, hw.sm)
+		c := ctx.NewContext(g, hw.db, hw.es, nil /* session */, hw.sm)
 
 		// The api route requires authentication so we add session data from the header.
 		if needAuth {
@@ -277,7 +283,7 @@ func (hw handlerWrapper) wrapHandler(handler handlerFunc, needAuth bool) gin.Han
 
 func (hw handlerWrapper) wrapHandlerHTML(handler handlerFunc, needAuth bool) gin.HandlerFunc {
 	return func(g *gin.Context) {
-		c := ctx.NewContext(g, hw.db, nil /* session */, hw.sm)
+		c := ctx.NewContext(g, hw.db, hw.es, nil /* session */, hw.sm)
 
 		// The api route requires authentication so we add session data from the header.
 		if needAuth {

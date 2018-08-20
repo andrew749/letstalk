@@ -5,11 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 )
 
 type Context struct {
 	GinContext     *gin.Context
 	Db             *gorm.DB
+	Es             *elastic.Client
 	SessionData    *sessions.SessionData
 	SessionManager *sessions.ISessionManagerBase
 	Result         interface{}
@@ -18,12 +20,14 @@ type Context struct {
 func NewContext(
 	g *gin.Context,
 	db *gorm.DB,
+	es *elastic.Client,
 	sessionData *sessions.SessionData,
 	sm *sessions.ISessionManagerBase,
 ) *Context {
 	return &Context{
 		GinContext:     g,
 		Db:             db,
+		Es:             es,
 		SessionData:    sessionData,
 		SessionManager: sm,
 	}

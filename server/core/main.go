@@ -6,6 +6,7 @@ import (
 
 	"fmt"
 	"letstalk/server/core/routes"
+	"letstalk/server/core/search"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/sessions"
 	"letstalk/server/data"
@@ -16,6 +17,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
 )
 
@@ -26,6 +28,11 @@ var (
 	dbAddr = flag.String("db_addr", "", "address of the database connection")
 )
 
+// ES flags
+var (
+	esAddr = flag.String("es_addr", "", "address of the elasticsearch connection")
+)
+
 var (
 	port = flag.String("port", "", "Port to host server on")
 )
@@ -34,7 +41,8 @@ var (
 var (
 	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
 	profiling   = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
-	production  = flag.Bool("PROD", false, "Whether to run in debug mode.")
+	isProd      = flag.Bool("PROD", false, "Whether to run in debug mode.")
+	useElastic  = flag.Bool("use_elastic", true, "Whether to create an Elasticsearch client")
 )
 
 func main() {
@@ -53,14 +61,34 @@ func main() {
 
 	defer db.Close()
 
-	// log in development
-	db.LogMode(!*production)
+	var es *elastic.Client = nil
 
-	// create the database
-	data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4")) // Create tables using utf8mb4 encoding. Only works with MySQL.
+	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
+	// work.
+	if *useElastic && !*isProd {
+		es, err = search.NewEsClient(*esAddr)
+		if err != nil {
+			rlog.Error(err)
+			panic("Failed to connect to elasticsearch.")
+		}
+
+		rlog.Info("Creating indexes in ES")
+		if err := search.CreateEsIndexes(es); err != nil {
+			// Failures here are okay since the indexes could already exist.
+			rlog.Error(err)
+		} else {
+			rlog.Info("Success creating indexes in ES")
+		}
+	}
+
+	// log in development
+	db.LogMode(!*isProd)
+
+	// Create tables using utf8mb4 encoding. Only works with MySQL.
+	data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4"))
 
 	sessionManager := sessions.CreateSessionManager(db)
-	router := routes.Register(db, &sessionManager)
+	router := routes.Register(db, es, &sessionManager)
 	if *profiling {
 		// add cpu profiling
 		pprof.Register(router, nil)
@@ -72,10 +100,10 @@ func main() {
 	raven.SetDSN(secrets.GetSecrets().SentryDSN)
 
 	// production specific setup
-	if *production {
-		rlog.Info("Running in Production")
+	if *isProd {
+		rlog.Info("Running in isProd")
 		raven.SetTagsContext(map[string]string{
-			"environment": "production",
+			"environment": "isProd",
 		})
 		// setup sentry
 	} else {
