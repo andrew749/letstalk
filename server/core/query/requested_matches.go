@@ -11,6 +11,7 @@ import (
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 
+	raven "github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
@@ -105,20 +106,26 @@ func sendNotifications(
 	credentialId uint,
 	name string,
 ) errs.Error {
-	notifications.RequestToMatchNotification(
+	err1 := notifications.RequestToMatchNotification(
 		c.Db,
 		askerId,
 		notifications.REQUEST_TO_MATCH_SIDE_ASKER,
 		credentialId,
 		name,
 	)
-	notifications.RequestToMatchNotification(
+	err2 := notifications.RequestToMatchNotification(
 		c.Db,
 		answererId,
 		notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
 		credentialId,
 		name,
 	)
+	if err1 != nil {
+		raven.CaptureError(err1, nil)
+	}
+	if err2 != nil {
+		raven.CaptureError(err2, nil)
+	}
 	return nil
 }
 
