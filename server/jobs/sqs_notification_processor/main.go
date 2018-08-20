@@ -47,7 +47,7 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 		}
 
 		for _, not := range *sendNotifications {
-			res, err := notification_api.SendNotification(not)
+			res, err := notification_api.SendNotifications(not)
 			if err != nil {
 				rlog.Error(err)
 				return err
