@@ -14,8 +14,8 @@ import (
 	"letstalk/server/jobs"
 	"letstalk/server/notifications"
 
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	// "letstalk/server/data"
 )
 
 type NotificationTokenSubmissionRequest struct {
@@ -29,26 +29,30 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Bad Request: %s", err)
 	}
 
-	db := c.Db
-
-	tx := db.Begin()
 	// TODO(acod): remove hardcoded
 	var notificationToken = &data.NotificationToken{
 		Token:   request.Token,
 		Service: "expo", // hardcoded for now
 	}
-	// add the token to the
-	tx.Create(&notificationToken)
-	tx.Model(&data.Session{}).
-		Where("session_id = ?", c.SessionData.SessionId).
-		Update("notification_token", request.Token)
-	if tx.Error != nil {
-		tx.Rollback()
-		return errs.NewRequestError(tx.Error.Error())
-	}
 
+	err = c.WithinTx(func(db *gorm.DB) error {
+		tx := db.Begin()
+		// add the token to the
+		tx.Create(&notificationToken)
+		tx.Model(&data.Session{}).
+			Where("session_id = ?", c.SessionData.SessionId).
+			Update("notification_token", request.Token)
+		if tx.Error != nil {
+			return tx.Error
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return errs.NewRequestError(err.Error())
+	}
 	c.Result = "Ok"
-	tx.Commit()
 
 	rlog.Debug("Dispatching notification lambda")
 	if err := aws_utils.DispatchLambdaJob(

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
@@ -27,35 +28,38 @@ func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait
 // user generated simple trait.
 func getOrCreateSimpleTrait(db *gorm.DB, name string) (*data.SimpleTrait, errs.Error) {
 	var trait data.SimpleTrait
-	tx := db.Begin()
 
-	err := tx.Where(&data.SimpleTrait{Name: name}).First(&trait).Error
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			trait = data.SimpleTrait{
-				Name:            name,
-				Type:            data.SIMPLE_TRAIT_TYPE_NONE,
-				IsSensitive:     false,
-				IsUserGenerated: true,
-			}
+	err := ctx.WithinTx(db, func(db *gorm.DB) error {
+		err := db.Where(&data.SimpleTrait{Name: name}).First(&trait).Error
+		if err != nil {
+			if gorm.IsRecordNotFoundError(err) {
+				trait = data.SimpleTrait{
+					Name:            name,
+					Type:            data.SIMPLE_TRAIT_TYPE_NONE,
+					IsSensitive:     false,
+					IsUserGenerated: true,
+				}
 
-			// Add credential if it doesn't already exist.
-			if err := tx.Save(&trait).Error; err != nil {
-				tx.Rollback()
-				return nil, errs.NewDbError(err)
+				// Add credential if it doesn't already exist.
+				if err := db.Save(&trait).Error; err != nil {
+					return err
+				}
+			} else {
+				return err
 			}
-		} else {
-			tx.Rollback()
-			return nil, errs.NewDbError(err)
 		}
+		return nil
+	})
+	if err != nil {
+		return nil, errs.NewDbError(err)
 	}
 
-	tx.Commit()
 	return &trait, nil
 }
 
 func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait) errs.Error {
 	var userTrait data.UserSimpleTrait
+	// TODO: Trying using `WithinTx`
 	tx := db.Begin()
 	err := tx.Where(
 		&data.UserSimpleTrait{UserId: userId, SimpleTraitId: trait.Id},
@@ -80,7 +84,9 @@ func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait
 		return errs.NewDbError(dbErr)
 	}
 
-	tx.Commit()
+	if dbErr := tx.Commit().Error; dbErr != nil {
+		return errs.NewDbError(dbErr)
+	}
 	return nil
 }
 
