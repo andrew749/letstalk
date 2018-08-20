@@ -1,16 +1,16 @@
 package meeting
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
-	"letstalk/server/core/api"
 	"letstalk/server/data"
-	"github.com/jinzhu/gorm"
-	"letstalk/server/core/sessions"
-	"letstalk/server/notifications"
-	"github.com/romana/rlog"
+
 	"github.com/getsentry/raven-go"
+	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 // PostMeetingConfirmation lets users confirm that a scheduled meeting occurred.
@@ -91,23 +91,14 @@ func updateMatchingObject(tx *gorm.DB, matching data.Matching) error {
 
 // Send notifications to the two users in a newly verified match.
 func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, matchedUser *data.User) error {
-	verifierDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, verifyingUser.UserId)
-	if err != nil {
-		return err
+	db := c.Db
+	err1 := notifications.MatchVerifiedNotification(db, verifyingUser.UserId, matchedUser.FirstName)
+	err2 := notifications.MatchVerifiedNotification(db, matchedUser.UserId, verifyingUser.FirstName)
+	if err1 != nil {
+		raven.CaptureError(err1, nil)
 	}
-	matchedDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, matchedUser.UserId)
-	if err != nil {
-		return err
-	}
-	for _, token := range verifierDeviceTokens {
-		if err := notifications.MatchVerifiedNotification(token, matchedUser.FirstName); err != nil {
-			return err
-		}
-	}
-	for _, token := range matchedDeviceTokens {
-		if err := notifications.MatchVerifiedNotification(token, verifyingUser.FirstName); err != nil {
-			return err
-		}
+	if err2 != nil {
+		raven.CaptureError(err2, nil)
 	}
 	return nil
 }

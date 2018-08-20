@@ -4,13 +4,12 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
-	"letstalk/server/core/sessions"
-	"letstalk/server/notifications"
-
+	raven "github.com/getsentry/raven-go"
 	"github.com/romana/rlog"
 )
 
@@ -95,19 +94,13 @@ func sendMatchNotifications(
 	mentorId data.TUserID,
 	menteeId data.TUserID,
 ) errs.Error {
-	mentorDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, mentorId)
-	if err != nil {
-		return errs.NewDbError(err)
+	err1 := notifications.NewMenteeNotification(c.Db, menteeId)
+	err2 := notifications.NewMentorNotification(c.Db, mentorId)
+	if err1 != nil {
+		raven.CaptureError(err1, nil)
 	}
-	menteeDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, menteeId)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	for _, token := range mentorDeviceTokens {
-		notifications.NewMenteeNotification(token)
-	}
-	for _, token := range menteeDeviceTokens {
-		notifications.NewMentorNotification(token)
+	if err2 != nil {
+		raven.CaptureError(err2, nil)
 	}
 	return nil
 }

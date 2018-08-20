@@ -83,9 +83,9 @@ func (s *NotificationSendResponse) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &s.Data)
 }
 
-// SendNotification Send a notification to the expo api and serialize response
-func SendNotification(notification Notification) (*NotificationSendResponse, error) {
-	marshalledNotification, err := json.Marshal(notification)
+// SendNotifications Send a notification to the expo api and serialize response
+func SendNotifications(notifications []Notification) (*NotificationSendResponse, error) {
+	marshalledNotification, err := json.Marshal(notifications)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 		rlog.Error(err)
 		return nil, err
 	}
-	rlog.Debug("Successfully sent notification to client: %s", notification.To)
+	rlog.Debugf("Successfully sent notification to clients\n")
 
 	var res NotificationSendResponse
 	err = json.Unmarshal(bodyBytes, &res)
