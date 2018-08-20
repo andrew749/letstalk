@@ -2,17 +2,13 @@ package query
 
 import (
 	"fmt"
+	"strings"
 
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
 )
-
-// Add trait by ID
-// Add trait by Name
-// Remove trait by ID
-// Get traits
 
 func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait, errs.Error) {
 	var trait data.SimpleTrait
@@ -64,11 +60,11 @@ func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait
 	err := tx.Where(
 		&data.UserSimpleTrait{UserId: userId, SimpleTraitId: trait.Id},
 	).First(&userTrait).Error
-	if err != nil {
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		tx.Rollback()
-		if !gorm.IsRecordNotFoundError(err) {
-			return errs.NewDbError(err)
-		}
+		return errs.NewDbError(err)
+	} else if err == nil {
+		tx.Rollback()
 		return errs.NewRequestError(fmt.Sprintf("You already have the trait \"%s\"", trait.Name))
 	}
 
@@ -105,6 +101,7 @@ func AddUserSimpleTraitByName(
 	userId data.TUserID,
 	name string,
 ) errs.Error {
+	name = strings.TrimSpace(name)
 	trait, err := getOrCreateSimpleTrait(db, name)
 	if err != nil {
 		return err
