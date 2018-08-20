@@ -9,6 +9,7 @@ const (
 	SIMPLE_TRAIT_TYPE_EXPERIENCE                 = "EXPERIENCE"
 	SIMPLE_TRAIT_TYPE_RELIGION                   = "RELIGION"
 	SIMPLE_TRAIT_TYPE_RACE                       = "RACE"
+	SIMPLE_TRAIT_TYPE_NONE                       = "NONE"
 )
 
 // Stores all simple traits that can we written down in a single line of plaintext. Examples of
