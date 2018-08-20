@@ -11,8 +11,6 @@ import (
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 
-	"letstalk/server/core/sessions"
-
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
@@ -107,30 +105,20 @@ func sendNotifications(
 	credentialId uint,
 	name string,
 ) errs.Error {
-	askerDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, askerId)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	answererDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, answererId)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	for _, token := range askerDeviceTokens {
-		notifications.RequestToMatchNotification(
-			token,
-			notifications.REQUEST_TO_MATCH_SIDE_ASKER,
-			credentialId,
-			name,
-		)
-	}
-	for _, token := range answererDeviceTokens {
-		notifications.RequestToMatchNotification(
-			token,
-			notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
-			credentialId,
-			name,
-		)
-	}
+	notifications.RequestToMatchNotification(
+		c.Db,
+		askerId,
+		notifications.REQUEST_TO_MATCH_SIDE_ASKER,
+		credentialId,
+		name,
+	)
+	notifications.RequestToMatchNotification(
+		c.Db,
+		answererId,
+		notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
+		credentialId,
+		name,
+	)
 	return nil
 }
 
