@@ -96,7 +96,8 @@ class ProfileView extends Component<Props> {
   }
 
   private async onEditTraitsButtonPress() {
-    await this.props.navigation.navigate('EditTraitsSelector');
+    const { profile } = this.props;
+    await this.props.navigation.navigate('EditTraitsSelector', { profile });
   }
 
   async componentDidMount() {

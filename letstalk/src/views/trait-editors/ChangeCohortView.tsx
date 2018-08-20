@@ -139,9 +139,8 @@ interface DispatchActions {
 // TODO: Maybe take current cohort info as a prop instead of pulling from redux. Makes this more
 // reusable.
 interface Props extends DispatchActions {
-  navigation: NavigationScreenProp<void, NavigationStackAction>;
+  navigation: NavigationScreenProp<void, NavigationStackAction & ChangeCohortFormData>;
   cohorts: CohortsState;
-  profile: ProfileState;
 }
 
 class ChangeCohortView extends Component<Props> {
@@ -162,7 +161,6 @@ class ChangeCohortView extends Component<Props> {
 
   private async load() {
     await this.props.fetchCohorts();
-    await this.props.fetchProfile();
   }
 
   async componentDidMount() {
@@ -190,11 +188,10 @@ class ChangeCohortView extends Component<Props> {
   }
 
   private renderBody() {
-    const {
-      programId,
-      sequenceId,
-      gradYear,
-    } = this.props.profile.profile;
+    const { navigation } = this.props;
+    const programId = navigation.getParam('programId', null);
+    const sequenceId = navigation.getParam('sequenceId', null);
+    const gradYear = navigation.getParam('gradYear', null);
     const ChangeCohortFormWithRedux = ChangeCohortFormWithReduxBuilder({
       programId,
       sequenceId,
@@ -210,7 +207,7 @@ class ChangeCohortView extends Component<Props> {
       state,
       errorMsg,
       errorType,
-    } = this.props.profile.fetchState;
+    } = this.props.cohorts.fetchState;
     return (
       <Loading
         state={state}
@@ -224,6 +221,6 @@ class ChangeCohortView extends Component<Props> {
   }
 }
 
-export default connect(({profile, cohorts}: RootState) => {
-  return { profile, cohorts }
+export default connect(({cohorts}: RootState) => {
+  return { cohorts }
 }, { fetchProfile, fetchCohorts, infoToast })(ChangeCohortView);

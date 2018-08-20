@@ -238,7 +238,7 @@ class App extends React.Component<Props, AppState> {
     const { loggedIn } = this.state;
 
     let initialRouteName = 'BlankDoNotUse';
-    if (loggedIn === true) initialRouteName = 'EditTraitsSelector';
+    if (loggedIn === true) initialRouteName = 'Tabbed';
     else if (loggedIn === false) initialRouteName = 'Login';
 
     const AppNavigation = createAppNavigation(initialRouteName);

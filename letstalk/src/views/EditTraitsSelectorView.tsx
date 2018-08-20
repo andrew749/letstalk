@@ -14,9 +14,10 @@ import { Card } from '../components';
 import { headerStyle } from './TopHeader';
 import Colors from '../services/colors';
 import { AnalyticsHelper } from '../services/analytics';
+import { ProfileData } from '../models/profile';
 
 interface Props {
-  navigation: NavigationScreenProp<void, NavigationStackAction>;
+  navigation: NavigationScreenProp<void, NavigationStackAction & { profile: ProfileData }>;
 }
 
 export default class EditTraitsSelectorView extends Component<Props> {
@@ -35,7 +36,10 @@ export default class EditTraitsSelectorView extends Component<Props> {
 
   private renderTraitCard(name: string, editView: string, description: string) {
     const onPress = async () => {
-      await this.props.navigation.navigate(editView);
+      const { navigation } = this.props;
+      const profile = navigation.getParam('profile', null);
+      console.log(profile);
+      await navigation.navigate(editView, profile);
     };
     return (
       <TouchableOpacity onPress={onPress}>
