@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	raven "github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
@@ -25,6 +26,7 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 	if db == nil {
 		conn, err := utility.GetDB()
 		if err != nil {
+			raven.CaptureError(err, nil)
 			return err
 		}
 		db = conn
@@ -37,6 +39,7 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 	for _, record := range records {
 		err := json.Unmarshal([]byte(record.Body), &notification)
 		if err != nil {
+			raven.CaptureError(err, nil)
 			return err
 		}
 
@@ -46,19 +49,35 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 			return err
 		}
 
-		for _, not := range *sendNotifications {
-			res, err := notification_api.SendNotifications(not)
-			if err != nil {
-				rlog.Error(err)
-				return err
-			}
-			// update notification state
-
-			// currently only one message being sent at a time
-			notification.UpdateReceipt(db, res.Data[0].Id)
+		res, err := notification_api.SendNotifications(*sendNotifications)
+		if err != nil {
+			rlog.Error(err)
+			return err
 		}
 
-		return nil
+		// create pending notification for each message we tried to send
+		tx := db.Begin()
+
+		// for each notification response, add the receipt
+		for i, response := range res.Data {
+			temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
+
+			// was this message errored
+			if response.Status == notification_api.ERROR_STATUS {
+				err := temp.MarkNotificationError(tx, response.Message, response.Details)
+				// THE WORLD IS ON FIRE!!! AAAAAAAAH!
+				raven.CaptureError(err, nil)
+				continue
+			}
+
+			err = temp.MarkNotificationSent(db, response.Id)
+			if err != nil {
+				raven.CaptureError(err, nil)
+				continue
+			}
+		}
+
+		return tx.Commit().Error
 	}
 	// will never reach here
 	return nil
