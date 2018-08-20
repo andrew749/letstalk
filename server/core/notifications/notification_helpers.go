@@ -88,7 +88,7 @@ func CreateNotification(
 
 // FromNotificationDataModel Convert a notification data model to a version that the expo API expects
 func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification) (*[]notifications.Notification, error) {
-	// create a bunch of notifications to send based on how many registered ids the device has
+	// create a bunch of notifications to send based on how many registered device ids the user has
 	deviceIds, err := data.GetDeviceNotificationTokensForUser(db, orig.UserId)
 	if err != nil {
 		return nil, err

@@ -22,6 +22,7 @@ type ISessionManagerBase interface {
 
 func CreateSessionManager(db *gorm.DB) ISessionManagerBase {
 	return CreateCompositeSessionManager(
+		db,
 		CreateInMemorySessionStore(),
 		CreateDBSessionStore(db),
 	)

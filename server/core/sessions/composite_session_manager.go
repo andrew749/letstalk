@@ -6,15 +6,18 @@ import (
 	"letstalk/server/data"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
 type CompositeSessionManager struct {
+	db            *gorm.DB
 	sessionStores []ISessionStore
 }
 
-func CreateCompositeSessionManager(sessionManagers ...ISessionStore) ISessionManagerBase {
+func CreateCompositeSessionManager(db *gorm.DB, sessionManagers ...ISessionStore) ISessionManagerBase {
 	sm := CompositeSessionManager{
+		db,
 		make([]ISessionStore, 0),
 	}
 	for _, x := range sessionManagers {
@@ -75,6 +78,7 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	if err != nil {
 		return nil, errors.New("Unable to create new session")
 	}
+	// TODO: add device to user devices.
 
 	// maintain mappings
 	sm.AddNewSession(session)
