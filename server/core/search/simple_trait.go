@@ -1,6 +1,7 @@
 package search
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 )
 
 const SIMPLE_TRAIT_INDEX = "simple_traits"
+const SIMPLE_TRAIT_TYPE = "simple_trait"
 
 type SimpleTrait struct {
 	Id              data.TSimpleTraitID  `json:"id"`
@@ -24,7 +26,7 @@ type SimpleTrait struct {
 func (c *RequestSearchClient) IndexSimpleTrait(trait SimpleTrait) error {
 	_, err := c.client.Index().
 		Index(SIMPLE_TRAIT_INDEX).
-		Type("doc").
+		Type(SIMPLE_TRAIT_TYPE).
 		Id(strconv.Itoa(int(trait.Id))).
 		BodyJson(trait).
 		Do(c.request.Context())
@@ -54,6 +56,24 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 		if t, ok := item.(SimpleTrait); ok {
 			rlog.Info(t)
 		}
+	}
+	return nil
+}
+
+// For use in backfill jobs
+func BulkIndexSimpleTraits(es *elastic.Client, traits []SimpleTrait) error {
+	bulkRequest := es.Bulk()
+	for _, trait := range traits {
+		req := elastic.NewBulkIndexRequest().
+			Index(SIMPLE_TRAIT_INDEX).
+			Type(SIMPLE_TRAIT_TYPE).
+			Id(strconv.Itoa(int(trait.Id))).
+			Doc(trait)
+		bulkRequest = bulkRequest.Add(req)
+	}
+	_, err := bulkRequest.Do(context.Background())
+	if err != nil {
+		return err
 	}
 	return nil
 }
