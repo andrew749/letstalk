@@ -220,6 +220,20 @@ func Register(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) *gin.En
 	v1.OPTIONS("/notification_page")
 	v1.GET("/notification_page", hw.wrapHandlerHTML(notifications.GetNotificationContentPage, true))
 
+	// Simple Traits
+	v1.OPTIONS("/user_simple_trait")
+	v1.POST("/user_simple_trait", hw.wrapHandler(controller.AddUserSimpleTraitByIdController, true))
+	v1.DELETE(
+		"/user_simple_trait",
+		hw.wrapHandler(controller.RemoveUserSimpleTraitController, true),
+	)
+
+	v1.OPTIONS("/user_simple_trait_by_name")
+	v1.POST(
+		"/user_simple_trait_by_name",
+		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
+	)
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))

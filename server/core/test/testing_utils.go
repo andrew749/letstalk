@@ -69,6 +69,11 @@ func RunTestsWithDb(tests []Test) {
 	TearDownLocalDatabase()
 }
 
+func RunTestWithDb(test Test) {
+	tests := []Test{test}
+	RunTestsWithDb(tests)
+}
+
 func runTestWithDb(db *gorm.DB, test Test) {
 	test.Test(db)
 }
