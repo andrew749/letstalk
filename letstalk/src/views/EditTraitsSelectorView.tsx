@@ -38,7 +38,6 @@ export default class EditTraitsSelectorView extends Component<Props> {
     const onPress = async () => {
       const { navigation } = this.props;
       const profile = navigation.getParam('profile', null);
-      console.log(profile);
       await navigation.navigate(editView, profile);
     };
     return (
@@ -52,6 +51,7 @@ export default class EditTraitsSelectorView extends Component<Props> {
   }
 
   render() {
+    // TODO: Copies
     const traitTypes = [
       {
         name: 'Change Cohort',
@@ -64,14 +64,14 @@ export default class EditTraitsSelectorView extends Component<Props> {
       return this.renderTraitCard(name, editView, description)
     });
 
-    // TODO: Copies
+    const description =
+      'Traits describe who you are. The more we know about you, the better we can help you find ' +
+      'others that share common interests and aspirations, leading to awesome new friendships ' +
+      'and valuable mentorships.';
+
     return (
       <ScrollView style={styles.container}>
-        <Text>
-          Traits describe who you are. The more we know about you, the better we can help you find
-          others that share common interests and aspirations, leading to awesome new friendships and
-          valuable mentorships.
-        </Text>
+        <Text>{ description }</Text>
         { traitCards }
       </ScrollView>
     );
