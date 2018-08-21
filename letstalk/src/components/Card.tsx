@@ -3,8 +3,6 @@ import { Dimensions, StyleProp, StyleSheet, View, ViewStyle } from 'react-native
 
 import Colors from '../services/colors';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 interface Props {
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;

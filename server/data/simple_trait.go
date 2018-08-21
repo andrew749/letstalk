@@ -5,11 +5,11 @@ type TSimpleTraitID EntID
 type SimpleTraitType string
 
 const (
-	SIMPLE_TRAIT_TYPE_INTEREST   SimpleTraitType = "INTEREST"
-	SIMPLE_TRAIT_TYPE_EXPERIENCE                 = "EXPERIENCE"
-	SIMPLE_TRAIT_TYPE_RELIGION                   = "RELIGION"
-	SIMPLE_TRAIT_TYPE_RACE                       = "RACE"
-	SIMPLE_TRAIT_TYPE_NONE                       = "NONE"
+	SIMPLE_TRAIT_TYPE_INTEREST     SimpleTraitType = "INTEREST"
+	SIMPLE_TRAIT_TYPE_EXPERIENCE                   = "EXPERIENCE"
+	SIMPLE_TRAIT_TYPE_RELIGION                     = "RELIGION"
+	SIMPLE_TRAIT_TYPE_RACE                         = "RACE"
+	SIMPLE_TRAIT_TYPE_UNDETERMINED                 = "UNDETERMINED"
 )
 
 // Stores all simple traits that can we written down in a single line of plaintext. Examples of

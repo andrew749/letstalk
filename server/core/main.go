@@ -14,23 +14,12 @@ import (
 	"github.com/gin-contrib/pprof"
 	"github.com/namsral/flag"
 
+	"letstalk/server/utility"
+
 	"github.com/getsentry/raven-go"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
-)
-
-// DB flags
-var (
-	dbUser = flag.String("db_user", "", "mySQL user")
-	dbPass = flag.String("db_pass", "", "mySQL password")
-	dbAddr = flag.String("db_addr", "", "address of the database connection")
-)
-
-// ES flags
-var (
-	esAddr = flag.String("es_addr", "", "address of the elasticsearch connection")
 )
 
 var (
@@ -49,10 +38,7 @@ func main() {
 	rlog.Info("Starting server")
 	flag.Parse()
 
-	db, err := gorm.Open(
-		"mysql",
-		fmt.Sprintf("%s:%s@%s/letstalk?charset=utf8mb4&parseTime=true", *dbUser, *dbPass, *dbAddr),
-	)
+	db, err := utility.GetDB()
 
 	if err != nil {
 		rlog.Error(err)

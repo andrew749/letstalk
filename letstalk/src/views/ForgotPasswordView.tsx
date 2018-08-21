@@ -14,6 +14,8 @@ import { connect, Dispatch } from 'react-redux';
 import { RootState } from '../redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
+import { required, email } from '../validators';
+
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -24,11 +26,6 @@ interface ForgotPasswordFormData {
   email: string,
 }
 
-const required = (value: any) => (value ? undefined : 'Required')
-const email = (value: string) =>
-  value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
-    ? 'Invalid email address'
-    : undefined;
 const ForgotPasswordForm: React.SFC<FormProps<ForgotPasswordFormData>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid, pristine } = props;
   const onSubmitWithReset = async (values: ForgotPasswordFormData): Promise<void> => {

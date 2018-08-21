@@ -21,6 +21,7 @@ import auth from '../services/auth';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle } from './TopHeader';
+import { required, email } from '../validators';
 
 const styles = StyleSheet.create({
   forgotPasswordButton: {
@@ -41,13 +42,6 @@ interface LoginFormData {
 interface NavProps {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
-
-// TODO: move elsewhere
-const required = (value: any) => (value ? undefined : 'Required')
-const email = (value: string) =>
-  value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
-    ? 'Invalid email address'
-    : undefined
 
 const LoginForm: React.SFC<FormProps<LoginFormData, NavProps>> = props => {
   const { error, handleSubmit, onSubmit, reset, submitting, valid, pristine } = props;
