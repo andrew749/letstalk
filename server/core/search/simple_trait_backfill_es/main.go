@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"letstalk/server/core/search"
 	"letstalk/server/data"
 	"letstalk/server/utility"
@@ -35,6 +37,7 @@ func main() {
 		traits[i] = search.NewSimpleTraitFromDataModel(dataTrait)
 	}
 
+	fmt.Printf("Writing %d things\n", len(traits))
 	err = search.BulkIndexSimpleTraits(es, traits)
 	if err != nil {
 		panic(err)

@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -21,6 +22,7 @@ type SimpleTrait struct {
 	Type            data.SimpleTraitType `json:"type"`
 	IsSensitive     bool                 `json:"isSensitive"`
 	IsUserGenerated bool                 `json:"isUserGenerated"`
+	Suggest         SuggestInput         `json:"suggest"`
 }
 
 func (c *RequestSearchClient) IndexSimpleTrait(trait SimpleTrait) error {
@@ -71,9 +73,42 @@ func BulkIndexSimpleTraits(es *elastic.Client, traits []SimpleTrait) error {
 			Doc(trait)
 		bulkRequest = bulkRequest.Add(req)
 	}
-	_, err := bulkRequest.Do(context.Background())
+	res, err := bulkRequest.Do(context.Background())
 	if err != nil {
 		return err
+	} else if len(res.Failed()) > 0 {
+		return errors.New(fmt.Sprintf("More than 0 operations failed: %d, example: %s\n",
+			len(res.Failed()),
+			res.Failed()[0].Error.Reason))
+	}
+	return nil
+}
+
+func createSimpleTraitIndex(es *elastic.Client) error {
+	exists, err := es.IndexExists(SIMPLE_TRAIT_INDEX).Do(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+
+		mapping := `
+      {
+        "mappings": {
+          "simple_trait" : {
+            "properties" : {
+              "suggest" : {
+                "type" : "completion"
+              }
+            }
+          }
+        }
+      }
+		`
+		_, err := es.CreateIndex(SIMPLE_TRAIT_INDEX).BodyString(mapping).Do(context.Background())
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -85,5 +120,6 @@ func NewSimpleTraitFromDataModel(dataTrait data.SimpleTrait) SimpleTrait {
 		dataTrait.Type,
 		dataTrait.IsSensitive,
 		dataTrait.IsUserGenerated,
+		SuggestInput{[]string{dataTrait.Name}, nil},
 	}
 }

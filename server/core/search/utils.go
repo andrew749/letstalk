@@ -1,19 +1,22 @@
 package search
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/olivere/elastic"
 )
+
+type SuggestInput struct {
+	Input  []string `json:"input"`
+	Weight *int     `json:"weight,omitempty"`
+}
 
 func NewEsClient(addr string) (*elastic.Client, error) {
 	return elastic.NewClient(elastic.SetURL(addr))
 }
 
 func CreateEsIndexes(client *elastic.Client) error {
-	_, err := client.CreateIndex("simple_traits").Do(context.Background())
-	return err
+	return createSimpleTraitIndex(client)
 }
 
 // Search client to be used within the request context
