@@ -38,9 +38,9 @@ export interface UserPersonalInfo {
 }
 
 export interface UserAdditionalData {
-  readonly mentorshipPreference: number | null;
-  readonly bio: string | null;
-  readonly hometown: string | null;
+  readonly mentorshipPreference?: number | null;
+  readonly bio?: string | null;
+  readonly hometown?: string | null;
 }
 
 export interface UserContactInfo {

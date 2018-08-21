@@ -28,7 +28,7 @@ type OnboardingStatus struct {
 
 type UpdateCohortRequest struct {
 	CohortId             data.TCohortID `json:"cohortId" binding:"required"`
-	MentorshipPreference int            `json:"mentorshipPreference" binding:"required"`
+	MentorshipPreference *int           `json:"mentorshipPreference"`
 	Bio                  *string        `json:"bio"`
 	Hometown             *string        `json:"hometown"`
 }
