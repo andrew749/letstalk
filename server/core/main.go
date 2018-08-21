@@ -71,7 +71,9 @@ func main() {
 	db.LogMode(!*isProd)
 
 	// Create tables using utf8mb4 encoding. Only works with MySQL.
-	data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4"))
+	if err := data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4")); err != nil {
+		panic(err)
+	}
 
 	sessionManager := sessions.CreateSessionManager(db)
 	router := routes.Register(db, es, &sessionManager)

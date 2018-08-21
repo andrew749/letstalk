@@ -1,10 +1,18 @@
 package data
 
 import (
+	"database/sql/driver"
+
 	"github.com/jinzhu/gorm"
 )
 
 type NotificationTokenType string
+
+func (u *NotificationTokenType) Scan(value interface{}) error {
+	*u = NotificationTokenType(value.([]byte))
+	return nil
+}
+func (u NotificationTokenType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
 	EXPO_PUSH = "expo"

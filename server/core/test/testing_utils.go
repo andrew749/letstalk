@@ -45,7 +45,9 @@ func GetSqliteDB() (*gorm.DB, error) {
 }
 
 func provisionDatabase(db *gorm.DB) {
-	data.CreateDB(db)
+	if err := data.CreateDB(db); err != nil {
+		panic(err)
+	}
 }
 
 func TearDownLocalDatabase() {

@@ -96,11 +96,16 @@ func sendMatchNotifications(
 ) errs.Error {
 	err1 := notifications.NewMenteeNotification(c.Db, menteeId)
 	err2 := notifications.NewMentorNotification(c.Db, mentorId)
+	rlog.Debug(err1.Error())
+	rlog.Debug(err2.Error())
+	var err *errs.CompositeError
 	if err1 != nil {
 		raven.CaptureError(err1, nil)
+		err = errs.AppendNullableError(err, err1)
 	}
 	if err2 != nil {
 		raven.CaptureError(err2, nil)
+		err = errs.AppendNullableError(err, err2)
 	}
-	return nil
+	return err
 }

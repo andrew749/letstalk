@@ -1,6 +1,8 @@
 package errs
 
-import "bytes"
+import (
+	"bytes"
+)
 
 /**
  * Error class to hold multiple errors.
@@ -8,12 +10,15 @@ import "bytes"
  * can fail.
  */
 type CompositeError struct {
-	errors []error
+	errors   []error
+	HttpCode *int
 }
 
 func CreateCompositeError() *CompositeError {
+	ok := 200
 	return &CompositeError{
 		make([]error, 0),
+		&ok,
 	}
 }
 
@@ -34,6 +39,10 @@ func AppendNullableError(ce *CompositeError, err error) *CompositeError {
 	return e
 }
 
+func (ce *CompositeError) GetHTTPCode() int {
+	return *ce.HttpCode
+}
+
 func (ce CompositeError) AddError(err error) {
 	ce.errors = append(ce.errors, err)
 }
@@ -48,4 +57,8 @@ func (ce CompositeError) Error() string {
 	}
 	buffer.WriteString("]")
 	return buffer.String()
+}
+
+func (ce *CompositeError) GetExtraData() map[string]interface{} {
+	return map[string]interface{}{}
 }

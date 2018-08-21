@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
-func migrateDB(db *gorm.DB) {
+func migrateDB(db *gorm.DB) error {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		{
 			ID: "1",
@@ -90,8 +90,8 @@ func migrateDB(db *gorm.DB) {
 				}
 
 				rows, err := tx.Table("notification_tokens").
-					Select("notification_tokens.token as token, sessions.user_id as uid").
-					Joins("left join sessions on sessions.session_id=notification_tokens.session_id").
+					Select("notification_tokens.token, sessions.user_id").
+					Joins("inner join sessions on sessions.session_id=notification_tokens.session_id").
 					Rows()
 
 				if err != nil {
@@ -101,7 +101,7 @@ func migrateDB(db *gorm.DB) {
 				for rows.Next() {
 					res := Row{}
 
-					err := rows.Scan(&res)
+					err := rows.Scan(&res.token, &res.uid)
 					if err != nil {
 						return err
 					}
@@ -124,11 +124,13 @@ func migrateDB(db *gorm.DB) {
 
 	if err := m.Migrate(); err != nil {
 		rlog.Errorf("Could not migrate: %v", err)
+		return err
 	}
 
 	rlog.Infof("Succesfully ran migration")
+	return nil
 }
 
-func CreateDB(db *gorm.DB) {
-	migrateDB(db)
+func CreateDB(db *gorm.DB) error {
+	return migrateDB(db)
 }
