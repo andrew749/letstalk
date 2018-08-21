@@ -12,14 +12,11 @@ func AddUserSimpleTraitByNameController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-	if err := query.AddUserSimpleTraitByName(
+	return query.AddUserSimpleTraitByName(
 		c.Db,
 		c.SessionData.UserId,
 		req.SimpleTraitName,
-	); err != nil {
-		return err
-	}
-	return nil
+	)
 }
 
 func AddUserSimpleTraitByIdController(c *ctx.Context) errs.Error {
@@ -27,14 +24,11 @@ func AddUserSimpleTraitByIdController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-	if err := query.AddUserSimpleTraitById(
+	return query.AddUserSimpleTraitById(
 		c.Db,
 		c.SessionData.UserId,
 		req.SimpleTraitId,
-	); err != nil {
-		return err
-	}
-	return nil
+	)
 }
 
 func RemoveUserSimpleTraitController(c *ctx.Context) errs.Error {
@@ -42,8 +36,5 @@ func RemoveUserSimpleTraitController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-	if err := query.RemoveUserSimpleTrait(c.Db, c.SessionData.UserId, req.SimpleTraitId); err != nil {
-		return err
-	}
-	return nil
+	return query.RemoveUserSimpleTrait(c.Db, c.SessionData.UserId, req.SimpleTraitId)
 }

@@ -70,6 +70,7 @@ import {
 import { headerStyle } from './TopHeader';
 import { AnalyticsHelper } from '../services';
 import Colors from '../services/colors';
+import { required } from '../validators';
 
 interface CohortFormData {
   programId: string,
@@ -83,9 +84,6 @@ interface CohortFormData {
 interface CohortFormProps extends FormProps<CohortFormData>, CohortFormData {
   cohorts: Immutable.List<Cohort>;
 }
-
-// TODO: move elsewhere
-const required = (value: any) => (value ? undefined : 'Required')
 
 const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
   = props => {

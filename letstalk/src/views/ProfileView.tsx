@@ -70,6 +70,7 @@ class ProfileView extends Component<Props> {
 
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.onChangePasswordPress = this.onChangePasswordPress.bind(this);
+    this.onEditTraitsButtonPress = this.onEditTraitsButtonPress.bind(this);
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
   }
@@ -78,7 +79,7 @@ class ProfileView extends Component<Props> {
     try {
       await auth.logout();
     } catch (error) { }
-    this.props.navigation.dispatch(NavigationActions.reset({
+    await this.props.navigation.dispatch(NavigationActions.reset({
       index: 0,
       key: null,
       actions: [NavigationActions.navigate({ routeName: 'Login' })]
@@ -92,6 +93,11 @@ class ProfileView extends Component<Props> {
     } catch(e) {
       await this.props.errorToast(e.errorMsg);
     }
+  }
+
+  private async onEditTraitsButtonPress() {
+    const { profile } = this.props;
+    await this.props.navigation.navigate('EditTraitsSelector', { profile });
   }
 
   async componentDidMount() {
@@ -223,6 +229,12 @@ class ProfileView extends Component<Props> {
             {this.renderQrCode()}
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <Header>{headerText}</Header>
+            <Button
+              buttonStyle={styles.logoutButton}
+              textStyle={styles.logoutButtonText}
+              onPress={this.onEditTraitsButtonPress}
+              title='Edit Traits'
+            />
             {editButton}
             <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
             {this.renderProfile(String(gradYear), program, bio)}

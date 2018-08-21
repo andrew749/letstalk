@@ -240,10 +240,6 @@ func Register(
 		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
 	)
 
-	// Search testing
-	v1.OPTIONS("/test/search/simple_trait")
-	v1.POST("/test/search/simple_trait", hw.wrapHandler(controller.AddSimpleTraitToES, false))
-
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))
