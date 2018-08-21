@@ -67,12 +67,35 @@ func GetLambdaServiceClient() (*lambda.Lambda, error) {
 	return lambdaClient, nil
 }
 
+func getSQSAWSConfig() (*aws.Config, error) {
+	creds := credentials.NewStaticCredentials(
+		secrets.GetSecrets().DefaultAccessKeyID,
+		secrets.GetSecrets().DefaultAccessKeySecret,
+		"",
+	)
+	_, err := creds.Get()
+
+	if err != nil {
+		return nil, err
+	}
+	config := &aws.Config{
+		Region:      aws.String("us-east-1"),
+		Credentials: creds,
+		//LogLevel        :0,
+	}
+	return config, nil
+}
+
 func GetSQSServiceClient() (*sqs.SQS, error) {
 	sess, err := getDefaultSession()
 	if err != nil {
 		return nil, err
 	}
-	sqsClient := sqs.New(sess)
+	config, err := getSQSAWSConfig()
+	if err != nil {
+		return nil, err
+	}
+	sqsClient := sqs.New(sess, config)
 	return sqsClient, nil
 }
 

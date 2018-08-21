@@ -3,11 +3,17 @@ package utility
 import (
 	"fmt"
 
+	"github.com/namsral/flag"
+
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/romana/rlog"
 )
 
 // GetDB Gets a connection to the gorm db instance using command line params
 func GetDB() (*gorm.DB, error) {
+	flag.Parse()
+	rlog.Infof("Connecting to db: %s", *dbAddr)
 	return gorm.Open(
 		"mysql",
 		fmt.Sprintf("%s:%s@%s/letstalk?charset=utf8mb4&parseTime=true", *dbUser, *dbPass, *dbAddr),

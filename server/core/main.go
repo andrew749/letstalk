@@ -17,7 +17,6 @@ import (
 	"letstalk/server/utility"
 
 	"github.com/getsentry/raven-go"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
 )
