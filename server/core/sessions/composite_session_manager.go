@@ -79,8 +79,11 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 		return nil, errors.New("Unable to create new session")
 	}
 
-	if err := data.AddExpoDeviceTokenforUser(sm.db, userId, *notificationToken); err != nil {
-		return nil, errors.New("Unable to register device in db.")
+	// store device
+	if notificationToken != nil {
+		if err := data.AddExpoDeviceTokenforUser(sm.db, userId, *notificationToken); err != nil {
+			return nil, errors.New("Unable to register device in db.")
+		}
 	}
 
 	// maintain mappings

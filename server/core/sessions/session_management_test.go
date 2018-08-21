@@ -47,7 +47,7 @@ func TestDatabaseSessionStore(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			sd := CreateDBSessionStore(db)
-			sm := CreateCompositeSessionManager(nil, sd)
+			sm := CreateCompositeSessionManager(db, sd)
 			session1, _ := sm.CreateNewSessionForUserId(1, nil)
 			session, _ := sm.GetSessionForSessionId(*session1.SessionId)
 			assert.Equal(t, session1.SessionId, session.SessionId)
@@ -66,7 +66,7 @@ func TestWriteThroughCache(t *testing.T) {
 
 			sd.AddNewSession(sessionData)
 			ss := CreateInMemorySessionStore()
-			sm := CreateCompositeSessionManager(nil, ss, sd)
+			sm := CreateCompositeSessionManager(db, ss, sd)
 			session, err := sm.GetSessionForSessionId(*sessionData.SessionId)
 			assert.NoError(t, err)
 			assert.NotNil(t, session)
