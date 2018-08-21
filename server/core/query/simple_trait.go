@@ -15,7 +15,7 @@ func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait
 	var trait data.SimpleTrait
 	err := db.Where(&data.SimpleTrait{Id: traitId}).First(&trait).Error
 	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
+		if gorm.IsRecordNotFoundError(err) {
 			return nil, errs.NewRequestError(fmt.Sprintf("Simple trait with id %d not found", traitId))
 		}
 		return nil, errs.NewDbError(err)
@@ -35,12 +35,12 @@ func getOrCreateSimpleTrait(db *gorm.DB, name string) (*data.SimpleTrait, errs.E
 			if gorm.IsRecordNotFoundError(err) {
 				trait = data.SimpleTrait{
 					Name:            name,
-					Type:            data.SIMPLE_TRAIT_TYPE_NONE,
+					Type:            data.SIMPLE_TRAIT_TYPE_UNDETERMINED,
 					IsSensitive:     false,
 					IsUserGenerated: true,
 				}
 
-				// Add credential if it doesn't already exist.
+				// Add trait if it doesn't already exist.
 				if err := db.Save(&trait).Error; err != nil {
 					return err
 				}

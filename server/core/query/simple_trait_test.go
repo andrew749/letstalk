@@ -54,7 +54,7 @@ func TestAddUserSimpleTraitByNameAlreadyExists(t *testing.T) {
 			assert.Equal(t, "Cycling", userTraits[0].SimpleTrait.Name)
 			assert.False(t, userTraits[0].SimpleTrait.IsUserGenerated)
 		},
-		TestName: "Test adding simple trait by name, trait alreadt exists",
+		TestName: "Test adding simple trait by name, trait already exists",
 	}
 	test.RunTestWithDb(thisTest)
 }
@@ -85,7 +85,7 @@ func TestAddUserSimpleTraitInvalidId(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			err := AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
-			assert.NotNil(t, err)
+			assert.Error(t, err)
 		},
 		TestName: "Test adding simple trait by id where trait doesn't exist",
 	}
@@ -101,7 +101,7 @@ func TestAddUserSimpleTraitAlreadyHaveMatching(t *testing.T) {
 			db.Save(&userTrait)
 
 			err := AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
-			assert.NotNil(t, err)
+			assert.Error(t, err)
 		},
 		TestName: "Test adding simple trait by id where they already have that trait",
 	}
