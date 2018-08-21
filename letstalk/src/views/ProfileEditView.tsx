@@ -42,7 +42,7 @@ import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
-import { ActionTypes } from '../redux/profile/actions';
+import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
 import photoService, {PhotoResult} from '../services/photo_service';
 import {
   Cohort,
@@ -60,6 +60,7 @@ import {
 import Colors from '../services/colors';
 import { headerStyle } from './TopHeader';
 import { AnalyticsHelper } from '../services';
+import { required, phoneNumber } from '../validators';
 
 interface EditFormData {
   firstName: string;
@@ -75,13 +76,6 @@ interface EditFormData {
   hometown: string | null;
   profilePic: PhotoResult;
 }
-
-// TODO: move elsewhere
-const required = (value: any) => (value ? undefined : 'Required')
-const phoneNumber = (value: string) =>
-  value && !/^(0|[1-9][0-9]{9})$/i.test(value)
-    ? 'Invalid phone number, must be 10 digits'
-    : undefined
 
 interface EditFormProps extends FormProps<EditFormData>, EditFormData {
   cohorts: Immutable.List<Cohort>;
@@ -265,7 +259,7 @@ const EditFormWithReduxBuilder = (initialValues: EditFormData) => {
 }
 
 interface DispatchActions {
-  fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  fetchProfile: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
 }
 
@@ -299,7 +293,7 @@ class ProfileEditView extends Component<Props> {
     await this.props.fetchCohorts();
   }
 
-  async onSubmit(values: EditFormData) {
+  private async onSubmit(values: EditFormData) {
     try {
       const {
         firstName,
@@ -332,13 +326,13 @@ class ProfileEditView extends Component<Props> {
         await photoService.uploadProfilePhoto(profilePic.uri);
       }
       await this.props.fetchProfile();
-      this.props.navigation.goBack();
+      await this.props.navigation.goBack();
     } catch(e) {
       throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
-  renderBody() {
+  private renderBody() {
     const {
       firstName,
       lastName,
