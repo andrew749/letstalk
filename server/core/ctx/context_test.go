@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/http"
 )
@@ -17,9 +18,11 @@ func TestNewContext(t *testing.T) {
 	g, _ := gin.CreateTestContext(&writer)
 	db := &gorm.DB{}
 	sm := sessions.CreateCompositeSessionManager()
+	es := &elastic.Client{}
 	sessionData, _ := sessions.CreateSessionData(1, nil, time.Now())
-	c := ctx.NewContext(g, db, sessionData, &sm)
+	c := ctx.NewContext(g, db, es, sessionData, &sm)
 	assert.Equal(t, db, c.Db)
+	assert.Equal(t, es, c.Es)
 	assert.Equal(t, g, c.GinContext)
 	assert.Equal(t, sessionData, c.SessionData)
 	assert.Nil(t, c.Result)

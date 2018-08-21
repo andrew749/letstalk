@@ -33,7 +33,7 @@ func TestCreateNewUser(t *testing.T) {
 				var err error
 				var tempUser *data.User
 
-				context := ctx.NewContext(nil, db, nil, nil)
+				context := ctx.NewContext(nil, db, nil, nil, nil)
 
 				err = writeUser(&signupRequest, context)
 				assert.NoError(t, err)

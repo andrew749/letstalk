@@ -27,6 +27,9 @@ DB_ADDR='tcp(mysql:3306)'
 DB_USER='letstalk'
 DB_PASS="uwletstalk"
 
+# default elasticsearch parameters
+ES_ADDR='http://elasticsearch:9200'
+
 # go env variables
 GOPATH = os.environ['GOPATH']
 GO_BINARY = "/usr/bin/go"
@@ -61,6 +64,11 @@ def get_args():
         default=DB_PASS,
         help="Password to connect to db with",
     )
+    parser.add_argument(
+        "--es_addr",
+        default=ES_ADDR,
+        help="The address of the elasticsearch cluster to connect to",
+    )
     return parser.parse_args()
 
 def main():
@@ -69,6 +77,7 @@ def main():
         "DB_ADDR": args.db_addr,
         "DB_USER": args.db_user,
         "DB_PASS": args.db_pass,
+        "ES_ADDR": args.es_addr,
         "RLOG_LOG_LEVEL": RLOG_LOG_LEVEL,
         "GOPATH": GOPATH,
         "GIN_MODE": GIN_MODE_PROD if args.prod else GIN_MODE_DEBUG,

@@ -10,3 +10,8 @@ var (
 	dbPass = flag.String("db_pass", "", "mySQL password")
 	dbAddr = flag.String("db_addr", "", "address of the database connection")
 )
+
+// Flags to get es credentials
+var (
+	esAddr = flag.String("es_addr", "", "address of the elasticsearch connection")
+)

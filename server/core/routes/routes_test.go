@@ -29,7 +29,7 @@ func setupSessionManager(t *testing.T) (*gorm.DB, sessions.ISessionManagerBase) 
 
 func TestHandlerResult(t *testing.T) {
 	db, sm := setupSessionManager(t)
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
@@ -44,7 +44,7 @@ func TestHandlerResult(t *testing.T) {
 
 func TestHandlerAuthBad(t *testing.T) {
 	db, sm := setupSessionManager(t)
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
@@ -64,7 +64,7 @@ func TestHandlerAuthGood(t *testing.T) {
 	session, err := sm.CreateNewSessionForUserId(1, nil)
 	assert.Nil(t, err)
 
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
@@ -85,7 +85,7 @@ func TestHandlerExpiredToken(t *testing.T) {
 	session, err := sm.CreateNewSessionForUserIdWithExpiry(1, nil, time.Unix(0, 0))
 	assert.Nil(t, err)
 
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		c.Result = msg
@@ -102,7 +102,7 @@ func TestHandlerExpiredToken(t *testing.T) {
 func TestHandlerClientError(t *testing.T) {
 	db, sm := setupSessionManager(t)
 
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(msg)
@@ -117,7 +117,7 @@ func TestHandlerClientError(t *testing.T) {
 func TestHandlerInternalError(t *testing.T) {
 	db, sm := setupSessionManager(t)
 
-	hw := handlerWrapper{db, &sm}
+	hw := handlerWrapper{db, nil, &sm}
 	msg := "test error message"
 	handler := hw.wrapHandler(func(c *ctx.Context) errs.Error {
 		return errs.NewInternalError(msg)
