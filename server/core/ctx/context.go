@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"letstalk/server/core/search"
 	"letstalk/server/core/sessions"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 type Context struct {
 	GinContext     *gin.Context
 	Db             *gorm.DB
-	Es             *elastic.Client
+	SearchClient   *search.RequestSearchClient
 	SessionData    *sessions.SessionData
 	SessionManager *sessions.ISessionManagerBase
 	Result         interface{}
@@ -27,7 +28,7 @@ func NewContext(
 	return &Context{
 		GinContext:     g,
 		Db:             db,
-		Es:             es,
+		SearchClient:   search.NewSearchClient(es, g.Request),
 		SessionData:    sessionData,
 		SessionManager: sm,
 	}

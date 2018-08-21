@@ -7,6 +7,8 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/search"
 	"letstalk/server/data"
+
+	"github.com/romana/rlog"
 )
 
 type AddSimpleTraitToESRequest struct {
@@ -22,13 +24,15 @@ func AddSimpleTraitToES(c *ctx.Context) errs.Error {
 	trait := search.SimpleTrait{
 		Id:              data.TSimpleTraitID(rand.Int()),
 		Name:            req.Name,
-		Type:            data.SIMPLE_TRAIT_TYPE_NONE,
+		Type:            data.SIMPLE_TRAIT_TYPE_UNDETERMINED,
 		IsSensitive:     false,
 		IsUserGenerated: true,
 	}
 
-	// TODO: Error handling
-	search.InsertSimpleTrait(c.Es, trait)
-	search.PrintAllSimpleTraits(c.Es)
+	err := c.SearchClient.IndexSimpleTrait(trait)
+	if err != nil {
+		rlog.Error(err)
+		return errs.NewDbError(err)
+	}
 	return nil
 }
