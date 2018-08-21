@@ -52,7 +52,7 @@ func main() {
 	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
 	// work.
 	if *useElastic && !*isProd {
-		es, err = search.NewEsClient(*esAddr)
+		es, err = utility.GetES()
 		if err != nil {
 			rlog.Error(err)
 			panic("Failed to connect to elasticsearch.")
