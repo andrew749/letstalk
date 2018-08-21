@@ -9,6 +9,7 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/utility"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/namsral/flag"
 )
@@ -17,6 +18,8 @@ var (
 	inFile = flag.String("in", "", "Input csv file containing simple traits and header")
 )
 
+// This job backfills simple traits from a csv (name, type, isSensitive). Will override simple
+// traits with the same name, potentially updating their type and isSensitive.
 func main() {
 	flag.Parse()
 
@@ -64,10 +67,18 @@ func main() {
 		})
 	}
 
-	// TODO: Look into bulk inserts, but for now this should be fine
+	// TODO: Look into bulk upserts, but for now this should be fine
 	tx := db.Begin()
 	for _, trait := range traits {
-		err := tx.Create(&trait).Error
+		var existingTrait data.SimpleTrait
+		err := tx.Where(&data.SimpleTrait{Name: trait.Name}).First(&existingTrait).Error
+		if err != nil && !gorm.IsRecordNotFoundError(err) {
+			tx.Rollback()
+			panic(err)
+		} else if err == nil {
+			trait.Id = existingTrait.Id
+		}
+		err = tx.Save(&trait).Error
 		if err != nil {
 			tx.Rollback()
 			panic(err)

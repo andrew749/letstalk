@@ -30,25 +30,13 @@ func getOrCreateSimpleTrait(db *gorm.DB, name string) (*data.SimpleTrait, errs.E
 	var trait data.SimpleTrait
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
-		err := db.Where(&data.SimpleTrait{Name: name}).First(&trait).Error
-		if err != nil {
-			if gorm.IsRecordNotFoundError(err) {
-				trait = data.SimpleTrait{
-					Name:            name,
-					Type:            data.SIMPLE_TRAIT_TYPE_UNDETERMINED,
-					IsSensitive:     false,
-					IsUserGenerated: true,
-				}
-
-				// Add trait if it doesn't already exist.
-				if err := db.Save(&trait).Error; err != nil {
-					return err
-				}
-			} else {
-				return err
-			}
+		trait = data.SimpleTrait{
+			Name:            name,
+			Type:            data.SIMPLE_TRAIT_TYPE_UNDETERMINED,
+			IsSensitive:     false,
+			IsUserGenerated: true,
 		}
-		return nil
+		return db.Where(&data.SimpleTrait{Name: name}).FirstOrCreate(&trait).Error
 	})
 	if err != nil {
 		return nil, errs.NewDbError(err)

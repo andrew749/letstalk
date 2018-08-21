@@ -57,3 +57,13 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 	}
 	return nil
 }
+
+func NewSimpleTraitFromDataModel(dataTrait data.SimpleTrait) SimpleTrait {
+	return SimpleTrait{
+		dataTrait.Id,
+		dataTrait.Name,
+		dataTrait.Type,
+		dataTrait.IsSensitive,
+		dataTrait.IsUserGenerated,
+	}
+}
