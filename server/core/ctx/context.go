@@ -1,6 +1,8 @@
 package ctx
 
 import (
+	"net/http"
+
 	"letstalk/server/core/search"
 	"letstalk/server/core/sessions"
 
@@ -25,10 +27,14 @@ func NewContext(
 	sessionData *sessions.SessionData,
 	sm *sessions.ISessionManagerBase,
 ) *Context {
+	var request *http.Request = nil
+	if g != nil {
+		request = g.Request
+	}
 	return &Context{
 		GinContext:     g,
 		Db:             db,
-		SearchClient:   search.NewSearchClient(es, g.Request),
+		SearchClient:   search.NewSearchClient(es, request),
 		SessionData:    sessionData,
 		SessionManager: sm,
 	}
