@@ -240,11 +240,7 @@ func Register(
 		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
 	)
 
-	// Test search
-	// TODO: Remove
-	v1.OPTIONS("/test/search/simple_trait")
-	v1.POST("/test/search/simple_trait", hw.wrapHandler(controller.AddSimpleTraitToES, false))
-
+	// Autocomplete endpoints
 	v1.OPTIONS("/autocomplete/simple_trait")
 	v1.POST(
 		"/autocomplete/simple_trait",

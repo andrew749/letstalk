@@ -39,6 +39,8 @@ func (c *RequestSearchClient) IndexSimpleTrait(trait SimpleTrait) error {
 	return nil
 }
 
+// Only here as an example of how to do a search.
+// Can remove this if we end up writing a search.
 func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 	termQuery := elastic.NewTermQuery("isUserGenerated", true)
 
