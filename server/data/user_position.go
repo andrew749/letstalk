@@ -5,6 +5,7 @@ type TUserPositionID EntID
 // One of the trait entity types. Describes positions that the user has held or currently holds.
 type UserPosition struct {
 	Id               TUserPositionID  `gorm:"primary_key;not null;auto_increment:true"`
+	UserId           TUserID          `gorm:"not null"`
 	OrganizationId   TOrganizationID  `gorm:"not null"`
 	OrganizationName string           `gorm:"not null"` // Denormalized
 	OrganizationType OrganizationType `gorm:"not null"` // Denormalized
@@ -16,4 +17,5 @@ type UserPosition struct {
 	// Untested
 	Organization *Organization `gorm:"foreignkey:OrganizationId;association_foreignkey:Id"`
 	Role         *Role         `gorm:"foreignkey:RoleId;association_foreignkey:Id"`
+	User         *User         `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 }

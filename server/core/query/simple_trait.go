@@ -115,6 +115,7 @@ func AddUserSimpleTraitByName(
 	return addUserSimpleTrait(db, userId, *trait)
 }
 
+// TODO: Take userTraitId instead of traitId for consistency with userPosition
 func RemoveUserSimpleTrait(
 	db *gorm.DB,
 	userId data.TUserID,

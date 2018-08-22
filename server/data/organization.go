@@ -5,9 +5,10 @@ type TOrganizationID EntID
 type OrganizationType string
 
 const (
-	ORGANIZATION_TYPE_COMPANY     OrganizationType = "COMPANY"
-	ORGANIZATION_TYPE_CLUB                         = "CLUB"
-	ORGANIZATION_TYPE_SPORTS_TEAM                  = "SPORTS_TEAM"
+	ORGANIZATION_TYPE_COMPANY      OrganizationType = "COMPANY"
+	ORGANIZATION_TYPE_CLUB         OrganizationType = "CLUB"
+	ORGANIZATION_TYPE_SPORTS_TEAM  OrganizationType = "SPORTS_TEAM"
+	ORGANIZATION_TYPE_UNDETERMINED OrganizationType = "UNDETERMINED"
 )
 
 // This table stores all available organizations, where an organization is a company, club or sports
