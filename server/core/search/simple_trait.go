@@ -2,6 +2,7 @@ package search
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -42,12 +43,11 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 	termQuery := elastic.NewTermQuery("isUserGenerated", true)
 
 	searchResult, err := c.client.Search().
-		Index(SIMPLE_TRAIT_INDEX). // search in index "tweets"
-		Query(termQuery).          // specify the query
-		Sort("id", true).          // sort by "user" field, ascending
-		Size(100).                 // take documents 0-9
-		Pretty(true).              // pretty print request and response JSON
-		Do(c.request.Context())    // execute
+		Index(SIMPLE_TRAIT_INDEX).
+		Query(termQuery).
+		Sort("id", true).
+		Size(100).
+		Do(c.request.Context())
 	if err != nil {
 		return err
 	}
@@ -60,6 +60,52 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 		}
 	}
 	return nil
+}
+
+func (c *RequestSearchClient) CompletionSuggestionSimpleTraits(
+	prefix string,
+	size int,
+) ([]SimpleTrait, error) {
+	fuzzyOptions := elastic.NewFuzzyCompletionSuggesterOptions().
+		EditDistance("AUTO").
+		Transpositions(true)
+
+	suggesterName := "simple-traits-suggester"
+
+	rlog.Info(prefix, size)
+
+	suggester := elastic.NewCompletionSuggester(suggesterName).
+		Text(prefix).
+		Size(size).
+		Field("suggest").
+		SkipDuplicates(true).
+		FuzzyOptions(fuzzyOptions)
+
+	searchResult, err := c.client.Search().
+		Index(SIMPLE_TRAIT_INDEX).
+		Suggester(suggester).
+		Do(c.request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	traits := make([]SimpleTrait, 0)
+	if _, ok := searchResult.Suggest[suggesterName]; ok {
+		searchSuggestions := searchResult.Suggest[suggesterName]
+		if len(searchSuggestions) > 0 {
+			opts := searchSuggestions[0].Options
+			for _, opt := range opts {
+				var trait SimpleTrait
+				err = json.Unmarshal(*opt.Source, &trait)
+				if err != nil {
+					return nil, err
+				}
+				traits = append(traits, trait)
+			}
+		}
+	}
+
+	return traits, nil
 }
 
 // For use in backfill jobs

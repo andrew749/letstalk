@@ -245,6 +245,12 @@ func Register(
 	v1.OPTIONS("/test/search/simple_trait")
 	v1.POST("/test/search/simple_trait", hw.wrapHandler(controller.AddSimpleTraitToES, false))
 
+	v1.OPTIONS("/autocomplete/simple_trait")
+	v1.POST(
+		"/autocomplete/simple_trait",
+		hw.wrapHandler(controller.SimpleTraitAutocompleteController, false),
+	)
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))

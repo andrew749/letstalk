@@ -15,6 +15,11 @@ type AddSimpleTraitToESRequest struct {
 	Name string
 }
 
+type SimpleTraitAutocompleteRequest struct {
+	Prefix string `json:"prefix" binding:"required"`
+	Size   int    `json:"size" binding:"required"`
+}
+
 func AddSimpleTraitToES(c *ctx.Context) errs.Error {
 	var req AddSimpleTraitToESRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {
@@ -34,5 +39,21 @@ func AddSimpleTraitToES(c *ctx.Context) errs.Error {
 		rlog.Error(err)
 		return errs.NewDbError(err)
 	}
+	return nil
+}
+
+func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
+	var req SimpleTraitAutocompleteRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	traits, err := c.SearchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
+	if err != nil {
+		// TODO: New error type
+		return errs.NewDbError(err)
+	}
+
+	c.Result = traits
 	return nil
 }
