@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"context"
 
 	"letstalk/server/core/search"
 	"letstalk/server/data"
@@ -37,8 +37,8 @@ func main() {
 		traits[i] = search.NewSimpleTraitFromDataModel(dataTrait)
 	}
 
-	fmt.Printf("Writing %d things\n", len(traits))
-	err = search.BulkIndexSimpleTraits(es, traits)
+	searchClient := search.NewClientWithContext(es, context.Background())
+	err = searchClient.BulkIndexSimpleTraits(traits)
 	if err != nil {
 		panic(err)
 	}

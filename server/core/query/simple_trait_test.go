@@ -12,7 +12,7 @@ import (
 func TestAddUserSimpleTraitByName(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			err := AddUserSimpleTraitByName(db, data.TUserID(1), "Cycling ")
+			err := AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
 			assert.Nil(t, err)
 
 			var traits []data.UserSimpleTrait
@@ -40,7 +40,7 @@ func TestAddUserSimpleTraitByNameAlreadyExists(t *testing.T) {
 			db.Find(&traits)
 			assert.Equal(t, 1, len(traits))
 
-			err := AddUserSimpleTraitByName(db, data.TUserID(1), "Cycling ")
+			err := AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
 			assert.Nil(t, err)
 
 			db.Find(&traits)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -59,7 +60,8 @@ func main() {
 		}
 
 		rlog.Info("Creating indexes in ES")
-		if err := search.CreateEsIndexes(es); err != nil {
+		searchClient := search.NewClientWithContext(es, context.Background())
+		if err := searchClient.CreateEsIndexes(); err != nil {
 			// Failures here are okay since the indexes could already exist.
 			rlog.Error(err)
 		} else {

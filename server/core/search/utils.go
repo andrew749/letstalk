@@ -1,11 +1,12 @@
 package search
 
 import (
-	"net/http"
+	"context"
 
 	"github.com/olivere/elastic"
 )
 
+// Used for indexes that require completion suggestions
 type SuggestInput struct {
 	Input  []string `json:"input"`
 	Weight *int     `json:"weight,omitempty"`
@@ -15,16 +16,16 @@ func NewEsClient(addr string) (*elastic.Client, error) {
 	return elastic.NewClient(elastic.SetURL(addr))
 }
 
-func CreateEsIndexes(client *elastic.Client) error {
-	return createSimpleTraitIndex(client)
-}
-
 // Search client to be used within the request context
-type RequestSearchClient struct {
+type ClientWithContext struct {
 	client  *elastic.Client
-	request *http.Request
+	context context.Context
 }
 
-func NewSearchClient(client *elastic.Client, request *http.Request) *RequestSearchClient {
-	return &RequestSearchClient{client, request}
+func NewClientWithContext(client *elastic.Client, context context.Context) *ClientWithContext {
+	return &ClientWithContext{client, context}
+}
+
+func (c *ClientWithContext) CreateEsIndexes() error {
+	return c.createSimpleTraitIndex()
 }

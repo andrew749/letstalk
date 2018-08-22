@@ -1,8 +1,6 @@
 package ctx
 
 import (
-	"net/http"
-
 	"letstalk/server/core/search"
 	"letstalk/server/core/sessions"
 
@@ -14,7 +12,7 @@ import (
 type Context struct {
 	GinContext     *gin.Context
 	Db             *gorm.DB
-	SearchClient   *search.RequestSearchClient
+	Es             *elastic.Client
 	SessionData    *sessions.SessionData
 	SessionManager *sessions.ISessionManagerBase
 	Result         interface{}
@@ -27,14 +25,10 @@ func NewContext(
 	sessionData *sessions.SessionData,
 	sm *sessions.ISessionManagerBase,
 ) *Context {
-	var request *http.Request = nil
-	if g != nil {
-		request = g.Request
-	}
 	return &Context{
 		GinContext:     g,
 		Db:             db,
-		SearchClient:   search.NewSearchClient(es, request),
+		Es:             es,
 		SessionData:    sessionData,
 		SessionManager: sm,
 	}
@@ -53,4 +47,8 @@ func WithinTx(db *gorm.DB, f func(*gorm.DB) error) error {
 // if an error is returned.
 func (c *Context) WithinTx(f func(*gorm.DB) error) error {
 	return WithinTx(c.Db, f)
+}
+
+func (c *Context) SearchClientWithContext() *search.ClientWithContext {
+	return search.NewClientWithContext(c.Es, c.GinContext.Request.Context())
 }

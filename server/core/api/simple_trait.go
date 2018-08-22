@@ -10,13 +10,13 @@ type SimpleTrait struct {
 }
 
 type AddUserSimpleTraitByNameRequest struct {
-	SimpleTraitName string `json:"name"`
+	SimpleTraitName string `json:"name" binding:"required"`
 }
 
 type AddUserSimpleTraitByIdRequest struct {
-	SimpleTraitId data.TSimpleTraitID `json:"simpleTraitId"`
+	SimpleTraitId data.TSimpleTraitID `json:"simpleTraitId" binding:"required"`
 }
 
 type RemoveUserSimpleTraitRequest struct {
-	SimpleTraitId data.TSimpleTraitID `json:"simpleTraitId"`
+	SimpleTraitId data.TSimpleTraitID `json:"simpleTraitId" binding:"required"`
 }

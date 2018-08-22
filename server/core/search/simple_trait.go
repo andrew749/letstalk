@@ -1,7 +1,6 @@
 package search
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,13 +25,13 @@ type SimpleTrait struct {
 	Suggest         SuggestInput         `json:"suggest"`
 }
 
-func (c *RequestSearchClient) IndexSimpleTrait(trait SimpleTrait) error {
+func (c *ClientWithContext) IndexSimpleTrait(trait SimpleTrait) error {
 	_, err := c.client.Index().
 		Index(SIMPLE_TRAIT_INDEX).
 		Type(SIMPLE_TRAIT_TYPE).
 		Id(strconv.Itoa(int(trait.Id))).
 		BodyJson(trait).
-		Do(c.request.Context())
+		Do(c.context)
 	if err != nil {
 		return err
 	}
@@ -41,7 +40,7 @@ func (c *RequestSearchClient) IndexSimpleTrait(trait SimpleTrait) error {
 
 // Only here as an example of how to do a search.
 // Can remove this if we end up writing a search.
-func (c *RequestSearchClient) PrintAllSimpleTraits() error {
+func (c *ClientWithContext) PrintAllSimpleTraits() error {
 	termQuery := elastic.NewTermQuery("isUserGenerated", true)
 
 	searchResult, err := c.client.Search().
@@ -49,7 +48,7 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 		Query(termQuery).
 		Sort("id", true).
 		Size(100).
-		Do(c.request.Context())
+		Do(c.context)
 	if err != nil {
 		return err
 	}
@@ -64,7 +63,7 @@ func (c *RequestSearchClient) PrintAllSimpleTraits() error {
 	return nil
 }
 
-func (c *RequestSearchClient) CompletionSuggestionSimpleTraits(
+func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 	prefix string,
 	size int,
 ) ([]SimpleTrait, error) {
@@ -74,10 +73,8 @@ func (c *RequestSearchClient) CompletionSuggestionSimpleTraits(
 
 	suggesterName := "simple-traits-suggester"
 
-	rlog.Info(prefix, size)
-
 	suggester := elastic.NewCompletionSuggester(suggesterName).
-		Text(prefix).
+		Prefix(prefix).
 		Size(size).
 		Field("suggest").
 		SkipDuplicates(true).
@@ -86,7 +83,7 @@ func (c *RequestSearchClient) CompletionSuggestionSimpleTraits(
 	searchResult, err := c.client.Search().
 		Index(SIMPLE_TRAIT_INDEX).
 		Suggester(suggester).
-		Do(c.request.Context())
+		Do(c.context)
 	if err != nil {
 		return nil, err
 	}
@@ -111,8 +108,8 @@ func (c *RequestSearchClient) CompletionSuggestionSimpleTraits(
 }
 
 // For use in backfill jobs
-func BulkIndexSimpleTraits(es *elastic.Client, traits []SimpleTrait) error {
-	bulkRequest := es.Bulk()
+func (c *ClientWithContext) BulkIndexSimpleTraits(traits []SimpleTrait) error {
+	bulkRequest := c.client.Bulk()
 	for _, trait := range traits {
 		req := elastic.NewBulkIndexRequest().
 			Index(SIMPLE_TRAIT_INDEX).
@@ -121,7 +118,7 @@ func BulkIndexSimpleTraits(es *elastic.Client, traits []SimpleTrait) error {
 			Doc(trait)
 		bulkRequest = bulkRequest.Add(req)
 	}
-	res, err := bulkRequest.Do(context.Background())
+	res, err := bulkRequest.Do(c.context)
 	if err != nil {
 		return err
 	} else if len(res.Failed()) > 0 {
@@ -132,8 +129,8 @@ func BulkIndexSimpleTraits(es *elastic.Client, traits []SimpleTrait) error {
 	return nil
 }
 
-func createSimpleTraitIndex(es *elastic.Client) error {
-	exists, err := es.IndexExists(SIMPLE_TRAIT_INDEX).Do(context.Background())
+func (c *ClientWithContext) createSimpleTraitIndex() error {
+	exists, err := c.client.IndexExists(SIMPLE_TRAIT_INDEX).Do(c.context)
 	if err != nil {
 		return err
 	}
@@ -153,7 +150,7 @@ func createSimpleTraitIndex(es *elastic.Client) error {
         }
       }
 		`
-		_, err := es.CreateIndex(SIMPLE_TRAIT_INDEX).BodyString(mapping).Do(context.Background())
+		_, err := c.client.CreateIndex(SIMPLE_TRAIT_INDEX).BodyString(mapping).Do(c.context)
 		if err != nil {
 			return err
 		}
