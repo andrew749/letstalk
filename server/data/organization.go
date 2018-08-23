@@ -1,8 +1,12 @@
 package data
 
+import "database/sql/driver"
+
 type TOrganizationID EntID
 
 type OrganizationType string
+
+func (u OrganizationType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
 	ORGANIZATION_TYPE_COMPANY      OrganizationType = "COMPANY"
@@ -10,6 +14,13 @@ const (
 	ORGANIZATION_TYPE_SPORTS_TEAM  OrganizationType = "SPORTS_TEAM"
 	ORGANIZATION_TYPE_UNDETERMINED OrganizationType = "UNDETERMINED"
 )
+
+var ALL_ORGANIZATION_TYPES = map[OrganizationType]interface{}{
+	ORGANIZATION_TYPE_COMPANY:      nil,
+	ORGANIZATION_TYPE_CLUB:         nil,
+	ORGANIZATION_TYPE_SPORTS_TEAM:  nil,
+	ORGANIZATION_TYPE_UNDETERMINED: nil,
+}
 
 // This table stores all available organizations, where an organization is a company, club or sports
 // team that a user can be a part of. E.g. Facebook. Used mainly by the user_position (position
