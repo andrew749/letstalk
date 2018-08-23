@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"time"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -119,6 +120,12 @@ func addUserPosition(
 	return nil
 }
 
+// TODO: Move elsewhere
+func isValidDate(date string) bool {
+	_, err := time.Parse("2006-01-02", date)
+	return err == nil
+}
+
 // One of roleId and roleName must be provided.
 // One of orgId and orgName must be provided.
 func AddUserPosition(
@@ -131,6 +138,17 @@ func AddUserPosition(
 	startDate string,
 	endDate *string,
 ) errs.Error {
+	if !isValidDate(startDate) {
+		return errs.NewRequestError(
+			fmt.Sprintf("startDate %s should be in YYYY-MM-DD format", startDate),
+		)
+	}
+	if endDate != nil && !isValidDate(*endDate) {
+		return errs.NewRequestError(
+			fmt.Sprintf("endDate %s should be in YYYY-MM-DD format", *endDate),
+		)
+	}
+
 	var (
 		role         *data.Role         = nil
 		organization *data.Organization = nil

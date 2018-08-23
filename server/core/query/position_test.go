@@ -159,6 +159,19 @@ func TestAddUserPositionMissingOrg(t *testing.T) {
 	test.RunTestWithDb(thisTest)
 }
 
+func TestAddUserPositionInvalidStartDate(t *testing.T) {
+	err := AddUserPosition(nil, data.TUserID(1), nil, nil, nil, nil, "Monday, June 2nd, 2018", nil)
+	assert.Error(t, err)
+	assert.Equal(t, "startDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
+}
+
+func TestAddUserPositionInvalidEndDate(t *testing.T) {
+	endDate := "Monday, June 2nd, 2018"
+	err := AddUserPosition(nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-01", &endDate)
+	assert.Error(t, err)
+	assert.Equal(t, "endDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
+}
+
 func TestRemoveUserPosition(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
