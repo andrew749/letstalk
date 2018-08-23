@@ -10,6 +10,7 @@ import (
 	"letstalk/server/core/search"
 	"letstalk/server/data"
 
+	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
@@ -29,17 +30,15 @@ func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait
 
 func indexSimpleTrait(es *elastic.Client, trait data.SimpleTrait) {
 	if es != nil {
-		rlog.Info(fmt.Sprintf("Indexing simple trait %s", trait.Name))
 		searchClient := search.NewClientWithContext(es, context.Background())
 		searchTrait := search.NewSimpleTraitFromDataModel(trait)
 		err := searchClient.IndexSimpleTrait(searchTrait)
 		if err != nil {
+			raven.CaptureError(err, nil)
 			rlog.Error(err)
-		} else {
-			rlog.Info(fmt.Sprintf("Successfully indexed simple trait %s", trait.Name))
 		}
 	} else {
-		rlog.Info(fmt.Sprintf("Not indexing simple trait %s since no es provided", trait.Name))
+		rlog.Warn(fmt.Sprintf("Not indexing simple trait %s since no es provided", trait.Name))
 	}
 }
 

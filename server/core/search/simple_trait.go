@@ -15,6 +15,7 @@ import (
 
 const SIMPLE_TRAIT_INDEX = "simple_traits"
 const SIMPLE_TRAIT_TYPE = "simple_trait"
+const SIMPLE_TRAIT_SUGGESTER = "simple-trait-suggester"
 
 type SimpleTrait struct {
 	Id              data.TSimpleTraitID  `json:"id"`
@@ -71,9 +72,7 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 		EditDistance("AUTO").
 		Transpositions(true)
 
-	suggesterName := "simple-traits-suggester"
-
-	suggester := elastic.NewCompletionSuggester(suggesterName).
+	suggester := elastic.NewCompletionSuggester(SIMPLE_TRAIT_SUGGESTER).
 		Prefix(prefix).
 		Size(size).
 		Field("suggest").
@@ -89,8 +88,8 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 	}
 
 	traits := make([]SimpleTrait, 0)
-	if _, ok := searchResult.Suggest[suggesterName]; ok {
-		searchSuggestions := searchResult.Suggest[suggesterName]
+	if _, ok := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]; ok {
+		searchSuggestions := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]
 		if len(searchSuggestions) > 0 {
 			opts := searchSuggestions[0].Options
 			for _, opt := range opts {
@@ -122,9 +121,19 @@ func (c *ClientWithContext) BulkIndexSimpleTraits(traits []SimpleTrait) error {
 	if err != nil {
 		return err
 	} else if len(res.Failed()) > 0 {
-		return errors.New(fmt.Sprintf("More than 0 operations failed: %d, example: %s\n",
-			len(res.Failed()),
-			res.Failed()[0].Error.Reason))
+		results := make([]string, len(res.Failed()))
+		reasons := make([]string, len(res.Failed()))
+		for i, failed := range res.Failed() {
+			results[i] = failed.Result
+			if failed.Error != nil {
+				reasons[i] = failed.Error.Reason
+			} else {
+				reasons[i] = "unknown reason"
+			}
+		}
+
+		return errors.New(fmt.Sprintf("More than 0 operations failed: %d, results: %#v, reasons: %#v\n",
+			len(reasons), results, reasons))
 	}
 	return nil
 }
@@ -136,11 +145,10 @@ func (c *ClientWithContext) createSimpleTraitIndex() error {
 	}
 
 	if !exists {
-
-		mapping := `
+		mapping := fmt.Sprintf(`
       {
         "mappings": {
-          "simple_trait" : {
+          "%s" : {
             "properties" : {
               "suggest" : {
                 "type" : "completion"
@@ -149,7 +157,7 @@ func (c *ClientWithContext) createSimpleTraitIndex() error {
           }
         }
       }
-		`
+		`, SIMPLE_TRAIT_TYPE)
 		_, err := c.client.CreateIndex(SIMPLE_TRAIT_INDEX).BodyString(mapping).Do(c.context)
 		if err != nil {
 			return err

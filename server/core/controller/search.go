@@ -15,8 +15,7 @@ func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	searchClient := c.SearchClientWithContext()
 	traits, err := searchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
 	if err != nil {
-		// TODO: New error type
-		return errs.NewDbError(err)
+		return errs.NewEsError(err)
 	}
 
 	apiTraits := make([]api.SimpleTrait, len(traits))

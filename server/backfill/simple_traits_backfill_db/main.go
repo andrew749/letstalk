@@ -18,8 +18,8 @@ var (
 	inFile = flag.String("in", "", "Input csv file containing simple traits and header")
 )
 
-// This job backfills simple traits from a csv (name, type, isSensitive). Will override simple
-// traits with the same name, potentially updating their type and isSensitive.
+// This job backfills simple traits from a csv with the row format "name,type,isSensitive". Will
+// override simple traits with the same name, potentially updating their type and isSensitive.
 func main() {
 	flag.Parse()
 
