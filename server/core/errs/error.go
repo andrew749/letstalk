@@ -29,6 +29,7 @@ func NewNotFoundError(msg string, args ...interface{}) IError {
 
 type InternalError struct{ IError }
 type DatabaseError struct{ IError }
+type ElasticsearchError struct{ IError }
 
 func (e *InternalError) GetHTTPCode() int { return http.StatusInternalServerError }
 
@@ -40,4 +41,8 @@ func NewInternalError(msg string, args ...interface{}) IError {
 
 func NewDbError(err error) IError {
 	return &DatabaseError{NewInternalError("Encountered database error: %s", err)}
+}
+
+func NewEsError(err error) IError {
+	return &ElasticsearchError{NewInternalError("Encountered elasticsearch error: %s", err)}
 }

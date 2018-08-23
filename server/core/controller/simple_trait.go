@@ -14,6 +14,7 @@ func AddUserSimpleTraitByNameController(c *ctx.Context) errs.Error {
 	}
 	return query.AddUserSimpleTraitByName(
 		c.Db,
+		c.Es,
 		c.SessionData.UserId,
 		req.SimpleTraitName,
 	)

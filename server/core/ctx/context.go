@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"letstalk/server/core/search"
 	"letstalk/server/core/sessions"
 
 	"github.com/gin-gonic/gin"
@@ -46,4 +47,8 @@ func WithinTx(db *gorm.DB, f func(*gorm.DB) error) error {
 // if an error is returned.
 func (c *Context) WithinTx(f func(*gorm.DB) error) error {
 	return WithinTx(c.Db, f)
+}
+
+func (c *Context) SearchClientWithContext() *search.ClientWithContext {
+	return search.NewClientWithContext(c.Es, c.GinContext.Request.Context())
 }
