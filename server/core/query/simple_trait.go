@@ -1,14 +1,19 @@
 package query
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/search"
 	"letstalk/server/data"
 
+	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
+	"github.com/romana/rlog"
 )
 
 func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait, errs.Error) {
@@ -23,10 +28,28 @@ func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait
 	return &trait, nil
 }
 
+func indexSimpleTrait(es *elastic.Client, trait data.SimpleTrait) {
+	if es != nil {
+		searchClient := search.NewClientWithContext(es, context.Background())
+		searchTrait := search.NewSimpleTraitFromDataModel(trait)
+		err := searchClient.IndexSimpleTrait(searchTrait)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			rlog.Error(err)
+		}
+	} else {
+		rlog.Warn(fmt.Sprintf("Not indexing simple trait %s since no es provided", trait.Name))
+	}
+}
+
 // Returns a simple trait with the given name or creates a new one if one doesn't already exist.
 // TODO: Maybe make this take `isSensitive` so that user can specify that when creating a new
 // user generated simple trait.
-func getOrCreateSimpleTrait(db *gorm.DB, name string) (*data.SimpleTrait, errs.Error) {
+func getOrCreateSimpleTrait(
+	db *gorm.DB,
+	es *elastic.Client,
+	name string,
+) (*data.SimpleTrait, errs.Error) {
 	var trait data.SimpleTrait
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
@@ -39,11 +62,12 @@ func getOrCreateSimpleTrait(db *gorm.DB, name string) (*data.SimpleTrait, errs.E
 					IsSensitive:     false,
 					IsUserGenerated: true,
 				}
-
 				// Add trait if it doesn't already exist.
-				if err := db.Save(&trait).Error; err != nil {
+				if err := db.Create(&trait).Error; err != nil {
 					return err
 				}
+
+				go indexSimpleTrait(es, trait)
 			} else {
 				return err
 			}
@@ -104,11 +128,12 @@ func AddUserSimpleTraitById(
 
 func AddUserSimpleTraitByName(
 	db *gorm.DB,
+	es *elastic.Client,
 	userId data.TUserID,
 	name string,
 ) errs.Error {
 	name = strings.TrimSpace(name)
-	trait, err := getOrCreateSimpleTrait(db, name)
+	trait, err := getOrCreateSimpleTrait(db, es, name)
 	if err != nil {
 		return err
 	}

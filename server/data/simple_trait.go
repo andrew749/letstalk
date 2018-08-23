@@ -1,8 +1,12 @@
 package data
 
+import "database/sql/driver"
+
 type TSimpleTraitID EntID
 
 type SimpleTraitType string
+
+func (u SimpleTraitType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
 	SIMPLE_TRAIT_TYPE_INTEREST     SimpleTraitType = "INTEREST"
@@ -11,6 +15,14 @@ const (
 	SIMPLE_TRAIT_TYPE_RACE                         = "RACE"
 	SIMPLE_TRAIT_TYPE_UNDETERMINED                 = "UNDETERMINED"
 )
+
+var ALL_SIMPLE_TRAIT_TYPES = map[SimpleTraitType]interface{}{
+	SIMPLE_TRAIT_TYPE_INTEREST:     nil,
+	SIMPLE_TRAIT_TYPE_EXPERIENCE:   nil,
+	SIMPLE_TRAIT_TYPE_RELIGION:     nil,
+	SIMPLE_TRAIT_TYPE_RACE:         nil,
+	SIMPLE_TRAIT_TYPE_UNDETERMINED: nil,
+}
 
 // Stores all simple traits that can we written down in a single line of plaintext. Examples of
 // these include experiences, hobbies, religion, race, etc. Since some of these are pretty

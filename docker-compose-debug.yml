@@ -34,17 +34,19 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+    restart: always
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - dbdata:/var/lib/elasticsearch/data
+      - esdata:/var/lib/elasticsearch/data
     networks:
       - db_net
     ports:
       - "9200:9200"
 volumes:
   dbdata:
+  esdata:
 networks:
   db_net:
