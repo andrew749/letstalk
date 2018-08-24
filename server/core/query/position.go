@@ -1,14 +1,19 @@
 package query
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/search"
 	"letstalk/server/data"
 
+	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
+	"github.com/romana/rlog"
 )
 
 func getRole(db *gorm.DB, roleId data.TRoleID) (*data.Role, errs.Error) {
@@ -23,8 +28,26 @@ func getRole(db *gorm.DB, roleId data.TRoleID) (*data.Role, errs.Error) {
 	return &role, nil
 }
 
+func indexRole(es *elastic.Client, role data.Role) {
+	if es != nil {
+		searchClient := search.NewClientWithContext(es, context.Background())
+		searchRole := search.NewRoleFromDataModel(role)
+		err := searchClient.IndexRole(searchRole)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			rlog.Error(err)
+		}
+	} else {
+		rlog.Warn(fmt.Sprintf("Not indexing role %s since no es provided", role.Name))
+	}
+}
+
 // Returns a role with the given name or creates a new one if one doesn't already exist.
-func getOrCreateRole(db *gorm.DB, name string) (*data.Role, errs.Error) {
+func getOrCreateRole(
+	db *gorm.DB,
+	es *elastic.Client,
+	name string,
+) (*data.Role, errs.Error) {
 	var role data.Role
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
@@ -40,6 +63,8 @@ func getOrCreateRole(db *gorm.DB, name string) (*data.Role, errs.Error) {
 				if err := db.Create(&role).Error; err != nil {
 					return err
 				}
+
+				go indexRole(es, role)
 			} else {
 				return err
 			}
@@ -65,8 +90,26 @@ func getOrganization(db *gorm.DB, orgId data.TOrganizationID) (*data.Organizatio
 	return &organization, nil
 }
 
+func indexOrganization(es *elastic.Client, organization data.Organization) {
+	if es != nil {
+		searchClient := search.NewClientWithContext(es, context.Background())
+		searchOrganization := search.NewOrganizationFromDataModel(organization)
+		err := searchClient.IndexOrganization(searchOrganization)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			rlog.Error(err)
+		}
+	} else {
+		rlog.Warn(fmt.Sprintf("Not indexing organization %s since no es provided", organization.Name))
+	}
+}
+
 // Returns a organization with the given name or creates a new one if one doesn't already exist.
-func getOrCreateOrganization(db *gorm.DB, name string) (*data.Organization, errs.Error) {
+func getOrCreateOrganization(
+	db *gorm.DB,
+	es *elastic.Client,
+	name string,
+) (*data.Organization, errs.Error) {
 	var organization data.Organization
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
@@ -83,6 +126,8 @@ func getOrCreateOrganization(db *gorm.DB, name string) (*data.Organization, errs
 				if err := db.Create(&organization).Error; err != nil {
 					return err
 				}
+
+				go indexOrganization(es, organization)
 			} else {
 				return err
 			}
@@ -130,6 +175,7 @@ func isValidDate(date string) bool {
 // One of orgId and orgName must be provided.
 func AddUserPosition(
 	db *gorm.DB,
+	es *elastic.Client,
 	userId data.TUserID,
 	roleId *data.TRoleID,
 	roleName *string,
@@ -158,7 +204,7 @@ func AddUserPosition(
 	if roleId != nil {
 		role, err = getRole(db, *roleId)
 	} else if roleName != nil {
-		role, err = getOrCreateRole(db, *roleName)
+		role, err = getOrCreateRole(db, es, *roleName)
 	} else {
 		err = errs.NewRequestError("Must provide either roleId or roleName")
 	}
@@ -169,7 +215,7 @@ func AddUserPosition(
 	if organizationId != nil {
 		organization, err = getOrganization(db, *organizationId)
 	} else if organizationName != nil {
-		organization, err = getOrCreateOrganization(db, *organizationName)
+		organization, err = getOrCreateOrganization(db, es, *organizationName)
 	} else {
 		err = errs.NewRequestError("Must provide either organizationId or organizationName")
 	}
