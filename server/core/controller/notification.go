@@ -57,7 +57,7 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 	rlog.Debug("Dispatching notification lambda")
 	if err := aws_utils.DispatchLambdaJob(
 		jobs.SendNotification,
-		notifications.Notification{
+		notifications.ExpoNotification{
 			To:    fmt.Sprintf("ExponentPushToken[%s]", notificationToken.Token),
 			Body:  "Subscribed for notifications.",
 			Title: "Hive",
