@@ -14,11 +14,11 @@ func TestAddUserSimpleTraitByName(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 			err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var traits []data.UserSimpleTrait
 			err = db.Where(&data.UserSimpleTrait{UserId: 1}).Preload("SimpleTrait").Find(&traits).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(traits))
 			assert.Equal(t, "Cycling", traits[0].SimpleTraitName)
 			assert.Equal(t, data.SIMPLE_TRAIT_TYPE_UNDETERMINED, traits[0].SimpleTraitType)
@@ -40,15 +40,15 @@ func TestAddUserSimpleTraitByNameAlreadyExists(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err := db.Save(&trait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var traits []data.SimpleTrait
 			err = db.Find(&traits).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(traits))
 
 			err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			db.Find(&traits)
 			assert.Equal(t, 1, len(traits))
@@ -57,7 +57,7 @@ func TestAddUserSimpleTraitByNameAlreadyExists(t *testing.T) {
 			err = db.Where(
 				&data.UserSimpleTrait{UserId: 1},
 			).Preload("SimpleTrait").Find(&userTraits).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(userTraits))
 			assert.Equal(t, "Cycling", userTraits[0].SimpleTraitName)
 			assert.Equal(t, trait, *userTraits[0].SimpleTrait)
@@ -76,14 +76,14 @@ func TestAddUserSimpleTraitById(t *testing.T) {
 				IsSensitive: true,
 			}
 			err := db.Save(&trait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			err = AddUserSimpleTraitById(db, data.TUserID(1), trait.Id)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var traits []data.UserSimpleTrait
 			err = db.Where(&data.UserSimpleTrait{UserId: 1}).Preload("SimpleTrait").Find(&traits).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(traits))
 			assert.Equal(t, trait.Id, traits[0].SimpleTraitId)
 			assert.Equal(t, "Cycling", traits[0].SimpleTraitName)
@@ -112,11 +112,11 @@ func TestAddUserSimpleTraitAlreadyHaveMatching(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			trait := data.SimpleTrait{Name: "Cycling"}
 			err := db.Save(&trait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			userTrait := data.UserSimpleTrait{UserId: 1, SimpleTraitId: trait.Id}
 			err = db.Save(&userTrait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			err = AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
 			assert.Error(t, err)
@@ -131,18 +131,18 @@ func TestRemoveUserSimpleTrait(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			trait := data.SimpleTrait{Name: "Cycling"}
 			err := db.Save(&trait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			userTrait := data.UserSimpleTrait{UserId: 1, SimpleTraitId: trait.Id}
 			err = db.Save(&userTrait).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var traits []data.UserSimpleTrait
 			db.Where(&data.UserSimpleTrait{UserId: 1}).Find(&traits)
 			assert.Equal(t, 1, len(traits))
 
 			err = RemoveUserSimpleTrait(db, data.TUserID(1), trait.Id)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			db.Where(&data.UserSimpleTrait{UserId: 1}).Find(&traits)
 			assert.Equal(t, 0, len(traits))
