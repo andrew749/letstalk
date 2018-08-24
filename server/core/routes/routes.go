@@ -226,7 +226,7 @@ func Register(
 	v1.OPTIONS("/notification_page")
 	v1.GET("/notification_page", hw.wrapHandlerHTML(notifications.GetNotificationContentPage, true))
 
-	// Simple Traits
+	// User Simple Traits
 	v1.OPTIONS("/user_simple_trait")
 	v1.POST("/user_simple_trait", hw.wrapHandler(controller.AddUserSimpleTraitByIdController, true))
 	v1.DELETE(
@@ -238,6 +238,14 @@ func Register(
 	v1.POST(
 		"/user_simple_trait_by_name",
 		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
+	)
+
+	// User Positions
+	v1.OPTIONS("/user_position")
+	v1.POST("/user_position", hw.wrapHandler(controller.AddUserPositionController, true))
+	v1.DELETE(
+		"/user_position",
+		hw.wrapHandler(controller.RemoveUserPositionController, true),
 	)
 
 	// Autocomplete endpoints
