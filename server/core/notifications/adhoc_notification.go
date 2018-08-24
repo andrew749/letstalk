@@ -14,7 +14,7 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	creationTime := time.Now()
 	var err error
 	tx := db.Begin()
-	notification, err := CreateNotification(db, recipient, NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
+	notification, err := CreateNotification(db, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -40,7 +40,7 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 
 func createTestNotificationPage(db *gorm.DB, userId uint) error {
 	d := []byte("{\"title\":\"Title\", \"body\":\"This is a body\"}")
-	n, _ := CreateNotification(db, data.TUserID(userId), NOTIF_TYPE_ADHOC, "Test Notification", "Test Message", nil, time.Now(), nil)
+	n, _ := CreateNotification(db, data.TUserID(userId), data.NOTIF_TYPE_ADHOC, "Test Notification", "Test Message", nil, time.Now(), nil)
 	req := data.NotificationPage{
 		NotificationId: n.ID,
 		UserId:         data.TUserID(userId),

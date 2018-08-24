@@ -33,7 +33,7 @@ func RequestToMatchNotification(
 		title,
 		message,
 		recipient,
-		NOTIF_TYPE_REQUEST_TO_MATCH,
+		data.NOTIF_TYPE_REQUEST_TO_MATCH,
 		nil,
 		extraData,
 	)
@@ -46,7 +46,7 @@ func NewMatchNotification(db *gorm.DB, recipient data.TUserID, message string) e
 		title,
 		message,
 		recipient,
-		NOTIF_TYPE_NEW_MATCH,
+		data.NOTIF_TYPE_NEW_MATCH,
 		nil,
 		map[string]string{},
 	)
@@ -68,7 +68,7 @@ func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName str
 		title,
 		message,
 		recipient,
-		NOTIF_TYPE_MATCH_VERIFIED,
+		data.NOTIF_TYPE_MATCH_VERIFIED,
 		nil,
 		map[string]string{},
 	)
