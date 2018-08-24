@@ -6,6 +6,7 @@ import (
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 	notification_api "letstalk/server/notifications"
+	"letstalk/server/queue/queues/notification_queue"
 	"letstalk/server/utility"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -31,27 +32,44 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 		}
 		db = conn
 	}
-	// TODO: handle error
+
 	rlog.Printf("Received message %#v\n", sqsEvent)
-	var notification data.Notification
+	var queueMessage notification_queue.NotificationQueueData
 	records := sqsEvent.Records
-	// Only handles one record since each sqs message only contains at most one notification.
+
+	// Only handles one notification record since each sqs message only contains
+	// at most one notification.
 	for _, record := range records {
-		err := json.Unmarshal([]byte(record.Body), &notification)
+		// get the serialized data in sqs
+		err := json.Unmarshal([]byte(record.Body), &queueMessage)
+
 		if err != nil {
+			rlog.Error(err)
 			raven.CaptureError(err, nil)
 			return err
 		}
 
-		sendNotifications, err := notifications.NotificationsFromNotificationDataModel(db, notification)
-
+		// get the notification model from db given the queue model
+		notification, err := notification_queue.QueueModelToDataNotificationModel(db, queueMessage)
 		if err != nil {
+			rlog.Error(err)
+			raven.CaptureError(err, nil)
 			return err
 		}
 
+		// create a set of notifications to send off to expo
+		sendNotifications, err := notifications.NotificationsFromNotificationDataModel(db, notification)
+		if err != nil {
+			rlog.Error(err)
+			raven.CaptureError(err, nil)
+			return err
+		}
+
+		// send the batch
 		res, err := notification_api.SendNotifications(*sendNotifications)
 		if err != nil {
 			rlog.Error(err)
+			raven.CaptureError(err, nil)
 			return err
 		}
 
@@ -59,19 +77,21 @@ func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
 		tx := db.Begin()
 
 		// for each notification response, add the receipt
+		// none of these should fail since we have a successful response from expo
 		for i, response := range res.Data {
 			temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
 
 			// was this message errored
 			if response.Status == notification_api.ERROR_STATUS {
 				err := temp.MarkNotificationError(tx, response.Message, response.Details)
-				// THE WORLD IS ON FIRE!!! AAAAAAAAH!
+				rlog.Error(err)
 				raven.CaptureError(err, nil)
 				continue
 			}
 
 			err = temp.MarkNotificationSent(db, response.Id)
 			if err != nil {
+				rlog.Error(err)
 				raven.CaptureError(err, nil)
 				continue
 			}

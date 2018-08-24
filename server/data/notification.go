@@ -34,7 +34,7 @@ type Notification struct {
 	User          User       `gorm:"foreignkey:UserId"`
 	Type          NotifType  `gorm:"not null"`
 	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
-	State         NotifState `gorm:"not null;default:PENDING_SEND"`
+	State         NotifState `gorm:"not null;default:UNREAD"`
 	Title         string     `gorm:"not null"`
 	Message       string     `gorm:"not null"`
 	ThumbnailLink *string
@@ -62,6 +62,18 @@ type ExpoPendingNotification struct {
 	Receipt        *string      `gorm:""`
 	FailureMessage *string
 	FailureDetails *string
+}
+
+// NotificationSentToExpoDevice Check if a specific notification was sent to a specfic device
+func NotificationSentToExpoDevice(db *gorm.DB, notificationId uint, deviceId string) (bool, error) {
+	var notification ExpoPendingNotification
+	if err := db.Where(&ExpoPendingNotification{NotificationId: notificationId, DeviceId: deviceId}).First(&notification).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func CreateNewPendingNotification(db *gorm.DB, notificationId uint, deviceId string) (*ExpoPendingNotification, error) {
