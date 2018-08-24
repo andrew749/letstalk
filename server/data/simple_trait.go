@@ -10,10 +10,10 @@ func (u SimpleTraitType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
 	SIMPLE_TRAIT_TYPE_INTEREST     SimpleTraitType = "INTEREST"
-	SIMPLE_TRAIT_TYPE_EXPERIENCE                   = "EXPERIENCE"
-	SIMPLE_TRAIT_TYPE_RELIGION                     = "RELIGION"
-	SIMPLE_TRAIT_TYPE_RACE                         = "RACE"
-	SIMPLE_TRAIT_TYPE_UNDETERMINED                 = "UNDETERMINED"
+	SIMPLE_TRAIT_TYPE_EXPERIENCE   SimpleTraitType = "EXPERIENCE"
+	SIMPLE_TRAIT_TYPE_RELIGION     SimpleTraitType = "RELIGION"
+	SIMPLE_TRAIT_TYPE_RACE         SimpleTraitType = "RACE"
+	SIMPLE_TRAIT_TYPE_UNDETERMINED SimpleTraitType = "UNDETERMINED"
 )
 
 var ALL_SIMPLE_TRAIT_TYPES = map[SimpleTraitType]interface{}{
