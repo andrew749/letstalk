@@ -2,6 +2,11 @@ package api
 
 import "letstalk/server/data"
 
+type Role struct {
+	Id   data.TRoleID `json:"id" binding:"required"`
+	Name string       `json:"name" binding:"required"`
+}
+
 type AddUserPositionRequest struct {
 	RoleId           *data.TRoleID         `json:"roleId"`
 	RoleName         *string               `json:"roleName"`

@@ -7,7 +7,7 @@ import (
 )
 
 func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
-	var req api.SimpleTraitAutocompleteRequest
+	var req api.AutocompleteRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
@@ -29,5 +29,29 @@ func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	}
 
 	c.Result = apiTraits
+	return nil
+}
+
+func RoleAutocompleteController(c *ctx.Context) errs.Error {
+	var req api.AutocompleteRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	searchClient := c.SearchClientWithContext()
+	roles, err := searchClient.CompletionSuggestionRoles(req.Prefix, req.Size)
+	if err != nil {
+		return errs.NewEsError(err)
+	}
+
+	apiroles := make([]api.Role, len(roles))
+	for i, role := range roles {
+		apiroles[i] = api.Role{
+			role.Id,
+			role.Name,
+		}
+	}
+
+	c.Result = apiroles
 	return nil
 }

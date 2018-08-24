@@ -3,6 +3,8 @@ package search
 import (
 	"context"
 
+	"letstalk/server/core/errs"
+
 	"github.com/olivere/elastic"
 )
 
@@ -27,5 +29,8 @@ func NewClientWithContext(client *elastic.Client, context context.Context) *Clie
 }
 
 func (c *ClientWithContext) CreateEsIndexes() error {
-	return c.createSimpleTraitIndex()
+	var compErr *errs.CompositeError = nil
+	compErr = errs.AppendNullableError(compErr, c.createSimpleTraitIndex())
+	compErr = errs.AppendNullableError(compErr, c.createRoleIndex())
+	return compErr
 }
