@@ -17,7 +17,7 @@ func TestAddUserPositionByIds(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err := db.Save(&role).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			org := data.Organization{
 				Name:            "Facebook",
@@ -25,17 +25,17 @@ func TestAddUserPositionByIds(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err = db.Save(&org).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			startDate := "2018-01-01"
 			err = AddUserPosition(db, data.TUserID(1), &role.Id, nil, &org.Id, nil, startDate, nil)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var userPositions []data.UserPosition
 			err = db.Where(
 				&data.UserSimpleTrait{UserId: 1},
 			).Preload("Role").Preload("Organization").Find(&userPositions).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(userPositions))
 			assert.Equal(t, org.Id, userPositions[0].OrganizationId)
 			assert.Equal(t, org.Name, userPositions[0].OrganizationName)
@@ -60,7 +60,7 @@ func TestAddUserPositionByNamesAlreadyExist(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err := db.Save(&role).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			org := data.Organization{
 				Name:            "Facebook",
@@ -68,20 +68,20 @@ func TestAddUserPositionByNamesAlreadyExist(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err = db.Save(&org).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			startDate := "2018-01-01"
 			endDate := "2018-04-01"
 			err = AddUserPosition(
 				db, data.TUserID(1), nil, &role.Name, nil, &org.Name, startDate, &endDate,
 			)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var userPositions []data.UserPosition
 			err = db.Where(
 				&data.UserSimpleTrait{UserId: 1},
 			).Preload("Role").Preload("Organization").Find(&userPositions).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(userPositions))
 			assert.Equal(t, org.Id, userPositions[0].OrganizationId)
 			assert.Equal(t, org.Name, userPositions[0].OrganizationName)
@@ -109,13 +109,13 @@ func TestAddUserPositionByNameNotExists(t *testing.T) {
 			err = AddUserPosition(
 				db, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
 			)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var userPositions []data.UserPosition
 			err = db.Where(
 				&data.UserSimpleTrait{UserId: 1},
 			).Preload("Role").Preload("Organization").Find(&userPositions).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, 1, len(userPositions))
 			assert.Equal(t, orgName, userPositions[0].OrganizationName)
 			assert.Equal(t, data.ORGANIZATION_TYPE_UNDETERMINED, userPositions[0].OrganizationType)
@@ -180,7 +180,7 @@ func TestRemoveUserPosition(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err := db.Save(&role).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			org := data.Organization{
 				Name:            "Facebook",
@@ -188,18 +188,18 @@ func TestRemoveUserPosition(t *testing.T) {
 				IsUserGenerated: false,
 			}
 			err = db.Save(&org).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			userPosition := data.UserPosition{UserId: 1, RoleId: role.Id, OrganizationId: org.Id}
 			err = db.Save(&userPosition).Error
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			var positions []data.UserPosition
 			db.Where(&data.UserPosition{UserId: 1}).Find(&positions)
 			assert.Equal(t, 1, len(positions))
 
 			err = RemoveUserPosition(db, data.TUserID(1), userPosition.Id)
-			assert.Nil(t, err)
+			assert.NoError(t, err)
 
 			db.Where(&data.UserPosition{UserId: 1}).Find(&positions)
 			assert.Equal(t, 0, len(positions))
