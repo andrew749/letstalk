@@ -76,6 +76,16 @@ func migrateDB(db *gorm.DB) error {
 			},
 		},
 		{
+			ID: "Pending sent notifications",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&ExpoPendingNotification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "User Devices Creation From Session",
 			Migrate: func(tx *gorm.DB) error {
 				// for every session create a new user device entry

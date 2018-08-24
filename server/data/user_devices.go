@@ -39,11 +39,24 @@ func AddExpoDeviceTokenforUser(db *gorm.DB, userId TUserID, token string) error 
 	return AddDeviceTokenForUser(db, userId, token, EXPO_PUSH)
 }
 
+func GetDevicesForUser(db *gorm.DB, userId TUserID) (*[]UserDevice, error) {
+	var userDevices []UserDevice
+	if err := db.Where("user_id=?", userId).Find(&userDevices).Error; err != nil {
+		return nil, err
+	}
+	return &userDevices, nil
+}
+
 func GetDeviceNotificationTokensForUser(db *gorm.DB, userId TUserID) (*[]string, error) {
-	var users []string
-	if err := db.Where("user_id=?", userId).Find(&users).Error; err != nil {
+	devices, err := GetDevicesForUser(db, userId)
+	if err != nil {
 		return nil, err
 	}
 
-	return &users, nil
+	tokens := make([]string, len(*devices))
+	for i, device := range *devices {
+		tokens[i] = device.NotificationToken
+	}
+
+	return &tokens, nil
 }

@@ -104,7 +104,8 @@ func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification)
 	for i, deviceId := range *deviceIds {
 		res[i] = notifications.ExpoNotification{
 			To:    deviceId,
-			Title: orig.Message,
+			Title: orig.Title,
+			Body:  orig.Message,
 			Data:  orig,
 		}
 	}
