@@ -253,6 +253,12 @@ func Register(
 		hw.wrapHandler(controller.RoleAutocompleteController, false),
 	)
 
+	v1.OPTIONS("/autocomplete/organization")
+	v1.POST(
+		"/autocomplete/organization",
+		hw.wrapHandler(controller.OrganizationAutocompleteController, false),
+	)
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))

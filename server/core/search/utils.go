@@ -32,5 +32,6 @@ func (c *ClientWithContext) CreateEsIndexes() error {
 	var compErr *errs.CompositeError = nil
 	compErr = errs.AppendNullableError(compErr, c.createSimpleTraitIndex())
 	compErr = errs.AppendNullableError(compErr, c.createRoleIndex())
+	compErr = errs.AppendNullableError(compErr, c.createOrganizationIndex())
 	return compErr
 }
