@@ -8,7 +8,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// CreateAdHocNotification Creates an adhoc notification as well as a page to render when users click though on the notification.
+// CreateAdHocNotification Creates an adhoc notification as well as a
+// page to render when users click though on the notification.
 func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]string) error {
 	creationTime := time.Now()
 	var err error

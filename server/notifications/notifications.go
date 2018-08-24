@@ -20,7 +20,7 @@ const (
 	ERROR_STATUS        = "error"
 )
 
-type Notification struct {
+type ExpoNotification struct {
 	To    string `json:"to"`
 	Title string `json:"title"`
 	Body  string `json:"body"`
@@ -44,47 +44,47 @@ type Notification struct {
 	Badge *int `json:"badge,omitempty"`
 }
 
-type NotificationStatusDetails struct {
+type ExpoNotificationStatusDetails struct {
 	Error string `json:"error"`
 }
 
-type NotificationStatusResponse struct {
-	Id      string                     `json:"id,omitempty"`
-	Status  string                     `json:"status"`
-	Message *string                    `json:"message,omitempty"`
-	Details *NotificationStatusDetails `json:"details,omitempty"`
+type ExpoNotificationStatusResponse struct {
+	Id      string                         `json:"id,omitempty"`
+	Status  string                         `json:"status"`
+	Message *string                        `json:"message,omitempty"`
+	Details *ExpoNotificationStatusDetails `json:"details,omitempty"`
 }
 
-type NotificationStatus struct {
-	Data map[string]NotificationStatusResponse `json:"data"`
+type ExpoNotificationStatus struct {
+	Data map[string]ExpoNotificationStatusResponse `json:"data"`
 }
 
-type NotificationSendResponse struct {
-	Data []NotificationStatusResponse `json:"-"`
+type ExpoNotificationSendResponse struct {
+	Data []ExpoNotificationStatusResponse `json:"-"`
 }
 
-type NotificationStatusRequest struct {
+type ExpoNotificationStatusRequest struct {
 	Ids []string `json:"ids"`
 }
 
 //UnmarshalJSON Custom unmarshalling since expo api could return an array or single item.
-func (s *NotificationSendResponse) UnmarshalJSON(data []byte) error {
+func (s *ExpoNotificationSendResponse) UnmarshalJSON(data []byte) error {
 	res := struct {
-		Data NotificationStatusResponse `json:"data"`
+		Data ExpoNotificationStatusResponse `json:"data"`
 	}{}
 	err := json.Unmarshal(data, &res)
 	// if we were able to deserialize a single response
 	if err == nil {
-		s.Data = []NotificationStatusResponse{res.Data}
+		s.Data = []ExpoNotificationStatusResponse{res.Data}
 		return nil
 	}
-	s.Data = make([]NotificationStatusResponse, 0)
+	s.Data = make([]ExpoNotificationStatusResponse, 0)
 
 	return json.Unmarshal(data, &s.Data)
 }
 
 // SendNotifications Send a notification to the expo api and serialize response
-func SendNotifications(notifications []Notification) (*NotificationSendResponse, error) {
+func SendNotifications(notifications []ExpoNotification) (*ExpoNotificationSendResponse, error) {
 	marshalledNotification, err := json.Marshal(notifications)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func SendNotifications(notifications []Notification) (*NotificationSendResponse,
 	}
 	rlog.Debugf("Successfully sent notification to clients\n")
 
-	var res NotificationSendResponse
+	var res ExpoNotificationSendResponse
 	err = json.Unmarshal(bodyBytes, &res)
 
 	if err != nil {
@@ -126,8 +126,8 @@ func SendNotifications(notifications []Notification) (*NotificationSendResponse,
 }
 
 // GetNotificationStatus Get the status on expo for the notification wrt it being delivered to apple or google.
-func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error) {
-	reqBody, err := json.Marshal(&NotificationStatusRequest{notificationIds})
+func GetNotificationStatus(notificationIds []string) (*ExpoNotificationStatus, error) {
+	reqBody, err := json.Marshal(&ExpoNotificationStatusRequest{notificationIds})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -156,7 +156,7 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error
 		return nil, err
 	}
 
-	var res NotificationStatus
+	var res ExpoNotificationStatus
 	err = json.Unmarshal(bodyBytes, &res)
 	if err != nil {
 		log.Fatal(err)

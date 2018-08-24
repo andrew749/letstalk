@@ -72,11 +72,14 @@ func CreateNotification(
 	}
 
 	dataNotif := &data.Notification{
-		UserId: userId,
-		Type:   tpe,
-		State:  data.NOTIF_STATE_UNREAD,
-		Data:   notifData,
-		Title:  title,
+		UserId:        userId,
+		Type:          tpe,
+		State:         data.NOTIF_STATE_UNREAD,
+		Data:          notifData,
+		Title:         title,
+		Message:       message,
+		ThumbnailLink: thumbnail,
+		Timestamp:     createdAt,
 	}
 
 	if err := db.Create(dataNotif).Error; err != nil {

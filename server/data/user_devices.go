@@ -15,14 +15,14 @@ func (u *NotificationTokenType) Scan(value interface{}) error {
 func (u NotificationTokenType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
-	EXPO_PUSH = "expo"
+	EXPO_PUSH = "EXPO"
 )
 
 type UserDevice struct {
-	User                  User    `gorm:"foreign_key:UserId"`
-	UserId                TUserID `gorm:"primary_key"`
-	NotificationToken     string  `gorm:"not null"`
-	NotificationTokenType NotificationTokenType
+	User                  User                  `gorm:"foreign_key:UserId"`
+	UserId                TUserID               `gorm:"primary_key"`
+	NotificationToken     string                `gorm:"primary_key;not null"`
+	NotificationTokenType NotificationTokenType `gorm:"not null"`
 }
 
 func AddDeviceTokenForUser(db *gorm.DB, userId TUserID, token string, tokenType NotificationTokenType) error {
