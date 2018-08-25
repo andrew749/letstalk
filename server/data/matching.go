@@ -21,3 +21,11 @@ type Matching struct {
 	Mentee     TUserID       `gorm:"not null"`
 	State      MatchingState `gorm:"not null"`
 }
+
+func GetMatchingWithId(db *gorm.DB, matchingId uint) (*Matching, error) {
+	var matching Matching
+	if err := db.First(&matching, matchingId).Error; err != nil {
+		return nil, err
+	}
+	return &matching, nil
+}
