@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
-func migrateDB(db *gorm.DB) {
+func migrateDB(db *gorm.DB) error {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		{
 			ID: "1",
@@ -75,15 +75,72 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Pending sent notifications",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&ExpoPendingNotification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "User Devices Creation From Session",
+			Migrate: func(tx *gorm.DB) error {
+				// for every session create a new user device entry
+
+				// create required table
+				tx.AutoMigrate(&UserDevice{})
+
+				// row to scan results into
+				type Row struct {
+					token string
+					uid   uint
+				}
+
+				rows, err := tx.Table("notification_tokens").
+					Select("notification_tokens.token, sessions.user_id").
+					Joins("inner join sessions on sessions.session_id=notification_tokens.session_id").
+					Rows()
+
+				if err != nil {
+					return err
+				}
+
+				for rows.Next() {
+					res := Row{}
+
+					err := rows.Scan(&res.token, &res.uid)
+					if err != nil {
+						return err
+					}
+
+					// insert row into devices table
+					err = AddExpoDeviceTokenforUser(tx, TUserID(res.uid), res.token)
+
+					if err != nil {
+						return err
+					}
+				}
+
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
 		rlog.Errorf("Could not migrate: %v", err)
+		return err
 	}
 
 	rlog.Infof("Succesfully ran migration")
+	return nil
 }
 
-func CreateDB(db *gorm.DB) {
-	migrateDB(db)
+func CreateDB(db *gorm.DB) error {
+	return migrateDB(db)
 }

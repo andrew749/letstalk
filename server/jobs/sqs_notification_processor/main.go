@@ -2,37 +2,33 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"letstalk/server/notifications"
+	"fmt"
+
+	sqs_notification_processor "letstalk/server/jobs/sqs_notification_processor/src"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/romana/rlog"
 )
 
 // HandleRequest Handle the message data passed to the lambda from sqs
 func HandleRequest(ctx context.Context, sqsEvent events.SQSEvent) error {
-	// TODO: handle error
-	rlog.Printf("Received message %#v\n", sqsEvent)
-	var notification notifications.Notification
-	records := sqsEvent.Records
-	// Only handles one record since each sqs message only contains at most notification.
-	for _, record := range records {
-		err := json.Unmarshal([]byte(record.Body), &notification)
-		if err != nil {
-			return err
-		}
-		_, err = notifications.SendNotification(notification)
-		if err != nil {
-			rlog.Error(err)
-			return err
-		}
-		return nil
-	}
-	// will never reach here
-	return nil
+	return sqs_notification_processor.SendNotificationLambda(sqsEvent)
+}
+
+func testNotification(id uint) error {
+	return sqs_notification_processor.SendNotificationLambda(events.SQSEvent{
+		Records: []events.SQSMessage{
+			events.SQSMessage{
+				Body: fmt.Sprintf("{\"id\": %d}", id),
+			},
+		},
+	})
 }
 
 func main() {
 	lambda.Start(HandleRequest)
+	// test the job locally
+	// if err := testNotification(49); err != nil {
+	// 	panic(err)
+	// }
 }

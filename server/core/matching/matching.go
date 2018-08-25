@@ -4,13 +4,12 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
-	"letstalk/server/core/sessions"
-	"letstalk/server/notifications"
-
+	raven "github.com/getsentry/raven-go"
 	"github.com/romana/rlog"
 )
 
@@ -72,7 +71,7 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	}
 
 	// Send push notifications asynchronously.
-	go sendMatchNotifications(c, mentor.UserId, mentee.UserId)
+	sendMatchNotifications(c, mentor.UserId, mentee.UserId)
 
 	c.Result = convertMatchingDataToApi(matching)
 	return nil
@@ -95,19 +94,18 @@ func sendMatchNotifications(
 	mentorId data.TUserID,
 	menteeId data.TUserID,
 ) errs.Error {
-	mentorDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, mentorId)
-	if err != nil {
-		return errs.NewDbError(err)
+	err1 := notifications.NewMenteeNotification(c.Db, menteeId)
+	err2 := notifications.NewMentorNotification(c.Db, mentorId)
+	var err *errs.CompositeError
+	if err1 != nil {
+		rlog.Debug(err1.Error())
+		raven.CaptureError(err1, nil)
+		err = errs.AppendNullableError(err, err1)
 	}
-	menteeDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, menteeId)
-	if err != nil {
-		return errs.NewDbError(err)
+	if err2 != nil {
+		rlog.Debug(err2.Error())
+		raven.CaptureError(err2, nil)
+		err = errs.AppendNullableError(err, err2)
 	}
-	for _, token := range mentorDeviceTokens {
-		notifications.NewMenteeNotification(token)
-	}
-	for _, token := range menteeDeviceTokens {
-		notifications.NewMentorNotification(token)
-	}
-	return nil
+	return err
 }

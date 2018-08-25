@@ -17,7 +17,7 @@ func TestNewContext(t *testing.T) {
 	writer := http.TestResponseWriter{}
 	g, _ := gin.CreateTestContext(&writer)
 	db := &gorm.DB{}
-	sm := sessions.CreateCompositeSessionManager()
+	sm := sessions.CreateCompositeSessionManager(db)
 	es := &elastic.Client{}
 	sessionData, _ := sessions.CreateSessionData(1, nil, time.Now())
 	c := ctx.NewContext(g, db, es, sessionData, &sm)

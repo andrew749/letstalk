@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"letstalk/server/data"
 	"log"
 	"net/http"
 
@@ -21,7 +20,7 @@ const (
 	ERROR_STATUS        = "error"
 )
 
-type Notification struct {
+type ExpoNotification struct {
 	To    string `json:"to"`
 	Title string `json:"title"`
 	Body  string `json:"body"`
@@ -45,56 +44,33 @@ type Notification struct {
 	Badge *int `json:"badge,omitempty"`
 }
 
-type NotificationStatusDetails struct {
+type ExpoNotificationStatusDetails struct {
 	Error string `json:"error"`
 }
 
-type NotificationStatusResponse struct {
-	Id      string                     `json:"id,omitempty"`
-	Status  string                     `json:"status"`
-	Message *string                    `json:"message,omitempty"`
-	Details *NotificationStatusDetails `json:"details,omitempty"`
+type ExpoNotificationStatusResponse struct {
+	Id      string                         `json:"id,omitempty"`
+	Status  string                         `json:"status"`
+	Message *string                        `json:"message,omitempty"`
+	Details *ExpoNotificationStatusDetails `json:"details,omitempty"`
 }
 
-type NotificationStatus struct {
-	Data map[string]NotificationStatusResponse `json:"data"`
+type ExpoNotificationStatus struct {
+	Data map[string]ExpoNotificationStatusResponse `json:"data"`
 }
 
-type NotificationSendResponse struct {
-	Data []NotificationStatusResponse `json:"-"`
+type ExpoNotificationSendResponse struct {
+	Data []ExpoNotificationStatusResponse `json:"data"`
 }
 
-type NotificationStatusRequest struct {
+type ExpoNotificationStatusRequest struct {
 	Ids []string `json:"ids"`
 }
 
-//UnmarshalJSON Custom unmarshalling since expo api could return an array or single item.
-func (s *NotificationSendResponse) UnmarshalJSON(data []byte) error {
-	res := struct {
-		Data NotificationStatusResponse `json:"data"`
-	}{}
-	err := json.Unmarshal(data, &res)
-	// if we were able to deserialize a single response
-	if err == nil {
-		s.Data = []NotificationStatusResponse{res.Data}
-		return nil
-	}
-	s.Data = make([]NotificationStatusResponse, 0)
-
-	return json.Unmarshal(data, &s.Data)
-}
-
-// FromNotificationDataModel Convert a notification data model to a version that the expo API expects
-func (n *Notification) FromNotificationDataModel(orig data.Notification) *Notification {
-	n.To = string(orig.UserId)
-	n.Title = orig.Message
-	n.Data = orig
-	return n
-}
-
-// SendNotification Send a notification to the expo api and serialize response
-func SendNotification(notification Notification) (*NotificationSendResponse, error) {
-	marshalledNotification, err := json.Marshal(notification)
+// SendNotifications Send a notification to the expo api and serialize response
+func SendNotifications(notifications []ExpoNotification) (*ExpoNotificationSendResponse, error) {
+	marshalledNotification, err := json.Marshal(notifications)
+	rlog.Debugf("Marshalled notification into payload: %s\n", marshalledNotification)
 	if err != nil {
 		return nil, err
 	}
@@ -122,10 +98,11 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 		rlog.Error(err)
 		return nil, err
 	}
-	rlog.Debug("Successfully sent notification to client: %s", notification.To)
+	rlog.Debugf("Successfully sent notification to clients\n")
 
-	var res NotificationSendResponse
+	var res ExpoNotificationSendResponse
 	err = json.Unmarshal(bodyBytes, &res)
+	rlog.Debugf("Got response from expo: %v", string(bodyBytes))
 
 	if err != nil {
 		return nil, err
@@ -135,8 +112,8 @@ func SendNotification(notification Notification) (*NotificationSendResponse, err
 }
 
 // GetNotificationStatus Get the status on expo for the notification wrt it being delivered to apple or google.
-func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error) {
-	reqBody, err := json.Marshal(&NotificationStatusRequest{notificationIds})
+func GetNotificationStatus(notificationIds []string) (*ExpoNotificationStatus, error) {
+	reqBody, err := json.Marshal(&ExpoNotificationStatusRequest{notificationIds})
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -165,7 +142,7 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error
 		return nil, err
 	}
 
-	var res NotificationStatus
+	var res ExpoNotificationStatus
 	err = json.Unmarshal(bodyBytes, &res)
 	if err != nil {
 		log.Fatal(err)
@@ -173,112 +150,4 @@ func GetNotificationStatus(notificationIds []string) (*NotificationStatus, error
 	}
 
 	return &res, nil
-}
-
-type NotifType string
-
-const (
-	NOTIF_TYPE_REQUEST_TO_MATCH NotifType = "REQUEST_TO_MATCH"
-	NOTIF_TYPE_NEW_MATCH        NotifType = "NEW_MATCH"
-	NOTIF_TYPE_MATCH_VERIFIED   NotifType = "MATCH_VERIFIED"
-	NOTIF_TYPE_ADHOC_NOT        NotifType = "ADHOC_NOTIFICATION"
-)
-
-func CreateAndSendNotificationWithData(
-	deviceToken string,
-	message string,
-	title string,
-	tpe NotifType,
-	extraData map[string]interface{},
-) error {
-	data := map[string]interface{}{"message": message, "title": title, "type": string(tpe)}
-	for key, value := range extraData {
-		data[key] = value
-	}
-
-	notification := Notification{
-		To:    deviceToken,
-		Title: title,
-		Body:  message,
-		Data:  data,
-	}
-
-	_, err := SendNotification(notification)
-
-	return err
-}
-
-func CreateAndSendNotification(
-	deviceToken string,
-	message string,
-	title string,
-	tpe NotifType,
-) error {
-	return CreateAndSendNotificationWithData(
-		deviceToken,
-		message,
-		title,
-		tpe,
-		make(map[string]interface{}),
-	)
-}
-
-// SPECIFIC NOTIFICATION MESSAGES
-
-type RequestToMatchSide string
-
-const (
-	REQUEST_TO_MATCH_SIDE_ASKER    RequestToMatchSide = "ASKER"
-	REQUEST_TO_MATCH_SIDE_ANSWERER RequestToMatchSide = "ANSWERER"
-)
-
-func RequestToMatchNotification(
-	deviceToken string,
-	side RequestToMatchSide,
-	requestId uint,
-	name string,
-) error {
-	var (
-		extraData map[string]interface{} = map[string]interface{}{"side": side, "requestId": requestId}
-		title     string                 = "You got a match!"
-		message   string                 = fmt.Sprintf("You got matched for \"%s\"", name)
-	)
-	return CreateAndSendNotificationWithData(
-		deviceToken,
-		message,
-		title,
-		NOTIF_TYPE_REQUEST_TO_MATCH,
-		extraData,
-	)
-}
-
-func NewMatchNotification(deviceToken string, message string) error {
-	title := "You got a match!"
-	return CreateAndSendNotificationWithData(
-		deviceToken,
-		message,
-		title,
-		NOTIF_TYPE_NEW_MATCH,
-		nil,
-	)
-}
-
-func NewMentorNotification(deviceToken string) error {
-	return NewMatchNotification(deviceToken, "You were matched with a new mentor.")
-}
-
-func NewMenteeNotification(deviceToken string) error {
-	return NewMatchNotification(deviceToken, "You were matched with a new mentee.")
-}
-
-func MatchVerifiedNotification(deviceToken string, userName string) error {
-	title := "You verified a match!"
-	message := fmt.Sprintf("Your match with %s is now verified.", userName)
-	return CreateAndSendNotificationWithData(
-		deviceToken,
-		message,
-		title,
-		NOTIF_TYPE_MATCH_VERIFIED,
-		nil,
-	)
 }

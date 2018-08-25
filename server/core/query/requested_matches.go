@@ -8,11 +8,10 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/data"
-	"letstalk/server/notifications"
 
-	"letstalk/server/core/sessions"
-
+	raven "github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
@@ -107,29 +106,25 @@ func sendNotifications(
 	credentialId uint,
 	name string,
 ) errs.Error {
-	askerDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, askerId)
-	if err != nil {
-		return errs.NewDbError(err)
+	err1 := notifications.RequestToMatchNotification(
+		c.Db,
+		askerId,
+		notifications.REQUEST_TO_MATCH_SIDE_ASKER,
+		credentialId,
+		name,
+	)
+	err2 := notifications.RequestToMatchNotification(
+		c.Db,
+		answererId,
+		notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
+		credentialId,
+		name,
+	)
+	if err1 != nil {
+		raven.CaptureError(err1, nil)
 	}
-	answererDeviceTokens, err := sessions.GetDeviceTokensForUser(*c.SessionManager, answererId)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	for _, token := range askerDeviceTokens {
-		notifications.RequestToMatchNotification(
-			token,
-			notifications.REQUEST_TO_MATCH_SIDE_ASKER,
-			credentialId,
-			name,
-		)
-	}
-	for _, token := range answererDeviceTokens {
-		notifications.RequestToMatchNotification(
-			token,
-			notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
-			credentialId,
-			name,
-		)
+	if err2 != nil {
+		raven.CaptureError(err2, nil)
 	}
 	return nil
 }

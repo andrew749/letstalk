@@ -15,6 +15,7 @@ import (
 // CreateAndSendNotification Creates a notification object and saves to data store. Also sends to sqs so it can be processed later
 func CreateAndSendNotification(
 	db *gorm.DB,
+	title,
 	message string,
 	recipient data.TUserID,
 	class data.NotifType,
@@ -23,17 +24,10 @@ func CreateAndSendNotification(
 ) error {
 	currentTime := time.Now()
 	var err error
-	notification, err := CreateNotification(db, recipient, class, message, thumbnail, currentTime, metadata)
+	notification, err := CreateNotification(db, recipient, class, title, message, thumbnail, currentTime, metadata)
 	if err != nil {
 		return err
 	}
-
-	if err = db.Save(notification).Error; err != nil {
-		return err
-	}
-
-	var sendNotification = &notifications.Notification{}
-	sendNotification = sendNotification.FromNotificationDataModel(*notification)
 
 	sqsHelper, err := aws_utils.GetSQSServiceClient()
 	if err != nil {
@@ -42,20 +36,7 @@ func CreateAndSendNotification(
 
 	// push to sqs
 	// TODO: if doesn't send then try again or set some bit saying that it wasnt sent so we can have a job retry
-	return notification_queue.PushNotificationToQueue(sqsHelper, *sendNotification)
-}
-
-func SendTestNotification(message string, recipient string) error {
-	notification := notifications.Notification{
-		To:    recipient,
-		Title: message,
-	}
-
-	sqsHelper, err := aws_utils.GetSQSServiceClient()
-	if err != nil {
-		return err
-	}
-	return notification_queue.PushNotificationToQueue(sqsHelper, notification)
+	return notification_queue.PushNotificationToQueue(sqsHelper, *notification)
 }
 
 func UpdateNotificationState(
@@ -74,10 +55,12 @@ func UpdateNotificationState(
 	return nil
 }
 
+// CreateNotification Creates the data model for a notification
 func CreateNotification(
 	db *gorm.DB,
 	userId data.TUserID,
 	tpe data.NotifType,
+	title string,
 	message string,
 	thumbnail *string,
 	createdAt time.Time,
@@ -89,23 +72,42 @@ func CreateNotification(
 	}
 
 	dataNotif := &data.Notification{
-		UserId: userId,
-		Type:   tpe,
-		State:  data.NOTIF_STATE_UNREAD,
-		Data:   notifData,
+		UserId:        userId,
+		Type:          tpe,
+		State:         data.NOTIF_STATE_UNREAD,
+		Data:          notifData,
+		Title:         title,
+		Message:       message,
+		ThumbnailLink: thumbnail,
+		Timestamp:     createdAt,
 	}
 
 	if err := db.Create(dataNotif).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
-	// NOTE: This should not error since we just marshalled the data, so didn't add any logic for
-	// deleting corrupt notifications.
-	// apiNotif, err := query.NotificationDataToApi(*dataNotif)
-	// if err != nil {
-	// 	return nil, errs.NewInternalError(err.Error())
-	// }
-
-	// return apiNotif, nil
 	return dataNotif, nil
+}
+
+// FromNotificationDataModel Convert a notification data model to a version that the expo API expects
+func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification) (*[]notifications.ExpoNotification, error) {
+	// create a bunch of notifications to send based on how many registered device ids the user has
+	deviceIds, err := data.GetDeviceNotificationTokensForUser(db, orig.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	// allocate storage
+	res := make([]notifications.ExpoNotification, len(*deviceIds))
+
+	// create new notification for each device id
+	for i, deviceId := range *deviceIds {
+		res[i] = notifications.ExpoNotification{
+			To:    deviceId,
+			Title: orig.Title,
+			Body:  orig.Message,
+			Data:  orig,
+		}
+	}
+	return &res, nil
 }

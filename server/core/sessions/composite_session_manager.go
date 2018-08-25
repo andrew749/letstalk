@@ -6,15 +6,18 @@ import (
 	"letstalk/server/data"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
 type CompositeSessionManager struct {
+	db            *gorm.DB
 	sessionStores []ISessionStore
 }
 
-func CreateCompositeSessionManager(sessionManagers ...ISessionStore) ISessionManagerBase {
+func CreateCompositeSessionManager(db *gorm.DB, sessionManagers ...ISessionStore) ISessionManagerBase {
 	sm := CompositeSessionManager{
+		db,
 		make([]ISessionStore, 0),
 	}
 	for _, x := range sessionManagers {
@@ -74,6 +77,13 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	session, err := CreateSessionData(userId, notificationToken, expiry)
 	if err != nil {
 		return nil, errors.New("Unable to create new session")
+	}
+
+	// store device
+	if notificationToken != nil {
+		if err := data.AddExpoDeviceTokenforUser(sm.db, userId, *notificationToken); err != nil {
+			return nil, errors.New("Unable to register device in db.")
+		}
 	}
 
 	// maintain mappings

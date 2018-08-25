@@ -1,10 +1,11 @@
 package notification_queue
 
 import (
-	"letstalk/server/notifications"
+	"letstalk/server/data"
 	"letstalk/server/queue"
 
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
 
@@ -13,8 +14,29 @@ const (
 	NotificationQueueUrl = "https://sqs.us-east-1.amazonaws.com/016267150191/Notifications"
 )
 
-func PushNotificationToQueue(sqs *sqs.SQS, notification notifications.Notification) error {
+type NotificationQueueData struct {
+	ID uint `json:"id"`
+}
+
+// DataNotificationModelToQueueModel Convert a data model of a notifiation to a
+// serializable model that is stored in an sqs queue.
+func DataNotificationModelToQueueModel(notification data.Notification) NotificationQueueData {
+	return NotificationQueueData{
+		ID: notification.ID,
+	}
+}
+
+// QueueModelToDataNotificationModel Convert a serialized queue model to a
+// data.Notification by looking up the appropriate notification in the db
+func QueueModelToDataNotificationModel(db *gorm.DB, notification NotificationQueueData) (data.Notification, error) {
+	var res data.Notification
+	err := db.First(&res, notification.ID).Error
+	return res, err
+}
+
+func PushNotificationToQueue(sqs *sqs.SQS, notification data.Notification) error {
 	rlog.Debugf("%#v", notification)
-	_, err := queue.AddNewMessage(sqs, NotificationQueueID, NotificationQueueUrl, notification)
+	queueData := DataNotificationModelToQueueModel(notification)
+	_, err := queue.AddNewMessage(sqs, NotificationQueueID, NotificationQueueUrl, queueData)
 	return err
 }

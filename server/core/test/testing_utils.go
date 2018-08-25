@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/romana/rlog"
 )
 
 type Test struct {
@@ -39,13 +40,13 @@ func GetSqliteDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	provisionDatabase(db)
+	err = provisionDatabase(db)
 
-	return db, nil
+	return db, err
 }
 
-func provisionDatabase(db *gorm.DB) {
-	data.CreateDB(db)
+func provisionDatabase(db *gorm.DB) error {
+	return data.CreateDB(db)
 }
 
 func TearDownLocalDatabase() {
@@ -58,8 +59,10 @@ func RunTestsWithDb(tests []Test) {
 	var err error
 	TearDownLocalDatabase()
 	if db, err = GetSqliteDB(); err != nil {
+		rlog.Errorf("Failed to provision db %s", err.Error())
 		panic(err)
 	}
+	rlog.Info("Provisioned DB")
 	defer db.Close()
 
 	for _, test := range tests {
