@@ -36,6 +36,7 @@ func QueueModelToDataNotificationModel(db *gorm.DB, notification NotificationQue
 
 func PushNotificationToQueue(sqs *sqs.SQS, notification data.Notification) error {
 	rlog.Debugf("%#v", notification)
-	_, err := queue.AddNewMessage(sqs, NotificationQueueID, NotificationQueueUrl, notification)
+	queueData := DataNotificationModelToQueueModel(notification)
+	_, err := queue.AddNewMessage(sqs, NotificationQueueID, NotificationQueueUrl, queueData)
 	return err
 }
