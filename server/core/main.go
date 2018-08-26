@@ -82,8 +82,6 @@ func main() {
 		pprof.Register(router, nil)
 	}
 
-	secrets.LoadSecrets(*secretsPath)
-
 	// setup sentry logging
 	raven.SetDSN(secrets.GetSecrets().SentryDSN)
 

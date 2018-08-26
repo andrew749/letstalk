@@ -20,7 +20,7 @@ func getTimeXDaysAgo(days int) string {
 }
 
 const (
-	NUM_DAYS_TILL_NOTIFICATION = 1
+	NUM_DAYS_TILL_NOTIFICATION = 30
 )
 
 var (
