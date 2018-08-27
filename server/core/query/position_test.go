@@ -28,7 +28,7 @@ func TestAddUserPositionByIds(t *testing.T) {
 			assert.NoError(t, err)
 
 			startDate := "2018-01-01"
-			err = AddUserPosition(db, data.TUserID(1), &role.Id, nil, &org.Id, nil, startDate, nil)
+			err = AddUserPosition(db, nil, data.TUserID(1), &role.Id, nil, &org.Id, nil, startDate, nil)
 			assert.NoError(t, err)
 
 			var userPositions []data.UserPosition
@@ -73,7 +73,7 @@ func TestAddUserPositionByNamesAlreadyExist(t *testing.T) {
 			startDate := "2018-01-01"
 			endDate := "2018-04-01"
 			err = AddUserPosition(
-				db, data.TUserID(1), nil, &role.Name, nil, &org.Name, startDate, &endDate,
+				db, nil, data.TUserID(1), nil, &role.Name, nil, &org.Name, startDate, &endDate,
 			)
 			assert.NoError(t, err)
 
@@ -107,7 +107,7 @@ func TestAddUserPositionByNameNotExists(t *testing.T) {
 			endDate := "2018-04-01"
 			var err error
 			err = AddUserPosition(
-				db, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
+				db, nil, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
 			)
 			assert.NoError(t, err)
 
@@ -137,7 +137,7 @@ func TestAddUserPositionMissingRole(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			orgName := "Facebook"
-			err := AddUserPosition(db, data.TUserID(1), nil, nil, nil, &orgName, "2018-01-01", nil)
+			err := AddUserPosition(db, nil, data.TUserID(1), nil, nil, nil, &orgName, "2018-01-01", nil)
 			assert.Error(t, err)
 			assert.Equal(t, "Must provide either roleId or roleName", err.Error())
 		},
@@ -150,7 +150,7 @@ func TestAddUserPositionMissingOrg(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			roleName := "Software Engineering Intern"
-			err := AddUserPosition(db, data.TUserID(1), nil, &roleName, nil, nil, "2018-01-01", nil)
+			err := AddUserPosition(db, nil, data.TUserID(1), nil, &roleName, nil, nil, "2018-01-01", nil)
 			assert.Error(t, err)
 			assert.Equal(t, "Must provide either organizationId or organizationName", err.Error())
 		},
@@ -160,14 +160,15 @@ func TestAddUserPositionMissingOrg(t *testing.T) {
 }
 
 func TestAddUserPositionInvalidStartDate(t *testing.T) {
-	err := AddUserPosition(nil, data.TUserID(1), nil, nil, nil, nil, "Monday, June 2nd, 2018", nil)
+	err := AddUserPosition(
+		nil, nil, data.TUserID(1), nil, nil, nil, nil, "Monday, June 2nd, 2018", nil)
 	assert.Error(t, err)
 	assert.Equal(t, "startDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
 }
 
 func TestAddUserPositionInvalidEndDate(t *testing.T) {
 	endDate := "Monday, June 2nd, 2018"
-	err := AddUserPosition(nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-01", &endDate)
+	err := AddUserPosition(nil, nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-01", &endDate)
 	assert.Error(t, err)
 	assert.Equal(t, "endDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
 }

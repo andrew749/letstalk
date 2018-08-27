@@ -3,10 +3,10 @@ package api
 import "letstalk/server/data"
 
 type SimpleTrait struct {
-	Id          data.TSimpleTraitID  `json:"id"`
-	Name        string               `json:"name"`
-	Type        data.SimpleTraitType `json:"type"`
-	IsSensitive bool                 `json:"isSensitive"`
+	Id          data.TSimpleTraitID  `json:"id" binding:"required"`
+	Name        string               `json:"name" binding:"required"`
+	Type        data.SimpleTraitType `json:"type" binding:"required"`
+	IsSensitive bool                 `json:"isSensitive" binding:"required"`
 }
 
 type AddUserSimpleTraitByNameRequest struct {

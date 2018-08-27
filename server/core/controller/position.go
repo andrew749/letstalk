@@ -14,6 +14,7 @@ func AddUserPositionController(c *ctx.Context) errs.Error {
 	}
 	return query.AddUserPosition(
 		c.Db,
+		c.Es,
 		c.SessionData.UserId,
 		req.RoleId,
 		req.RoleName,

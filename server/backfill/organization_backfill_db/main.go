@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"strings"
 
 	"letstalk/server/data"
 	"letstalk/server/utility"
@@ -14,11 +13,13 @@ import (
 )
 
 var (
-	inFile = flag.String("in", "", "Input csv file containing simple traits and header")
+	inFile = flag.String("in", "", "Input csv file containing organizations and header")
 )
 
-// This job backfills simple traits from a csv with the row format "name,type,isSensitive". Will
-// override simple traits with the same name, potentially updating their type and isSensitive.
+// This job backfills organizations from a csv which contains rows with the following format
+// "name,type". If an organization with a particular name already exists, it will not create a new
+// one with the same name, but instead override it with new type.
+// Note that the csv also contains a header, so the first row is skipped.
 func main() {
 	flag.Parse()
 
@@ -40,44 +41,36 @@ func main() {
 		panic(err)
 	}
 
-	traits := make([]data.SimpleTrait, 0, len(records))
+	organizations := make([]data.Organization, 0, len(records))
 	for i, record := range records {
 		if i == 0 {
 			// Skip first record
 			continue
 		}
-		var (
-			isSensitive = true
-			tpe         = data.SimpleTraitType(record[1])
-		)
-		if strings.ToUpper(strings.TrimSpace(record[2])) == "FALSE" {
-			isSensitive = false
-		}
-
-		if _, ok := data.ALL_SIMPLE_TRAIT_TYPES[tpe]; !ok {
+		tpe := data.OrganizationType(record[1])
+		if _, ok := data.ALL_ORGANIZATION_TYPES[tpe]; !ok {
 			panic(fmt.Sprintf("Record %d has an invalid type %s\n", i, record[1]))
 		}
 
-		traits = append(traits, data.SimpleTrait{
+		organizations = append(organizations, data.Organization{
 			Name:            record[0],
 			Type:            tpe,
-			IsSensitive:     isSensitive,
 			IsUserGenerated: false,
 		})
 	}
 
 	// TODO: Look into bulk upserts, but for now this should be fine
 	tx := db.Begin()
-	for _, trait := range traits {
-		var existingTrait data.SimpleTrait
-		err := tx.Where(&data.SimpleTrait{Name: trait.Name}).First(&existingTrait).Error
+	for _, organization := range organizations {
+		var existingOrganization data.Organization
+		err := tx.Where(&data.Organization{Name: organization.Name}).First(&existingOrganization).Error
 		if err != nil && !gorm.IsRecordNotFoundError(err) {
 			tx.Rollback()
 			panic(err)
 		} else if err == nil {
-			trait.Id = existingTrait.Id
+			organization.Id = existingOrganization.Id
 		}
-		err = tx.Save(&trait).Error
+		err = tx.Save(&organization).Error
 		if err != nil {
 			tx.Rollback()
 			panic(err)
