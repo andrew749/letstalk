@@ -8,7 +8,6 @@ import (
 	"letstalk/server/utility"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/namsral/flag"
 )
 

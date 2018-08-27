@@ -60,8 +60,7 @@ func (c *ClientWithContext) CompletionSuggestionOrganizations(
 	}
 
 	organizations := make([]Organization, 0)
-	if _, ok := searchResult.Suggest[ORGANIZATION_SUGGESTER]; ok {
-		searchSuggestions := searchResult.Suggest[ORGANIZATION_SUGGESTER]
+	if searchSuggestions, ok := searchResult.Suggest[ORGANIZATION_SUGGESTER]; ok {
 		if len(searchSuggestions) > 0 {
 			opts := searchSuggestions[0].Options
 			for _, opt := range opts {
@@ -73,6 +72,10 @@ func (c *ClientWithContext) CompletionSuggestionOrganizations(
 				organizations = append(organizations, organization)
 			}
 		}
+	} else {
+		return nil, errors.New(
+			fmt.Sprintf("Completion results doesn't have suggestion %s", ORGANIZATION_SUGGESTER),
+		)
 	}
 
 	return organizations, nil

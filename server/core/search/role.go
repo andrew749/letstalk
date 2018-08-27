@@ -59,8 +59,7 @@ func (c *ClientWithContext) CompletionSuggestionRoles(
 	}
 
 	roles := make([]Role, 0)
-	if _, ok := searchResult.Suggest[ROLE_SUGGESTER]; ok {
-		searchSuggestions := searchResult.Suggest[ROLE_SUGGESTER]
+	if searchSuggestions, ok := searchResult.Suggest[ROLE_SUGGESTER]; ok {
 		if len(searchSuggestions) > 0 {
 			opts := searchSuggestions[0].Options
 			for _, opt := range opts {
@@ -72,6 +71,10 @@ func (c *ClientWithContext) CompletionSuggestionRoles(
 				roles = append(roles, role)
 			}
 		}
+	} else {
+		return nil, errors.New(
+			fmt.Sprintf("Completion results doesn't have suggestion %s", ROLE_SUGGESTER),
+		)
 	}
 
 	return roles, nil

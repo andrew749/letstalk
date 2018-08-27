@@ -88,8 +88,7 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 	}
 
 	traits := make([]SimpleTrait, 0)
-	if _, ok := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]; ok {
-		searchSuggestions := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]
+	if searchSuggestions, ok := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]; ok {
 		if len(searchSuggestions) > 0 {
 			opts := searchSuggestions[0].Options
 			for _, opt := range opts {
@@ -101,6 +100,10 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 				traits = append(traits, trait)
 			}
 		}
+	} else {
+		return nil, errors.New(
+			fmt.Sprintf("Completion results doesn't have suggestion %s", SIMPLE_TRAIT_SUGGESTER),
+		)
 	}
 
 	return traits, nil
