@@ -43,6 +43,7 @@ import QrScannerView from "./views/QrScannerView";
 import NotificationContentView from './views/NotificationContentView';
 import EditTraitsSelectorView from './views/EditTraitsSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
+import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
@@ -199,6 +200,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   ChangeCohort: {
     screen: ChangeCohortView,
   },
+  AddSimpleTrait: {
+    screen: AddSimpleTraitView,
+  },
 }, {
   initialRouteName,
 });
@@ -238,7 +242,8 @@ class App extends React.Component<Props, AppState> {
     const { loggedIn } = this.state;
 
     let initialRouteName = 'BlankDoNotUse';
-    if (loggedIn === true) initialRouteName = 'Tabbed';
+    // if (loggedIn === true) initialRouteName = 'Tabbed';
+    if (loggedIn === true) initialRouteName = 'AddSimpleTrait';
     else if (loggedIn === false) initialRouteName = 'Login';
 
     const AppNavigation = createAppNavigation(initialRouteName);

@@ -84,6 +84,7 @@
     "react": "16.3.2",
     "react-native": "^0.55",
     "react-native-app-intro-slider": "^0.2.4",
+    "react-native-autocomplete-input": "^3.5.0",
     "react-native-datepicker": "^1.7.2",
     "react-native-elements": "^0.19.0",
     "react-native-in-app-notification": "^2.2.0",
