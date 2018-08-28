@@ -34,6 +34,7 @@ type User struct {
 	ExternalAuthData *ExternalAuthData   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	Cohort           *UserCohort         `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	AdditionalData   *UserAdditionalData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
+	IsEmailVerified  bool `gorm:"not null;default=false"`
 }
 
 func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }
@@ -49,12 +50,13 @@ func CreateUser(
 	role UserRole,
 ) (*User, error) {
 	user := User{
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
-		Gender:    gender,
-		Birthdate: birthdate,
-		Role:      role,
+		Email:           email,
+		FirstName:       firstName,
+		LastName:        lastName,
+		Gender:          gender,
+		Birthdate:       birthdate,
+		Role:            role,
+		IsEmailVerified: false,
 	}
 
 	// Generate UUID for each user.

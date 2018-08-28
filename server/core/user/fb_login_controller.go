@@ -53,12 +53,13 @@ func FBController(c *ctx.Context) errs.Error {
 	if tx.Where("fb_user_id = ?", user.Id).First(&externalAuthRecord).RecordNotFound() {
 
 		appUser := data.User{
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Email:     user.Email,
-			Gender:    user.Gender,
-			Birthdate: user.Birthdate,
-			Role:      data.USER_ROLE_DEFAULT,
+			FirstName:       user.FirstName,
+			LastName:        user.LastName,
+			Email:           user.Email,
+			Gender:          user.Gender,
+			Birthdate:       user.Birthdate,
+			Role:            data.USER_ROLE_DEFAULT,
+			IsEmailVerified: false,
 		}
 
 		// Generate UUID for FB user.
