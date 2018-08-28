@@ -10,6 +10,8 @@ import {
   CREDENTIAL_REQUEST_ROUTE,
   CREDENTIAL_REQUESTS_ROUTE,
   REMOVE_RTM_MATCHES_ROUTE,
+  USER_SIMPLE_TRAIT_ROUTE,
+  USER_SIMPLE_TRAIT_BY_NAME_ROUTE,
 } from './constants';
 
 type GetAllCredentialsResponse = Array<Credential>;
@@ -20,6 +22,9 @@ interface AddCredentialRequest { name: string }
 interface AddCredentialResponse { credentialId: number }
 interface AddCredentialRequestRequest { name: string }
 interface AddCredentialRequestResponse { credentialId: number }
+
+interface AddUserSimpleTraitByIdRequest { simpleTraitId: number }
+interface AddUserSimpleTraitByNameRequest { name: string }
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -85,6 +90,18 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const url = REMOVE_RTM_MATCHES_ROUTE + '/' + userId;
     await this.requestor.delete(url, null, sessionToken);
+  }
+
+  async addUserSimpleTraitById(id: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const req: AddUserSimpleTraitByIdRequest = { simpleTraitId: id };
+    await this.requestor.post(USER_SIMPLE_TRAIT_ROUTE, req, sessionToken);
+  }
+
+  async addUserSimpleTraitByName(name: string): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const req: AddUserSimpleTraitByNameRequest = { name };
+    await this.requestor.post(USER_SIMPLE_TRAIT_BY_NAME_ROUTE, req, sessionToken);
   }
 }
 

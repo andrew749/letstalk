@@ -6,3 +6,4 @@ declare module 'react-native-redux-toast';
 declare module 'react-native-picker-select';
 declare module 'react-native-swipe-gestures';
 declare module 'react-native-app-intro-slider';
+declare module 'react-native-autocomplete-input';

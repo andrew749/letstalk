@@ -1,4 +1,5 @@
 import ActionButton from './ActionButton';
+import AutocompleteInput from './AutocompleteInput';
 import Button from './Button';
 import ButtonPicker from './ButtonPicker';
 import Card from './Card';
@@ -16,6 +17,7 @@ import NotificationBody from './NotificationBody';
 
 export {
   ActionButton,
+  AutocompleteInput,
   Button,
   ButtonPicker,
   Card,

@@ -73,6 +73,7 @@
     "@types/react-test-renderer": "^16.0.0",
     "@types/redux-form": "^7.0.13",
     "@types/redux-logger": "^3.0.5",
+    "@types/underscore": "^1.8.9",
     "babel-preset-expo": "^4.0.0",
     "expo": "^27.0",
     "expo-analytics": "^1.0.7",
@@ -84,6 +85,7 @@
     "react": "16.3.2",
     "react-native": "^0.55",
     "react-native-app-intro-slider": "^0.2.4",
+    "react-native-autocomplete-input": "^3.5.0",
     "react-native-datepicker": "^1.7.2",
     "react-native-elements": "^0.19.0",
     "react-native-in-app-notification": "^2.2.0",
@@ -100,6 +102,7 @@
     "redux": "^3.7.2",
     "redux-form": "^7.2.3",
     "redux-thunk": "^2.2.0",
-    "sentry-expo": "^1.7.0"
+    "sentry-expo": "^1.7.0",
+    "underscore": "^1.9.1"
   }
 }

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  View,
 } from 'react-native';
 
 import { Card } from '../components';
@@ -43,7 +44,9 @@ export default class EditTraitsSelectorView extends Component<Props> {
     return (
       <TouchableOpacity onPress={onPress}>
         <Card key={name} style={styles.traitCard}>
-          <Text style={styles.traitTypeTitle}>{name}</Text>
+          <View style={styles.nameContainer}>
+            <Text style={styles.traitTypeTitle}>{name}</Text>
+          </View>
           <Text style={styles.traitTypeDescription}>{description}</Text>
         </Card>
       </TouchableOpacity>
@@ -59,6 +62,11 @@ export default class EditTraitsSelectorView extends Component<Props> {
         description: 'Your program and anticipated graduating year. For students ' +
           'in co-op, this also includes your sequence.',
       },
+      {
+        name: 'Add Trait',
+        editView: 'AddSimpleTrait',
+        description: 'Add any other traits such as your interests, hobbies, experiences, etc.',
+      },
     ];
     const traitCards = traitTypes.map(({ name, editView, description }) => {
       return this.renderTraitCard(name, editView, description)
@@ -72,7 +80,9 @@ export default class EditTraitsSelectorView extends Component<Props> {
     return (
       <ScrollView style={styles.container}>
         <Text>{ description }</Text>
-        { traitCards }
+        <View style={styles.buttonContainer}>
+          { traitCards }
+        </View>
       </ScrollView>
     );
   }
@@ -84,9 +94,11 @@ const styles = StyleSheet.create({
   },
   traitCard: {
     marginHorizontal: 0,
+    marginVertical: 5,
     padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  buttonContainer: {
+    paddingVertical: 5,
   },
   traitTypeTitle: {
     color: Colors.HIVE_MAIN_FONT,
@@ -98,4 +110,7 @@ const styles = StyleSheet.create({
     color: Colors.HIVE_MAIN_FONT,
     fontSize: 14,
   },
+  nameContainer: {
+    alignItems: 'center',
+  }
 });
