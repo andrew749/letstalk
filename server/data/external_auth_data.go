@@ -11,9 +11,9 @@ import (
 type ExternalAuthData struct {
 	User          User    `gorm:"foreignkey:UserId"`
 	UserId        TUserID `gorm:"primary_key;not null"`
-	FbUserId      *string `gorm:"null"`
-	FbProfileLink *string `gorm:"null"`
-	PhoneNumber   *string `gorm:"null"`
+	FbUserId      *string `gorm:"null;size:100"`
+	FbProfileLink *string `gorm:"null;type:text"`
+	PhoneNumber   *string `gorm:"null;size:100"`
 }
 
 func CreateExternalAuthData(
