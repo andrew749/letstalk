@@ -21,6 +21,7 @@ type Element = CustomItemElement | ItemElement;
 
 interface SelectItem {
   readonly type: 'ITEM';
+  readonly name: string;
   readonly id: number | string;
 }
 
@@ -30,6 +31,13 @@ interface SelectCustomItem {
 }
 
 export type Select = SelectItem | SelectCustomItem;
+
+type Props = WrappedFieldProps & {
+  label: string;
+  onQueryChange(query: string): Promise<Array<DataItem>>;
+  allowCustom?: boolean;
+  placeholder?: string;
+}
 
 interface State {
   readonly query: string;
@@ -41,12 +49,6 @@ const initialState = {
   query: '',
   showSuggestions: false,
   data: [] as Array<Element>,
-}
-
-type Props = WrappedFieldProps & {
-  label: string;
-  onQueryChange(query: string): Promise<Array<DataItem>>;
-  allowCustom?: boolean;
 }
 
 // Greedily searches for the earilest characters in name that match some prefix of the query.
@@ -121,12 +123,13 @@ class AutocompleteInput extends React.Component<Props, State> {
         }
         onPress = () => {
           this.onChangeText(name);
-          onChange({ type: 'ITEM', id });
+          onChange({ type: 'ITEM', id, name });
           this.autocompleteRef.blur();
         };
         break;
       case 'CUSTOM_ITEM':
-        text = <Text>{'Add "'}<Text style={{fontWeight: "900"}}>{query}</Text>{'"'}</Text>
+        if (query === '') return null; // Race with autocomplete results
+        text = <Text>{'Add '}<Text style={{fontWeight: "900"}}>{query}</Text></Text>
         onPress = () => {
           this.onChangeText(query);
           onChange({ type: 'CUSTOM_ITEM', query });
@@ -139,7 +142,7 @@ class AutocompleteInput extends React.Component<Props, State> {
     }
     return (
       <TouchableOpacity onPress={onPress} style={styles.itemContainer}>
-        { text }
+        <Text style={styles.itemText}>{ text }</Text>
       </TouchableOpacity>
     );
   }
@@ -147,7 +150,7 @@ class AutocompleteInput extends React.Component<Props, State> {
   render() {
     const props = this.props;
     const { label } = props;
-    const { value } = this.props.input;
+    const { value, onBlur, onFocus } = this.props.input;
     const { error, touched, warning } = props.meta;
     const {
       data,
@@ -166,20 +169,27 @@ class AutocompleteInput extends React.Component<Props, State> {
               data={data}
               renderItem={this.renderItem}
               hideResults={!showSuggestions}
-              onFocus={() => this.setState({ showSuggestions: true })}
-              onBlur={() => this.setState({ showSuggestions: false })}
+              onFocus={() => {
+                this.setState({ showSuggestions: true });
+                onFocus(undefined);
+              }}
+              onBlur={() => {
+                this.setState({ showSuggestions: false });
+                onBlur(undefined);
+              }}
               onChangeText={this.onChangeText}
               {...this.props}
               listStyle={{maxHeight: 200}}
+              placeholder={this.props.placeholder}
             />
           </View>
         </View>
         {touched && (
           (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
           (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}
-        </View>
-      );
-    }
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -192,15 +202,20 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   outerContainer: {
-    margin: 5,
-    height: 50,
+    margin: 10,
+    marginBottom: 5,
+    height: 40,
+    zIndex: 1,
   },
   container: {
     zIndex: 1,
   },
   itemContainer: {
-    padding: 5,
+    padding: 10,
   },
+  itemText: {
+    fontSize: 16,
+  }
 });
 
 export default AutocompleteInput;

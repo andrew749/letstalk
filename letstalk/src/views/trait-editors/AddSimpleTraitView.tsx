@@ -1,5 +1,5 @@
-import React, { Component, SFC } from 'react';
-import { Picker, Text } from 'react-native';
+import React, { Component, SFC, ReactNode } from 'react';
+import { Picker, StyleSheet, Text, View } from 'react-native';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
   NavigationScreenProp,
@@ -14,6 +14,7 @@ import {
   InjectedFormProps,
   SubmissionError,
 } from 'redux-form';
+import Sentry from 'sentry-expo';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThunkAction } from 'redux-thunk';
 
@@ -33,12 +34,13 @@ import { headerStyle } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import autocompleteService from '../../services/autocomplete-service';
+import requestToMatchService from '../../services/request-to-match-service';
 
 interface AddSimpleTraitFormData {
   simpleTrait: Select;
 }
 
-const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData>> = props => {
+const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTraitFormData> = props => {
   const onQueryChange = async (query: string) => {
     if (query === '') return [];
     const res = await autocompleteService.autocompleteSimpleTrait(query, 10);
@@ -52,7 +54,33 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData>> = props => {
     reset,
     submitting,
     valid,
+    simpleTrait,
   } = props;
+  let selection: ReactNode = null;
+
+  if (!simpleTrait) {
+    selection = (
+      <Text>Choose a trait from the dropdown above to add it to your list</Text>
+    );
+  } else if (simpleTrait.type === 'CUSTOM_ITEM') {
+    selection = (
+      <Text>
+        {'Looks like you want to add a new trait '}
+        <Text style={{fontWeight: "900"}}>{simpleTrait.query}</Text>
+        {'. Make sure that the spelling and capitalization is correct before adding. '}
+        {'Click the button below to add.'}
+      </Text>
+    );
+  } else if (simpleTrait.type === 'ITEM') {
+    selection = (
+      <Text>
+        {'Looks like you want to add '}
+        <Text style={{fontWeight: "900"}}>{simpleTrait.name}</Text>
+        {' to your list of traits. Click the button below to add.'}
+      </Text>
+    );
+  }
+
   return (
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps={true}
@@ -60,28 +88,38 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData>> = props => {
       <Field
         label="Trait"
         name="simpleTrait"
+        placeholder="Search for traits (e.g. cycling, climbing)"
         component={AutocompleteInput}
         allowCustom={true}
         onQueryChange={onQueryChange}
         validate={required}
       >
       </Field>
+      <View style={styles.selectionContainer}>
+        <Text style={styles.selectionText}>
+          { selection }
+        </Text>
+      </View>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         backgroundColor={Colors.HIVE_PRIMARY}
         disabled={!valid}
         loading={submitting}
-        title={submitting ? null : "Save"}
+        title={submitting ? null : "Add"}
         onPress={handleSubmit(onSubmit)}
       />
     </KeyboardAwareScrollView>
   );
 }
 
+const selector = formValueSelector('add-simple-trait');
+
 const AddSimpleTraitFormWithRedux =
   reduxForm<AddSimpleTraitFormData, FormP<AddSimpleTraitFormData>>({
     form: 'add-simple-trait',
-  })(AddSimpleTraitForm);
+  })(connect((state: RootState) => ({
+    simpleTrait: selector(state, 'simpleTrait'),
+  }))(AddSimpleTraitForm));
 
 interface DispatchActions {
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -105,7 +143,6 @@ class AddSimpleTraitView extends Component<Props> {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
-    this.renderBody = this.renderBody.bind(this);
   }
 
   async componentDidMount() {
@@ -117,20 +154,43 @@ class AddSimpleTraitView extends Component<Props> {
   private async onSubmit(values: AddSimpleTraitFormData) {
     try {
       const { simpleTrait } = values;
-      console.log(simpleTrait);
-      // TODO: Fill in
+      let err = '';
+      if (simpleTrait === null) {
+        err = 'You have not selected a trait';
+        Sentry.captureMessage(err, { level: 'error' });
+        throw new Error(err);
+      } else {
+        if (simpleTrait.type === 'CUSTOM_ITEM') {
+          const newTraitName = simpleTrait.query.trim();
+          await requestToMatchService.addUserSimpleTraitByName(newTraitName);
+          await this.props.infoToast(`Successfully added new trait "${newTraitName}"`);
+        } else if (simpleTrait.type === 'ITEM') {
+          await requestToMatchService.addUserSimpleTraitById(simpleTrait.id as number);
+          await this.props.infoToast(`Successfully added trait "${simpleTrait.name}"`);
+        } else {
+          err = 'Invalid item type selected';
+          Sentry.captureMessage(err, { level: 'error' });
+          throw new Error(err);
+        }
+        await this.props.navigation.goBack();
+      }
     } catch (e) {
       throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
-  private renderBody() {
+  render() {
     return <AddSimpleTraitFormWithRedux onSubmit={this.onSubmit} />;
   }
-
-  render() {
-    return this.renderBody();
-  }
 }
+
+const styles = StyleSheet.create({
+  selectionContainer: {
+    padding: 10,
+  },
+  selectionText: {
+    fontSize: 16,
+  }
+});
 
 export default connect(null, { infoToast })(AddSimpleTraitView);
