@@ -136,8 +136,6 @@ interface DispatchActions {
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
-// TODO: Maybe take current cohort info as a prop instead of pulling from redux. Makes this more
-// reusable.
 interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction & ChangeCohortFormData>;
   cohorts: CohortsState;

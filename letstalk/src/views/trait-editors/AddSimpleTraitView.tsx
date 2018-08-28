@@ -17,6 +17,7 @@ import {
 import Sentry from 'sentry-expo';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { ThunkAction } from 'redux-thunk';
+import _ from 'underscore';
 
 import { infoToast } from '../../redux/toast';
 import { RootState } from '../../redux';
@@ -29,7 +30,7 @@ import {
   FormP,
   Header,
 } from '../../components';
-import { Select } from '../../components/AutocompleteInput';
+import { DataItem, Select } from '../../components/AutocompleteInput';
 import { headerStyle } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
@@ -40,12 +41,17 @@ interface AddSimpleTraitFormData {
   simpleTrait: Select;
 }
 
+const THROTTLE_TIME = 250; // ms
+
+const onQueryChange = async (query: string, setData: (data: Array<DataItem>) => void) => {
+  let res: Array<DataItem> = [];
+  if (query !== '') res = await autocompleteService.autocompleteSimpleTrait(query, 10);
+  setData(res);
+}
+
+const onQueryChangeThrottled = _.throttle(onQueryChange, THROTTLE_TIME);
+
 const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTraitFormData> = props => {
-  const onQueryChange = async (query: string) => {
-    if (query === '') return [];
-    const res = await autocompleteService.autocompleteSimpleTrait(query, 10);
-    return res;
-  }
 
   const {
     error,
@@ -91,7 +97,7 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTrait
         placeholder="Search for traits (e.g. cycling, climbing)"
         component={AutocompleteInput}
         allowCustom={true}
-        onQueryChange={onQueryChange}
+        onQueryChange={onQueryChangeThrottled}
         validate={required}
       >
       </Field>
@@ -125,8 +131,6 @@ interface DispatchActions {
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
-// TODO: Maybe take current cohort info as a prop instead of pulling from redux. Makes this more
-// reusable.
 interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }

@@ -19,7 +19,6 @@ class AutocompleteService {
     this.requestor = requestor;
   }
 
-  // TODO: Add type to response
   async autocompleteSimpleTrait(prefix: string, size: number): Promise<Array<SimpleTrait>> {
     const req: AutocompleteRequest = { prefix, size };
     const res = await this.requestor.post(AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE, req);

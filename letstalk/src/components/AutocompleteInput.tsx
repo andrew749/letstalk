@@ -4,7 +4,7 @@ import { WrappedFieldProps } from 'redux-form';
 import Autocomplete from 'react-native-autocomplete-input';
 import { FormValidationMessage, FormInputProps, FormLabel } from 'react-native-elements';
 
-interface DataItem {
+export interface DataItem {
   readonly name: string;
   readonly id: number | string;
 }
@@ -34,7 +34,7 @@ export type Select = SelectItem | SelectCustomItem;
 
 type Props = WrappedFieldProps & {
   label: string;
-  onQueryChange(query: string): Promise<Array<DataItem>>;
+  onQueryChange(query: string, setData: (items: Array<DataItem>) => void): Promise<void>;
   allowCustom?: boolean;
   placeholder?: string;
 }
@@ -42,18 +42,21 @@ type Props = WrappedFieldProps & {
 interface State {
   readonly query: string;
   readonly showSuggestions: boolean;
-  readonly data: Array<Element>,
+  readonly items: Array<ItemElement>,
 }
 
 const initialState = {
   query: '',
   showSuggestions: false,
-  data: [] as Array<Element>,
+  items: [] as Array<ItemElement>,
 }
 
-// Greedily searches for the earilest characters in name that match some prefix of the query.
-function greedyMatch(name: string, query: string): Array<number> | null {
+// Greedily searches for the earliest characters in name that match some prefix of the query.
+// Returns [start, end) of the match if one exists, otherwise null.
+export function greedyMatch(name: string, query: string): Array<number> | null {
   if (name.length === 0 || query.length === 0) return null;
+  name = name.toLowerCase();
+  query = query.toLowerCase();
   let start = 0;
   for (;; start++) {
     if (start >= name.length) return null; // couldn't find character
@@ -91,14 +94,13 @@ class AutocompleteInput extends React.Component<Props, State> {
 
   private async onChangeText(text: string) {
     this.setState({ query: text });
-    const res = await this.props.onQueryChange(text);
-    let items: Array<ItemElement> = res.map(({ id, name }) => {
-      const item: ItemElement = { id, name, type: 'ITEM' };
-      return item;
-    });
-    const data: Array<Element> =
-      this.showCustom(text, items) ? [{ type: 'CUSTOM_ITEM' } as Element].concat(items) : items;
-    this.setState({ data });
+    await this.props.onQueryChange(text, res => {
+      let items: Array<ItemElement> = res.map(({ id, name }) => {
+        const item: ItemElement = { id, name, type: 'ITEM' };
+        return item;
+      });
+      this.setState({ items });
+    })
   }
 
   private renderItem(item: Element) {
@@ -153,10 +155,12 @@ class AutocompleteInput extends React.Component<Props, State> {
     const { value, onBlur, onFocus } = this.props.input;
     const { error, touched, warning } = props.meta;
     const {
-      data,
+      items,
       query,
       showSuggestions,
     } = this.state;
+    const data: Array<Element> =
+      this.showCustom(query, items) ? [{ type: 'CUSTOM_ITEM' } as Element].concat(items) : items;
     return (
       <View style={styles.container}>
         {label && <FormLabel>{label}</FormLabel>}
