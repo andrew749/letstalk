@@ -5,7 +5,7 @@ import (
 )
 
 type Session struct {
-	SessionId         string             `gorm:"not null;primary_key"`
+	SessionId         string             `gorm:"not null;primary_key;size:100"`
 	User              User               `gorm:"foreignkey:UserId"`
 	UserId            TUserID            `gorm:"not null"`
 	ExpiryDate        time.Time          `gorm:"not null"`
