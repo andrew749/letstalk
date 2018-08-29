@@ -11,6 +11,7 @@ type Notification struct {
 	UserId         data.TUserID      `json:"userId"`
 	Type           data.NotifType    `json:"type"`
 	State          data.NotifState   `json:"state"`
+	Title          string            `json:"title"`
 	Message        string            `json:"message"`
 	Timestamp      time.Time         `json:"timestamp"`
 	ThumbnailLink  *string           `json:"thumbnail"`
