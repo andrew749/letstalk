@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -15,6 +14,7 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"time"
 	"regexp"
+	"fmt"
 )
 
 var uwEmailRegex = regexp.MustCompile(".*@(edu.)?uwaterloo.ca$")
@@ -24,13 +24,7 @@ func SendEmailVerificationController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-
-	if !uwEmailRegex.MatchString(req.Email) {
-		return errs.NewRequestError("Expected valid @edu.uwaterloo.ca or @uwaterloo.ca email address")
-	}
-	user, _ := query.GetUserById(c.Db, c.SessionData.UserId)
-
-	if err := generateAndSendNewAccountVerificationEmail(c, user, req.Email); err != nil {
+	if err := handleSendAccountVerificationEmailRequest(c, req); err != nil {
 		return err
 	}
 	c.Result = "Ok"
@@ -38,17 +32,22 @@ func SendEmailVerificationController(c *ctx.Context) errs.Error {
 }
 
 // Transactionally generates a new VerifyEmailId and sends a link in an email to the user.
-func generateAndSendNewAccountVerificationEmail(c *ctx.Context, user *data.User, emailAddr string) errs.Error {
+func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAccountVerificationEmailRequest) errs.Error {
+	if !uwEmailRegex.MatchString(req.Email) {
+		return errs.NewRequestError("Expected valid @edu.uwaterloo.ca or @uwaterloo.ca email address")
+	}
+	user, _ := query.GetUserById(c.Db, c.SessionData.UserId)
+
 	if user.IsEmailVerified {
 		return errs.NewRequestError("Account email has already been verified.")
 	}
 	dbErr := c.WithinTx(func (tx *gorm.DB) error {
 		var verifyEmailId *data.VerifyEmailId
 		var err error
-		if verifyEmailId, err = generateNewVerifyEmailId(tx, user.UserId); err != nil {
+		if verifyEmailId, err = generateNewVerifyEmailId(tx, user.UserId, req.Email); err != nil {
 			return err
 		}
-		if err = sendAccountVerifyEmail(verifyEmailId, user, emailAddr); err != nil {
+		if err = sendAccountVerifyEmail(verifyEmailId, user, req.Email); err != nil {
 			return err
 		}
 		return nil
@@ -67,6 +66,7 @@ func generateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, emailAddr string
 		UserId:         userId,
 		Email:          emailAddr,
 		IsActive:       true,
+		IsUsed:         false,
 		ExpirationDate: time.Now().AddDate(0, 0, 1), // Verification email valid for 24 hours.
 	}
 	// Set all existing VerifyEmailId entries for this user to inactive.
@@ -104,7 +104,14 @@ func VerifyEmailController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
+	if err := handleEmailVerification(c, &req); err != nil {
+		return err
+	}
+	c.Result = "Ok"
+	return nil
+}
 
+func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.Error {
 	verifyEmailId := data.VerifyEmailId{Id: req.Id}
 	if err := c.Db.First(&verifyEmailId).Error; err != nil {
 		return errs.NewRequestError("Invalid email verification id")
@@ -124,16 +131,16 @@ func VerifyEmailController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Email verification link is expired")
 	}
 
-	c.WithinTx(func(tx *gorm.DB) error {
+	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		// Set all existing VerifyEmailId entries for this user to inactive.
-		err := tx.Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
-			Update(data.VerifyEmailId{IsActive: false}).
-			Error
+		err := tx.Model(&data.VerifyEmailId{}).
+				Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
+				Update("is_active", false).Error
 		if err != nil {
 			return err
 		}
 		// Mark this verify email id as used.
-		if err := tx.Model(verifyEmailId).Update(data.VerifyEmailId{IsUsed: true}).Error; err != nil {
+		if err := tx.Model(&verifyEmailId).Update("is_used", true).Error; err != nil {
 			return err
 		}
 		// Set user's IsEmailVerified to true.
@@ -142,7 +149,8 @@ func VerifyEmailController(c *ctx.Context) errs.Error {
 		}
 		return nil
 	})
-
-	c.Result = "Ok"
+	if dbErr != nil {
+		return errs.NewDbError(dbErr)
+	}
 	return nil
 }
