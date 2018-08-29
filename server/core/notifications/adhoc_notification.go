@@ -18,7 +18,7 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	tx := db.Begin()
 	// note that this cant use the helper create and send notification since we
 	// probably want all data written to our db before being sent to aws
-	notification, err := CreateNotification(db, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
+	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
 	if err != nil {
 		tx.Rollback()
 		return err
