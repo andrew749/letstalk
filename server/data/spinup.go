@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
-func migrateDB(db *gorm.DB) error {
+func migrateDB(db *gorm.DB) {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		{
 			ID: "1",
@@ -144,13 +144,12 @@ func migrateDB(db *gorm.DB) error {
 
 	if err := m.Migrate(); err != nil {
 		rlog.Errorf("Could not migrate: %v", err)
-		return err
+		panic(err)
 	}
 
 	rlog.Infof("Succesfully ran migration")
-	return nil
 }
 
-func CreateDB(db *gorm.DB) error {
-	return migrateDB(db)
+func CreateDB(db *gorm.DB) {
+	migrateDB(db)
 }
