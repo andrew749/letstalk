@@ -69,7 +69,7 @@ class AutocompleteInput extends React.Component<Props, State> {
 
     this.onChangeText = this.onChangeText.bind(this);
     this.renderItem = this.renderItem.bind(this);
-    this.setValue = this.setValue.bind(this);
+    this.changeValue = this.changeValue.bind(this);
     this.onEndEditing = this.onEndEditing.bind(this);
   }
 
@@ -78,7 +78,11 @@ class AutocompleteInput extends React.Component<Props, State> {
     this.autocompleteRef.current.focus();
   }
 
-  private setValue() {
+  // Decides what value to give to `onChange` depending on the current query and items. If items
+  // contains an item with a name that has the same value as query (ignoring case), then we set
+  // the value to that item. Otherwise, we set the value to a custom item with the name being the
+  // current query.
+  private changeValue() {
     const { query, items } = this.state;
     if (query !== '') {
       const { onChange } = this.props.input;
@@ -91,14 +95,15 @@ class AutocompleteInput extends React.Component<Props, State> {
     }
   }
 
-  private async onChangeText(text: string) {
-    await this.setState({ query: text });
-    this.setValue();
-    await this.props.onQueryChange(text, items => this.setState({ items }));
+  private onChangeText(text: string) {
+    this.setState({ query: text }, async () => {
+      this.changeValue();
+      await this.props.onQueryChange(text, items => this.setState({ items }));
+      this.changeValue(); // Try again once we have new items
+    });
   }
 
   private renderItem(item: DataItem) {
-    const { onChange } = this.props.input;
     const { query } = this.state;
     let text = null;
     const { name, id } = item;
@@ -125,10 +130,10 @@ class AutocompleteInput extends React.Component<Props, State> {
     );
   }
 
-  private async onEndEditing() {
+  private onEndEditing() {
     const { value } = this.props.input;
     if (value !== null) {
-      await this.setState({ query: value.name });
+      this.setState({ query: value.name });
     }
   }
 
