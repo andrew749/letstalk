@@ -7,6 +7,7 @@ interface BaseNotification {
   userId: number;
   type: string;
   state: NotifState;
+  title: string;
   message: string;
   timestamp: Date;
   thumbnail: string;
