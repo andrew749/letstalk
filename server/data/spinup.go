@@ -11,7 +11,7 @@ func migrateDB(db *gorm.DB) {
 		TableName:      "migrations",
 		IDColumnName:   "id",
 		IDColumnSize:   190,
-		UseTransaction: true,
+		UseTransaction: false,
 	}
 	m := gormigrate.New(db, &options, []*gormigrate.Migration{
 		{
