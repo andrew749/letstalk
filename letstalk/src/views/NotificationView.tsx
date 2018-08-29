@@ -114,6 +114,12 @@ class NotificationView extends Component<Props, State> {
         thumbnail,
         message,
     } = notification;
+    notifText = <Text>{message}</Text>;
+    if (thumbnail) {
+      icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
+    } else {
+      icon = <MaterialIcons size={ICON_SIZE} name='message'/>;
+    }
 
     // TODO: enforce stricter typing with metadata
     switch (notification.type) {
@@ -142,12 +148,6 @@ class NotificationView extends Component<Props, State> {
         }).bind(this);
         break;
       case 'ADHOC_NOTIFICATION':
-        notifText = <Text>{message}</Text>;
-        if (thumbnail) {
-          icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
-        } else {
-          icon = <MaterialIcons size={ICON_SIZE} name='message'/>;
-        }
         onPressAction =  (async () => {
           this.props.navigation.navigate('NotificationContent', {
             notificationId: notificationId,
