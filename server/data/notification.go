@@ -37,7 +37,7 @@ type Notification struct {
 	State         NotifState `gorm:"not null;size:100"`
 	Title         string     `gorm:"not null;size:190"`
 	Message       string     `gorm:"not null;type:text"`
-	ThumbnailLink *string    `gorm:"type:varchar:190"`
+	ThumbnailLink *string    `gorm:"size:190"`
 	Data          JSONBlob   `gorm:"not null;type:text"`
 }
 
