@@ -7,7 +7,13 @@ import (
 )
 
 func migrateDB(db *gorm.DB) {
-	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
+	options := gormigrate.Options{
+		TableName:      "migrations",
+		IDColumnName:   "id",
+		IDColumnSize:   190,
+		UseTransaction: true,
+	}
+	m := gormigrate.New(db, &options, []*gormigrate.Migration{
 		{
 			ID: "1",
 			Migrate: func(tx *gorm.DB) error {
