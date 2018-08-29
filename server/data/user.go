@@ -34,6 +34,8 @@ type User struct {
 	ExternalAuthData *ExternalAuthData   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	Cohort           *UserCohort         `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	AdditionalData   *UserAdditionalData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
+	UserPositions    []UserPosition      `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
+	UserSimpleTraits []UserSimpleTrait   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 }
 
 func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }

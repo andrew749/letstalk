@@ -9,6 +9,14 @@ type SimpleTrait struct {
 	IsSensitive bool                 `json:"isSensitive" binding:"required"`
 }
 
+type UserSimpleTrait struct {
+	Id                     data.TUserSimpleTraitID `json:"id"`
+	SimpleTraitId          data.TSimpleTraitID     `json:"simpleTraitId"`
+	SimpleTraitName        string                  `json:"simpleTraitName"`
+	SimpleTraitType        data.SimpleTraitType    `json:"simpleTraitType"`
+	SimpleTraitIsSensitive bool                    `json:"simpleTraitIsSensitive"`
+}
+
 type AddUserSimpleTraitByNameRequest struct {
 	SimpleTraitName string `json:"name" binding:"required"`
 }
