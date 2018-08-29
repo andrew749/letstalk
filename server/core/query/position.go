@@ -51,7 +51,7 @@ func getOrCreateRole(
 	var role data.Role
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
-		err := db.Where(&data.Role{Name: name}).First(&role).Error
+		err := db.Where("UPPER(name) = UPPER(?)", name).First(&role).Error
 		if err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				role = data.Role{
@@ -113,7 +113,7 @@ func getOrCreateOrganization(
 	var organization data.Organization
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
-		err := db.Where(&data.Organization{Name: name}).First(&organization).Error
+		err := db.Where("UPPER(name) = UPPER(?)", name).First(&organization).Error
 		if err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				organization = data.Organization{

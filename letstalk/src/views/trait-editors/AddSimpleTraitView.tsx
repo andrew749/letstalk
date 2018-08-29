@@ -72,7 +72,7 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTrait
     selection = (
       <Text>
         {'Looks like you want to add a new trait '}
-        <Text style={{fontWeight: "900"}}>{simpleTrait.query}</Text>
+        <Text style={{fontWeight: "900"}}>{simpleTrait.name}</Text>
         {'. Make sure that the spelling and capitalization is correct before adding. '}
         {'Click the button below to add.'}
       </Text>
@@ -96,7 +96,6 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTrait
         name="simpleTrait"
         placeholder="Search for traits (e.g. cycling, climbing)"
         component={AutocompleteInput}
-        allowCustom={true}
         onQueryChange={onQueryChangeThrottled}
         validate={required}
       >
@@ -165,7 +164,7 @@ class AddSimpleTraitView extends Component<Props> {
         throw new Error(err);
       } else {
         if (simpleTrait.type === 'CUSTOM_ITEM') {
-          const newTraitName = simpleTrait.query.trim();
+          const newTraitName = simpleTrait.name.trim();
           await requestToMatchService.addUserSimpleTraitByName(newTraitName);
           await this.props.infoToast(`Successfully added new trait "${newTraitName}"`);
         } else if (simpleTrait.type === 'ITEM') {
