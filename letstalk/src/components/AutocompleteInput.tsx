@@ -1,5 +1,5 @@
 import React, { SFC } from 'react';
-import { Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, ViewStyle, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import Autocomplete from 'react-native-autocomplete-input';
 import { FormValidationMessage, FormInputProps, FormLabel } from 'react-native-elements';
@@ -9,16 +9,6 @@ export interface DataItem {
   readonly id: number | string;
 }
 
-interface CustomItemElement {
-  readonly type: 'CUSTOM_ITEM';
-}
-
-interface ItemElement extends DataItem {
-  readonly type: 'ITEM';
-}
-
-type Element = CustomItemElement | ItemElement;
-
 interface SelectItem {
   readonly type: 'ITEM';
   readonly name: string;
@@ -27,7 +17,7 @@ interface SelectItem {
 
 interface SelectCustomItem {
   readonly type: 'CUSTOM_ITEM';
-  readonly query: string;
+  readonly name: string;
 }
 
 export type Select = SelectItem | SelectCustomItem;
@@ -35,20 +25,20 @@ export type Select = SelectItem | SelectCustomItem;
 type Props = WrappedFieldProps & {
   label: string;
   onQueryChange(query: string, setData: (items: Array<DataItem>) => void): Promise<void>;
-  allowCustom?: boolean;
   placeholder?: string;
+  containerStyle?: ViewStyle;
 }
 
 interface State {
   readonly query: string;
   readonly showSuggestions: boolean;
-  readonly items: Array<ItemElement>,
+  readonly items: Array<DataItem>,
 }
 
 const initialState = {
   query: '',
   showSuggestions: false,
-  items: [] as Array<ItemElement>,
+  items: [] as Array<DataItem>,
 }
 
 // Greedily searches for the earliest characters in name that match some prefix of the query.
@@ -79,6 +69,8 @@ class AutocompleteInput extends React.Component<Props, State> {
 
     this.onChangeText = this.onChangeText.bind(this);
     this.renderItem = this.renderItem.bind(this);
+    this.changeValue = this.changeValue.bind(this);
+    this.onEndEditing = this.onEndEditing.bind(this);
   }
 
   focus() {
@@ -86,62 +78,51 @@ class AutocompleteInput extends React.Component<Props, State> {
     this.autocompleteRef.current.focus();
   }
 
-  private showCustom(query: string, items: Array<ItemElement>): boolean {
-    if (query === '' || !this.props.allowCustom) return false;
-    const names = items.map(item => item.name.trim().toLowerCase());
-    return names.indexOf(query.trim().toLowerCase()) === -1;
-  }
-
-  private async onChangeText(text: string) {
-    this.setState({ query: text });
-    await this.props.onQueryChange(text, res => {
-      let items: Array<ItemElement> = res.map(({ id, name }) => {
-        const item: ItemElement = { id, name, type: 'ITEM' };
-        return item;
+  // Decides what value to give to `onChange` depending on the current query and items. If items
+  // contains an item with a name that has the same value as query (ignoring case), then we set
+  // the value to that item. Otherwise, we set the value to a custom item with the name being the
+  // current query.
+  private changeValue() {
+    const { query, items } = this.state;
+    if (query !== '') {
+      const { onChange } = this.props.input;
+      const found = this.state.items.find(item => {
+        return item.name.trim().toLowerCase() === query.trim().toLowerCase()
       });
-      this.setState({ items });
-    })
+      const newValue = !found ? { type: 'CUSTOM_ITEM', name: query.trim() } :
+        { type: 'ITEM', id: found.id, name: found.name };
+      onChange(newValue);
+    }
   }
 
-  private renderItem(item: Element) {
-    const { onChange } = this.props.input;
+  private onChangeText(text: string) {
+    this.setState({ query: text }, async () => {
+      this.changeValue();
+      await this.props.onQueryChange(text, items => this.setState({ items }));
+      this.changeValue(); // Try again once we have new items
+    });
+  }
+
+  private renderItem(item: DataItem) {
     const { query } = this.state;
     let text = null;
-    let onPress: () => void = null;
-    switch (item.type) {
-      case 'ITEM':
-        const { name, id } = item;
-        const matched = greedyMatch(item.name, query);
-        if (!!matched) {
-          text = (
-            <Text>
-              {name.substring(0, matched[0])}
-              <Text style={{fontWeight: "900"}}>{name.substring(matched[0], matched[1])}</Text>
-              {name.substring(matched[1])}
-            </Text>
-          );
-        } else {
-          text = <Text>{name}</Text>;
-        }
-        onPress = () => {
-          this.onChangeText(name);
-          onChange({ type: 'ITEM', id, name });
-          this.autocompleteRef.blur();
-        };
-        break;
-      case 'CUSTOM_ITEM':
-        if (query === '') return null; // Race with autocomplete results
-        text = <Text>{'Add '}<Text style={{fontWeight: "900"}}>{query}</Text></Text>
-        onPress = () => {
-          this.onChangeText(query);
-          onChange({ type: 'CUSTOM_ITEM', query });
-          this.autocompleteRef.blur();
-        };
-        break;
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = item;
+    const { name, id } = item;
+    const matched = greedyMatch(item.name, query);
+    if (!!matched) {
+      text = (
+        <Text>
+          {name.substring(0, matched[0])}
+          <Text style={{fontWeight: "900"}}>{name.substring(matched[0], matched[1])}</Text>
+          {name.substring(matched[1])}
+        </Text>
+      );
+    } else {
+      text = <Text>{name}</Text>;
     }
+    const onPress = () => {
+      this.onChangeText(name);
+      this.autocompleteRef.blur();
+    };
     return (
       <TouchableOpacity onPress={onPress} style={styles.itemContainer}>
         <Text style={styles.itemText}>{ text }</Text>
@@ -149,9 +130,16 @@ class AutocompleteInput extends React.Component<Props, State> {
     );
   }
 
+  private onEndEditing() {
+    const { value } = this.props.input;
+    if (value !== null) {
+      this.setState({ query: value.name });
+    }
+  }
+
   render() {
     const props = this.props;
-    const { label } = props;
+    const { label, containerStyle } = props;
     const { value, onBlur, onFocus } = this.props.input;
     const { error, touched, warning } = props.meta;
     const {
@@ -159,10 +147,8 @@ class AutocompleteInput extends React.Component<Props, State> {
       query,
       showSuggestions,
     } = this.state;
-    const data: Array<Element> =
-      this.showCustom(query, items) ? [{ type: 'CUSTOM_ITEM' } as Element].concat(items) : items;
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, containerStyle]}>
         {label && <FormLabel>{label}</FormLabel>}
         <View style={styles.outerContainer}>
           <View style={styles.autocompleteContainer}>
@@ -170,9 +156,10 @@ class AutocompleteInput extends React.Component<Props, State> {
               ref={(ref: any) => this.autocompleteRef = ref}
               value={query}
               autoCorrect={true}
-              data={data}
+              data={items}
               renderItem={this.renderItem}
               hideResults={!showSuggestions}
+              onEndEditing={this.onEndEditing}
               onFocus={() => {
                 this.setState({ showSuggestions: true });
                 onFocus(undefined);

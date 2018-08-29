@@ -63,6 +63,12 @@ export default class EditTraitsSelectorView extends Component<Props> {
           'in co-op, this also includes your sequence.',
       },
       {
+        name: 'Add Position',
+        editView: 'AddPosition',
+        description: 'Add positions at companies, clubs or sports teams that you hold or have ' +
+          'held in the past.',
+      },
+      {
         name: 'Add Trait',
         editView: 'AddSimpleTrait',
         description: 'Add any other traits such as your interests, hobbies, experiences, etc.',
