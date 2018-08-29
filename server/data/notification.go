@@ -34,11 +34,11 @@ type Notification struct {
 	User          User       `gorm:"foreignkey:UserId"`
 	Type          NotifType  `gorm:"not null;size:100"`
 	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
-	State         NotifState `gorm:"not null;default:UNREAD;size:100"`
+	State         NotifState `gorm:"not null;size:100"`
 	Title         string     `gorm:"not null;size:190"`
 	Message       string     `gorm:"not null;type:text"`
 	ThumbnailLink *string    `gorm:"type:varchar:190"`
-	Data          JSONBlob   `gorm:"not null" sql:"type:json"`
+	Data          JSONBlob   `gorm:"not null;type:text"`
 }
 
 func (u *NotifType) Scan(value interface{}) error { *u = NotifType(value.([]byte)); return nil }

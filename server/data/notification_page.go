@@ -12,5 +12,5 @@ type NotificationPage struct {
 	Notification   Notification `gorm:"not null;foreign_key:NotificationId"`
 	NotificationId uint         `gorm:"primary_key;auto_increment:false"`
 	TemplateLink   string       `gorm:"not null;size:100"`
-	Attributes     JSONBlob     `gorm:"not null" sql:"type:json"`
+	Attributes     JSONBlob     `gorm:"not null;type:text"`
 }
