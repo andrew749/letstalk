@@ -67,7 +67,7 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&Cohort{})
 				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
 				// exists.
-				tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(255)")
+				tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(100)")
 				tx.AutoMigrate(&UserCohort{})
 				return tx.Error
 			},
