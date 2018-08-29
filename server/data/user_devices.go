@@ -21,7 +21,7 @@ const (
 type UserDevice struct {
 	User                  User                  `gorm:"foreign_key:UserId"`
 	UserId                TUserID               `gorm:"primary_key"`
-	NotificationToken     string                `gorm:"size:255;primary_key;not null"`
+	NotificationToken     string                `gorm:"size:100;primary_key;not null"`
 	NotificationTokenType NotificationTokenType `gorm:"not null"`
 }
 
