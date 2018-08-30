@@ -71,8 +71,9 @@ func generateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, emailAddr string
 		ExpirationDate: time.Now().AddDate(0, 0, 1), // Verification email valid for 24 hours.
 	}
 	// Set all existing VerifyEmailId entries for this user to inactive.
-	err := tx.Where(&data.VerifyEmailId{UserId: userId}).
-		Update(data.VerifyEmailId{IsActive: false}).
+	err := tx.Model(&data.VerifyEmailId{}).
+		Where(&data.VerifyEmailId{UserId: userId}).
+		Update("is_active", false).
 		Error
 	if err != nil {
 		return nil, err
@@ -134,7 +135,6 @@ func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.E
 
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		// Set all existing VerifyEmailId entries for this user to inactive.
-		// TODO ensure that this doesn't modify expiration date
 		err := tx.Model(&data.VerifyEmailId{}).
 				Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
 				Update("is_active", false).Error
