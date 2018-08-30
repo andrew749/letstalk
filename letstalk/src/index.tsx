@@ -45,6 +45,7 @@ import EditProfileSelectorView from './views/EditProfileSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
+import QrCodeView from './views/QrCodeView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
@@ -206,6 +207,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   AddPosition: {
     screen: AddPositionView,
+  },
+  QrCode: {
+    screen: QrCodeView,
   },
 }, {
   initialRouteName,

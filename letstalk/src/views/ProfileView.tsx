@@ -48,7 +48,6 @@ import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import QRCode from "react-native-qrcode";
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { UserPosition } from '../models/position';
@@ -420,6 +419,7 @@ class ProfileView extends Component<Props, State> {
       fbLink,
       bio,
       hometown,
+      secret,
     } = this.props.profile;
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -442,10 +442,12 @@ class ProfileView extends Component<Props, State> {
       <View>
         <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.contentContainer} >
-            {this.renderQrCode()}
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <Header>{headerText}</Header>
             <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+            <TouchableOpacity style={styles.listItem} onPress={() => navigate('QrCode', { secret })}>
+              <Text style={styles.value}>Show QR Code</Text>
+            </TouchableOpacity>
             {this.renderProfile(bio)}
             {this.renderCohortInfo()}
             {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
@@ -480,18 +482,6 @@ class ProfileView extends Component<Props, State> {
       </View>
     );
   }
-
-  renderQrCode = () => {
-    const {secret} = this.props.profile;
-    return (
-      !!secret && <QRCode
-        value={secret}
-        size={150}
-        bgColor='black'
-        fgColor='white'
-      />
-    );
-  };
 
   render() {
     const {
