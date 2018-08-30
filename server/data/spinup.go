@@ -134,6 +134,7 @@ func migrateDB(db *gorm.DB) error {
 			ID: "Verify email id",
 			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&VerifyEmailId{})
+				tx.AutoMigrate(&User{}) // Added IsEmailVerified column.
 				return tx.Error
 			},
 			Rollback: func(tx *gorm.DB) error {

@@ -74,6 +74,18 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		userId   = c.SessionData.UserId
 	)
 
+	user, err := query.GetUserById(c.Db, userId)
+	if err != nil {
+		return errs.NewInternalError("Authenticated user not found")
+	}
+	if !user.IsEmailVerified {
+		// User email not yet verified, don't proceed to onboarding.
+		c.Result = response
+		return nil
+	} else {
+		response.State = api.ACCOUNT_EMAIL_VERIFIED
+	}
+
 	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, userId)
 	if err != nil {
 		return errs.NewDbError(err)

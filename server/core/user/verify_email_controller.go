@@ -17,7 +17,7 @@ import (
 	"fmt"
 )
 
-var uwEmailRegex = regexp.MustCompile(".*@(edu.)?uwaterloo.ca$")
+var uwEmailRegex = regexp.MustCompile("(?i)^[A-Z0-9._%+-]+@(edu\\.)?uwaterloo\\.ca$")
 
 func SendEmailVerificationController(c *ctx.Context) errs.Error {
 	var req *api.SendAccountVerificationEmailRequest
@@ -41,6 +41,7 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 	if user.IsEmailVerified {
 		return errs.NewRequestError("Account email has already been verified.")
 	}
+	// TODO ensure that this email hasn't already been used for a different account
 	dbErr := c.WithinTx(func (tx *gorm.DB) error {
 		var verifyEmailId *data.VerifyEmailId
 		var err error
@@ -85,7 +86,7 @@ func generateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, emailAddr string
 
 func sendAccountVerifyEmail(requestId *data.VerifyEmailId, user *data.User, emailAddr string) error {
 	verifyEmailLink := fmt.Sprintf(
-		"%s/verify_email.html?requestid=%s",
+		"%s/verify_email.html?requestId=%s",
 		utility.BaseUrl,
 		requestId.Id,
 	)
@@ -133,6 +134,7 @@ func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.E
 
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		// Set all existing VerifyEmailId entries for this user to inactive.
+		// TODO ensure that this doesn't modify expiration date
 		err := tx.Model(&data.VerifyEmailId{}).
 				Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
 				Update("is_active", false).Error
