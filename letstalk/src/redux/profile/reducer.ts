@@ -13,6 +13,7 @@ import { ProfileData } from '../../models/profile';
 import {
   fetch,
   positionRemove,
+  simpleTraitRemove,
   ActionTypes,
   TypeKeys,
 } from './actions';
@@ -29,6 +30,7 @@ const initialState: State = {
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
+  let profile: ProfileData = null;
   switch (action.type) {
     case TypeKeys.FETCH:
       return {
@@ -37,9 +39,20 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         profile: getDataOrCur(action, state.profile),
       };
     case TypeKeys.POSITION_REMOVE:
-      const profile = state.profile === null ? null : {
+      profile = state.profile === null ? null : {
         ...state.profile,
         userPositions: state.profile.userPositions.filter(pos => pos.id !== action.id).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.SIMPLE_TRAIT_REMOVE:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userSimpleTraits: state.profile.userSimpleTraits.filter(trait => {
+          return trait.id !== action.id;
+        }).toList(),
       }
       return {
         ...state,
@@ -73,7 +86,16 @@ const removePosition: ActionCreator<
   };
 }
 
+const removeSimpleTrait: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (id: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    await requestToMatchService.removeUserSimpleTrait(id);
+    return dispatch(simpleTraitRemove(id));
+  };
+}
+
 export {
   fetchProfile,
   removePosition,
+  removeSimpleTrait,
 };

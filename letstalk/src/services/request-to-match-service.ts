@@ -34,9 +34,8 @@ interface AddUserPositionRequest {
   startDate: string;
   endDate?: string;
 }
-interface RemoveUserPositionRequest {
-  userPositionId: number;
-}
+interface RemoveUserPositionRequest { userPositionId: number }
+interface RemoveUserSimpleTraitRequest { userSimpleTraitId: number }
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -114,6 +113,12 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const req: AddUserSimpleTraitByNameRequest = { name };
     await this.requestor.post(USER_SIMPLE_TRAIT_BY_NAME_ROUTE, req, sessionToken);
+  }
+
+  async removeUserSimpleTrait(id: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const req: RemoveUserSimpleTraitRequest = { userSimpleTraitId: id };
+    await this.requestor.delete(USER_SIMPLE_TRAIT_ROUTE, req, sessionToken);
   }
 
   async addUserPosition(req: AddUserPositionRequest): Promise<void> {

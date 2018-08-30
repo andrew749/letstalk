@@ -26,5 +26,5 @@ type AddUserSimpleTraitByIdRequest struct {
 }
 
 type RemoveUserSimpleTraitRequest struct {
-	SimpleTraitId data.TSimpleTraitID `json:"simpleTraitId" binding:"required"`
+	UserSimpleTraitId data.TUserSimpleTraitID `json:"userSimpleTraitId" binding:"required"`
 }

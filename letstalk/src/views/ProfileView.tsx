@@ -37,7 +37,12 @@ import { Button, Card, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
-import { State as ProfileState, fetchProfile, removePosition } from '../redux/profile/reducer';
+import {
+  State as ProfileState,
+  fetchProfile,
+  removePosition,
+  removeSimpleTrait,
+} from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
@@ -57,6 +62,7 @@ const MAX_NUMBER_SIMPLE_TRAITS_SHOWN = 5;
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   removePosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removeSimpleTrait: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -94,6 +100,7 @@ class ProfileView extends Component<Props, State> {
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
     this.renderPosition = this.renderPosition.bind(this);
+    this.renderSimpleTrait = this.renderSimpleTrait.bind(this);
   }
 
   private async onLogoutPress() {
@@ -145,10 +152,19 @@ class ProfileView extends Component<Props, State> {
     const {
       programId,
       gradYear,
+      sequenceId,
     } = this.props.profile;
     const program = programById(programId);
+    const changeCohort = () => this.props.navigation.navigate('ChangeCohort', {
+      programId,
+      gradYear,
+      sequenceId,
+    });
     return (
       <View style={styles.sectionContainer}>
+        <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
+          <MaterialIcons name="edit" size={32} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>
         <Text style={styles.sectionHeader}>Cohort</Text>
         <Text style={styles.cohortText}>{ program + ', ' + gradYear }</Text>
       </View>
@@ -234,7 +250,13 @@ class ProfileView extends Component<Props, State> {
     const until = !pos.endDate ? 'present' : Moment(pos.endDate).format(dateFmt);
     const frm = Moment(pos.startDate).format(dateFmt);
 
-    const onRemoveAccept = async () => await this.props.removePosition(pos.id);
+    const onRemoveAccept = async () => {
+      try {
+        await this.props.removePosition(pos.id);
+      } catch (e) {
+        await this.props.errorToast(e.errorMsg);
+      }
+    }
 
     const onRemovePress = () => {
       Alert.alert(
@@ -255,7 +277,7 @@ class ProfileView extends Component<Props, State> {
           <Text style={styles.positionBold}>{ pos.organizationName }</Text>
           <Text>{'\n'}({ frm } - { until })</Text>
         </Text>
-        <TouchableOpacity style={styles.positionDelete} onPress={onRemovePress}>
+        <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
           <MaterialIcons color={Colors.WHITE} name="close" size={18} />
         </TouchableOpacity>
       </View>
@@ -299,6 +321,81 @@ class ProfileView extends Component<Props, State> {
           <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_ACCENT} />
         </TouchableOpacity>
         { positionItems }
+        <View style={styles.traitBottomActionContainer}>
+          { bottomAction }
+        </View>
+      </View>
+    );
+  }
+
+  private renderSimpleTrait(trait: UserSimpleTrait) {
+    const onRemoveAccept = async () => {
+      try {
+        await this.props.removeSimpleTrait(trait.id);
+      } catch (e) {
+        await this.props.errorToast(e.errorMsg);
+      }
+    };
+
+    const onRemovePress = () => {
+      Alert.alert(
+        'Remove Trait',
+        `Are you sure you want to remove "${trait.simpleTraitName}" as a trait?`,
+        [
+          {text: 'Cancel', onPress: () => null, style: 'cancel'},
+          {text: 'Remove', onPress: onRemoveAccept, style: 'destructive'},
+        ],
+      );
+    }
+
+    return (
+      <View key={ trait.id } style={styles.simpleTraitContainer}>
+        <Text style={styles.simpleTraitText}>{ trait.simpleTraitName }</Text>
+        <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
+          <MaterialIcons color={Colors.WHITE} name="close" size={18} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  private renderSimpleTraits() {
+    let { userSimpleTraits } = this.props.profile;
+    const { showAllSimpleTraits } = this.state;
+
+    const addSimpleTrait = () => this.props.navigation.navigate('AddSimpleTrait');
+
+    let bottomAction: ReactNode = null;
+    if (userSimpleTraits.isEmpty()) {
+      bottomAction = [
+        <Text key={'text'} style={styles.noTraitText}>You don't have any traits</Text>,
+        <Button
+          key={'button'}
+          buttonStyle={styles.noTraitButton}
+          title="Add trait"
+          onPress={addSimpleTrait}
+          color={Colors.HIVE_PRIMARY}
+        />,
+      ];
+    } else if (userSimpleTraits.size > MAX_NUMBER_SIMPLE_TRAITS_SHOWN) {
+      bottomAction = ProfileView.renderShowLessMore(showAllSimpleTraits,
+        () => this.setState({ showAllSimpleTraits: true }),
+        () => this.setState({ showAllSimpleTraits: false }));
+    }
+
+    if (!showAllSimpleTraits) {
+      userSimpleTraits = userSimpleTraits.take(MAX_NUMBER_SIMPLE_TRAITS_SHOWN).toList();
+    }
+    const traitItems = userSimpleTraits.map(this.renderSimpleTrait).toJS();
+
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionHeader}>Simple Traits</Text>
+        <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>
+        <View style={styles.simpleTraitOuterContainer}>
+          { traitItems }
+        </View>
         <View style={styles.traitBottomActionContainer}>
           { bottomAction }
         </View>
@@ -363,6 +460,7 @@ class ProfileView extends Component<Props, State> {
             {this.renderCohortInfo()}
             {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
             {this.renderPositions()}
+            {this.renderSimpleTraits()}
             <View style={styles.sectionContainer}>
             </View>
             <Button
@@ -426,7 +524,7 @@ class ProfileView extends Component<Props, State> {
 
 export default connect(
   ({ profile }: RootState) => profile,
-  { fetchProfile, removePosition, infoToast, errorToast },
+  { fetchProfile, removePosition, removeSimpleTrait, infoToast, errorToast },
 )(ProfileView);
 
 const BUTTON_WIDTH = SCREEN_WIDTH - 80;
@@ -508,7 +606,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.HIVE_ACCENT,
     marginTop: 5,
     padding: 5,
-    paddingRight: 20,
+    paddingRight: 25,
     borderRadius: 5,
   },
   positionText: {
@@ -518,10 +616,31 @@ const styles = StyleSheet.create({
   positionBold: {
     fontWeight: '700',
   },
-  positionDelete: {
+  traitDelete: {
     position: 'absolute',
-    top: 5,
-    right: 5,
+    padding: 5,
+    top: 0,
+    right: 0,
+  },
+  simpleTraitOuterContainer: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 2.5,
+  },
+  simpleTraitContainer: {
+    backgroundColor: Colors.HIVE_PRIMARY,
+    marginVertical: 2.5,
+    marginHorizontal: 2.5,
+    padding: 5,
+    paddingRight: 25,
+    paddingLeft: 10,
+    borderRadius: 20,
+  },
+  simpleTraitText: {
+    color: Colors.WHITE,
+    fontWeight: '700',
+    fontSize: 14,
   },
   traitBottomActionContainer: {
     flexDirection: 'column',

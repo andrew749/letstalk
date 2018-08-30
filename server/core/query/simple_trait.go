@@ -144,9 +144,9 @@ func AddUserSimpleTraitByName(
 func RemoveUserSimpleTrait(
 	db *gorm.DB,
 	userId data.TUserID,
-	traitId data.TSimpleTraitID,
+	userTraitId data.TUserSimpleTraitID,
 ) errs.Error {
-	toDelete := data.UserSimpleTrait{UserId: userId, SimpleTraitId: traitId}
+	toDelete := data.UserSimpleTrait{UserId: userId, Id: userTraitId}
 	err := db.Delete(&toDelete).Error
 	if err != nil {
 		return errs.NewDbError(err)

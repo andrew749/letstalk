@@ -78,6 +78,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   return (
     <KeyboardAwareScrollView
+      style={{ paddingTop: 10 }}
       keyboardShouldPersistTaps={true}
     >
       <Field

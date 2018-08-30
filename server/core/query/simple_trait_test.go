@@ -176,7 +176,7 @@ func TestRemoveUserSimpleTrait(t *testing.T) {
 			db.Where(&data.UserSimpleTrait{UserId: 1}).Find(&traits)
 			assert.Equal(t, 1, len(traits))
 
-			err = RemoveUserSimpleTrait(db, data.TUserID(1), trait.Id)
+			err = RemoveUserSimpleTrait(db, data.TUserID(1), userTrait.Id)
 			assert.NoError(t, err)
 
 			db.Where(&data.UserSimpleTrait{UserId: 1}).Find(&traits)

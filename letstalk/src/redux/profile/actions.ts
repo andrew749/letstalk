@@ -13,6 +13,7 @@ import { APIError } from '../../services/requests';
 export enum TypeKeys {
   FETCH = 'PROFILE/FETCH',
   POSITION_REMOVE = 'PROFILE/POSITIVE_REMOVE',
+  SIMPLE_TRAIT_REMOVE = 'PROFILE/SIMPLE_TRAIT_REMOVE',
 }
 
 type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, ProfileData>;
@@ -21,6 +22,11 @@ type ProfileStartAction = FetchStartAction<TypeKeys.FETCH>;
 
 export interface PositionRemoveAction extends Action {
   readonly type: TypeKeys.POSITION_REMOVE;
+  readonly id: number;
+}
+
+export interface SimpleTraitRemoveAction extends Action {
+  readonly type: TypeKeys.SIMPLE_TRAIT_REMOVE;
   readonly id: number;
 }
 
@@ -51,6 +57,10 @@ export function positionRemove(id: number): PositionRemoveAction {
   return { type: TypeKeys.POSITION_REMOVE, id };
 }
 
+export function simpleTraitRemove(id: number): SimpleTraitRemoveAction {
+  return { type: TypeKeys.SIMPLE_TRAIT_REMOVE, id };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, ProfileData> = {
   receive,
   error,
@@ -64,3 +74,4 @@ export type ActionTypes =
   | ProfileErrorAction
   | ProfileStartAction
   | PositionRemoveAction
+  | SimpleTraitRemoveAction

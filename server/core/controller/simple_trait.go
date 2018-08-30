@@ -37,5 +37,5 @@ func RemoveUserSimpleTraitController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-	return query.RemoveUserSimpleTrait(c.Db, c.SessionData.UserId, req.SimpleTraitId)
+	return query.RemoveUserSimpleTrait(c.Db, c.SessionData.UserId, req.UserSimpleTraitId)
 }
