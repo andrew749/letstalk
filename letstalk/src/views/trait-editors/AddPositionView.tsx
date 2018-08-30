@@ -135,7 +135,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
 
   return (
     <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
     >
       <Field
         label="Role"

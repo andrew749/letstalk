@@ -111,7 +111,7 @@ const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
   const fieldRefs = new EditFormRefs();
   return (
     <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
       >
       <Header>Personal Info</Header>
       <Field

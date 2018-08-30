@@ -79,7 +79,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
   return (
     <KeyboardAwareScrollView
       style={{ paddingTop: 10 }}
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
     >
       <Field
         label="Program"

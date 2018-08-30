@@ -62,7 +62,6 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         profile,
       }
     case TypeKeys.SIMPLE_TRAIT_ADD:
-      console.log(action.simpleTrait);
       profile = state.profile === null ? null : {
         ...state.profile,
         userSimpleTraits: state.profile.userSimpleTraits.push(action.simpleTrait),

@@ -94,7 +94,7 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTrait
 
   return (
     <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
     >
       <Field
         label="Trait"

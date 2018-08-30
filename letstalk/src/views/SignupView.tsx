@@ -58,7 +58,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
   const fieldRefs = new SignupFormRefs();
   return (
     <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
       contentContainerStyle={styles.scrollView}>
       <Field
         name="profilePic"
