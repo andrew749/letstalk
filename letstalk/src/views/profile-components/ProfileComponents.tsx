@@ -70,7 +70,10 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
 
     const headerText = firstName + ' ' + lastName;
 
-    const bioStr = bio === null ? 'Add bio by editing profile' : bio;
+    // If allow QrCode is false, we assume that it's not your profile, but someone else's.
+    const bioStr = !!bio ? bio : (
+      !allowQrCode ? 'An awesome person that forgot to write a bio' : 'Add bio by editing profile'
+    );
 
     return (
       <View style={styles.personalInfoContainer}>
@@ -104,6 +107,7 @@ export class CohortInfo extends Component<CohortInfoProps> {
       programId,
       gradYear,
       sequenceId,
+      allowEditing,
     } = this.props;
     const program = programById(programId);
     const changeCohort = () => this.props.navigation.navigate('ChangeCohort', {
@@ -113,9 +117,9 @@ export class CohortInfo extends Component<CohortInfoProps> {
     });
     return (
       <View style={styles.sectionContainer}>
-        <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
+        {!!allowEditing && <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
           <MaterialIcons name="edit" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>
+        </TouchableOpacity>}
         <Text style={styles.sectionHeader}>Cohort</Text>
         <Text style={styles.cohortText}>{ program + ', ' + gradYear }</Text>
       </View>
@@ -166,6 +170,8 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
   }
 
   private renderPosition(pos: UserPosition) {
+    const { allowEditing } = this.props;
+
     const dateFmt = "MMM YYYY";
     const until = !pos.endDate ? 'present' : Moment(pos.endDate).format(dateFmt);
     const frm = Moment(pos.startDate).format(dateFmt);
@@ -189,32 +195,34 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
       );
     }
 
+    const padRight = allowEditing ? { paddingRight: 25 } : null;
     return (
-      <View key={ pos.id } style={styles.positionContainer}>
+      <View key={ pos.id } style={[styles.positionContainer, padRight]}>
         <Text style={styles.positionText}>
           <Text style={styles.positionBold}>{ pos.roleName }</Text>
           <Text> @ </Text>
           <Text style={styles.positionBold}>{ pos.organizationName }</Text>
           <Text>{'\n'}({ frm } - { until })</Text>
         </Text>
-        <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
+        {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
           <MaterialIcons color={Colors.WHITE} name="close" size={18} />
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
     );
   }
 
   render() {
-    let { userPositions } = this.props;
+    let { userPositions, allowEditing } = this.props;
     const { showAll } = this.state;
 
     const addPosition = () => this.props.navigation.navigate('AddPosition');
+    const emptyText = allowEditing ? 'You don\'t have any positions' : 'They don\'t have any positions';
 
     let bottomAction: ReactNode = null;
     if (userPositions.isEmpty()) {
       bottomAction = [
-        <Text key={'text'} style={styles.noTraitText}>You don't have any positions</Text>,
-        <Button
+        <Text key={'text'} style={styles.noTraitText}>{ emptyText }</Text>,
+        !!allowEditing && <Button
           key={'button'}
           buttonStyle={styles.noTraitButton}
           title="Add position"
@@ -237,9 +245,9 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Positions</Text>
-        <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
+        {!!allowEditing && <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
           <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_ACCENT} />
-        </TouchableOpacity>
+        </TouchableOpacity>}
         { positionItems }
         <View style={styles.traitBottomActionContainer}>
           { bottomAction }
@@ -268,6 +276,7 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
   }
 
   private renderSimpleTrait(trait: UserSimpleTrait) {
+    const { allowEditing } = this.props;
     const onRemoveAccept = async () => {
       try {
         await this.props.removeSimpleTrait(trait.id);
@@ -287,18 +296,19 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
       );
     }
 
+    const padRight = allowEditing ? { paddingRight: 25 } : null;
     return (
-      <View key={ trait.id } style={styles.simpleTraitContainer}>
+      <View key={ trait.id } style={[styles.simpleTraitContainer, padRight]}>
         <Text style={styles.simpleTraitText}>{ trait.simpleTraitName }</Text>
-        <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
+        {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
           <MaterialIcons color={Colors.WHITE} name="close" size={18} />
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
     );
   }
 
   render() {
-    let { userSimpleTraits } = this.props;
+    let { userSimpleTraits, allowEditing } = this.props;
     const { showAll } = this.state;
 
     const addSimpleTrait = () => this.props.navigation.navigate('AddSimpleTrait');
@@ -307,7 +317,7 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     if (userSimpleTraits.isEmpty()) {
       bottomAction = [
         <Text key={'text'} style={styles.noTraitText}>You don't have any traits</Text>,
-        <Button
+        !!allowEditing && <Button
           key={'button'}
           buttonStyle={styles.noTraitButton}
           title="Add trait"
@@ -329,9 +339,9 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Traits</Text>
-        <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
+        {!!allowEditing && <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
           <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>
+        </TouchableOpacity>}
         <View style={styles.simpleTraitOuterContainer}>
           { traitItems }
         </View>
@@ -348,7 +358,7 @@ const BUTTON_WIDTH = SCREEN_WIDTH - 80;
 export const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
-    paddingBottom: 65,
+    paddingBottom: 10,
     backgroundColor: 'white',
     minHeight: '100%'
   },
@@ -417,7 +427,6 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.HIVE_ACCENT,
     marginTop: 5,
     padding: 5,
-    paddingRight: 25,
     borderRadius: 5,
   },
   positionText: {
@@ -444,8 +453,8 @@ export const styles = StyleSheet.create({
     marginVertical: 2.5,
     marginHorizontal: 2.5,
     padding: 5,
-    paddingRight: 25,
     paddingLeft: 10,
+    paddingRight: 10,
     borderRadius: 20,
   },
   simpleTraitText: {

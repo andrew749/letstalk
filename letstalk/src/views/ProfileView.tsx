@@ -139,7 +139,13 @@ class ProfileView extends Component<Props, State> {
     await this.props.fetchProfile();
   }
 
-  private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
+  private renderContactInfo() {
+    const {
+      email,
+      phoneNumber,
+      fbId,
+      fbLink,
+    } = this.props.profile;
     const buildItem = (label: string, value: string) => {
       return (
         <View key={label} style={styles.listItem}>
@@ -200,25 +206,6 @@ class ProfileView extends Component<Props, State> {
   private renderBody() {
     const { navigate } = this.props.navigation;
 
-    const {
-      userPositions,
-      userSimpleTraits,
-    } = this.props.profile;
-
-    const {
-      firstName,
-      lastName,
-      gender,
-      email,
-      birthdate,
-      phoneNumber,
-      fbId,
-      fbLink,
-      bio,
-      hometown,
-      secret,
-    } = this.props.profile;
-
     let userId;
     if (this.props.profile) {
       userId = this.props.profile.userId.toString();
@@ -226,7 +213,7 @@ class ProfileView extends Component<Props, State> {
 
     return (
       <View>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 65 }]}>
           <View style={styles.contentContainer} >
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <PersonalInfo
@@ -241,16 +228,16 @@ class ProfileView extends Component<Props, State> {
               navigation={this.props.navigation}
               allowEditing={true}
             />
-            {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
+            {this.renderContactInfo()}
             <UserPositions
-              userPositions={userPositions}
+              userPositions={this.props.profile.userPositions}
               navigation={this.props.navigation}
               allowEditing={true}
               removePosition={this.props.removePosition}
               errorToast={this.props.errorToast}
             />
             <UserSimpleTraits
-              userSimpleTraits={userSimpleTraits}
+              userSimpleTraits={this.props.profile.userSimpleTraits}
               navigation={this.props.navigation}
               allowEditing={true}
               removeSimpleTrait={this.props.removeSimpleTrait}
