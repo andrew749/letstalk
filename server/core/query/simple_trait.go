@@ -81,7 +81,11 @@ func getOrCreateSimpleTrait(
 	return &trait, nil
 }
 
-func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait) errs.Error {
+func addUserSimpleTrait(
+	db *gorm.DB,
+	userId data.TUserID,
+	trait data.SimpleTrait,
+) (*data.UserSimpleTrait, errs.Error) {
 	var userTrait data.UserSimpleTrait
 	// TODO: Trying using `WithinTx`
 	tx := db.Begin()
@@ -90,10 +94,10 @@ func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait
 	).First(&userTrait).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		tx.Rollback()
-		return errs.NewDbError(err)
+		return nil, errs.NewDbError(err)
 	} else if err == nil {
 		tx.Rollback()
-		return errs.NewRequestError(fmt.Sprintf("You already have the trait \"%s\"", trait.Name))
+		return nil, errs.NewRequestError(fmt.Sprintf("You already have the trait \"%s\"", trait.Name))
 	}
 
 	userTrait = data.UserSimpleTrait{
@@ -105,23 +109,23 @@ func addUserSimpleTrait(db *gorm.DB, userId data.TUserID, trait data.SimpleTrait
 	}
 	if dbErr := tx.Save(&userTrait).Error; dbErr != nil {
 		tx.Rollback()
-		return errs.NewDbError(dbErr)
+		return nil, errs.NewDbError(dbErr)
 	}
 
 	if dbErr := tx.Commit().Error; dbErr != nil {
-		return errs.NewDbError(dbErr)
+		return nil, errs.NewDbError(dbErr)
 	}
-	return nil
+	return &userTrait, nil
 }
 
 func AddUserSimpleTraitById(
 	db *gorm.DB,
 	userId data.TUserID,
 	traitId data.TSimpleTraitID,
-) errs.Error {
+) (*data.UserSimpleTrait, errs.Error) {
 	trait, err := getSimpleTrait(db, traitId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return addUserSimpleTrait(db, userId, *trait)
 }
@@ -131,11 +135,11 @@ func AddUserSimpleTraitByName(
 	es *elastic.Client,
 	userId data.TUserID,
 	name string,
-) errs.Error {
+) (*data.UserSimpleTrait, errs.Error) {
 	name = strings.TrimSpace(name)
 	trait, err := getOrCreateSimpleTrait(db, es, name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return addUserSimpleTrait(db, userId, *trait)
 }

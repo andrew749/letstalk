@@ -12,7 +12,7 @@ func AddUserPositionController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
-	return query.AddUserPosition(
+	userPosition, err := query.AddUserPosition(
 		c.Db,
 		c.Es,
 		c.SessionData.UserId,
@@ -23,6 +23,20 @@ func AddUserPositionController(c *ctx.Context) errs.Error {
 		req.StartDate,
 		req.EndDate,
 	)
+	if err != nil {
+		return err
+	}
+	c.Result = &api.UserPosition{
+		Id:               userPosition.Id,
+		RoleId:           userPosition.RoleId,
+		RoleName:         userPosition.RoleName,
+		OrganizationId:   userPosition.OrganizationId,
+		OrganizationName: userPosition.OrganizationName,
+		OrganizationType: userPosition.OrganizationType,
+		StartDate:        userPosition.StartDate,
+		EndDate:          userPosition.EndDate,
+	}
+	return nil
 }
 
 func RemoveUserPositionController(c *ctx.Context) errs.Error {

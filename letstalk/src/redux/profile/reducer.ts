@@ -12,13 +12,18 @@ import {
 import { ProfileData } from '../../models/profile';
 import {
   fetch,
+  positionAdd,
   positionRemove,
+  simpleTraitAdd,
   simpleTraitRemove,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import profileService from '../../services/profile-service';
 import requestToMatchService from '../../services/request-to-match-service';
+import { AddUserPositionRequest } from '../../services/request-to-match-service';
+import { UserPosition } from '../../models/position';
+import { UserSimpleTrait } from '../../models/simple-trait';
 
 export interface State {
   readonly profile?: ProfileData;
@@ -38,10 +43,29 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         fetchState: fetchStateReducer(action),
         profile: getDataOrCur(action, state.profile),
       };
+    case TypeKeys.POSITION_ADD:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userPositions: state.profile.userPositions.push(action.position),
+      }
+      return {
+        ...state,
+        profile,
+      }
     case TypeKeys.POSITION_REMOVE:
       profile = state.profile === null ? null : {
         ...state.profile,
         userPositions: state.profile.userPositions.filter(pos => pos.id !== action.id).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.SIMPLE_TRAIT_ADD:
+      console.log(action.simpleTrait);
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userSimpleTraits: state.profile.userSimpleTraits.push(action.simpleTrait),
       }
       return {
         ...state,
@@ -78,11 +102,35 @@ const fetchProfile: ActionCreator<
   };
 }
 
+const addPosition: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (req: AddUserPositionRequest) => {
+  return async (dispatch: Dispatch<State>) => {
+    const position = await requestToMatchService.addUserPosition(req);
+    return dispatch(positionAdd(position));
+  };
+}
+
 const removePosition: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = (id: number) => {
   return async (dispatch: Dispatch<State>) => {
     await requestToMatchService.removeUserPosition(id);
     return dispatch(positionRemove(id));
+  };
+}
+
+const addSimpleTraitById: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (id: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    const simpleTrait = await requestToMatchService.addUserSimpleTraitById(id);
+    return dispatch(simpleTraitAdd(simpleTrait));
+  };
+}
+
+const addSimpleTraitByName: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (name: string) => {
+  return async (dispatch: Dispatch<State>) => {
+    const simpleTrait = await requestToMatchService.addUserSimpleTraitByName(name);
+    return dispatch(simpleTraitAdd(simpleTrait));
   };
 }
 
@@ -96,6 +144,9 @@ const removeSimpleTrait: ActionCreator<
 
 export {
   fetchProfile,
+  addPosition,
   removePosition,
+  addSimpleTraitById,
+  addSimpleTraitByName,
   removeSimpleTrait,
 };

@@ -13,7 +13,7 @@ func TestAddUserSimpleTraitByName(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			var err error
-			err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
+			userTrait, err := AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
 			assert.NoError(t, err)
 
 			var traits []data.UserSimpleTrait
@@ -26,6 +26,8 @@ func TestAddUserSimpleTraitByName(t *testing.T) {
 			assert.NotNil(t, traits[0].SimpleTrait)
 			assert.Equal(t, "Cycling", traits[0].SimpleTrait.Name)
 			assert.True(t, traits[0].SimpleTrait.IsUserGenerated)
+
+			assert.Equal(t, traits[0].Id, userTrait.Id)
 		},
 		TestName: "Test adding simple trait by name",
 	}
@@ -47,7 +49,7 @@ func TestAddUserSimpleTraitByNameAlreadyExists(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, 1, len(traits))
 
-			err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
+			_, err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "Cycling ")
 			assert.NoError(t, err)
 
 			db.Find(&traits)
@@ -82,7 +84,7 @@ func TestAddUserSimpleTraitByNameAlreadyExistsIgnoreCase(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, 1, len(traits))
 
-			err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "cycling ")
+			_, err = AddUserSimpleTraitByName(db, nil, data.TUserID(1), "cycling ")
 			assert.NoError(t, err)
 
 			db.Find(&traits)
@@ -113,7 +115,7 @@ func TestAddUserSimpleTraitById(t *testing.T) {
 			err := db.Save(&trait).Error
 			assert.NoError(t, err)
 
-			err = AddUserSimpleTraitById(db, data.TUserID(1), trait.Id)
+			userTrait, err := AddUserSimpleTraitById(db, data.TUserID(1), trait.Id)
 			assert.NoError(t, err)
 
 			var traits []data.UserSimpleTrait
@@ -125,6 +127,8 @@ func TestAddUserSimpleTraitById(t *testing.T) {
 			assert.Equal(t, data.SIMPLE_TRAIT_TYPE_UNDETERMINED, traits[0].SimpleTraitType)
 			assert.True(t, traits[0].SimpleTraitIsSensitive)
 			assert.Equal(t, trait, *traits[0].SimpleTrait)
+
+			assert.Equal(t, traits[0].Id, userTrait.Id)
 		},
 		TestName: "Test adding simple trait by id",
 	}
@@ -134,7 +138,7 @@ func TestAddUserSimpleTraitById(t *testing.T) {
 func TestAddUserSimpleTraitInvalidId(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			err := AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
+			_, err := AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
 			assert.Error(t, err)
 		},
 		TestName: "Test adding simple trait by id where trait doesn't exist",
@@ -153,7 +157,7 @@ func TestAddUserSimpleTraitAlreadyHaveMatching(t *testing.T) {
 			err = db.Save(&userTrait).Error
 			assert.NoError(t, err)
 
-			err = AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
+			_, err = AddUserSimpleTraitById(db, data.TUserID(1), data.TSimpleTraitID(1))
 			assert.Error(t, err)
 		},
 		TestName: "Test adding simple trait by id where they already have that trait",

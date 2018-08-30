@@ -35,7 +35,12 @@ import { headerStyle } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import autocompleteService from '../../services/autocomplete-service';
-import requestToMatchService from '../../services/request-to-match-service';
+import { ActionTypes } from '../../redux/profile/actions';
+import {
+  State as ProfileState,
+  addSimpleTraitById,
+  addSimpleTraitByName,
+} from '../../redux/profile/reducer';
 
 interface AddSimpleTraitFormData {
   simpleTrait: Select;
@@ -127,6 +132,8 @@ const AddSimpleTraitFormWithRedux =
   }))(AddSimpleTraitForm));
 
 interface DispatchActions {
+  addSimpleTraitById: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  addSimpleTraitByName: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
@@ -165,10 +172,10 @@ class AddSimpleTraitView extends Component<Props> {
       } else {
         if (simpleTrait.type === 'CUSTOM_ITEM') {
           const newTraitName = simpleTrait.name.trim();
-          await requestToMatchService.addUserSimpleTraitByName(newTraitName);
+          await this.props.addSimpleTraitByName(newTraitName);
           await this.props.infoToast(`Successfully added new trait "${newTraitName}"`);
         } else if (simpleTrait.type === 'ITEM') {
-          await requestToMatchService.addUserSimpleTraitById(simpleTrait.id as number);
+          await this.props.addSimpleTraitById(simpleTrait.id);
           await this.props.infoToast(`Successfully added trait "${simpleTrait.name}"`);
         } else {
           err = 'Invalid item type selected';
@@ -196,4 +203,8 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(null, { infoToast })(AddSimpleTraitView);
+export default connect(null, {
+  addSimpleTraitById,
+  addSimpleTraitByName,
+  infoToast,
+})(AddSimpleTraitView);
