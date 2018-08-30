@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import {
   ActivityIndicator,
   AppRegistry,
+  Alert,
   Button as ReactNativeButton,
   Dimensions,
   FlatList,
@@ -27,6 +28,7 @@ import {
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
+import Moment from 'moment';
 
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
@@ -35,7 +37,7 @@ import { Button, Card, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
-import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
+import { State as ProfileState, fetchProfile, removePosition } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
@@ -44,11 +46,17 @@ import Colors from '../services/colors';
 import QRCode from "react-native-qrcode";
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
+import { UserPosition } from '../models/position';
+import { UserSimpleTrait } from '../models/simple-trait';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
+const MAX_NUMBER_POSITIONS_SHOWN = 3;
+const MAX_NUMBER_SIMPLE_TRAITS_SHOWN = 5;
+
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removePosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -57,7 +65,17 @@ interface Props extends ProfileState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class ProfileView extends Component<Props> {
+interface State {
+  readonly showAllPositions: boolean;
+  readonly showAllSimpleTraits: boolean;
+};
+
+const initialState: State = {
+  showAllPositions: false,
+  showAllSimpleTraits: false,
+};
+
+class ProfileView extends Component<Props, State> {
   PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
@@ -68,11 +86,14 @@ class ProfileView extends Component<Props> {
   constructor(props: Props) {
     super(props);
 
+    this.state = initialState;
+
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.onChangePasswordPress = this.onChangePasswordPress.bind(this);
     this.onEditTraitsButtonPress = this.onEditTraitsButtonPress.bind(this);
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+    this.renderPosition = this.renderPosition.bind(this);
   }
 
   private async onLogoutPress() {
@@ -129,13 +150,12 @@ class ProfileView extends Component<Props> {
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Cohort</Text>
-        <Text>{ program + ', ' + gradYear }</Text>
+        <Text style={styles.cohortText}>{ program + ', ' + gradYear }</Text>
       </View>
     );
   }
 
   private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
-
     const buildItem = (label: string, value: string) => {
       return (
         <View key={label} style={styles.listItem}>
@@ -191,6 +211,99 @@ class ProfileView extends Component<Props> {
         {contactItems}
       </View>
     )
+  }
+
+  private static renderShowLessMore(isShown: boolean, show: () => void, hide: () => void) {
+    if (isShown) {
+      return (
+        <TouchableOpacity style={styles.listItem} onPress={hide}>
+          <Text style={styles.value}>Show less...</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity style={styles.listItem} onPress={show}>
+          <Text style={styles.value}>Show more...</Text>
+        </TouchableOpacity>
+      );
+    }
+  }
+
+  private renderPosition(pos: UserPosition) {
+    const dateFmt = "MMM YYYY";
+    const until = !pos.endDate ? 'present' : Moment(pos.endDate).format(dateFmt);
+    const frm = Moment(pos.startDate).format(dateFmt);
+
+    const onRemoveAccept = async () => await this.props.removePosition(pos.id);
+
+    const onRemovePress = () => {
+      Alert.alert(
+        'Remove Position',
+        `Are you sure you want to remove your position as ${pos.roleName} at ${pos.organizationName}?`,
+        [
+          {text: 'Cancel', onPress: () => null, style: 'cancel'},
+          {text: 'Remove', onPress: onRemoveAccept, style: 'destructive'},
+        ],
+      );
+    }
+
+    return (
+      <View key={ pos.id } style={styles.positionContainer}>
+        <Text style={styles.positionText}>
+          <Text style={styles.positionBold}>{ pos.roleName }</Text>
+          <Text> @ </Text>
+          <Text style={styles.positionBold}>{ pos.organizationName }</Text>
+          <Text>{'\n'}({ frm } - { until })</Text>
+        </Text>
+        <TouchableOpacity style={styles.positionDelete} onPress={onRemovePress}>
+          <MaterialIcons color={Colors.WHITE} name="close" size={18} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  private renderPositions() {
+    let { userPositions } = this.props.profile;
+    const { showAllPositions } = this.state;
+
+    const addPosition = () => this.props.navigation.navigate('AddPosition');
+
+    let bottomAction: ReactNode = null;
+    if (userPositions.isEmpty()) {
+      bottomAction = [
+        <Text key={'text'} style={styles.noTraitText}>You don't have any positions</Text>,
+        <Button
+          key={'button'}
+          buttonStyle={styles.noTraitButton}
+          title="Add position"
+          onPress={addPosition}
+          color={Colors.HIVE_ACCENT}
+        />,
+      ];
+    } else if (userPositions.size > MAX_NUMBER_POSITIONS_SHOWN) {
+      bottomAction = ProfileView.renderShowLessMore(showAllPositions,
+        () => this.setState({ showAllPositions: true }),
+        () => this.setState({ showAllPositions: false }));
+    }
+
+    userPositions = userPositions.sortBy(pos => pos.startDate).reverse().toList();
+    if (!showAllPositions) {
+      userPositions = userPositions.take(MAX_NUMBER_POSITIONS_SHOWN).toList();
+    }
+    const positionItems = userPositions.map(this.renderPosition).toJS();
+
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionHeader}>Positions</Text>
+        <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_ACCENT} />
+        </TouchableOpacity>
+        { positionItems }
+        <View style={styles.traitBottomActionContainer}>
+          { bottomAction }
+        </View>
+      </View>
+    );
   }
 
   private renderBody() {
@@ -249,6 +362,7 @@ class ProfileView extends Component<Props> {
             {this.renderProfile(bio)}
             {this.renderCohortInfo()}
             {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
+            {this.renderPositions()}
             <View style={styles.sectionContainer}>
             </View>
             <Button
@@ -312,7 +426,7 @@ class ProfileView extends Component<Props> {
 
 export default connect(
   ({ profile }: RootState) => profile,
-  { fetchProfile, infoToast, errorToast },
+  { fetchProfile, removePosition, infoToast, errorToast },
 )(ProfileView);
 
 const BUTTON_WIDTH = SCREEN_WIDTH - 80;
@@ -341,8 +455,7 @@ const styles = StyleSheet.create({
   listItem: {
     flex: 1,
     flexDirection: 'row',
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 5,
   },
   changePassButton: {
     width: BUTTON_WIDTH,
@@ -381,10 +494,49 @@ const styles = StyleSheet.create({
     fontSize: 18
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
   },
   value: {
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.HIVE_ACCENT
+  },
+  cohortText: {
+    fontSize: 16,
+    marginTop: 5,
+  },
+  positionContainer: {
+    backgroundColor: Colors.HIVE_ACCENT,
+    marginTop: 5,
+    padding: 5,
+    paddingRight: 20,
+    borderRadius: 5,
+  },
+  positionText: {
+    color: Colors.WHITE,
+    fontSize: 14,
+  },
+  positionBold: {
+    fontWeight: '700',
+  },
+  positionDelete: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+  },
+  traitBottomActionContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  addTraitButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  noTraitText: {
+    marginTop: 10,
+  },
+  noTraitButton: {
+    width: 200,
+    marginTop: 10,
   },
 });

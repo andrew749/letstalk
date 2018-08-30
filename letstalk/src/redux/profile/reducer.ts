@@ -12,10 +12,12 @@ import {
 import { ProfileData } from '../../models/profile';
 import {
   fetch,
+  positionRemove,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import profileService from '../../services/profile-service';
+import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
   readonly profile?: ProfileData;
@@ -34,9 +36,18 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         fetchState: fetchStateReducer(action),
         profile: getDataOrCur(action, state.profile),
       };
+    case TypeKeys.POSITION_REMOVE:
+      const profile = state.profile === null ? null : {
+        ...state.profile,
+        userPositions: state.profile.userPositions.filter(pos => pos.id !== action.id).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
     default:
       // Ensure exhaustiveness of select
-      const _: never = action.type;
+      const _: never = action;
       return state;
   }
 };
@@ -54,4 +65,15 @@ const fetchProfile: ActionCreator<
   };
 }
 
-export { fetchProfile };
+const removePosition: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (id: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    await requestToMatchService.removeUserPosition(id);
+    return dispatch(positionRemove(id));
+  };
+}
+
+export {
+  fetchProfile,
+  removePosition,
+};

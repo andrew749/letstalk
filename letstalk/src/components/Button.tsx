@@ -22,9 +22,26 @@ interface Props {
   onPress(): void;
   title: string;
   icon?: string;
+  color?: string;
 }
 
 const Button: React.SFC<Props> = props => {
+  const styles = StyleSheet.create({
+    loginButtonStyle: {
+      flexDirection: 'row',
+      borderColor: props.color || Colors.HIVE_PRIMARY,
+      borderWidth: 0.5,
+      borderRadius: 5,
+      height: 28,
+      backgroundColor: 'white',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    loginButtonTextStyle: {
+      fontSize: 14,
+      color: props.color || Colors.HIVE_PRIMARY,
+    },
+  });
   const icon = props.icon ?
     <MaterialIcons
       style={{ position: 'absolute', left: 2, top: 2 }}
@@ -43,20 +60,3 @@ const Button: React.SFC<Props> = props => {
 };
 
 export default Button;
-
-const styles = StyleSheet.create({
-  loginButtonStyle: {
-    flexDirection: 'row',
-    borderColor: Colors.HIVE_PRIMARY,
-    borderWidth: 0.5,
-    borderRadius: 5,
-    height: 28,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loginButtonTextStyle: {
-    fontSize: 14,
-    color: Colors.HIVE_PRIMARY,
-  },
-});

@@ -1,3 +1,5 @@
+import { Action } from 'redux';
+
 import { ProfileData } from '../../models/profile';
 import {
   FetchReceiveAction,
@@ -10,11 +12,17 @@ import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH = 'PROFILE/FETCH',
+  POSITION_REMOVE = 'PROFILE/POSITIVE_REMOVE',
 }
 
 type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, ProfileData>;
 type ProfileErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type ProfileStartAction = FetchStartAction<TypeKeys.FETCH>;
+
+export interface PositionRemoveAction extends Action {
+  readonly type: TypeKeys.POSITION_REMOVE;
+  readonly id: number;
+}
 
 function receive(data: ProfileData): ProfileReceiveAction {
   return {
@@ -39,6 +47,10 @@ function start(): ProfileStartAction {
   };
 }
 
+export function positionRemove(id: number): PositionRemoveAction {
+  return { type: TypeKeys.POSITION_REMOVE, id };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, ProfileData> = {
   receive,
   error,
@@ -51,3 +63,4 @@ export type ActionTypes =
   | ProfileReceiveAction
   | ProfileErrorAction
   | ProfileStartAction
+  | PositionRemoveAction
