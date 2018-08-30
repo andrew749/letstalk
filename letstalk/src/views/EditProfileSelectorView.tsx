@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { Card } from '../components';
+import { Card, Header } from '../components';
 import { headerStyle } from './TopHeader';
 import Colors from '../services/colors';
 import { AnalyticsHelper } from '../services/analytics';
@@ -21,17 +21,17 @@ interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction & { profile: ProfileData }>;
 }
 
-export default class EditTraitsSelectorView extends Component<Props> {
-  ADD_TRAIT_SELECTOR_VIEW_IDENTIFIER = 'EditTraitsSelectorView';
+export default class EditProfileSelectorView extends Component<Props> {
+  EDIT_PROFILE_SELECTOR_VIEW_IDENTIFIER = 'EditProfileSelectorView';
 
   static navigationOptions = {
-    headerTitle: 'Edit Traits',
+    headerTitle: 'Edit Profile',
     headerStyle,
   }
 
   async componentDidMount() {
     this.props.navigation.addListener('willFocus', (route) => {
-      AnalyticsHelper.getInstance().recordPage(this.ADD_TRAIT_SELECTOR_VIEW_IDENTIFIER);
+      AnalyticsHelper.getInstance().recordPage(this.EDIT_PROFILE_SELECTOR_VIEW_IDENTIFIER);
     });
   }
 
@@ -54,6 +54,13 @@ export default class EditTraitsSelectorView extends Component<Props> {
   }
 
   render() {
+    const editPersonalInfoCard = this.renderTraitCard(
+      'Edit Personal Info',
+      'ProfileEdit',
+      'Edit info such as your name, phone number, mentorship preference, hometown and bio. Also, ' +
+      'change your profile picture.',
+    );
+
     // TODO: Copies
     const traitTypes = [
       {
@@ -78,15 +85,20 @@ export default class EditTraitsSelectorView extends Component<Props> {
       return this.renderTraitCard(name, editView, description)
     });
 
-    const description =
+    const traitDescription =
       'Traits describe who you are. The more we know about you, the better we can help you find ' +
       'others that share common interests and aspirations, leading to awesome new friendships ' +
       'and valuable mentorships.';
 
     return (
       <ScrollView style={styles.container}>
-        <Text>{ description }</Text>
+        <Header>Personal Info</Header>
         <View style={styles.buttonContainer}>
+          { editPersonalInfoCard }
+        </View>
+        <Header>Traits</Header>
+        <Text style={styles.descriptionText}>{ traitDescription }</Text>
+        <View style={[styles.buttonContainer, { paddingBottom: 20 }]}>
           { traitCards }
         </View>
       </ScrollView>
@@ -118,5 +130,9 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     alignItems: 'center',
-  }
+  },
+  descriptionText: {
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+  },
 });

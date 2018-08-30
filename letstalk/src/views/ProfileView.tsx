@@ -33,7 +33,7 @@ import Moment from 'moment';
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
 import {fbLogin} from '../services/fb';
-import { Button, Card, Header } from '../components';
+import { Button, Card, FloatingButton, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -389,7 +389,7 @@ class ProfileView extends Component<Props, State> {
 
     return (
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionHeader}>Simple Traits</Text>
+        <Text style={styles.sectionHeader}>Traits</Text>
         <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
           <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
         </TouchableOpacity>
@@ -438,23 +438,6 @@ class ProfileView extends Component<Props, State> {
 
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
-    // TODO: Remove and replace with floating button
-    const editButton = <Icon
-      name='pencil'
-      type='font-awesome'
-      color={Colors.HIVE_PRIMARY}
-      containerStyle={styles.editButton}
-      onPress={() => navigate('ProfileEdit')}
-    />;
-    // With this:
-    // <Button
-    //   buttonStyle={styles.logoutButton}
-    //   textStyle={styles.logoutButtonText}
-    //   onPress={this.onEditTraitsButtonPress}
-    //   title='Edit Traits'
-    // />
-
-    // TODO: Make edit traits button floating.
     return (
       <View>
         <ScrollView contentContainerStyle={styles.container}>
@@ -462,7 +445,6 @@ class ProfileView extends Component<Props, State> {
             {this.renderQrCode()}
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <Header>{headerText}</Header>
-            {editButton}
             <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
             {this.renderProfile(bio)}
             {this.renderCohortInfo()}
@@ -487,6 +469,9 @@ class ProfileView extends Component<Props, State> {
             </View>
           </View>
         </ScrollView>
+        <FloatingButton title="Edit Profile" onPress={() => {
+          navigate('EditProfileSelector', { profile: this.props.profile });
+        }} />
         <AllFilterableModals
           onSelectSuccess={() => {
             this.props.navigation.navigate({ routeName: 'Requests' });
@@ -536,7 +521,7 @@ const BUTTON_WIDTH = SCREEN_WIDTH - 80;
 const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 65,
     backgroundColor: 'white',
     minHeight: '100%'
   },
@@ -549,11 +534,6 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 18,
     color: Colors.HIVE_SUBDUED
-  },
-  editButton: {
-    position: 'absolute',
-    right: 0,
-    margin: 20
   },
   listItem: {
     flex: 1,

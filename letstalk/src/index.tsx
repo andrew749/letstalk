@@ -41,7 +41,7 @@ import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
 import QrScannerView from "./views/QrScannerView";
 import NotificationContentView from './views/NotificationContentView';
-import EditTraitsSelectorView from './views/EditTraitsSelectorView';
+import EditProfileSelectorView from './views/EditProfileSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
@@ -195,8 +195,8 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   NotificationContent: {
     screen: NotificationContentView,
   },
-  EditTraitsSelector: {
-    screen: EditTraitsSelectorView,
+  EditProfileSelector: {
+    screen: EditProfileSelectorView,
   },
   ChangeCohort: {
     screen: ChangeCohortView,
