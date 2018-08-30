@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-  var baseUrl = "http://localhost:80/v1";
+  var baseUrl = "https://api.hiveapp.org/v1";
 
   function getVerifyEmailRequestId() {
     var searchParams = new URLSearchParams(window.location.search);
