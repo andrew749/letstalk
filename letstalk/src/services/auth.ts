@@ -4,7 +4,7 @@ import { AsyncStorage } from 'react-native';
 
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
-import {FORGOT_PASSWORD_ROUTE} from './constants';
+import {FORGOT_PASSWORD_ROUTE, SEND_EMAIL_VERIFICATION_ROUTE} from './constants';
 import {Notifications, Permissions} from "expo";
 
 export class Auth {
@@ -55,6 +55,11 @@ export class Auth {
 
   async forgotPassword(email: string): Promise<void> {
     const resp = await requestor.post(FORGOT_PASSWORD_ROUTE, {"email": email});
+  }
+
+  async sendVerificationEmail(email: string): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const resp = await requestor.post(SEND_EMAIL_VERIFICATION_ROUTE, {"email": email}, sessionToken);
   }
 
   async linkFB(): Promise<boolean> {

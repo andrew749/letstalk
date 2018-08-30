@@ -101,6 +101,12 @@ class HomeView extends Component<Props, State> {
 
   async componentWillReceiveProps(nextProps: Props) {
     if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_created') {
+      // Email not yet verified, so take to email verification page
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
+      }));
+    } else if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_email_verified') {
       // Account not yet setup, so take to onboarding page
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
@@ -327,7 +333,9 @@ class HomeView extends Component<Props, State> {
     const { state } = this.props.bootstrap;
     switch (state) {
       case 'account_created':
-        // Should in reality not be shown, since we never show home page for account_created
+        // fallthrough
+      case 'account_email_verified':
+        // Should in reality not be shown, since we never show home page until state account_setup.
         return (
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for you to finish onboarding</Text>
