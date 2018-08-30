@@ -42,8 +42,8 @@ export default class EditTraitsSelectorView extends Component<Props> {
       await navigation.navigate(editView, profile);
     };
     return (
-      <TouchableOpacity onPress={onPress}>
-        <Card key={name} style={styles.traitCard}>
+      <TouchableOpacity key={name} onPress={onPress}>
+        <Card style={styles.traitCard}>
           <View style={styles.nameContainer}>
             <Text style={styles.traitTypeTitle}>{name}</Text>
           </View>

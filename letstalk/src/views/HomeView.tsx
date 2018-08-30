@@ -285,7 +285,7 @@ class HomeView extends Component<Props, State> {
     const elements: Array<ReactNode> = [];
     const pushRels = (title: string, rels: Immutable.List<ReactNode>) => {
       if (rels.size > 0) {
-        elements.push(<Header>{ title + (rels.size > 1 ? 's' : '') }</Header>);
+        elements.push(<Header key={title}>{ title + (rels.size > 1 ? 's' : '') }</Header>);
         elements.push(rels.toJS());
       }
     };
@@ -294,7 +294,7 @@ class HomeView extends Component<Props, State> {
     pushRels('Your Mentee', mentees);
 
     if (connections.size > 0) {
-      elements.push(<Header>Your Connections</Header>);
+      elements.push(<Header key={'Your Connections'}>Your Connections</Header>);
       elements.push(connections.toJS());
     }
 

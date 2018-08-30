@@ -111,14 +111,27 @@ class ProfileView extends Component<Props> {
     await this.props.fetchProfile();
   }
 
-  private renderProfile(gradYear: string, program: string, bio: string | null) {
+  private renderProfile(bio: string | null) {
     const bioStr = bio === null ? 'Add bio by editing profile' : bio;
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.description}>{ bioStr }</Text>
-        <Text style={styles.profileTitle}>{program}, {gradYear}</Text>
       </View>
     )
+  }
+
+  private renderCohortInfo() {
+    const {
+      programId,
+      gradYear,
+    } = this.props.profile;
+    const program = programById(programId);
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionHeader}>Cohort</Text>
+        <Text>{ program + ', ' + gradYear }</Text>
+      </View>
+    );
   }
 
   private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
@@ -147,7 +160,11 @@ class ProfileView extends Component<Props> {
 
     if (fbLink !== null) {
       contactItems.push(
-        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+        <TouchableOpacity
+          key={'facebook'}
+          style={styles.listItem}
+          onPress={() => Linking.openURL(fbLink)}
+        >
           <MaterialIcons name="face" size={24} />
           <Text style={styles.label}>Facebook</Text>
         </TouchableOpacity>
@@ -156,6 +173,7 @@ class ProfileView extends Component<Props> {
       // link fb profile
       contactItems.push(
         <TouchableOpacity
+          key={'facebook'}
           style={styles.listItem}
           onPress={async () => {
             await auth.linkFB();
@@ -179,9 +197,8 @@ class ProfileView extends Component<Props> {
     const { navigate } = this.props.navigation;
 
     const {
-      programId,
-      gradYear,
-      sequenceId,
+      userPositions,
+      userSimpleTraits,
     } = this.props.profile;
 
     const {
@@ -209,9 +226,6 @@ class ProfileView extends Component<Props> {
     const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
     const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
 
-    const sequence = sequenceById(sequenceId);
-    const program = programById(programId);
-
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
     const editButton = <Icon
@@ -222,6 +236,7 @@ class ProfileView extends Component<Props> {
       onPress={() => navigate('ProfileEdit')}
     />;
 
+    // TODO: Make edit traits button floating.
     return (
       <View>
         <ScrollView contentContainerStyle={styles.container}>
@@ -229,18 +244,19 @@ class ProfileView extends Component<Props> {
             {this.renderQrCode()}
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <Header>{headerText}</Header>
+            {editButton}
+            <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+            {this.renderProfile(bio)}
+            {this.renderCohortInfo()}
+            {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
+            <View style={styles.sectionContainer}>
+            </View>
             <Button
               buttonStyle={styles.logoutButton}
               textStyle={styles.logoutButtonText}
               onPress={this.onEditTraitsButtonPress}
               title='Edit Traits'
             />
-            {editButton}
-            <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-            {this.renderProfile(String(gradYear), program, bio)}
-            {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
-            <View style={styles.sectionContainer}>
-            </View>
             <Button
               buttonStyle={styles.changePassButton}
               onPress={this.onChangePasswordPress}
