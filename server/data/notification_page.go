@@ -11,6 +11,6 @@ type NotificationPage struct {
 	UserId         TUserID      `gorm:"primary_key;auto_increment:false"`
 	Notification   Notification `gorm:"not null;foreign_key:NotificationId"`
 	NotificationId uint         `gorm:"primary_key;auto_increment:false"`
-	TemplateLink   string       `gorm:"not null;size:100"`
+	TemplateLink   string       `gorm:"not null;size:190"`
 	Attributes     JSONBlob     `gorm:"not null;type:text"`
 }

@@ -32,9 +32,9 @@ type Notification struct {
 	gorm.Model
 	UserId        TUserID    `gorm:"not null"`
 	User          User       `gorm:"foreignkey:UserId"`
-	Type          NotifType  `gorm:"not null;size:100"`
+	Type          NotifType  `gorm:"not null;size:190"`
 	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
-	State         NotifState `gorm:"not null;size:100"`
+	State         NotifState `gorm:"not null;size:190"`
 	Title         string     `gorm:"not null;size:190"`
 	Message       string     `gorm:"not null;type:text"`
 	ThumbnailLink *string    `gorm:"size:190"`
@@ -58,8 +58,8 @@ type ExpoPendingNotification struct {
 	gorm.Model
 	Notification   Notification `gorm:"foreign_key:NotificationId"`
 	NotificationId uint         `gorm:"primary_key;auto_increment:false"`
-	DeviceId       string       `gorm:"not null;primary_key;size:100"`
-	Receipt        *string      `gorm:"size:100"`
+	DeviceId       string       `gorm:"not null;primary_key;size:190"`
+	Receipt        *string      `gorm:"size:190"`
 	FailureMessage *string      `gorm:"type:text"`
 	FailureDetails *string      `gorm:"type:text"`
 }
