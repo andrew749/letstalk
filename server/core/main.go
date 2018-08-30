@@ -28,15 +28,14 @@ var (
 
 // Authentication flags
 var (
-	secretsPath = flag.String("secrets_path", "~/secrets.json", "path to secrets.json")
-	profiling   = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
-	isProd      = flag.Bool("PROD", false, "Whether to run in debug mode.")
-	useElastic  = flag.Bool("use_elastic", true, "Whether to create an Elasticsearch client")
+	profiling  = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
+	isProd     = flag.Bool("PROD", false, "Whether to run in debug mode.")
+	useElastic = flag.Bool("use_elastic", true, "Whether to create an Elasticsearch client")
 )
 
 func main() {
 	rlog.Info("Starting server")
-	flag.Parse()
+	utility.Bootstrap()
 
 	db, err := utility.GetDB()
 
@@ -82,8 +81,6 @@ func main() {
 		// add cpu profiling
 		pprof.Register(router, nil)
 	}
-
-	secrets.LoadSecrets(*secretsPath)
 
 	// setup sentry logging
 	raven.SetDSN(secrets.GetSecrets().SentryDSN)
