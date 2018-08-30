@@ -6,8 +6,14 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
-func migrateDB(db *gorm.DB) error {
-	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
+func migrateDB(db *gorm.DB) {
+	options := gormigrate.Options{
+		TableName:      "migrations",
+		IDColumnName:   "id",
+		IDColumnSize:   190,
+		UseTransaction: false,
+	}
+	m := gormigrate.New(db, &options, []*gormigrate.Migration{
 		{
 			ID: "1",
 			Migrate: func(tx *gorm.DB) error {
@@ -67,7 +73,7 @@ func migrateDB(db *gorm.DB) error {
 				tx.AutoMigrate(&Cohort{})
 				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
 				// exists.
-				tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(255)")
+				tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(190)")
 				tx.AutoMigrate(&UserCohort{})
 				return tx.Error
 			},
@@ -131,6 +137,16 @@ func migrateDB(db *gorm.DB) error {
 			},
 		},
 		{
+			ID: "Add book-keeping for monthly notification",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(SentMonthlyNotification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Verify email id",
 			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&VerifyEmailId{})
@@ -145,13 +161,12 @@ func migrateDB(db *gorm.DB) error {
 
 	if err := m.Migrate(); err != nil {
 		rlog.Errorf("Could not migrate: %v", err)
-		return err
+		panic(err)
 	}
 
 	rlog.Infof("Succesfully ran migration")
-	return nil
 }
 
-func CreateDB(db *gorm.DB) error {
-	return migrateDB(db)
+func CreateDB(db *gorm.DB) {
+	migrateDB(db)
 }

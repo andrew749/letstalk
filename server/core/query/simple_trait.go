@@ -53,7 +53,7 @@ func getOrCreateSimpleTrait(
 	var trait data.SimpleTrait
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
-		err := db.Where(&data.SimpleTrait{Name: name}).First(&trait).Error
+		err := db.Where("UPPER(name) = UPPER(?)", name).First(&trait).Error
 		if err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				trait = data.SimpleTrait{

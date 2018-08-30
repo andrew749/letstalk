@@ -32,13 +32,13 @@ type Notification struct {
 	gorm.Model
 	UserId        TUserID    `gorm:"not null"`
 	User          User       `gorm:"foreignkey:UserId"`
-	Type          NotifType  `gorm:"not null"`
+	Type          NotifType  `gorm:"not null;size:190"`
 	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
-	State         NotifState `gorm:"not null;default:UNREAD"`
-	Title         string     `gorm:"not null"`
-	Message       string     `gorm:"not null"`
-	ThumbnailLink *string
-	Data          JSONBlob `gorm:"not null" sql:"type:json"`
+	State         NotifState `gorm:"not null;size:190"`
+	Title         string     `gorm:"not null;size:190"`
+	Message       string     `gorm:"not null;type:text"`
+	ThumbnailLink *string    `gorm:"size:190"`
+	Data          JSONBlob   `gorm:"not null;type:text"`
 }
 
 func (u *NotifType) Scan(value interface{}) error { *u = NotifType(value.([]byte)); return nil }
@@ -58,10 +58,10 @@ type ExpoPendingNotification struct {
 	gorm.Model
 	Notification   Notification `gorm:"foreign_key:NotificationId"`
 	NotificationId uint         `gorm:"primary_key;auto_increment:false"`
-	DeviceId       string       `gorm:"not null;primary_key;"`
-	Receipt        *string      `gorm:""`
-	FailureMessage *string
-	FailureDetails *string
+	DeviceId       string       `gorm:"not null;primary_key;size:190"`
+	Receipt        *string      `gorm:"size:190"`
+	FailureMessage *string      `gorm:"type:text"`
+	FailureDetails *string      `gorm:"type:text"`
 }
 
 // NotificationSentToExpoDevice Check if a specific notification was sent to a specfic device

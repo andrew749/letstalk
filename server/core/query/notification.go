@@ -46,6 +46,7 @@ func NotificationDataToApi(notification data.Notification) (*api.Notification, e
 		Type:           notification.Type,
 		State:          notification.State,
 		Timestamp:      notification.Timestamp,
+		Title:          notification.Title,
 		Message:        notification.Message,
 		ThumbnailLink:  notification.ThumbnailLink,
 		Data:           dataMap,

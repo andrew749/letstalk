@@ -44,6 +44,7 @@ import NotificationContentView from './views/NotificationContentView';
 import EditTraitsSelectorView from './views/EditTraitsSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
+import AddPositionView from './views/trait-editors/AddPositionView';
 import VerifyEmailView from "./views/VerifyEmailView";
 
 import NotificationService, { Notification } from './services/notification-service';
@@ -203,6 +204,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   AddSimpleTrait: {
     screen: AddSimpleTraitView,
+  },
+  AddPosition: {
+    screen: AddPositionView,
   },
   VerifyEmail: {
     screen: VerifyEmailView,

@@ -3,6 +3,7 @@ package query
 import (
 	"letstalk/server/core/test"
 	"letstalk/server/data"
+	"strings"
 	"testing"
 
 	"github.com/jinzhu/gorm"
@@ -94,6 +95,54 @@ func TestAddUserPositionByNamesAlreadyExist(t *testing.T) {
 			assert.Equal(t, org, *userPositions[0].Organization)
 		},
 		TestName: "Test adding user position by names which already exist",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestAddUserPositionByNamesAlreadyExistIgnoreCase(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			role := data.Role{
+				Name:            "Software Engineering Intern",
+				IsUserGenerated: false,
+			}
+			err := db.Save(&role).Error
+			assert.NoError(t, err)
+
+			org := data.Organization{
+				Name:            "Facebook",
+				Type:            data.ORGANIZATION_TYPE_COMPANY,
+				IsUserGenerated: false,
+			}
+			err = db.Save(&org).Error
+			assert.NoError(t, err)
+
+			roleName := strings.ToLower(role.Name)
+			orgName := strings.ToLower(org.Name)
+			startDate := "2018-01-01"
+			endDate := "2018-04-01"
+			err = AddUserPosition(
+				db, nil, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
+			)
+			assert.NoError(t, err)
+
+			var userPositions []data.UserPosition
+			err = db.Where(
+				&data.UserSimpleTrait{UserId: 1},
+			).Preload("Role").Preload("Organization").Find(&userPositions).Error
+			assert.NoError(t, err)
+			assert.Equal(t, 1, len(userPositions))
+			assert.Equal(t, org.Id, userPositions[0].OrganizationId)
+			assert.Equal(t, org.Name, userPositions[0].OrganizationName)
+			assert.Equal(t, org.Type, userPositions[0].OrganizationType)
+			assert.Equal(t, role.Id, userPositions[0].RoleId)
+			assert.Equal(t, role.Name, userPositions[0].RoleName)
+			assert.Equal(t, startDate, userPositions[0].StartDate)
+			assert.Equal(t, endDate, *userPositions[0].EndDate)
+			assert.Equal(t, role, *userPositions[0].Role)
+			assert.Equal(t, org, *userPositions[0].Organization)
+		},
+		TestName: "Test adding user position by names which already exist while ignoring case",
 	}
 	test.RunTestWithDb(thisTest)
 }

@@ -40,13 +40,13 @@ func GetSqliteDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = provisionDatabase(db)
+	provisionDatabase(db)
 
 	return db, err
 }
 
-func provisionDatabase(db *gorm.DB) error {
-	return data.CreateDB(db)
+func provisionDatabase(db *gorm.DB) {
+	data.CreateDB(db)
 }
 
 func TearDownLocalDatabase() {

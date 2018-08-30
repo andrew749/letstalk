@@ -12,6 +12,7 @@ import {
   REMOVE_RTM_MATCHES_ROUTE,
   USER_SIMPLE_TRAIT_ROUTE,
   USER_SIMPLE_TRAIT_BY_NAME_ROUTE,
+  USER_POSITION,
 } from './constants';
 
 type GetAllCredentialsResponse = Array<Credential>;
@@ -25,6 +26,14 @@ interface AddCredentialRequestResponse { credentialId: number }
 
 interface AddUserSimpleTraitByIdRequest { simpleTraitId: number }
 interface AddUserSimpleTraitByNameRequest { name: string }
+interface AddUserPositionRequest {
+  roleId?: number;
+  roleName?: string;
+  organizationId?: number;
+  organizationName?: string;
+  startDate: string;
+  endDate?: string;
+}
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -102,6 +111,11 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const req: AddUserSimpleTraitByNameRequest = { name };
     await this.requestor.post(USER_SIMPLE_TRAIT_BY_NAME_ROUTE, req, sessionToken);
+  }
+
+  async addUserPosition(req: AddUserPositionRequest): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    await this.requestor.post(USER_POSITION, req, sessionToken);
   }
 }
 
