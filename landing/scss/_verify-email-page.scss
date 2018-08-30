@@ -1,0 +1,61 @@
+.verify-email {
+  margin-top: 100px !important;
+  display: flex;
+  border-radius: 5px;
+  width: 75vw;
+  background-color: $primary;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  max-width: 600px;
+
+  h3 {
+    color: white;
+  }
+}
+
+.single-page-about {
+  margin-bottom: 20px;
+}
+
+.row.center {
+  justify-content: center;
+}
+
+#logo {
+  height: 130px;
+  margin: 20px;
+}
+
+.background-about {
+  height: 1000px;
+}
+
+.overlay-about {
+  height: 1000px;
+  top: 0;
+}
+
+@media (min-width: 768px) {
+  .about {
+    width: 60vw;
+    text-align: left;
+    p {
+      font-size: 1.2rem;
+    }
+  }
+
+  .background-about {
+    bottom: 0;
+    height: 100%;
+  }
+
+  .overlay-about {
+    height: 100%;
+    bottom: 0;
+  }
+
+  .single-page-about {
+    margin-bottom: 0;
+  }
+}
