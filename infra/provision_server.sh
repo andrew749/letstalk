@@ -30,7 +30,8 @@ install_dependencies() {
       docker-compose \
       jq \
       software-properties-common \
-      python-certbot-nginx
+      python-certbot-nginx \
+      apt-transport-https
 }
 
 setup_docker() {
@@ -51,6 +52,20 @@ setup_startup() {
   update-rc.d server defaults
 }
 
+setup_datadog() {
+  sudo sh -c "echo 'deb https://apt.datadoghq.com/ stable 6' > /etc/apt/sources.list.d/datadog.list"
+  sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 382E94DE
+
+  # install agent
+  sudo apt-get update
+  sudo apt-get install datadog-agent
+
+  # configure agent
+  read -p "Datadog api key: " DATADOG_API_KEY
+  sudo sh -c "sed 's/api_key:.*/api_key: $DATADOG_API_KEY/' /var/app/letstalk/infra/config/datadog.yaml > /etc/datadog-agent/datadog.yaml"
+  systemctl start datadog-agent
+  systemctl enable datadog-agent
+}
 
 # start of actual program
 create_admin_group
@@ -58,6 +73,7 @@ create_admin_user
 install_dependencies
 generate_ssh
 setup_docker
+setup_datadog
 
 echo "\033[92mAdding source code.\033[0m"
 git clone git@github.com:andrew749/letstalk.git
