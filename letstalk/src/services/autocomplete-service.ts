@@ -1,4 +1,6 @@
 import requestor, { Requestor } from './requests';
+import { SimpleTrait } from '../models/simple-trait';
+import { Role, Organization } from '../models/position';
 import {
   AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE,
   AUTOCOMPLETE_ROLE_ROUTE,
@@ -8,12 +10,6 @@ import {
 interface AutocompleteRequest {
   readonly prefix: string;
   readonly size: number;
-}
-
-// TODO: Add other fields
-interface SimpleTrait {
-  readonly id: number;
-  readonly name: string;
 }
 
 class AutocompleteService {
@@ -29,13 +25,13 @@ class AutocompleteService {
     return res
   }
 
-  async autocompleteOrganization(prefix: string, size: number): Promise<Array<SimpleTrait>> {
+  async autocompleteOrganization(prefix: string, size: number): Promise<Array<Organization>> {
     const req: AutocompleteRequest = { prefix, size };
     const res = await this.requestor.post(AUTOCOMPLETE_ORGANIZATION_ROUTE, req);
     return res
   }
 
-  async autocompleteRole(prefix: string, size: number): Promise<Array<SimpleTrait>> {
+  async autocompleteRole(prefix: string, size: number): Promise<Array<Role>> {
     const req: AutocompleteRequest = { prefix, size };
     const res = await this.requestor.post(AUTOCOMPLETE_ROLE_ROUTE, req);
     return res

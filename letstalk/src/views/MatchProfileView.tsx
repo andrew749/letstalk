@@ -40,6 +40,13 @@ import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
 import { headerStyle } from './TopHeader';
+import {
+  CohortInfo,
+  PersonalInfo,
+  UserPositions,
+  UserSimpleTraits,
+  styles,
+} from './profile-components/ProfileComponents';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -76,17 +83,13 @@ class MatchProfileView extends Component<Props> {
     await this.props.fetchMatchProfile(userId);
   }
 
-  private renderProfile(gradYear: string, program: string, bio: string | null) {
-    const bioStr = bio === null ? 'N/A' : bio;
-    return (
-      <View style={styles.sectionContainer}>
-        <Text style={styles.description}>{ bioStr }</Text>
-        <Text style={styles.profileTitle}>{program}, {gradYear}</Text>
-      </View>
-    )
-  }
-
-  private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
+  private renderContactInfo() {
+    const {
+      email,
+      phoneNumber,
+      fbId,
+      fbLink,
+    } = this.props.profile;
 
     const buildItem = (label: string, value: string, link: string) => {
       const onPress = () => Linking.openURL(link);
@@ -136,53 +139,35 @@ class MatchProfileView extends Component<Props> {
   private renderBody() {
     const { navigate } = this.props.navigation;
 
-    const {
-      programId,
-      gradYear,
-      sequenceId,
-    } = this.props.profile;
-
-    const {
-      gender,
-      email,
-      birthdate,
-      phoneNumber,
-      fbId,
-      fbLink,
-      bio,
-      hometown,
-    } = this.props.profile;
-
-    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
     let userId;
     if (this.props.profile) {
       userId = this.props.profile.userId.toString();
     }
-    const headerText = this.props.profile ?
-      this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
-
-    const genderStr = capitalize(genderIdToString(gender));
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
-    const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
-
-    const sequence = sequenceById(sequenceId);
-    const program = programById(programId);
-
-    const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Card style={styles.contentContainer} >
+        <View style={styles.contentContainer} >
           <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-          <Header>{headerText}</Header>
-          <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-          {this.renderProfile(String(gradYear), program, bio)}
-          {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
-          <View style={styles.sectionContainer}>
-          </View>
-        </Card>
+          <PersonalInfo
+            {...this.props.profile}
+            navigation={this.props.navigation}
+          />
+          <CohortInfo
+            programId={this.props.profile.programId}
+            sequenceId={this.props.profile.sequenceId}
+            gradYear={this.props.profile.gradYear}
+            navigation={this.props.navigation}
+          />
+          {this.renderContactInfo()}
+          <UserPositions
+            userPositions={this.props.profile.userPositions}
+            navigation={this.props.navigation}
+          />
+          <UserSimpleTraits
+            userSimpleTraits={this.props.profile.userSimpleTraits}
+            navigation={this.props.navigation}
+          />
+        </View>
       </ScrollView>
     );
   }
@@ -210,66 +195,3 @@ export default connect(
   ({ matchProfile }: RootState) => matchProfile,
   { fetchMatchProfile },
 )(MatchProfileView);
-
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    minHeight: '100%'
-  },
-  contentContainer: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'column',
-    margin: 20,
-    padding: 20,
-  },
-  description: {
-    fontSize: 18,
-    color: Colors.HIVE_SUBDUED
-  },
-  editButton: {
-    position: 'absolute',
-    right: 0,
-    margin: 20
-  },
-  listItem: {
-    flex: 1,
-    flexDirection: 'row',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  logoutButton: {
-    color: Colors.HIVE_ERROR
-  },
-  profileTitle: {
-    fontSize: 18,
-    marginTop: 10,
-    alignSelf: 'flex-end'
-  },
-  profilePicture: {
-    margin: 20
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    alignSelf: 'flex-start',
-  },
-  sectionContainer: {
-    width: "100%",
-    backgroundColor: 'white',
-    flex: 1,
-    flexDirection: 'column',
-    marginTop: 20
-  },
-  subHeaderText: {
-    fontSize: 18
-  },
-  label: {
-    fontSize: 18,
-  },
-  value: {
-    fontSize: 18,
-    color: Colors.HIVE_ACCENT
-  },
-});

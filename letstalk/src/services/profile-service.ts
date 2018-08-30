@@ -165,17 +165,23 @@ export class RemoteProfileService implements ProfileService {
     return Immutable.List(response);
   }
 
-  async me(): Promise<ProfileData> {
+  private async getProfile(url: string): Promise<ProfileData> {
     const sessionToken = await this.auth.getSessionToken();
-    const response: ProfileData = await this.requestor.get(ME_ROUTE, sessionToken);
-    return response;
+    const response: ProfileData = await this.requestor.get(url, sessionToken);
+    return {
+      ...response,
+      userPositions: Immutable.List(response.userPositions),
+      userSimpleTraits: Immutable.List(response.userSimpleTraits),
+    };
+  }
+
+  async me(): Promise<ProfileData> {
+    return this.getProfile(ME_ROUTE);
   }
 
   async matchProfile(userId: number): Promise<ProfileData> {
-    const sessionToken = await this.auth.getSessionToken();
     const url = MATCH_PROFILE_ROUTE + '/' + userId;
-    const response: ProfileData = await this.requestor.get(url, sessionToken);
-    return response;
+    return this.getProfile(url);
   }
 
   async getProfilePicUrl(userId: string): Promise<string> {

@@ -148,7 +148,7 @@ func addUserPosition(
 	organization data.Organization,
 	startDate string,
 	endDate *string,
-) errs.Error {
+) (*data.UserPosition, errs.Error) {
 	userPosition := data.UserPosition{
 		UserId:           userId,
 		OrganizationId:   organization.Id,
@@ -160,9 +160,9 @@ func addUserPosition(
 		EndDate:          endDate,
 	}
 	if err := db.Create(&userPosition).Error; err != nil {
-		return errs.NewDbError(err)
+		return nil, errs.NewDbError(err)
 	}
-	return nil
+	return &userPosition, nil
 }
 
 // TODO: Move elsewhere
@@ -183,14 +183,14 @@ func AddUserPosition(
 	organizationName *string,
 	startDate string,
 	endDate *string,
-) errs.Error {
+) (*data.UserPosition, errs.Error) {
 	if !isValidDate(startDate) {
-		return errs.NewRequestError(
+		return nil, errs.NewRequestError(
 			fmt.Sprintf("startDate %s should be in YYYY-MM-DD format", startDate),
 		)
 	}
 	if endDate != nil && !isValidDate(*endDate) {
-		return errs.NewRequestError(
+		return nil, errs.NewRequestError(
 			fmt.Sprintf("endDate %s should be in YYYY-MM-DD format", *endDate),
 		)
 	}
@@ -209,7 +209,7 @@ func AddUserPosition(
 		err = errs.NewRequestError("Must provide either roleId or roleName")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if organizationId != nil {
@@ -220,7 +220,7 @@ func AddUserPosition(
 		err = errs.NewRequestError("Must provide either organizationId or organizationName")
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return addUserPosition(db, userId, *role, *organization, startDate, endDate)

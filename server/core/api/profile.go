@@ -7,6 +7,8 @@ type ProfileResponse struct {
 	UserPersonalInfo
 	UserContactInfo
 	Cohort
+	UserPositions    []UserPosition    `json:"userPositions"`
+	UserSimpleTraits []UserSimpleTrait `json:"userSimpleTraits"`
 }
 
 type ProfileEditRequest struct {

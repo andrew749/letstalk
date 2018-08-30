@@ -29,7 +29,7 @@ func TestAddUserPositionByIds(t *testing.T) {
 			assert.NoError(t, err)
 
 			startDate := "2018-01-01"
-			err = AddUserPosition(db, nil, data.TUserID(1), &role.Id, nil, &org.Id, nil, startDate, nil)
+			userPos, err := AddUserPosition(db, nil, data.TUserID(1), &role.Id, nil, &org.Id, nil, startDate, nil)
 			assert.NoError(t, err)
 
 			var userPositions []data.UserPosition
@@ -47,6 +47,8 @@ func TestAddUserPositionByIds(t *testing.T) {
 			assert.Nil(t, userPositions[0].EndDate)
 			assert.Equal(t, role, *userPositions[0].Role)
 			assert.Equal(t, org, *userPositions[0].Organization)
+
+			assert.Equal(t, userPositions[0].Id, userPos.Id)
 		},
 		TestName: "Test adding user position by ids",
 	}
@@ -73,7 +75,7 @@ func TestAddUserPositionByNamesAlreadyExist(t *testing.T) {
 
 			startDate := "2018-01-01"
 			endDate := "2018-04-01"
-			err = AddUserPosition(
+			_, err = AddUserPosition(
 				db, nil, data.TUserID(1), nil, &role.Name, nil, &org.Name, startDate, &endDate,
 			)
 			assert.NoError(t, err)
@@ -121,7 +123,7 @@ func TestAddUserPositionByNamesAlreadyExistIgnoreCase(t *testing.T) {
 			orgName := strings.ToLower(org.Name)
 			startDate := "2018-01-01"
 			endDate := "2018-04-01"
-			err = AddUserPosition(
+			_, err = AddUserPosition(
 				db, nil, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
 			)
 			assert.NoError(t, err)
@@ -155,7 +157,7 @@ func TestAddUserPositionByNameNotExists(t *testing.T) {
 			startDate := "2018-01-01"
 			endDate := "2018-04-01"
 			var err error
-			err = AddUserPosition(
+			_, err = AddUserPosition(
 				db, nil, data.TUserID(1), nil, &roleName, nil, &orgName, startDate, &endDate,
 			)
 			assert.NoError(t, err)
@@ -186,7 +188,7 @@ func TestAddUserPositionMissingRole(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			orgName := "Facebook"
-			err := AddUserPosition(db, nil, data.TUserID(1), nil, nil, nil, &orgName, "2018-01-01", nil)
+			_, err := AddUserPosition(db, nil, data.TUserID(1), nil, nil, nil, &orgName, "2018-01-01", nil)
 			assert.Error(t, err)
 			assert.Equal(t, "Must provide either roleId or roleName", err.Error())
 		},
@@ -199,7 +201,7 @@ func TestAddUserPositionMissingOrg(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			roleName := "Software Engineering Intern"
-			err := AddUserPosition(db, nil, data.TUserID(1), nil, &roleName, nil, nil, "2018-01-01", nil)
+			_, err := AddUserPosition(db, nil, data.TUserID(1), nil, &roleName, nil, nil, "2018-01-01", nil)
 			assert.Error(t, err)
 			assert.Equal(t, "Must provide either organizationId or organizationName", err.Error())
 		},
@@ -209,7 +211,7 @@ func TestAddUserPositionMissingOrg(t *testing.T) {
 }
 
 func TestAddUserPositionInvalidStartDate(t *testing.T) {
-	err := AddUserPosition(
+	_, err := AddUserPosition(
 		nil, nil, data.TUserID(1), nil, nil, nil, nil, "Monday, June 2nd, 2018", nil)
 	assert.Error(t, err)
 	assert.Equal(t, "startDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
@@ -217,7 +219,7 @@ func TestAddUserPositionInvalidStartDate(t *testing.T) {
 
 func TestAddUserPositionInvalidEndDate(t *testing.T) {
 	endDate := "Monday, June 2nd, 2018"
-	err := AddUserPosition(nil, nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-01", &endDate)
+	_, err := AddUserPosition(nil, nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-01", &endDate)
 	assert.Error(t, err)
 	assert.Equal(t, "endDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
 }
