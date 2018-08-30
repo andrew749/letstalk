@@ -10,7 +10,10 @@ ADMINUSER="server"
 
 # directories for the app
 HOME=/var/app/letstalk
+APP=$HOME
 SERVER=${HOME}/server
+DATADOG_CONF=/etc/datadog-agent/conf.d
+DATADOG_DOCKER_CONF=$DATADOG_CONF/docker.d
 
 # create group and add the current user to the group
 create_admin_group() {
@@ -65,6 +68,15 @@ setup_datadog() {
   sudo sh -c "sed 's/api_key:.*/api_key: $DATADOG_API_KEY/' /var/app/letstalk/infra/config/datadog.yaml > /etc/datadog-agent/datadog.yaml"
   systemctl start datadog-agent
   systemctl enable datadog-agent
+
+  # install agent checks
+  cp $APP/infra/monitoring/docker_daemon.yaml $DATADOG_DOCKER_CONF
+
+  #setup permissions
+  usermod -a -G docker dd-agent
+
+  # restart agent
+  systemctl restart datadog-agent
 }
 
 # start of actual program
