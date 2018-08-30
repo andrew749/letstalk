@@ -438,6 +438,7 @@ class ProfileView extends Component<Props, State> {
 
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
+    // TODO: Remove and replace with floating button
     const editButton = <Icon
       name='pencil'
       type='font-awesome'
@@ -445,12 +446,19 @@ class ProfileView extends Component<Props, State> {
       containerStyle={styles.editButton}
       onPress={() => navigate('ProfileEdit')}
     />;
+    // With this:
+    // <Button
+    //   buttonStyle={styles.logoutButton}
+    //   textStyle={styles.logoutButtonText}
+    //   onPress={this.onEditTraitsButtonPress}
+    //   title='Edit Traits'
+    // />
 
     // TODO: Make edit traits button floating.
     return (
       <View>
         <ScrollView contentContainerStyle={styles.container}>
-          <Card style={styles.contentContainer} >
+          <View style={styles.contentContainer} >
             {this.renderQrCode()}
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
             <Header>{headerText}</Header>
@@ -462,25 +470,22 @@ class ProfileView extends Component<Props, State> {
             {this.renderPositions()}
             {this.renderSimpleTraits()}
             <View style={styles.sectionContainer}>
+              <Text style={styles.sectionHeader}>Account Actions</Text>
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  buttonStyle={styles.changePassButton}
+                  onPress={this.onChangePasswordPress}
+                  title='Change Password'
+                />
+                <Button
+                  buttonStyle={styles.logoutButton}
+                  textStyle={styles.logoutButtonText}
+                  onPress={this.onLogoutPress}
+                  title='Logout'
+                />
+              </View>
             </View>
-            <Button
-              buttonStyle={styles.logoutButton}
-              textStyle={styles.logoutButtonText}
-              onPress={this.onEditTraitsButtonPress}
-              title='Edit Traits'
-            />
-            <Button
-              buttonStyle={styles.changePassButton}
-              onPress={this.onChangePasswordPress}
-              title='Change Password'
-            />
-            <Button
-              buttonStyle={styles.logoutButton}
-              textStyle={styles.logoutButtonText}
-              onPress={this.onLogoutPress}
-              title='Logout'
-            />
-          </Card>
+          </View>
         </ScrollView>
         <AllFilterableModals
           onSelectSuccess={() => {
@@ -532,13 +537,13 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
     paddingBottom: 10,
+    backgroundColor: 'white',
     minHeight: '100%'
   },
   contentContainer: {
     alignItems: 'center',
     flex: 1,
     flexDirection: 'column',
-    margin: 20,
     padding: 20,
   },
   description: {
@@ -583,7 +588,6 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     width: "100%",
-    backgroundColor: 'white',
     flex: 1,
     flexDirection: 'column',
     marginTop: 20
