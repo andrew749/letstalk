@@ -67,42 +67,77 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 		}
 		rlog.Debugf("Generated Notifications: %v", sendNotifications)
 
-		// send the batch
-		res, err := notification_api.SendNotifications(*sendNotifications)
-		if err != nil {
-			rlog.Error(err)
-			raven.CaptureError(err, nil)
-			return err
-		}
-		rlog.Debugf("Sent Notifications got response: %v", res)
+		// send each notification individually
+		// TODO: migrate to one project to fix this bug so we can send batches
+		for _, sendNotification := range *sendNotifications {
+			rlog.Debugf("Sending notification to %s", sendNotification.To)
 
-		// create pending notification for each message we tried to send
-		tx := db.Begin()
+			// this is what we need to do in the future
+			// res, err := notification_api.SendNotifications(*sendNotifications)
 
-		// for each notification response, add the receipt
-		// none of these should fail since we have a successful response from expo
-		for i, response := range res.Data {
-			rlog.Debug("Processing response: %v", response)
-			temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
-
-			// was this message errored
-			if response.Status == notification_api.ERROR_STATUS {
-				err := temp.MarkNotificationError(tx, response.Message, response.Details)
+			// ensure idempotent behaviour for each device
+			// if there is already a sent notification for this, don't send one
+			exists, err := data.ExistsPendingNotification(db, notification.ID, sendNotification.To)
+			if err != nil {
 				rlog.Error(err)
-				raven.CaptureError(err, nil)
 				continue
 			}
 
-			err = temp.MarkNotificationSent(tx, response.Id)
+			if exists == true {
+				rlog.Debug("Notification already sent")
+				continue
+			}
+
+			// instead send a single notification
+			res, err := notification_api.SendNotifications([]notification_api.ExpoNotification{sendNotification})
+
+			// if there was an error sending this notification (not 200 status code)
 			if err != nil {
 				rlog.Error(err)
 				raven.CaptureError(err, nil)
-				continue
+				return err
 			}
-			rlog.Debug("Done processing response")
-		}
 
-		return tx.Commit().Error
+			rlog.Debugf("Sent Notifications and got response: %v", res)
+			// create pending notification for each message we tried to send
+			tx := db.Begin()
+
+			// for each notification response, add the receipt
+			// none of these should fail since we have a successful response from expo
+			for i, response := range res.Data {
+				rlog.Debug("Processing response: %v", response)
+				temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
+				if err != nil {
+					tx.Rollback()
+					raven.CaptureError(err, nil)
+					continue
+				}
+
+				// was this message errored
+				if response.Status == notification_api.ERROR_STATUS {
+					if err := temp.MarkNotificationError(tx, response.Message, response.Details); err != nil {
+						tx.Rollback()
+						rlog.Error(err)
+						raven.CaptureError(err, nil)
+						continue
+					}
+				}
+
+				if err = temp.MarkNotificationSent(tx, response.Id); err != nil {
+					rlog.Error(err)
+					raven.CaptureError(err, nil)
+					continue
+				}
+
+				rlog.Debug("Done processing response")
+			}
+
+			err = tx.Commit().Error
+			if err != nil {
+				raven.CaptureError(err, nil)
+				rlog.Error(err)
+			}
+		}
 	}
 	// will never reach here
 	return nil
