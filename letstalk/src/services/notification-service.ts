@@ -24,27 +24,27 @@ interface RequestToMatchNotificationData extends BaseNotificationData {
   readonly requestId: number;
 }
 
-interface AdHocNotification extends BaseNotificationData {
+interface AdHocNotificationData extends BaseNotificationData {
   readonly type: 'ADHOC_NOTIFICATION';
 }
 
-interface NewMatchNotification extends BaseNotificationData {
+interface NewMatchNotificationData extends BaseNotificationData {
   readonly type: 'NEW_MATCH';
 }
 
-interface NewCredentialMatchNotification extends BaseNotificationData {
+interface NewCredentialMatchNotificationData extends BaseNotificationData {
   readonly type: 'NEW_CREDENTIAL_MATCH';
 }
 
-interface NewMatchVerifiedNotificaiton extends BaseNotificationData {
+interface NewMatchVerifiedNotificationData extends BaseNotificationData {
   readonly type: 'MATCH_VERIFIED';
 }
 
 type NotificationData = RequestToMatchNotificationData
-| AdHocNotification
-| NewMatchNotification
-| NewCredentialMatchNotification
-| NewMatchVerifiedNotificaiton;
+| AdHocNotificationData
+| NewMatchNotificationData
+| NewCredentialMatchNotificationData
+| NewMatchVerifiedNotificationData;
 
 export interface Notification {
   readonly data: NotificationData;
@@ -90,9 +90,10 @@ export default class NotificationService {
       case 'NEW_MATCH':
       case 'NEW_CREDENTIAL_MATCH':
       case 'MATCH_VERIFIED':
+        break;
       default:
         // Ensure exhaustiveness of select
-        // const _: never = data.type;
+        const _: never = data;
         // This case could happen, but we wouldn't do anything anyways
     }
   }
@@ -111,7 +112,7 @@ export default class NotificationService {
           break;
         default:
           // Ensure exhaustiveness of select
-          // const _: never = notification.data.Type;
+          const _: never = notification.data;
           // This case could happen, but we wouldn't do anything anyways
       }
     };
