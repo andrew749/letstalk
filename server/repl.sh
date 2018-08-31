@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SECRETS_PATH="secrets.json"
 # get options
 export DB_PASS=$(jq -r '.db_pass' ${SECRETS_PATH})
 export DB_ADDR=$(jq -r '.db_addr' ${SECRETS_PATH})
