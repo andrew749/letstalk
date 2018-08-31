@@ -30,4 +30,4 @@ docker run -it letstalk_webapp bash <<'EOF'
   gore <<EOF
     :import letstalk/server/utility
   EOF
-EOF
+'EOF'
