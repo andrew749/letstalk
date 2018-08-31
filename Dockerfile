@@ -17,6 +17,7 @@ ADD ./server /go/src/letstalk/server
 
 # install dep
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+RUN go get -u github.com/motemen/gore
 
 # set the working directory
 WORKDIR /go/src/letstalk/server
