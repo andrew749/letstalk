@@ -79,6 +79,7 @@ export default class NotificationService {
 
   private async actOnNotification(notification: Notification): Promise<void> {
     const data = notification.data;
+    console.log(data);
     switch (data.type) {
       case 'REQUEST_TO_MATCH':
         if (data.side === SIDE_ASKER) {
