@@ -24,7 +24,27 @@ interface RequestToMatchNotificationData extends BaseNotificationData {
   readonly requestId: number;
 }
 
-type NotificationData = RequestToMatchNotificationData;
+interface AdHocNotification extends BaseNotificationData {
+  readonly type: 'ADHOC_NOTIFICATION';
+}
+
+interface NewMatchNotification extends BaseNotificationData {
+  readonly type: 'NEW_MATCH';
+}
+
+interface NewCredentialMatchNotification extends BaseNotificationData {
+  readonly type: 'NEW_CREDENTIAL_MATCH';
+}
+
+interface NewMatchVerifiedNotificaiton extends BaseNotificationData {
+  readonly type: 'MATCH_VERIFIED';
+}
+
+type NotificationData = RequestToMatchNotificationData
+| AdHocNotification
+| NewMatchNotification
+| NewCredentialMatchNotification
+| NewMatchVerifiedNotificaiton;
 
 export interface Notification {
   readonly data: NotificationData;
@@ -59,6 +79,7 @@ export default class NotificationService {
 
   private async actOnNotification(notification: Notification): Promise<void> {
     const data = notification.data;
+    console.log(data);
     switch (data.type) {
       case 'REQUEST_TO_MATCH':
         if (data.side === SIDE_ASKER) {
@@ -66,9 +87,13 @@ export default class NotificationService {
         }
         await fetchBootstrap()(this.store.dispatch, null, null);
         break;
+      case 'ADHOC_NOTIFICATION':
+      case 'NEW_MATCH':
+      case 'NEW_CREDENTIAL_MATCH':
+      case 'MATCH_VERIFIED':
       default:
         // Ensure exhaustiveness of select
-        const _: never = data.type;
+        // const _: never = data.type;
         // This case could happen, but we wouldn't do anything anyways
     }
   }
@@ -80,9 +105,14 @@ export default class NotificationService {
           // TODO: Make this do a reset instead
           this.navigate('Home');
           break;
+        case 'ADHOC_NOTIFICATION':
+        case 'NEW_MATCH':
+        case 'NEW_CREDENTIAL_MATCH':
+        case 'MATCH_VERIFIED':
+          break;
         default:
           // Ensure exhaustiveness of select
-          const _: never = notification.data.type;
+          // const _: never = notification.data.Type;
           // This case could happen, but we wouldn't do anything anyways
       }
     };

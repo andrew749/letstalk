@@ -3,6 +3,7 @@ package notifications
 import (
 	"encoding/json"
 	"letstalk/server/aws_utils"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 	"letstalk/server/notifications"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 // CreateAndSendNotification Creates a notification object and saves to data store. Also sends to sqs so it can be processed later
@@ -100,13 +102,23 @@ func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification)
 	// allocate storage
 	res := make([]notifications.ExpoNotification, len(*deviceIds))
 
+	notification, err := converters.NotificationDataToApi(orig)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to convert data.Notification to api.Notification")
+	}
+
+	body, err := json.Marshal(notification)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to marshall api.Notification")
+	}
+
 	// create new notification for each device id
 	for i, deviceId := range *deviceIds {
 		res[i] = notifications.ExpoNotification{
 			To:    deviceId,
 			Title: orig.Title,
 			Body:  orig.Message,
-			Data:  orig,
+			Data:  body,
 		}
 	}
 	return &res, nil
