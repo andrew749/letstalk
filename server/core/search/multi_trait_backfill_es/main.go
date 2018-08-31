@@ -26,8 +26,7 @@ func main() {
 		panic(err)
 	}
 
-	ids := make([]string, 0)
-	multiTraits := make([]interface{}, 0)
+	multiTraits := make(map[string]interface{})
 
 	userSimpleTraits := make([]data.UserSimpleTrait, 0)
 	err = db.Find(&userSimpleTraits).Error
@@ -37,8 +36,7 @@ func main() {
 
 	for _, trait := range userSimpleTraits {
 		id, multiTrait := search.NewMultiTraitFromUserSimpleTrait(&trait)
-		ids = append(ids, id)
-		multiTraits = append(multiTraits, multiTrait)
+		multiTraits[id] = multiTrait
 	}
 
 	userPositions := make([]data.UserPosition, 0)
@@ -49,12 +47,11 @@ func main() {
 
 	for _, pos := range userPositions {
 		id, multiTrait := search.NewMultiTraitFromUserPosition(&pos)
-		ids = append(ids, id)
-		multiTraits = append(multiTraits, multiTrait)
+		multiTraits[id] = multiTrait
 	}
 
 	searchClient := search.NewClientWithContext(es, context.Background())
-	err = searchClient.BulkIndexMultiTraits(ids, multiTraits)
+	err = searchClient.BulkIndexMultiTraits(multiTraits)
 	if err != nil {
 		panic(err)
 	}

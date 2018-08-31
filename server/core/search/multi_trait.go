@@ -1,11 +1,13 @@
 package search
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"letstalk/server/data"
 
+	"github.com/getsentry/raven-go"
 	"github.com/olivere/elastic"
 )
 
@@ -76,6 +78,74 @@ func NewMultiTraitFromUserSimpleTrait(trait *data.UserSimpleTrait) (string, *Sim
 	return id, traitMultiTrait
 }
 
+func parseMultiTraitHit(hit *elastic.SearchHit) (interface{}, error) {
+	var (
+		fieldMap     map[string]interface{}
+		typeField    interface{}
+		typeFieldStr string
+		ok           bool
+		res          interface{}
+	)
+	err := json.Unmarshal(*hit.Source, &fieldMap)
+	if err != nil {
+		return nil, err
+	}
+	if typeField, ok = fieldMap["traitType"]; !ok {
+		return nil, errors.New("Missing trait type in hit")
+	}
+	if typeFieldStr, ok = typeField.(string); !ok {
+		return nil, errors.New("Trait type is not a string")
+	}
+
+	switch MultiTraitType(typeFieldStr) {
+	case MULTI_TRAIT_TYPE_POSITION:
+		var pos PositionMultiTrait
+		err = json.Unmarshal(*hit.Source, &pos)
+		if err != nil {
+			return nil, err
+		}
+		res = &pos
+	case MULTI_TRAIT_TYPE_SIMPLE_TRAIT:
+		var trait SimpleTraitMultiTrait
+		err = json.Unmarshal(*hit.Source, &trait)
+		if err != nil {
+			return nil, err
+		}
+		res = &trait
+	default:
+		return nil, errors.New("Trait type is not a string")
+	}
+	return res, nil
+}
+
+// Queries multi traits by name, using the autocomplete analyzer on the traitName field.
+func (c *ClientWithContext) QueryMultiTraitsByName(prefix string, size int) ([]interface{}, error) {
+	matchQuery := elastic.NewMatchQuery("traitName", prefix)
+
+	res, err := c.client.Search().
+		Index(MULTI_TRAIT_INDEX).
+		Type(MULTI_TRAIT_TYPE).
+		Query(matchQuery).
+		Size(size).
+		Do(c.context)
+	if err != nil {
+		return nil, err
+	}
+
+	traits := make([]interface{}, 0)
+	for _, hit := range res.Hits.Hits {
+		trait, err := parseMultiTraitHit(hit)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			// Ignore bad results, but record so that we can fix them.
+			continue
+		}
+		traits = append(traits, trait)
+	}
+
+	return traits, nil
+}
+
 // Checks whether type of object is one for the valid multi trait types
 // Must be a pointer
 func isMultiTrait(obj interface{}) bool {
@@ -85,14 +155,7 @@ func isMultiTrait(obj interface{}) bool {
 }
 
 // For use in backfill jobs
-func (c *ClientWithContext) BulkIndexMultiTraits(ids []string, traits []interface{}) error {
-	if len(ids) != len(traits) {
-		return errors.New(fmt.Sprintf(
-			"Length of ids (%d) and traits (%d) must be equal",
-			len(ids),
-			len(traits),
-		))
-	}
+func (c *ClientWithContext) BulkIndexMultiTraits(traits map[string]interface{}) error {
 	for _, trait := range traits {
 		if !isMultiTrait(trait) {
 			return errors.New(fmt.Sprintf("Invalid type of trait %T", trait))
@@ -100,11 +163,11 @@ func (c *ClientWithContext) BulkIndexMultiTraits(ids []string, traits []interfac
 	}
 
 	bulkRequest := c.client.Bulk()
-	for i, trait := range traits {
+	for id, trait := range traits {
 		req := elastic.NewBulkIndexRequest().
 			Index(MULTI_TRAIT_INDEX).
 			Type(MULTI_TRAIT_TYPE).
-			Id(ids[i]).
+			Id(id).
 			Doc(trait)
 		bulkRequest = bulkRequest.Add(req)
 	}
