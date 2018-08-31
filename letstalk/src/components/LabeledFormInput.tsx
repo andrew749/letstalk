@@ -1,9 +1,13 @@
 import React, { SFC } from 'react';
-import { View, Platform } from 'react-native';
+import { View, Platform, ViewStyle } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput, FormLabel } from 'react-native-elements';
 
-type Props = FormInputProps & WrappedFieldProps & { label: string, onSubmitEditing?: () => void }
+type Props = FormInputProps & WrappedFieldProps & {
+  label: string;
+  onSubmitEditing?: () => void;
+  containerStyle?: ViewStyle;
+}
 
 class LabeledFormInput extends React.Component<Props> {
   private elementRef: React.Ref<FormInput>;
@@ -22,7 +26,7 @@ class LabeledFormInput extends React.Component<Props> {
     const { onChange, onBlur, value } = props.input;
     const { error, touched, warning } = props.meta;
     return (
-      <View>
+      <View style={this.props.containerStyle}>
         {label && <FormLabel>{label}</FormLabel>}
         <FormInput
           {...props}

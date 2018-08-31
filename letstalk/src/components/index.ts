@@ -5,6 +5,7 @@ import ButtonPicker from './ButtonPicker';
 import Card from './Card';
 import Emoji from './Emoji';
 import FilterListModal, { FilterableElement } from './FilterListModal';
+import FloatingButton from './FloatingButton';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
 import InfoText from './InfoText';
@@ -26,6 +27,7 @@ export {
   FilterListModal,
   FormP,
   FormProps,
+  FloatingButton,
   Header,
   InfoText,
   LabeledFormInput,

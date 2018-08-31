@@ -22,6 +22,17 @@ type AddUserPositionRequest struct {
 	EndDate          *string               `json:"endDate"`
 }
 
+type UserPosition struct {
+	Id               data.TUserPositionID  `json:"id"`
+	RoleId           data.TRoleID          `json:"roleId"`
+	RoleName         string                `json:"roleName"`
+	OrganizationId   data.TOrganizationID  `json:"organizationId"`
+	OrganizationName string                `json:"organizationName"`
+	OrganizationType data.OrganizationType `json:"organizationType"`
+	StartDate        string                `json:"startDate" binding:"required"`
+	EndDate          *string               `json:"endDate"`
+}
+
 type RemoveUserPositionRequest struct {
 	UserPositionId data.TUserPositionID `json:"userPositionId" binding:"required"`
 }

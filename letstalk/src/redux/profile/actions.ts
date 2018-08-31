@@ -1,3 +1,5 @@
+import { Action } from 'redux';
+
 import { ProfileData } from '../../models/profile';
 import {
   FetchReceiveAction,
@@ -7,14 +9,40 @@ import {
   FetchActionCreators,
 } from '../actions';
 import { APIError } from '../../services/requests';
+import { UserPosition } from '../../models/position';
+import { UserSimpleTrait } from '../../models/simple-trait';
 
 export enum TypeKeys {
   FETCH = 'PROFILE/FETCH',
+  POSITION_ADD = 'PROFILE/POSITION_ADD',
+  POSITION_REMOVE = 'PROFILE/POSITIVE_REMOVE',
+  SIMPLE_TRAIT_ADD = 'PROFILE/SIMPLE_TRAIT_ADD',
+  SIMPLE_TRAIT_REMOVE = 'PROFILE/SIMPLE_TRAIT_REMOVE',
 }
 
 type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, ProfileData>;
 type ProfileErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type ProfileStartAction = FetchStartAction<TypeKeys.FETCH>;
+
+export interface PositionAddAction extends Action {
+  readonly type: TypeKeys.POSITION_ADD;
+  readonly position: UserPosition;
+}
+
+export interface PositionRemoveAction extends Action {
+  readonly type: TypeKeys.POSITION_REMOVE;
+  readonly id: number;
+}
+
+export interface SimpleTraitAddAction extends Action {
+  readonly type: TypeKeys.SIMPLE_TRAIT_ADD;
+  readonly simpleTrait: UserSimpleTrait;
+}
+
+export interface SimpleTraitRemoveAction extends Action {
+  readonly type: TypeKeys.SIMPLE_TRAIT_REMOVE;
+  readonly id: number;
+}
 
 function receive(data: ProfileData): ProfileReceiveAction {
   return {
@@ -39,6 +67,22 @@ function start(): ProfileStartAction {
   };
 }
 
+export function positionAdd(position: UserPosition): PositionAddAction {
+  return { type: TypeKeys.POSITION_ADD, position };
+}
+
+export function positionRemove(id: number): PositionRemoveAction {
+  return { type: TypeKeys.POSITION_REMOVE, id };
+}
+
+export function simpleTraitAdd(simpleTrait: UserSimpleTrait): SimpleTraitAddAction {
+  return { type: TypeKeys.SIMPLE_TRAIT_ADD, simpleTrait };
+}
+
+export function simpleTraitRemove(id: number): SimpleTraitRemoveAction {
+  return { type: TypeKeys.SIMPLE_TRAIT_REMOVE, id };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, ProfileData> = {
   receive,
   error,
@@ -51,3 +95,7 @@ export type ActionTypes =
   | ProfileReceiveAction
   | ProfileErrorAction
   | ProfileStartAction
+  | PositionAddAction
+  | PositionRemoveAction
+  | SimpleTraitAddAction
+  | SimpleTraitRemoveAction

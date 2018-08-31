@@ -1,9 +1,13 @@
 import React, { Component, SFC } from 'react';
 import {
+  Dimensions,
+  EmitterSubscription,
   Picker,
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
+  View,
 } from 'react-native';
 import {
   formValueSelector,
@@ -26,8 +30,11 @@ import profileService from '../services/profile-service';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
 import {
   ActionButton,
+  FloatingButton,
   ButtonPicker,
   Card,
   FormP,
@@ -87,161 +94,211 @@ class EditFormRefs {
   phoneNumberFieldRef: Field<FormInputProps>;
 }
 
-const EditForm: SFC<FormProps<EditFormData> & EditFormProps> = props => {
-  const {
-    cohorts,
-    error,
-    handleSubmit,
-    onSubmit,
-    reset,
-    submitting,
-    valid,
-    programId,
-    sequenceId,
-    gradYear
-  } = props;
-  const buildItems = (rows: Immutable.List<ValueLabel>) => {
-    return rows.map(({ value, label }) => {
-      return <Picker.Item key={value} label={label} value={value}/>;
-    });
-  };
-  const programItems = buildItems(programOptions(cohorts)).toJS();
-  const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
-  const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
-  const fieldRefs = new EditFormRefs();
-  return (
-    <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
-      >
-      <Header>Personal Info</Header>
-      <Field
-        name="profilePic"
-        component={ProfileAvatarEditableFormElement}
-        containerStyle={styles.profilePicContainerStyle}
-      />
-      <Field
-        label="First name"
-        name="firstName"
-        component={LabeledFormInput}
-        ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
-        onSubmitEditing={() => {
-          // @ts-ignore
-          fieldRefs.lastNameFieldRef.getRenderedComponent().focus();
-        }}
-        withRef={true}
-        autoCorrect={false}
-        validate={required}
-      />
-      <Field
-        label="Last name"
-        name="lastName"
-        component={LabeledFormInput}
-        ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
-        onSubmitEditing={() => {
-          // @ts-ignore
-          fieldRefs.phoneNumberFieldRef.getRenderedComponent().focus();
-        }}
-        withRef={true}
-        autoCorrect={false}
-        validate={required}
-      />
-      <Field
-        label="Phone number"
-        name="phoneNumber"
-        component={LabeledFormInput}
-        ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
-        withRef={true}
-        keyboardType={'phone-pad' as 'phone-pad'}
-        validate={phoneNumber}
-      />
-      <Field
-        label="Gender"
-        name="gender"
-        component={ButtonPicker}
-        validate={required}
-      >
-        <Picker.Item
-          label="Male"
-          value={2}
+interface State {
+  readonly isKeyboardShown: boolean;
+}
+
+type EditFormComponentProps = FormProps<EditFormData> & EditFormProps;
+
+class EditForm extends Component<EditFormComponentProps, State> {
+  private keyboardDidHideListener: EmitterSubscription;
+  private keyboardDidShowListener: EmitterSubscription;
+
+  constructor(props: EditFormComponentProps) {
+    super(props)
+
+    this.state = { isKeyboardShown: false };
+
+    this.keyboardDidShow = this.keyboardDidShow.bind(this)
+    this.keyboardDidHide = this.keyboardDidHide.bind(this)
+  }
+
+  componentDidMount () {
+    this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
+    this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
+  }
+
+  componentWillUnmount () {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  }
+
+  private keyboardDidShow () {
+    this.setState({ isKeyboardShown: true });
+  }
+
+  private keyboardDidHide () {
+    this.setState({ isKeyboardShown: false });
+  }
+
+  render() {
+    const {
+      cohorts,
+      error,
+      handleSubmit,
+      onSubmit,
+      reset,
+      submitting,
+      valid,
+      programId,
+      sequenceId,
+      gradYear
+    } = this.props;
+    const { isKeyboardShown } = this.state;
+    const buildItems = (rows: Immutable.List<ValueLabel>) => {
+      return rows.map(({ value, label }) => {
+        return <Picker.Item key={value} label={label} value={value}/>;
+      });
+    };
+    const programItems = buildItems(programOptions(cohorts)).toJS();
+    const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
+    const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
+    const fieldRefs = new EditFormRefs();
+    return (
+      <View>
+        <KeyboardAwareScrollView
+          keyboardShouldPersistTaps="always"
+        >
+          <Header>Personal Info</Header>
+          <View style={styles.profilePicContainer}>
+            <Field
+              name="profilePic"
+              component={ProfileAvatarEditableFormElement}
+              containerStyle={styles.profilePicContainerStyle}
+            />
+          </View>
+          <Field
+            label="First name"
+            name="firstName"
+            component={LabeledFormInput}
+            ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
+            onSubmitEditing={() => {
+              // @ts-ignore
+              fieldRefs.lastNameFieldRef.getRenderedComponent().focus();
+            }}
+            withRef={true}
+            autoCorrect={false}
+            validate={required}
+          />
+          <Field
+            label="Last name"
+            name="lastName"
+            component={LabeledFormInput}
+            ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
+            onSubmitEditing={() => {
+              // @ts-ignore
+              fieldRefs.phoneNumberFieldRef.getRenderedComponent().focus();
+            }}
+            withRef={true}
+            autoCorrect={false}
+            validate={required}
+          />
+          <Field
+            label="Phone number"
+            name="phoneNumber"
+            component={LabeledFormInput}
+            ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
+            withRef={true}
+            keyboardType={'phone-pad' as 'phone-pad'}
+            validate={phoneNumber}
+          />
+          <Field
+            label="Gender"
+            name="gender"
+            component={ButtonPicker}
+            validate={required}
+          >
+            <Picker.Item
+              label="Male"
+              value={2}
+            />
+            <Picker.Item
+              label="Female"
+              value={1}
+            />
+          </Field>
+          <Field
+            label="Birthday"
+            name="birthdate"
+            mode={'date' as 'date'}
+            androidMode={'spinner' as 'spinner'}
+            component={ModalDatePicker}
+            validate={required}
+          />
+          <Header>Your Cohort</Header>
+          <Field
+            label="Program"
+            name="programId"
+            component={ModalPicker}
+            validate={required}
+          >
+            {programItems}
+          </Field>
+          <Field
+            label="Sequence"
+            name="sequenceId"
+            component={ModalPicker}
+            validate={required}
+          >
+            {sequenceItems}
+          </Field>
+          <Field
+            label="Grad Year"
+            name="gradYear"
+            component={ModalPicker}
+            validate={required}
+          >
+            {gradYearItems}
+          </Field>
+          <Field
+            label="Mentorship Preference"
+            name="mentorshipPreference"
+            component={ModalPicker}
+            validate={required}
+          >
+            <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
+            <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
+            <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
+          </Field>
+          <Header>Additional Info</Header>
+          <Text style={styles.hint}>Optional</Text>
+          <Field
+            label="Hometown"
+            name="hometown"
+            component={LabeledFormInput}
+            autoCorrect={false}
+            placeholder="e.g. Waterloo, ON"
+          />
+          <Field
+            label="Bio"
+            name="bio"
+            component={LabeledFormInput}
+            autoCorrect={false}
+            multiline={true}
+            numberOfLines={10}
+            inputStyle={{width: "100%"}}
+            containerStyle={!isKeyboardShown && { marginBottom: 40 }}
+            placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
+          />
+          {isKeyboardShown && <ActionButton
+            backgroundColor={Colors.HIVE_PRIMARY}
+            disabled={!valid}
+            loading={submitting}
+            title={submitting ? null : "Save"}
+            onPress={handleSubmit(onSubmit)}
+          />}
+          {error && <FormValidationMessage>{error}</FormValidationMessage>}
+        </KeyboardAwareScrollView>
+        <FloatingButton
+          backgroundColor={Colors.HIVE_PRIMARY}
+          disabled={!valid}
+          loading={submitting}
+          title={submitting ? null : "Save"}
+          onPress={handleSubmit(onSubmit)}
         />
-        <Picker.Item
-          label="Female"
-          value={1}
-        />
-      </Field>
-      <Field
-        label="Birthday"
-        name="birthdate"
-        mode={'date' as 'date'}
-        androidMode={'spinner' as 'spinner'}
-        component={ModalDatePicker}
-        validate={required}
-      />
-      <Header>Your Cohort</Header>
-      <Field
-        label="Program"
-        name="programId"
-        component={ModalPicker}
-        validate={required}
-      >
-        {programItems}
-      </Field>
-      <Field
-        label="Sequence"
-        name="sequenceId"
-        component={ModalPicker}
-        validate={required}
-      >
-        {sequenceItems}
-      </Field>
-      <Field
-        label="Grad Year"
-        name="gradYear"
-        component={ModalPicker}
-        validate={required}
-      >
-        {gradYearItems}
-      </Field>
-      <Field
-        label="Mentorship Preference"
-        name="mentorshipPreference"
-        component={ModalPicker}
-        validate={required}
-      >
-        <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
-        <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
-        <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
-      </Field>
-      <Header>Additional Info</Header>
-      <Text style={styles.hint}>Optional</Text>
-      <Field
-        label="Hometown"
-        name="hometown"
-        component={LabeledFormInput}
-        autoCorrect={false}
-        placeholder="e.g. Waterloo, ON"
-      />
-      <Field
-        label="Bio"
-        name="bio"
-        component={LabeledFormInput}
-        autoCorrect={false}
-        multiline={true}
-        numberOfLines={10}
-        inputStyle={{width: "100%"}}
-        placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
-      />
-      {error && <FormValidationMessage>{error}</FormValidationMessage>}
-      <ActionButton
-        backgroundColor={Colors.HIVE_PRIMARY}
-        style={styles.submitButton}
-        disabled={!valid}
-        loading={submitting}
-        title={submitting ? null : "Save"}
-        onPress={handleSubmit(onSubmit)}
-      />
-    </KeyboardAwareScrollView>
-  );
+      </View>
+    );
+  }
 }
 
 const cohortSelector = formValueSelector('profile-edit');
@@ -272,7 +329,7 @@ class ProfileEditView extends Component<Props> {
   EDIT_PROFILE_VIEW_IDENTIFIER = "ProfileEditView";
 
   static navigationOptions = () => ({
-    headerTitle: 'Edit Profile',
+    headerTitle: 'Edit Personal Info',
     headerStyle,
   })
 
@@ -390,8 +447,9 @@ export default connect(({profile, cohorts}: RootState) => {
 }, { fetchProfile, fetchCohorts })(ProfileEditView);
 
 const styles = StyleSheet.create({
-  submitButton: {
-    marginBottom: 100,
+  profilePicContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profilePicContainerStyle: {
     justifyContent: 'center',

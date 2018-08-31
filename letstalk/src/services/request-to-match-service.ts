@@ -14,6 +14,8 @@ import {
   USER_SIMPLE_TRAIT_BY_NAME_ROUTE,
   USER_POSITION,
 } from './constants';
+import { UserPosition } from '../models/position';
+import { UserSimpleTrait } from '../models/simple-trait';
 
 type GetAllCredentialsResponse = Array<Credential>;
 type GetCredentialsResponse = Array<Credential>;
@@ -26,7 +28,7 @@ interface AddCredentialRequestResponse { credentialId: number }
 
 interface AddUserSimpleTraitByIdRequest { simpleTraitId: number }
 interface AddUserSimpleTraitByNameRequest { name: string }
-interface AddUserPositionRequest {
+export interface AddUserPositionRequest {
   roleId?: number;
   roleName?: string;
   organizationId?: number;
@@ -34,6 +36,8 @@ interface AddUserPositionRequest {
   startDate: string;
   endDate?: string;
 }
+interface RemoveUserPositionRequest { userPositionId: number }
+interface RemoveUserSimpleTraitRequest { userSimpleTraitId: number }
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -101,21 +105,38 @@ export class RemoteRequestToMatchService {
     await this.requestor.delete(url, null, sessionToken);
   }
 
-  async addUserSimpleTraitById(id: number): Promise<void> {
+  async addUserSimpleTraitById(id: number): Promise<UserSimpleTrait> {
     const sessionToken = await auth.getSessionToken();
     const req: AddUserSimpleTraitByIdRequest = { simpleTraitId: id };
-    await this.requestor.post(USER_SIMPLE_TRAIT_ROUTE, req, sessionToken);
+    const res: UserSimpleTrait = await this.requestor.post(
+      USER_SIMPLE_TRAIT_ROUTE, req, sessionToken);
+    return res;
   }
 
-  async addUserSimpleTraitByName(name: string): Promise<void> {
+  async addUserSimpleTraitByName(name: string): Promise<UserSimpleTrait> {
     const sessionToken = await auth.getSessionToken();
     const req: AddUserSimpleTraitByNameRequest = { name };
-    await this.requestor.post(USER_SIMPLE_TRAIT_BY_NAME_ROUTE, req, sessionToken);
+    const res: UserSimpleTrait = await this.requestor.post(
+      USER_SIMPLE_TRAIT_BY_NAME_ROUTE, req, sessionToken);
+    return res;
   }
 
-  async addUserPosition(req: AddUserPositionRequest): Promise<void> {
+  async removeUserSimpleTrait(id: number): Promise<void> {
     const sessionToken = await auth.getSessionToken();
-    await this.requestor.post(USER_POSITION, req, sessionToken);
+    const req: RemoveUserSimpleTraitRequest = { userSimpleTraitId: id };
+    await this.requestor.delete(USER_SIMPLE_TRAIT_ROUTE, req, sessionToken);
+  }
+
+  async addUserPosition(req: AddUserPositionRequest): Promise<UserPosition> {
+    const sessionToken = await auth.getSessionToken();
+    const res: UserPosition = await this.requestor.post(USER_POSITION, req, sessionToken);
+    return res;
+  }
+
+  async removeUserPosition(id: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const req: RemoveUserPositionRequest = { userPositionId: id };
+    await this.requestor.delete(USER_POSITION, req, sessionToken);
   }
 }
 

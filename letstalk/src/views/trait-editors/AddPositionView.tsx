@@ -37,7 +37,11 @@ import { headerStyle } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import autocompleteService from '../../services/autocomplete-service';
-import requestToMatchService from '../../services/request-to-match-service';
+import { ActionTypes } from '../../redux/profile/actions';
+import {
+  State as ProfileState,
+  addPosition,
+} from '../../redux/profile/reducer';
 
 interface AddPositionFormData {
   role: Select;
@@ -131,7 +135,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
 
   return (
     <KeyboardAwareScrollView
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
     >
       <Field
         label="Role"
@@ -193,6 +197,7 @@ const AddPositionFormWithRedux =
   }))(AddPositionForm));
 
 interface DispatchActions {
+  addPosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
@@ -236,7 +241,7 @@ class AddPositionView extends Component<Props> {
           startDate,
           endDate,
         };
-        await requestToMatchService.addUserPosition(req);
+        await this.props.addPosition(req);
         await this.props.infoToast(`Successfully added position "${role.name} @ ${organization.name}"`);
         await this.props.navigation.goBack();
       }
@@ -262,4 +267,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect(null, { infoToast })(AddPositionView);
+export default connect(null, { addPosition, infoToast })(AddPositionView);

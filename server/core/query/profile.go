@@ -103,6 +103,35 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 		userModel.UserContactInfo.FbLink = user.ExternalAuthData.FbProfileLink
 	}
 
+	if user.UserPositions != nil {
+		userModel.UserPositions = make([]api.UserPosition, len(user.UserPositions))
+		for i, userPosition := range user.UserPositions {
+			userModel.UserPositions[i] = api.UserPosition{
+				Id:               userPosition.Id,
+				RoleId:           userPosition.RoleId,
+				RoleName:         userPosition.RoleName,
+				OrganizationId:   userPosition.OrganizationId,
+				OrganizationName: userPosition.OrganizationName,
+				OrganizationType: userPosition.OrganizationType,
+				StartDate:        userPosition.StartDate,
+				EndDate:          userPosition.EndDate,
+			}
+		}
+	}
+
+	if user.UserSimpleTraits != nil {
+		userModel.UserSimpleTraits = make([]api.UserSimpleTrait, len(user.UserSimpleTraits))
+		for i, userSimpleTrait := range user.UserSimpleTraits {
+			userModel.UserSimpleTraits[i] = api.UserSimpleTrait{
+				Id:                     userSimpleTrait.Id,
+				SimpleTraitId:          userSimpleTrait.SimpleTraitId,
+				SimpleTraitName:        userSimpleTrait.SimpleTraitName,
+				SimpleTraitType:        userSimpleTrait.SimpleTraitType,
+				SimpleTraitIsSensitive: userSimpleTrait.SimpleTraitIsSensitive,
+			}
+		}
+	}
+
 	if userCohort != nil {
 		// NOTE: New API will allow for null sequence ids.
 		sequenceId := ""

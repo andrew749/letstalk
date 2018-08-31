@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import {
   ActivityIndicator,
   AppRegistry,
+  Alert,
   Button as ReactNativeButton,
   Dimensions,
   FlatList,
@@ -27,28 +28,43 @@ import {
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
+import Moment from 'moment';
 
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
 import {fbLogin} from '../services/fb';
-import { Button, Card, Header } from '../components';
+import { Button, Card, FloatingButton, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
-import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
+import {
+  State as ProfileState,
+  fetchProfile,
+  removePosition,
+  removeSimpleTrait,
+} from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
-import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import QRCode from "react-native-qrcode";
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
+import { UserPosition } from '../models/position';
+import { UserSimpleTrait } from '../models/simple-trait';
+import {
+  CohortInfo,
+  PersonalInfo,
+  UserPositions,
+  UserSimpleTraits,
+  styles,
+} from './profile-components/ProfileComponents';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removePosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removeSimpleTrait: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -57,7 +73,17 @@ interface Props extends ProfileState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
-class ProfileView extends Component<Props> {
+interface State {
+  readonly showAllPositions: boolean;
+  readonly showAllSimpleTraits: boolean;
+};
+
+const initialState: State = {
+  showAllPositions: false,
+  showAllSimpleTraits: false,
+};
+
+class ProfileView extends Component<Props, State> {
   PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
@@ -67,6 +93,8 @@ class ProfileView extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
+
+    this.state = initialState;
 
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.onChangePasswordPress = this.onChangePasswordPress.bind(this);
@@ -111,18 +139,13 @@ class ProfileView extends Component<Props> {
     await this.props.fetchProfile();
   }
 
-  private renderProfile(gradYear: string, program: string, bio: string | null) {
-    const bioStr = bio === null ? 'Add bio by editing profile' : bio;
-    return (
-      <View style={styles.sectionContainer}>
-        <Text style={styles.description}>{ bioStr }</Text>
-        <Text style={styles.profileTitle}>{program}, {gradYear}</Text>
-      </View>
-    )
-  }
-
-  private renderContactInfo(email: string, fbId: string, fbLink: string, phoneNumber: string) {
-
+  private renderContactInfo() {
+    const {
+      email,
+      phoneNumber,
+      fbId,
+      fbLink,
+    } = this.props.profile;
     const buildItem = (label: string, value: string) => {
       return (
         <View key={label} style={styles.listItem}>
@@ -147,7 +170,11 @@ class ProfileView extends Component<Props> {
 
     if (fbLink !== null) {
       contactItems.push(
-        <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
+        <TouchableOpacity
+          key={'facebook'}
+          style={styles.listItem}
+          onPress={() => Linking.openURL(fbLink)}
+        >
           <MaterialIcons name="face" size={24} />
           <Text style={styles.label}>Facebook</Text>
         </TouchableOpacity>
@@ -156,6 +183,7 @@ class ProfileView extends Component<Props> {
       // link fb profile
       contactItems.push(
         <TouchableOpacity
+          key={'facebook'}
           style={styles.listItem}
           onPress={async () => {
             await auth.linkFB();
@@ -178,82 +206,64 @@ class ProfileView extends Component<Props> {
   private renderBody() {
     const { navigate } = this.props.navigation;
 
-    const {
-      programId,
-      gradYear,
-      sequenceId,
-    } = this.props.profile;
-
-    const {
-      gender,
-      email,
-      birthdate,
-      phoneNumber,
-      fbId,
-      fbLink,
-      bio,
-      hometown,
-    } = this.props.profile;
-
-    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
     let userId;
     if (this.props.profile) {
       userId = this.props.profile.userId.toString();
     }
-    const headerText = this.props.profile ?
-      this.props.profile.firstName + ' ' + this.props.profile.lastName : 'Profile';
-
-    const genderStr = capitalize(genderIdToString(gender));
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
-    const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
-
-    const sequence = sequenceById(sequenceId);
-    const program = programById(programId);
-
-    const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
-
-    const editButton = <Icon
-      name='pencil'
-      type='font-awesome'
-      color={Colors.HIVE_PRIMARY}
-      containerStyle={styles.editButton}
-      onPress={() => navigate('ProfileEdit')}
-    />;
 
     return (
       <View>
-        <ScrollView contentContainerStyle={styles.container}>
-          <Card style={styles.contentContainer} >
-            {this.renderQrCode()}
+        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 65 }]}>
+          <View style={styles.contentContainer} >
             <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-            <Header>{headerText}</Header>
-            <Button
-              buttonStyle={styles.logoutButton}
-              textStyle={styles.logoutButtonText}
-              onPress={this.onEditTraitsButtonPress}
-              title='Edit Traits'
+            <PersonalInfo
+              {...this.props.profile}
+              navigation={this.props.navigation}
+              allowQrCode={true}
             />
-            {editButton}
-            <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
-            {this.renderProfile(String(gradYear), program, bio)}
-            {this.renderContactInfo(email, fbId, fbLink, phoneNumber)}
+            <CohortInfo
+              programId={this.props.profile.programId}
+              sequenceId={this.props.profile.sequenceId}
+              gradYear={this.props.profile.gradYear}
+              navigation={this.props.navigation}
+              allowEditing={true}
+            />
+            {this.renderContactInfo()}
+            <UserPositions
+              userPositions={this.props.profile.userPositions}
+              navigation={this.props.navigation}
+              allowEditing={true}
+              removePosition={this.props.removePosition}
+              errorToast={this.props.errorToast}
+            />
+            <UserSimpleTraits
+              userSimpleTraits={this.props.profile.userSimpleTraits}
+              navigation={this.props.navigation}
+              allowEditing={true}
+              removeSimpleTrait={this.props.removeSimpleTrait}
+              errorToast={this.props.errorToast}
+            />
             <View style={styles.sectionContainer}>
+              <Text style={styles.sectionHeader}>Account Actions</Text>
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  buttonStyle={styles.changePassButton}
+                  onPress={this.onChangePasswordPress}
+                  title='Change Password'
+                />
+                <Button
+                  buttonStyle={styles.logoutButton}
+                  textStyle={styles.logoutButtonText}
+                  onPress={this.onLogoutPress}
+                  title='Logout'
+                />
+              </View>
             </View>
-            <Button
-              buttonStyle={styles.changePassButton}
-              onPress={this.onChangePasswordPress}
-              title='Change Password'
-            />
-            <Button
-              buttonStyle={styles.logoutButton}
-              textStyle={styles.logoutButtonText}
-              onPress={this.onLogoutPress}
-              title='Logout'
-            />
-          </Card>
+          </View>
         </ScrollView>
+        <FloatingButton title="Edit Profile" onPress={() => {
+          navigate('EditProfileSelector', { profile: this.props.profile });
+        }} />
         <AllFilterableModals
           onSelectSuccess={() => {
             this.props.navigation.navigate({ routeName: 'Requests' });
@@ -262,18 +272,6 @@ class ProfileView extends Component<Props> {
       </View>
     );
   }
-
-  renderQrCode = () => {
-    const {secret} = this.props.profile;
-    return (
-      !!secret && <QRCode
-        value={secret}
-        size={150}
-        bgColor='black'
-        fgColor='white'
-      />
-    );
-  };
 
   render() {
     const {
@@ -296,79 +294,5 @@ class ProfileView extends Component<Props> {
 
 export default connect(
   ({ profile }: RootState) => profile,
-  { fetchProfile, infoToast, errorToast },
+  { fetchProfile, removePosition, removeSimpleTrait, infoToast, errorToast },
 )(ProfileView);
-
-const BUTTON_WIDTH = SCREEN_WIDTH - 80;
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    minHeight: '100%'
-  },
-  contentContainer: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'column',
-    margin: 20,
-    padding: 20,
-  },
-  description: {
-    fontSize: 18,
-    color: Colors.HIVE_SUBDUED
-  },
-  editButton: {
-    position: 'absolute',
-    right: 0,
-    margin: 20
-  },
-  listItem: {
-    flex: 1,
-    flexDirection: 'row',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  changePassButton: {
-    width: BUTTON_WIDTH,
-    marginTop: 10,
-  },
-  logoutButtonText: {
-    color: 'white',
-  },
-  logoutButton: {
-    width: BUTTON_WIDTH,
-    marginTop: 10,
-    backgroundColor: "gray",
-    borderWidth: 0,
-  },
-  profileTitle: {
-    fontSize: 18,
-    marginTop: 10,
-    alignSelf: 'flex-end'
-  },
-  profilePicture: {
-    margin: 20
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    alignSelf: 'flex-start',
-  },
-  sectionContainer: {
-    width: "100%",
-    backgroundColor: 'white',
-    flex: 1,
-    flexDirection: 'column',
-    marginTop: 20
-  },
-  subHeaderText: {
-    fontSize: 18
-  },
-  label: {
-    fontSize: 18,
-  },
-  value: {
-    fontSize: 18,
-    color: Colors.HIVE_ACCENT
-  },
-});

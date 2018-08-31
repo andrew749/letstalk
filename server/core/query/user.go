@@ -36,7 +36,8 @@ func GetUserProfileById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 
 	if db.Where(
 		&data.User{UserId: userId},
-	).Preload("ExternalAuthData").Preload("AdditionalData").First(&user).RecordNotFound() {
+	).Preload("ExternalAuthData").Preload("AdditionalData").
+		Preload("UserPositions").Preload("UserSimpleTraits").First(&user).RecordNotFound() {
 		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 
