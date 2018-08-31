@@ -107,18 +107,13 @@ func NotificationsFromNotificationDataModel(db *gorm.DB, orig data.Notification)
 		return nil, errors.Wrap(err, "Unable to convert data.Notification to api.Notification")
 	}
 
-	body, err := json.Marshal(notification)
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to marshall api.Notification")
-	}
-
 	// create new notification for each device id
 	for i, deviceId := range *deviceIds {
 		res[i] = notifications.ExpoNotification{
 			To:    deviceId,
 			Title: orig.Title,
 			Body:  orig.Message,
-			Data:  body,
+			Data:  notification,
 		}
 	}
 	return &res, nil
