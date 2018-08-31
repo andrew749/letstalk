@@ -26,3 +26,14 @@ dep ensure
 dep ensure -add github.com/pkg/errors
 ```
 
+### Using repl
+
+#### Install gore
+```
+go get -u github.com/motemen/gore
+```
+
+#### Run gore
+```
+./repl.sh
+```
