@@ -1,20 +1,18 @@
 import React, {Component} from 'react';
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 import { View, StyleSheet } from 'react-native';
-import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
+import { reduxForm, Field, SubmissionError } from 'redux-form';
 import { FormValidationMessage, Text } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
 import { headerStyle } from './TopHeader';
 import Colors from '../services/colors';
-import { ScrollView } from 'react-native';
 import auth from '../services/auth';
 import {ActionCreator, connect, Dispatch} from 'react-redux';
 import { RootState } from '../redux';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-import { required } from '../validators';
+import { required, uwEmail } from '../validators';
 import {ThunkAction} from "redux-thunk";
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import {
@@ -36,11 +34,6 @@ interface State {
 interface VerifyEmailFormData {
   email: string,
 }
-
-const uwEmail = (value: string) =>
-  value && !/^[A-Z0-9._%+-]+@(edu\.)?uwaterloo\.ca$/i.test(value)
-    ? 'Invalid UW email address'
-    : undefined;
 
 const VerifyEmailForm: React.SFC<FormProps<VerifyEmailFormData>> = props => {
   const { error, handleSubmit, onSubmit, submitting, valid, pristine } = props;
