@@ -28,7 +28,22 @@ func main() {
 
 	multiTraits := make(map[string]interface{})
 
-	userSimpleTraits := make([]data.UserSimpleTrait, 0)
+	var (
+		userCohorts      []data.UserCohort
+		userSimpleTraits []data.UserSimpleTrait
+		userPositions    []data.UserPosition
+	)
+
+	err = db.Preload("Cohort").Find(&userCohorts).Error
+	if err != nil {
+		panic(err)
+	}
+
+	for _, cohort := range userCohorts {
+		id, multiTrait := search.NewMultiTraitFromUserCohort(&cohort)
+		multiTraits[id] = multiTrait
+	}
+
 	err = db.Find(&userSimpleTraits).Error
 	if err != nil {
 		panic(err)
@@ -39,7 +54,6 @@ func main() {
 		multiTraits[id] = multiTrait
 	}
 
-	userPositions := make([]data.UserPosition, 0)
 	err = db.Find(&userPositions).Error
 	if err != nil {
 		panic(err)

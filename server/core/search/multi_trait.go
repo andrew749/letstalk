@@ -28,6 +28,16 @@ type MultiTrait struct {
 	TraitType MultiTraitType `json:"traitType"`
 }
 
+type CohortMultiTrait struct {
+	ProgramId    string  `json:"programId"`
+	ProgramName  string  `json:"programName"`
+	GradYear     uint    `json:"gradYear"`
+	IsCoop       bool    `json:"isCoop"`
+	SequenceId   *string `json:"sequenceId,omitempty"`
+	SequenceName *string `json:"sequenceName,omitempty"`
+	MultiTrait
+}
+
 type PositionMultiTrait struct {
 	RoleId           data.TRoleID          `json:"roleId"`
 	RoleName         string                `json:"roleName"`
@@ -43,6 +53,33 @@ type SimpleTraitMultiTrait struct {
 	SimpleTraitType        data.SimpleTraitType `json:"simpleTraitType"`
 	SimpleTraitIsSensitive bool                 `json:"simpleTraitIsSensitive"`
 	MultiTrait
+}
+
+// Returns id for the document and the CohortMultiTrait struct
+func NewMultiTraitFromUserCohort(userCohort *data.UserCohort) (string, *CohortMultiTrait) {
+	cohort := userCohort.Cohort
+	id := fmt.Sprintf("%s-%d", MULTI_TRAIT_TYPE_COHORT, cohort.CohortId)
+
+	var traitName string
+	if cohort.SequenceName != nil {
+		traitName = fmt.Sprintf("%s %d %s", cohort.ProgramName, cohort.GradYear, *cohort.SequenceName)
+	} else {
+		traitName = fmt.Sprintf("%s %d", cohort.ProgramName, cohort.GradYear)
+	}
+
+	cohortMultiTrait := &CohortMultiTrait{
+		ProgramId:    cohort.ProgramId,
+		ProgramName:  cohort.ProgramName,
+		GradYear:     cohort.GradYear,
+		IsCoop:       cohort.IsCoop,
+		SequenceId:   cohort.SequenceId,
+		SequenceName: cohort.SequenceName,
+		MultiTrait: MultiTrait{
+			TraitName: traitName,
+			TraitType: MULTI_TRAIT_TYPE_COHORT,
+		},
+	}
+	return id, cohortMultiTrait
 }
 
 // Returns id for the document and the PositionMultiTrait struct
@@ -112,6 +149,13 @@ func parseMultiTraitHit(hit *elastic.SearchHit) (interface{}, error) {
 			return nil, err
 		}
 		res = &trait
+	case MULTI_TRAIT_TYPE_COHORT:
+		var cohort CohortMultiTrait
+		err = json.Unmarshal(*hit.Source, &cohort)
+		if err != nil {
+			return nil, err
+		}
+		res = &cohort
 	default:
 		return nil, errors.New("Trait type is not a string")
 	}
@@ -149,9 +193,10 @@ func (c *ClientWithContext) QueryMultiTraitsByName(prefix string, size int) ([]i
 // Checks whether type of object is one for the valid multi trait types
 // Must be a pointer
 func isMultiTrait(obj interface{}) bool {
-	_, ok1 := obj.(*PositionMultiTrait)
-	_, ok2 := obj.(*SimpleTraitMultiTrait)
-	return ok1 || ok2
+	_, ok1 := obj.(*CohortMultiTrait)
+	_, ok2 := obj.(*PositionMultiTrait)
+	_, ok3 := obj.(*SimpleTraitMultiTrait)
+	return ok1 || ok2 || ok3
 }
 
 // For use in backfill jobs
