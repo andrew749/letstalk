@@ -71,6 +71,27 @@ func getCohort(db *gorm.DB, cohortId data.TCohortID) (*data.Cohort, errs.Error) 
 	return &cohort, nil
 }
 
+func updateUserCohort(
+	db *gorm.DB,
+	userId data.TUserID,
+	cohortId data.TCohortID,
+) (*data.UserCohort, error) {
+	cohort, err := getCohort(db, cohortId)
+	if err != nil {
+		return nil, err
+	}
+
+	var userCohort data.UserCohort
+	if err := db.Where(&data.UserCohort{UserId: userId}).Assign(
+		&data.UserCohort{CohortId: cohortId},
+	).FirstOrCreate(&userCohort).Error; err != nil {
+		return nil, err
+	}
+
+	userCohort.Cohort = cohort
+	return &userCohort, nil
+}
+
 // TODO: Maybe make this return the cohort that is newly added/updated.
 // TODO: Would probably be preferable to break these up in the future.
 func UpdateUserCohortAndAdditionalInfo(
@@ -82,20 +103,15 @@ func UpdateUserCohortAndAdditionalInfo(
 	bio *string,
 	hometown *string,
 ) errs.Error {
-	cohort, err := getCohort(db, cohortId)
-	if err != nil {
-		return err
-	}
-
 	var (
-		userCohort         data.UserCohort
+		userCohort         *data.UserCohort
 		userAdditionalData data.UserAdditionalData
 	)
 
 	dbErr := ctx.WithinTx(db, func(db *gorm.DB) error {
-		if err := db.Where(&data.UserCohort{UserId: userId}).Assign(
-			&data.UserCohort{CohortId: cohortId},
-		).FirstOrCreate(&userCohort).Error; err != nil {
+		var err error
+		userCohort, err = updateUserCohort(db, userId, cohortId)
+		if err != nil {
 			return err
 		}
 
@@ -116,8 +132,7 @@ func UpdateUserCohortAndAdditionalInfo(
 		return errs.NewDbError(dbErr)
 	}
 
-	userCohort.Cohort = cohort
-	go indexCohortMultiTrait(es, &userCohort)
+	go indexCohortMultiTrait(es, userCohort)
 
 	return nil
 }
