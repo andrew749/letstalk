@@ -29,12 +29,13 @@ type MultiTrait struct {
 }
 
 type CohortMultiTrait struct {
-	ProgramId    string  `json:"programId"`
-	ProgramName  string  `json:"programName"`
-	GradYear     uint    `json:"gradYear"`
-	IsCoop       bool    `json:"isCoop"`
-	SequenceId   *string `json:"sequenceId,omitempty"`
-	SequenceName *string `json:"sequenceName,omitempty"`
+	CohortId     data.TCohortID `json:"cohortId"`
+	ProgramId    string         `json:"programId"`
+	ProgramName  string         `json:"programName"`
+	GradYear     uint           `json:"gradYear"`
+	IsCoop       bool           `json:"isCoop"`
+	SequenceId   *string        `json:"sequenceId,omitempty"`
+	SequenceName *string        `json:"sequenceName,omitempty"`
 	MultiTrait
 }
 
@@ -100,6 +101,7 @@ func NewMultiTraitFromUserCohort(userCohort *data.UserCohort) (string, *CohortMu
 	}
 
 	cohortMultiTrait := &CohortMultiTrait{
+		CohortId:     cohort.CohortId,
 		ProgramId:    cohort.ProgramId,
 		ProgramName:  cohort.ProgramName,
 		GradYear:     cohort.GradYear,
