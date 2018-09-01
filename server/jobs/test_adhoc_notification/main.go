@@ -7,6 +7,7 @@ import (
 	"letstalk/server/utility"
 
 	"github.com/namsral/flag"
+	"github.com/romana/rlog"
 )
 
 var (
@@ -36,5 +37,24 @@ func main() {
 		panic(err)
 	}
 
-	notifications.CreateAdHocNotification(db, data.TUserID(*recipient), *title, *message, thumbnail, *templatePath, params)
+	rlog.Infof(
+		`Sending notification:
+		\trecipient:%d
+		\tmessage:%s
+		\ttitle:%s
+		\tthumbnail:%s
+		\ttemplate:%s
+		\tparams:%v`, recipient, message, title, thumbnail, templatePath, params)
+
+	if err = notifications.CreateAdHocNotification(
+		db,
+		data.TUserID(*recipient),
+		*title,
+		*message,
+		thumbnail,
+		*templatePath,
+		params,
+	); err != nil {
+		panic(err)
+	}
 }
