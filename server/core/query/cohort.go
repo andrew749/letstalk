@@ -3,10 +3,12 @@ package query
 import (
 	"errors"
 	"letstalk/server/core/api"
+	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 )
 
 /**
@@ -59,4 +61,63 @@ func GetAllCohorts(db *gorm.DB) ([]api.Cohort, errs.Error) {
 	}
 
 	return cohorts, nil
+}
+
+func getCohort(db *gorm.DB, cohortId data.TCohortID) (*data.Cohort, errs.Error) {
+	var cohort data.Cohort
+	if err := db.Where(&data.Cohort{CohortId: cohortId}).First(&cohort).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	return &cohort, nil
+}
+
+// TODO: Maybe make this return the cohort that is newly added/updated.
+// TODO: Would probably be preferable to break these up in the future.
+func UpdateUserCohortAndAdditionalInfo(
+	db *gorm.DB,
+	es *elastic.Client,
+	userId data.TUserID,
+	cohortId data.TCohortID,
+	mentorshipPreference *int,
+	bio *string,
+	hometown *string,
+) errs.Error {
+	cohort, err := getCohort(db, cohortId)
+	if err != nil {
+		return err
+	}
+
+	var (
+		userCohort         data.UserCohort
+		userAdditionalData data.UserAdditionalData
+	)
+
+	dbErr := ctx.WithinTx(db, func(db *gorm.DB) error {
+		if err := db.Where(&data.UserCohort{UserId: userId}).Assign(
+			&data.UserCohort{CohortId: cohortId},
+		).FirstOrCreate(&userCohort).Error; err != nil {
+			return err
+		}
+
+		if err := db.Where(
+			&data.UserAdditionalData{UserId: userId},
+		).Assign(
+			&data.UserAdditionalData{
+				MentorshipPreference: mentorshipPreference,
+				Bio:                  bio,
+				Hometown:             hometown,
+			},
+		).FirstOrCreate(&userAdditionalData).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if dbErr != nil {
+		return errs.NewDbError(dbErr)
+	}
+
+	userCohort.Cohort = cohort
+	go indexCohortMultiTrait(es, &userCohort)
+
+	return nil
 }

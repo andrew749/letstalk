@@ -55,6 +55,38 @@ type SimpleTraitMultiTrait struct {
 	MultiTrait
 }
 
+func (c *ClientWithContext) indexMultiTrait(id string, trait interface{}) error {
+	if !isMultiTrait(trait) {
+		return errors.New(fmt.Sprintf("Invalid type of trait %T", trait))
+	}
+
+	_, err := c.client.Index().
+		Index(MULTI_TRAIT_INDEX).
+		Type(MULTI_TRAIT_TYPE).
+		Id(id).
+		BodyJson(trait).
+		Do(c.context)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *ClientWithContext) IndexCohortMultiTrait(userCohort *data.UserCohort) error {
+	id, trait := NewMultiTraitFromUserCohort(userCohort)
+	return c.indexMultiTrait(id, trait)
+}
+
+func (c *ClientWithContext) IndexPositionMultiTrait(userPosition *data.UserPosition) error {
+	id, trait := NewMultiTraitFromUserPosition(userPosition)
+	return c.indexMultiTrait(id, trait)
+}
+
+func (c *ClientWithContext) IndexSimpleTraitMultiTrait(userSimpleTrait *data.UserSimpleTrait) error {
+	id, trait := NewMultiTraitFromUserSimpleTrait(userSimpleTrait)
+	return c.indexMultiTrait(id, trait)
+}
+
 // Returns id for the document and the CohortMultiTrait struct
 func NewMultiTraitFromUserCohort(userCohort *data.UserCohort) (string, *CohortMultiTrait) {
 	cohort := userCohort.Cohort
