@@ -274,6 +274,9 @@ func Register(
 	debug.OPTIONS("/matching")
 	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
 
+	debug.OPTIONS("adhoc_notification")
+	debug.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
+
 	return router
 }
 

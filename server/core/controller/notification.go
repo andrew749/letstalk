@@ -139,3 +139,41 @@ func UpdateNotificationState(c *ctx.Context) errs.Error {
 
 	return nil
 }
+
+// SendAdhocNotification Endpoint to send an adhoc notification to a user with the given params
+func SendAdhocNotification(c *ctx.Context) errs.Error {
+	var req api.SendAdhocNotificationRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+	var (
+		recipient    = req.Recipient
+		message      = req.Message
+		title        = req.Title
+		thumbnail    = req.Thumbnail
+		templatePath = req.TemplatePath
+		params       = req.TemplateParams
+	)
+	rlog.Infof(
+		`Sending notification:
+		\trecipient:%d
+		\tmessage:%s
+		\ttitle:%s
+		\tthumbnail:%s
+		\ttemplate:%s
+		\tparams:%v`, recipient, message, title, thumbnail, templatePath, params)
+
+	if err := notification_helper.CreateAdHocNotification(
+		c.Db,
+		data.TUserID(recipient),
+		title,
+		message,
+		thumbnail,
+		templatePath,
+		params,
+	); err != nil {
+		panic(err)
+	}
+	c.Result = struct{ Status string }{"Ok"}
+	return nil
+}
