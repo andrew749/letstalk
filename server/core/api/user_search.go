@@ -25,19 +25,19 @@ type PositionUserSearchRequest struct {
 }
 
 type UserSearchResult struct {
-	UserId     data.TUserID `json:"userId"`
-	FirstName  string       `json:"firstName"`
-	LastName   string       `json:"lastName"`
-	Gender     int          `json:"gender"`
-	Cohort     *CohortV2    `json:"cohort"`
-	ProfilePic *string      `json:"profilePic"`
-	Reason     *string      `json:"reason"` // optional reason for the result being shown
+	UserId     data.TUserID  `json:"userId"`
+	FirstName  string        `json:"firstName"`
+	LastName   string        `json:"lastName"`
+	Gender     data.GenderID `json:"gender"`
+	Cohort     *CohortV2     `json:"cohort"`
+	ProfilePic *string       `json:"profilePic"`
+	Reason     *string       `json:"reason"` // optional reason for the result being shown
 }
 
 // `isAnonymous` will be true if the searched term is sensitive and we don't want to be actually
 // showing any results.
 type UserSearchResponse struct {
 	IsAnonymous bool               `json:"isAnonymous"`
-	NumResults  int                `json:"numResults"`
-	Results     []UserSearchResult `json:"results"`
+	NumResults  int                `json:"numResults"` // Number of results, even if anonymous
+	Results     []UserSearchResult `json:"results"`    // Empty if anonymous
 }
