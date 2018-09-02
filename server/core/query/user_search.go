@@ -81,6 +81,7 @@ func SearchUsersBySimpleTrait(
 	db *gorm.DB,
 	req api.SimpleTraitUserSearchRequest,
 ) (*api.UserSearchResponse, errs.Error) {
+
 	var userSimpleTraits []data.UserSimpleTrait
 
 	query := db.Where(&data.UserSimpleTrait{SimpleTraitId: req.SimpleTraitId})
@@ -93,7 +94,12 @@ func SearchUsersBySimpleTrait(
 		users[i] = *userSimpleTrait.User
 	}
 
-	return buildUserSearchResponse(false, users), nil
+	isAnonymous := false
+	if len(userSimpleTraits) > 0 {
+		isAnonymous = userSimpleTraits[0].SimpleTraitIsSensitive
+	}
+
+	return buildUserSearchResponse(isAnonymous, users), nil
 }
 
 func SearchUsersByPosition(
