@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -147,13 +148,19 @@ func SendAdhocNotification(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 	var (
-		recipient    = req.Recipient
-		message      = req.Message
-		title        = req.Title
-		thumbnail    = req.Thumbnail
-		templatePath = req.TemplatePath
-		params       = req.TemplateParams
+		recipient      = req.Recipient
+		message        = req.Message
+		title          = req.Title
+		thumbnail      = req.Thumbnail
+		templatePath   = req.TemplatePath
+		templateParams = req.TemplateParams
 	)
+	params := make(map[string]string)
+	err := json.Unmarshal([]byte(templateParams), &params)
+	if err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
 	rlog.Infof(
 		`Sending notification:
 		\trecipient:%d
@@ -172,7 +179,7 @@ func SendAdhocNotification(c *ctx.Context) errs.Error {
 		templatePath,
 		params,
 	); err != nil {
-		panic(err)
+		return errs.NewInternalError(err.Error())
 	}
 	c.Result = struct{ Status string }{"Ok"}
 	return nil

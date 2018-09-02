@@ -24,10 +24,10 @@ type UpdateNotificationStateRequest struct {
 }
 
 type SendAdhocNotificationRequest struct {
-	Recipient      int               `json:"recipient" binding:"required"`
-	Message        string            `json:"message" binding:"required"`
-	Title          string            `json:"title" binding:"required"`
-	Thumbnail      *string           `json:"thumbnail"`
-	TemplatePath   string            `json:"templatePath" binding:"required"`
-	TemplateParams map[string]string `json:"templateParams"`
+	Recipient      int     `json:"recipient" binding:"required"`
+	Message        string  `json:"message" binding:"required"`
+	Title          string  `json:"title" binding:"required"`
+	Thumbnail      *string `json:"thumbnail"`
+	TemplatePath   string  `json:"templatePath" binding:"required"`
+	TemplateParams string  `json:"templateParams"`
 }
