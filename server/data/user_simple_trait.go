@@ -15,3 +15,7 @@ type UserSimpleTrait struct {
 	User        *User        `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	SimpleTrait *SimpleTrait `gorm:"foreignkey:SimpleTraitId;association_foreignkey:Id"`
 }
+
+func (trait *UserSimpleTrait) GetUser() *User {
+	return trait.User
+}

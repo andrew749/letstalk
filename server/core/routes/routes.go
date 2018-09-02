@@ -267,6 +267,18 @@ func Register(
 		hw.wrapHandler(controller.OrganizationAutocompleteController, false),
 	)
 
+	// User search endpoints
+	userSearchV1 := v1.Group("/user_search")
+
+	userSearchV1.OPTIONS("/simple_trait")
+	userSearchV1.POST("/simple_trait", hw.wrapHandler(controller.SimpleTraitUserSearchController, true))
+
+	userSearchV1.OPTIONS("/cohort")
+	userSearchV1.POST("/cohort", hw.wrapHandler(controller.CohortUserSearchController, true))
+
+	userSearchV1.OPTIONS("/position")
+	userSearchV1.POST("/position", hw.wrapHandler(controller.PositionUserSearchController, true))
+
 	// Debug route group.
 	debug := router.Group("/debug")
 	debug.Use(debugAuthMiddleware(hw.db, hw.sm))
