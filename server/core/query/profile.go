@@ -7,9 +7,18 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 )
 
-func UpdateProfile(db *gorm.DB, userId data.TUserID, request api.ProfileEditRequest) errs.Error {
+// TODO: In the future, probably want to remove updating cohort from here since it's not technically
+// part of the core profile.
+func UpdateProfile(
+	db *gorm.DB,
+	es *elastic.Client,
+	userId data.TUserID,
+	request api.ProfileEditRequest,
+) errs.Error {
+	var userCohort *data.UserCohort
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
 		err := db.Model(&data.User{}).Where(&data.User{
 			UserId: userId,
@@ -23,9 +32,7 @@ func UpdateProfile(db *gorm.DB, userId data.TUserID, request api.ProfileEditRequ
 			return err
 		}
 
-		err = db.Model(&data.UserCohort{}).Where(&data.UserCohort{
-			UserId: userId,
-		}).Update(data.UserCohort{CohortId: request.CohortId}).Error
+		userCohort, err = updateUserCohort(db, userId, request.CohortId)
 		if err != nil {
 			return err
 		}
@@ -61,6 +68,8 @@ func UpdateProfile(db *gorm.DB, userId data.TUserID, request api.ProfileEditRequ
 	if err != nil {
 		return errs.NewDbError(err)
 	}
+
+	go indexCohortMultiTrait(es, userCohort)
 
 	return nil
 }

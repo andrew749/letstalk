@@ -94,22 +94,8 @@ func (c *ClientWithContext) BulkIndexRoles(roles []Role) error {
 	res, err := bulkRequest.Do(c.context)
 	if err != nil {
 		return err
-	} else if len(res.Failed()) > 0 {
-		results := make([]string, len(res.Failed()))
-		reasons := make([]string, len(res.Failed()))
-		for i, failed := range res.Failed() {
-			results[i] = failed.Result
-			if failed.Error != nil {
-				reasons[i] = failed.Error.Reason
-			} else {
-				reasons[i] = "unknown reason"
-			}
-		}
-
-		return errors.New(fmt.Sprintf("More than 0 operations failed: %d, results: %#v, reasons: %#v\n",
-			len(reasons), results, reasons))
 	}
-	return nil
+	return consolidateBulkResponseErrors(res)
 }
 
 func (c *ClientWithContext) createRoleIndex() error {
@@ -121,6 +107,9 @@ func (c *ClientWithContext) createRoleIndex() error {
 	if !exists {
 		mapping := fmt.Sprintf(`
       {
+        "settings": {
+          "number_of_shards": 1
+        },
         "mappings": {
           "%s" : {
             "properties" : {
@@ -131,7 +120,7 @@ func (c *ClientWithContext) createRoleIndex() error {
           }
         }
       }
-		`, ROLE_TYPE)
+    `, ROLE_TYPE)
 		_, err := c.client.CreateIndex(ROLE_INDEX).BodyString(mapping).Do(c.context)
 		if err != nil {
 			return err
