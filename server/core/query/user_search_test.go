@@ -67,6 +67,147 @@ func assertUserSearchResultEqual(t *testing.T, res api.UserSearchResult, user *d
 	assert.Nil(t, res.Reason)
 }
 
+func TestSearchUsersByCohort(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+
+			user1, err := createUser(db, 1)
+			assert.NoError(t, err)
+
+			_, err = createUser(db, 2)
+			assert.NoError(t, err)
+
+			req := api.CohortUserSearchRequest{
+				CohortId:                user1.Cohort.CohortId,
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
+			}
+			res, err := SearchUsersByCohort(db, req)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 1, res.NumResults)
+			assert.Equal(t, 1, len(res.Results))
+
+			assertUserSearchResultEqual(t, res.Results[0], user1)
+		},
+		TestName: "Test correct results when searching for users by cohort",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestSearchUsersByCohortLimit(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+			numUsers := 10
+			users := make([]data.User, numUsers)
+			for i := 0; i < numUsers; i = i + 1 {
+				user, err := createUser(db, i+1)
+				assert.NoError(t, err)
+				users[i] = *user
+				userTrait := data.UserCohort{
+					UserId:   user.UserId,
+					CohortId: users[0].Cohort.CohortId,
+				}
+				err = db.Save(&userTrait).Error
+				assert.NoError(t, err)
+			}
+
+			req := api.CohortUserSearchRequest{
+				CohortId:                users[0].Cohort.CohortId,
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
+			}
+			res, err := SearchUsersByCohort(db, req)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 5, res.NumResults)
+			assert.Equal(t, 5, len(res.Results))
+		},
+		TestName: "Test truncating of results when searching for users by cohort",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestSearchUsersByPosition(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+
+			user1, err := createUser(db, 1)
+			assert.NoError(t, err)
+
+			user2, err := createUser(db, 2)
+			assert.NoError(t, err)
+
+			userTrait1 := data.UserPosition{
+				UserId:         user1.UserId,
+				RoleId:         data.TRoleID(69),
+				OrganizationId: data.TOrganizationID(69),
+			}
+			err = db.Save(&userTrait1).Error
+			assert.NoError(t, err)
+
+			userTrait2 := data.UserPosition{
+				UserId:         user2.UserId,
+				RoleId:         data.TRoleID(69),
+				OrganizationId: data.TOrganizationID(70),
+			}
+			err = db.Save(&userTrait2).Error
+			assert.NoError(t, err)
+
+			req := api.PositionUserSearchRequest{
+				RoleId:                  data.TRoleID(69),
+				OrganizationId:          data.TOrganizationID(69),
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
+			}
+			res, err := SearchUsersByPosition(db, req)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 1, res.NumResults)
+			assert.Equal(t, 1, len(res.Results))
+
+			assertUserSearchResultEqual(t, res.Results[0], user1)
+		},
+		TestName: "Test correct results when searching for users by position",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestSearchUsersByPositionLimit(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+			numUsers := 10
+			users := make([]data.User, numUsers)
+			for i := 0; i < numUsers; i = i + 1 {
+				user, err := createUser(db, i+1)
+				assert.NoError(t, err)
+				users[i] = *user
+				userTrait := data.UserPosition{
+					UserId:         user.UserId,
+					RoleId:         data.TRoleID(69),
+					OrganizationId: data.TOrganizationID(69),
+				}
+				err = db.Save(&userTrait).Error
+				assert.NoError(t, err)
+			}
+
+			req := api.PositionUserSearchRequest{
+				RoleId:                  data.TRoleID(69),
+				OrganizationId:          data.TOrganizationID(69),
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
+			}
+			res, err := SearchUsersByPosition(db, req)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 5, res.NumResults)
+			assert.Equal(t, 5, len(res.Results))
+		},
+		TestName: "Test truncating of results when searching for users by position",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
 func TestSearchUsersBySimpleTrait(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
