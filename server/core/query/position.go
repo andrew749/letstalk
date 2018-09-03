@@ -1,19 +1,15 @@
 package query
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/search"
 	"letstalk/server/data"
 
-	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
-	"github.com/romana/rlog"
 )
 
 func getRole(db *gorm.DB, roleId data.TRoleID) (*data.Role, errs.Error) {
@@ -26,20 +22,6 @@ func getRole(db *gorm.DB, roleId data.TRoleID) (*data.Role, errs.Error) {
 		return nil, errs.NewDbError(err)
 	}
 	return &role, nil
-}
-
-func indexRole(es *elastic.Client, role data.Role) {
-	if es != nil {
-		searchClient := search.NewClientWithContext(es, context.Background())
-		searchRole := search.NewRoleFromDataModel(role)
-		err := searchClient.IndexRole(searchRole)
-		if err != nil {
-			raven.CaptureError(err, nil)
-			rlog.Error(err)
-		}
-	} else {
-		rlog.Warn(fmt.Sprintf("Not indexing role %s since no es provided", role.Name))
-	}
 }
 
 // Returns a role with the given name or creates a new one if one doesn't already exist.
@@ -90,20 +72,6 @@ func getOrganization(db *gorm.DB, orgId data.TOrganizationID) (*data.Organizatio
 	return &organization, nil
 }
 
-func indexOrganization(es *elastic.Client, organization data.Organization) {
-	if es != nil {
-		searchClient := search.NewClientWithContext(es, context.Background())
-		searchOrganization := search.NewOrganizationFromDataModel(organization)
-		err := searchClient.IndexOrganization(searchOrganization)
-		if err != nil {
-			raven.CaptureError(err, nil)
-			rlog.Error(err)
-		}
-	} else {
-		rlog.Warn(fmt.Sprintf("Not indexing organization %s since no es provided", organization.Name))
-	}
-}
-
 // Returns a organization with the given name or creates a new one if one doesn't already exist.
 func getOrCreateOrganization(
 	db *gorm.DB,
@@ -143,6 +111,7 @@ func getOrCreateOrganization(
 
 func addUserPosition(
 	db *gorm.DB,
+	es *elastic.Client,
 	userId data.TUserID,
 	role data.Role,
 	organization data.Organization,
@@ -162,6 +131,7 @@ func addUserPosition(
 	if err := db.Create(&userPosition).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
+	go indexPositionMultiTrait(es, &userPosition)
 	return &userPosition, nil
 }
 
@@ -223,9 +193,10 @@ func AddUserPosition(
 		return nil, err
 	}
 
-	return addUserPosition(db, userId, *role, *organization, startDate, endDate)
+	return addUserPosition(db, es, userId, *role, *organization, startDate, endDate)
 }
 
+// TODO: Maybe check if exists
 func RemoveUserPosition(
 	db *gorm.DB,
 	userId data.TUserID,

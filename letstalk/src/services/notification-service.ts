@@ -24,7 +24,27 @@ interface RequestToMatchNotificationData extends BaseNotificationData {
   readonly requestId: number;
 }
 
-type NotificationData = RequestToMatchNotificationData;
+interface AdHocNotificationData extends BaseNotificationData {
+  readonly type: 'ADHOC_NOTIFICATION';
+}
+
+interface NewMatchNotificationData extends BaseNotificationData {
+  readonly type: 'NEW_MATCH';
+}
+
+interface NewCredentialMatchNotificationData extends BaseNotificationData {
+  readonly type: 'NEW_CREDENTIAL_MATCH';
+}
+
+interface NewMatchVerifiedNotificationData extends BaseNotificationData {
+  readonly type: 'MATCH_VERIFIED';
+}
+
+type NotificationData = RequestToMatchNotificationData
+| AdHocNotificationData
+| NewMatchNotificationData
+| NewCredentialMatchNotificationData
+| NewMatchVerifiedNotificationData;
 
 export interface Notification {
   readonly data: NotificationData;
@@ -66,9 +86,14 @@ export default class NotificationService {
         }
         await fetchBootstrap()(this.store.dispatch, null, null);
         break;
+      case 'ADHOC_NOTIFICATION':
+      case 'NEW_MATCH':
+      case 'NEW_CREDENTIAL_MATCH':
+      case 'MATCH_VERIFIED':
+        break;
       default:
         // Ensure exhaustiveness of select
-        const _: never = data.type;
+        const _: never = data;
         // This case could happen, but we wouldn't do anything anyways
     }
   }
@@ -80,9 +105,14 @@ export default class NotificationService {
           // TODO: Make this do a reset instead
           this.navigate('Home');
           break;
+        case 'ADHOC_NOTIFICATION':
+        case 'NEW_MATCH':
+        case 'NEW_CREDENTIAL_MATCH':
+        case 'MATCH_VERIFIED':
+          break;
         default:
           // Ensure exhaustiveness of select
-          const _: never = notification.data.type;
+          const _: never = notification.data;
           // This case could happen, but we wouldn't do anything anyways
       }
     };

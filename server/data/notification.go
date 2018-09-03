@@ -76,6 +76,21 @@ func NotificationSentToExpoDevice(db *gorm.DB, notificationId uint, deviceId str
 	return true, nil
 }
 
+func ExistsPendingNotification(db *gorm.DB, notificationId uint, deviceId string) (bool, error) {
+	notification := ExpoPendingNotification{
+		NotificationId: notificationId,
+		DeviceId:       deviceId,
+	}
+	var res ExpoPendingNotification
+	if err := db.Where(&notification).First(&res).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 func CreateNewPendingNotification(db *gorm.DB, notificationId uint, deviceId string) (*ExpoPendingNotification, error) {
 	notification := ExpoPendingNotification{
 		NotificationId: notificationId,

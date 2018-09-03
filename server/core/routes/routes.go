@@ -249,22 +249,30 @@ func Register(
 	)
 
 	// Autocomplete endpoints
-	v1.OPTIONS("/autocomplete/simple_trait")
-	v1.POST(
-		"/autocomplete/simple_trait",
+	autocompleteV1 := v1.Group("/autocomplete")
+
+	autocompleteV1.OPTIONS("/simple_trait")
+	autocompleteV1.POST(
+		"/simple_trait",
 		hw.wrapHandler(controller.SimpleTraitAutocompleteController, false),
 	)
 
-	v1.OPTIONS("/autocomplete/role")
-	v1.POST(
-		"/autocomplete/role",
+	autocompleteV1.OPTIONS("/role")
+	autocompleteV1.POST(
+		"/role",
 		hw.wrapHandler(controller.RoleAutocompleteController, false),
 	)
 
-	v1.OPTIONS("/autocomplete/organization")
-	v1.POST(
-		"/autocomplete/organization",
+	autocompleteV1.OPTIONS("/organization")
+	autocompleteV1.POST(
+		"/organization",
 		hw.wrapHandler(controller.OrganizationAutocompleteController, false),
+	)
+
+	autocompleteV1.OPTIONS("/multi_trait")
+	autocompleteV1.POST(
+		"/multi_trait",
+		hw.wrapHandler(controller.MultiTraitAutocompleteController, false),
 	)
 
 	// User search endpoints
@@ -285,6 +293,9 @@ func Register(
 
 	debug.OPTIONS("/matching")
 	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
+
+	debug.OPTIONS("/adhoc_notification")
+	debug.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
 
 	return router
 }

@@ -1,19 +1,15 @@
 package query
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/search"
 	"letstalk/server/data"
 
-	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
-	"github.com/romana/rlog"
 )
 
 func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait, errs.Error) {
@@ -26,20 +22,6 @@ func getSimpleTrait(db *gorm.DB, traitId data.TSimpleTraitID) (*data.SimpleTrait
 		return nil, errs.NewDbError(err)
 	}
 	return &trait, nil
-}
-
-func indexSimpleTrait(es *elastic.Client, trait data.SimpleTrait) {
-	if es != nil {
-		searchClient := search.NewClientWithContext(es, context.Background())
-		searchTrait := search.NewSimpleTraitFromDataModel(trait)
-		err := searchClient.IndexSimpleTrait(searchTrait)
-		if err != nil {
-			raven.CaptureError(err, nil)
-			rlog.Error(err)
-		}
-	} else {
-		rlog.Warn(fmt.Sprintf("Not indexing simple trait %s since no es provided", trait.Name))
-	}
 }
 
 // Returns a simple trait with the given name or creates a new one if one doesn't already exist.
@@ -83,6 +65,7 @@ func getOrCreateSimpleTrait(
 
 func addUserSimpleTrait(
 	db *gorm.DB,
+	es *elastic.Client,
 	userId data.TUserID,
 	trait data.SimpleTrait,
 ) (*data.UserSimpleTrait, errs.Error) {
@@ -115,11 +98,13 @@ func addUserSimpleTrait(
 	if dbErr := tx.Commit().Error; dbErr != nil {
 		return nil, errs.NewDbError(dbErr)
 	}
+	go indexSimpleTraitMultiTrait(es, &userTrait)
 	return &userTrait, nil
 }
 
 func AddUserSimpleTraitById(
 	db *gorm.DB,
+	es *elastic.Client,
 	userId data.TUserID,
 	traitId data.TSimpleTraitID,
 ) (*data.UserSimpleTrait, errs.Error) {
@@ -127,7 +112,7 @@ func AddUserSimpleTraitById(
 	if err != nil {
 		return nil, err
 	}
-	return addUserSimpleTrait(db, userId, *trait)
+	return addUserSimpleTrait(db, es, userId, *trait)
 }
 
 func AddUserSimpleTraitByName(
@@ -141,10 +126,10 @@ func AddUserSimpleTraitByName(
 	if err != nil {
 		return nil, err
 	}
-	return addUserSimpleTrait(db, userId, *trait)
+	return addUserSimpleTrait(db, es, userId, *trait)
 }
 
-// TODO: Take userTraitId instead of traitId for consistency with userPosition
+// TODO: Maybe check if exists
 func RemoveUserSimpleTrait(
 	db *gorm.DB,
 	userId data.TUserID,

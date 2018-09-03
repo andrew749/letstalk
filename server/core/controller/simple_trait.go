@@ -43,6 +43,7 @@ func AddUserSimpleTraitByIdController(c *ctx.Context) errs.Error {
 	}
 	userTrait, err := query.AddUserSimpleTraitById(
 		c.Db,
+		c.Es,
 		c.SessionData.UserId,
 		req.SimpleTraitId,
 	)

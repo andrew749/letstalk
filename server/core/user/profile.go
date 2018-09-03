@@ -23,7 +23,7 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 		}
 	}
 
-	if err := query.UpdateProfile(c.Db, c.SessionData.UserId, request); err != nil {
+	if err := query.UpdateProfile(c.Db, c.Es, c.SessionData.UserId, request); err != nil {
 		return err
 	}
 	return nil

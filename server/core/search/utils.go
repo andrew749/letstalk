@@ -2,6 +2,8 @@ package search
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"letstalk/server/core/errs"
 
@@ -33,5 +35,25 @@ func (c *ClientWithContext) CreateEsIndexes() error {
 	compErr = errs.AppendNullableError(compErr, c.createSimpleTraitIndex())
 	compErr = errs.AppendNullableError(compErr, c.createRoleIndex())
 	compErr = errs.AppendNullableError(compErr, c.createOrganizationIndex())
+	compErr = errs.AppendNullableError(compErr, c.createMultiTraitIndex())
 	return compErr
+}
+
+func consolidateBulkResponseErrors(res *elastic.BulkResponse) error {
+	if len(res.Failed()) > 0 {
+		results := make([]string, len(res.Failed()))
+		reasons := make([]string, len(res.Failed()))
+		for i, failed := range res.Failed() {
+			results[i] = failed.Result
+			if failed.Error != nil {
+				reasons[i] = failed.Error.Reason
+			} else {
+				reasons[i] = "unknown reason"
+			}
+		}
+
+		return errors.New(fmt.Sprintf("More than 0 operations failed: %d, results: %#v, reasons: %#v\n",
+			len(reasons), results, reasons))
+	}
+	return nil
 }

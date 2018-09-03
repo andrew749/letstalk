@@ -52,10 +52,12 @@ func NewMatchNotification(db *gorm.DB, recipient data.TUserID, message string) e
 	)
 }
 
+// NewMentorNotification: Tell a user that they have a new mentor
 func NewMentorNotification(db *gorm.DB, recipient data.TUserID) error {
 	return NewMatchNotification(db, recipient, "You were matched with a new mentor.")
 }
 
+// NewMenteeNotification: Tell a user they have a new mentee
 func NewMenteeNotification(db *gorm.DB, recipient data.TUserID) error {
 	return NewMatchNotification(db, recipient, "You were matched with a new mentee.")
 }
