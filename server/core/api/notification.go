@@ -22,3 +22,12 @@ type UpdateNotificationStateRequest struct {
 	NotificationIds []uint          `json:"notificationIds"`
 	State           data.NotifState `json:"state"`
 }
+
+type SendAdhocNotificationRequest struct {
+	Recipient      int     `json:"recipient" binding:"required"`
+	Message        string  `json:"message" binding:"required"`
+	Title          string  `json:"title" binding:"required"`
+	Thumbnail      *string `json:"thumbnail"`
+	TemplatePath   string  `json:"templatePath" binding:"required"`
+	TemplateParams string  `json:"templateParams"`
+}
