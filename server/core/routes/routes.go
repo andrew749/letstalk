@@ -84,6 +84,14 @@ func Register(
 	v1.OPTIONS("/change_password")
 	v1.POST("/change_password", hw.wrapHandler(user.ForgotPasswordController, false))
 
+	// endpoint to send a new account verification email
+	v1.OPTIONS("/send_email_verification")
+	v1.POST("/send_email_verification", hw.wrapHandler(user.SendEmailVerificationController, true))
+
+	// callback to verify user's email
+	v1.OPTIONS("/verify_email")
+	v1.POST("/verify_email", hw.wrapHandler(user.VerifyEmailController, false))
+
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
 	v1.POST("/fb_login", hw.wrapHandler(user.FBController, false))

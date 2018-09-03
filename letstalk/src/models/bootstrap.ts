@@ -31,6 +31,7 @@ export enum MatchingState {
 
 export type UserState =
   | 'account_created'
+  | 'account_email_verified'
   | 'account_setup'
   | 'account_matched';
 

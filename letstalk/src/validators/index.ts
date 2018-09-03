@@ -7,9 +7,14 @@ const email = (value: string) =>
   value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)
     ? 'Invalid email address'
     : undefined;
+const uwEmail = (value: string) =>
+  value && !/^[A-Z0-9._%+-]+@(edu\.)?uwaterloo\.ca$/i.test(value)
+    ? 'Invalid UW email address'
+    : undefined;
 
 export {
   email,
+  uwEmail,
   phoneNumber,
   required,
 };

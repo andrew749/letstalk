@@ -6,6 +6,7 @@ const (
 	SubscribeEmail      = "eaf48eac-ef8a-4dfc-9b10-e09f2dc4b337"
 	PasswordChangeEmail = "5bd55885-2793-4848-8ed1-18d2483188f8"
 	NewAccount          = "3df07433-f8a3-453f-a94c-1408e85d35e4"
+	AccountVerifyEmail  = "0f4be460-b8b2-42bb-8682-222af0ddba99"
 )
 
 func SendSubscribeEmail(
@@ -46,3 +47,21 @@ func SendNewAccountEmail(
 	message := CreateBasicTemplatedEmail(to, NewAccount, &emailContext)
 	return SendEmail(message)
 }
+
+func SendAccountVerifyEmail(
+	to *mail.Email,
+	verifyEmailLink string,
+) error {
+	var emailContext interface{} = struct {
+		RecipientEmail     string `email_sub:":recipientemail"`
+		VerifyEmailLink string `email_sub:":verifyemaillink"`
+	}{
+		to.Address,
+		verifyEmailLink,
+	}
+
+	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+
+	return SendEmail(message)
+}
+

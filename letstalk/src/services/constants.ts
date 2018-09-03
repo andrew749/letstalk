@@ -1,6 +1,6 @@
 // DEV
 
- export const BASE_URL = 'https://api.hiveapp.org';
+export const BASE_URL = 'https://api.hiveapp.org';
 //export const BASE_URL = 'http://192.168.0.12';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
@@ -36,3 +36,4 @@ export const AUTOCOMPLETE_ORGANIZATION_ROUTE  = '/v1/autocomplete/organization';
 export const USER_SIMPLE_TRAIT_ROUTE          = '/v1/user_simple_trait';
 export const USER_SIMPLE_TRAIT_BY_NAME_ROUTE  = '/v1/user_simple_trait_by_name';
 export const USER_POSITION                    = '/v1/user_position';
+export const SEND_EMAIL_VERIFICATION_ROUTE    = '/v1/send_email_verification';

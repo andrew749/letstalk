@@ -46,6 +46,7 @@ import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
 import QrCodeView from './views/QrCodeView';
+import VerifyEmailView from "./views/VerifyEmailView";
 
 import NotificationService, { Notification } from './services/notification-service';
 import Colors from './services/colors';
@@ -210,6 +211,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   QrCode: {
     screen: QrCodeView,
+  },
+  VerifyEmail: {
+    screen: VerifyEmailView,
   },
 }, {
   initialRouteName,
