@@ -6,6 +6,7 @@ import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
 import {FORGOT_PASSWORD_ROUTE, SEND_EMAIL_VERIFICATION_ROUTE} from './constants';
 import {Notifications, Permissions} from "expo";
+import {SendAccountVerificationEmailRequest} from "../models/verify_email";
 
 export class Auth {
   private sessionService: SessionService
@@ -59,7 +60,8 @@ export class Auth {
 
   async sendVerificationEmail(email: string): Promise<void> {
     const sessionToken = await auth.getSessionToken();
-    const resp = await requestor.post(SEND_EMAIL_VERIFICATION_ROUTE, {"email": email}, sessionToken);
+    const req: SendAccountVerificationEmailRequest = {"email": email};
+    const resp = await requestor.post(SEND_EMAIL_VERIFICATION_ROUTE, req, sessionToken);
   }
 
   async linkFB(): Promise<boolean> {

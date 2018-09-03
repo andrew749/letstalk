@@ -54,7 +54,7 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 		return nil
 	})
 	if dbErr != nil {
-		return errs.NewDbError(dbErr)
+		return errs.NewInternalError("error sending account verify email: %v", dbErr)
 	}
 	return nil
 }
@@ -121,7 +121,7 @@ func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.E
 
 	user, err := query.GetUserById(c.Db, verifyEmailId.UserId)
 	if err != nil {
-		return errs.NewInternalError("Invalid user id")
+		return errs.NewRequestError("Invalid user id")
 	}
 
 	if user.IsEmailVerified {
