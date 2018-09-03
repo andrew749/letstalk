@@ -2,23 +2,12 @@ package query
 
 import (
 	"letstalk/server/core/api"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
 )
-
-func cohortV2FromDataCohort(cohort *data.Cohort) *api.CohortV2 {
-	return &api.CohortV2{
-		CohortId:     cohort.CohortId,
-		ProgramId:    cohort.ProgramId,
-		ProgramName:  cohort.ProgramName,
-		IsCoop:       cohort.IsCoop,
-		GradYear:     cohort.GradYear,
-		SequenceId:   cohort.SequenceId,
-		SequenceName: cohort.SequenceName,
-	}
-}
 
 func userSearchResultFromDataUser(user *data.User) *api.UserSearchResult {
 	// Reasons can be added later.
@@ -31,7 +20,7 @@ func userSearchResultFromDataUser(user *data.User) *api.UserSearchResult {
 	}
 
 	if user.Cohort != nil && user.Cohort.Cohort != nil {
-		res.Cohort = cohortV2FromDataCohort(user.Cohort.Cohort)
+		res.Cohort = converters.ApiCohortV2FromDataCohort(user.Cohort.Cohort)
 	}
 	return res
 }
@@ -39,7 +28,7 @@ func userSearchResultFromDataUser(user *data.User) *api.UserSearchResult {
 func buildUserSearchResponse(isAnonymous bool, users []data.User) *api.UserSearchResponse {
 	var results []api.UserSearchResult
 	if isAnonymous {
-		results = make([]api.UserSearchResult, 0)
+		results = []api.UserSearchResult{}
 	} else {
 		results = make([]api.UserSearchResult, len(users))
 		for i, user := range users {
