@@ -9,6 +9,13 @@ import (
 )
 
 type UserRole string
+type GenderID EntID
+
+const (
+	GENDER_OTHER GenderID = iota
+	GENDER_FEMALE
+	GENDER_MALE
+)
 
 const (
 	USER_ROLE_DEFAULT UserRole = "DEFAULT"
@@ -25,7 +32,7 @@ type User struct {
 	LastName         string    `gorm:"not null"`
 	Email            string    `gorm:"type:varchar(128);not null;unique"`
 	Secret           string    `gorm:"type:char(36);not null;unique"`
-	Gender           int       `gorm:"not null"`
+	Gender           GenderID  `gorm:"not null"`
 	Birthdate        string    `gorm:"type:varchar(100);not null"`
 	Role             UserRole  `gorm:"not null"`
 	ProfilePic       *string
@@ -47,7 +54,7 @@ func CreateUser(
 	email string,
 	firstName string,
 	lastName string,
-	gender int,
+	gender GenderID,
 	birthdate string,
 	role UserRole,
 ) (*User, error) {

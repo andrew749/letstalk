@@ -1,9 +1,10 @@
 package query
 
 import (
+	"testing"
+
 	"letstalk/server/core/test"
 	"letstalk/server/data"
-	"testing"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
