@@ -2,13 +2,13 @@ package search
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"letstalk/server/data"
 
 	"github.com/getsentry/raven-go"
 	"github.com/olivere/elastic"
+	"github.com/pkg/errors"
 )
 
 type MultiTraitID int
@@ -58,7 +58,7 @@ type SimpleTraitMultiTrait struct {
 
 func (c *ClientWithContext) indexMultiTrait(id string, trait interface{}) error {
 	if !isMultiTrait(trait) {
-		return errors.New(fmt.Sprintf("Invalid type of trait %T", trait))
+		return errors.WithStack(errors.New(fmt.Sprintf("Invalid type of trait %T", trait)))
 	}
 
 	_, err := c.client.Index().

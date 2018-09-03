@@ -44,6 +44,7 @@ func indexCohortMultiTrait(es *elastic.Client, cohort *data.UserCohort) {
 		rlog.Warn(
 			fmt.Sprintf("Cohort was not provided when adding cohort with id %d", cohort.CohortId),
 		)
+		return
 	}
 	var sequenceName string
 	if cohort.Cohort.SequenceName != nil {
