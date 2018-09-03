@@ -80,3 +80,19 @@ func OrganizationAutocompleteController(c *ctx.Context) errs.Error {
 	c.Result = apiOrganizations
 	return nil
 }
+
+func MultiTraitAutocompleteController(c *ctx.Context) errs.Error {
+	var req api.AutocompleteRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	searchClient := c.SearchClientWithContext()
+	traits, err := searchClient.QueryMultiTraitsByName(req.Prefix, req.Size)
+	if err != nil {
+		return errs.NewEsError(err)
+	}
+
+	c.Result = traits
+	return nil
+}

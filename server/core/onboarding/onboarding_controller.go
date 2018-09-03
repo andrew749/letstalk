@@ -1,14 +1,11 @@
 package onboarding
 
 import (
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"letstalk/server/data"
-
-	"letstalk/server/core/api"
-
-	"github.com/jinzhu/gorm"
-	"github.com/romana/rlog"
 )
 
 // i.e. fetch a onboarding type and the possible options
@@ -21,71 +18,26 @@ import (
  }
 */
 
-// TODO: Move into `query`
-func isValidCohort(db *gorm.DB, cohortId data.TCohortID) bool {
-	var numCohorts int = 0
-	db.Model(&data.Cohort{}).Where("cohort_id = ?", cohortId).Count(&numCohorts)
-	return numCohorts > 0
-}
-
 // Update a user with new information for their school
 // try to match this data to an existing sequence.
 func UpdateUserCohort(c *ctx.Context) errs.Error {
-	var newCohortRequest api.UpdateCohortRequest
+	var req api.UpdateCohortRequest
 
-	if err := c.GinContext.BindJSON(&newCohortRequest); err != nil {
+	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError("%s", err.Error())
 	}
 
-	newCohortId := newCohortRequest.CohortId
-
-	// check that the new cohort is valid
-	if !isValidCohort(c.Db, newCohortId) {
-		return errs.NewRequestError("Unknown cohort: %s", newCohortId)
+	if err := query.UpdateUserCohortAndAdditionalInfo(
+		c.Db,
+		c.Es,
+		c.SessionData.UserId,
+		req.CohortId,
+		req.MentorshipPreference,
+		req.Bio,
+		req.Hometown,
+	); err != nil {
+		return err
 	}
-
-	userId := c.SessionData.UserId
-
-	var (
-		dbErr          error
-		successMessage string
-	)
-
-	tx := c.Db.Begin()
-
-	rlog.Debug("No cohort found for user. Adding cohort.")
-	// insert new data from the request
-	var (
-		userCohort         data.UserCohort
-		userAdditionalData data.UserAdditionalData
-	)
-
-	dbErr = tx.Where(&data.UserCohort{UserId: userId}).Assign(
-		&data.UserCohort{CohortId: newCohortId},
-	).FirstOrCreate(&userCohort).Error
-
-	if dbErr != nil {
-		tx.Rollback()
-		return errs.NewInternalError(dbErr.Error())
-	}
-
-	dbErr = tx.Where(
-		&data.UserAdditionalData{UserId: userId},
-	).Assign(
-		&data.UserAdditionalData{
-			MentorshipPreference: newCohortRequest.MentorshipPreference,
-			Bio:                  newCohortRequest.Bio,
-			Hometown:             newCohortRequest.Hometown,
-		},
-	).FirstOrCreate(&userAdditionalData).Error
-
-	if dbErr != nil {
-		tx.Rollback()
-		return errs.NewInternalError(dbErr.Error())
-	}
-
-	successMessage = "Successfully added cohort to user."
-	tx.Commit()
 
 	onboardingInfo, err := GetOnboardingInfo(c.Db, c.SessionData.UserId)
 	if err != nil {
@@ -96,6 +48,7 @@ func UpdateUserCohort(c *ctx.Context) errs.Error {
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
+	successMessage := "Successfully added cohort to user."
 	c.Result = api.OnboardingUpdateResponse{successMessage, onboardingStatus}
 	return nil
 }
