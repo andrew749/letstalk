@@ -7,6 +7,7 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"letstalk/server/core/api"
@@ -17,6 +18,8 @@ import (
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"letstalk/server/email"
+
+	errors_extended "github.com/pkg/errors"
 
 	"github.com/getsentry/raven-go"
 	"github.com/google/uuid"
@@ -114,62 +117,9 @@ func FBController(c *ctx.Context) errs.Error {
 		}
 		// get a long lived access token from this short term token
 		// do not fail if we cant do this
-		go func() {
-			rlog.Debug("Getting long lived fb token in another fiber.")
-
-			res, err := fb.Get("/oauth/access_token", fb.Params{
-				"grant_type":        "fb_exchange_token",
-				"client_id":         secrets.GetSecrets().AppId,
-				"client_secret":     secrets.GetSecrets().AppSecret,
-				"fb_exchange_token": authToken,
-			})
-
-			if err != nil {
-				// err can be an facebook API error.
-				// if so, the Error struct contains error details.
-				if e, ok := err.(*fb.Error); ok {
-					rlog.Error("facebook error. [message:%v] [type:%v] [code:%v] [subcode:%v]",
-						e.Message, e.Type, e.Code, e.ErrorSubcode)
-					raven.CaptureError(e, nil)
-				}
-			}
-
-			if err != nil {
-				// log the error to sentry
-				// not fatal but this will cause early logout
-				rlog.Error("Unable to get new token from facebook")
-				raven.CaptureError(err, nil)
-				return
-			}
-			expiresIn, err := res["expires_in"].(json.Number).Int64()
-			if err != nil {
-				rlog.Error("Malformed date")
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			convertedTime := time.Unix(expiresIn, 0)
-			if err != nil {
-				rlog.Error("Unable to get new token from facebook")
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			fbAuthToken := data.FbAuthToken{
-				UserId:    userId,
-				AuthToken: res["access_token"].(string),
-				Expiry:    convertedTime,
-			}
-
-			if err := db.Save(&fbAuthToken).Error; err != nil {
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			// TODO: we get a long term user access token but this might set of spam filter according to fb
-			// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
-		}()
+		go GetLongTermFBToken(db, userId, fbAuthToken)
 	} else {
+		rlog.Infof("Already found facebook user with fbid %#v", externalAuthRecord)
 		userId = externalAuthRecord.UserId
 	}
 
@@ -186,6 +136,71 @@ func FBController(c *ctx.Context) errs.Error {
 		ExpiryDate: session.ExpiryDate,
 	}
 
+	return nil
+}
+
+func GetLongTermFBToken(db *gorm.DB, userId data.TUserID, authToken data.FbAuthToken) error {
+	rlog.Debug("Getting long lived fb token.")
+
+	res, err := fb.Get("/oauth/access_token", fb.Params{
+		"grant_type":        "fb_exchange_token",
+		"client_id":         secrets.GetSecrets().AppId,
+		"client_secret":     secrets.GetSecrets().AppSecret,
+		"fb_exchange_token": authToken,
+	})
+
+	if err != nil {
+		// err can be an facebook API error.
+		// if so, the Error struct contains error details.
+		if e, ok := err.(*fb.Error); ok {
+			err := errors_extended.Wrap(
+				errors.New(
+					fmt.Sprintf("Facebook error. [message:%v] [type:%v] [code:%v] [subcode:%v]",
+						e.Message, e.Type, e.Code, e.ErrorSubcode,
+					),
+				),
+				"Error from facebook api",
+			)
+			rlog.Error(err.Error())
+			raven.CaptureError(e, nil)
+		}
+	}
+
+	if err != nil {
+		// log the error to sentry
+		// not fatal but this will cause early logout
+		rlog.Errorf("Unable to get new token from facebook: %v", err)
+		raven.CaptureError(err, nil)
+		return err
+	}
+
+	expiresIn, err := res["expires_in"].(json.Number).Int64()
+	if err != nil {
+		rlog.Error("Malformed date")
+		raven.CaptureError(err, nil)
+		return err
+	}
+
+	convertedTime := time.Unix(expiresIn, 0)
+	if err != nil {
+		rlog.Error("Unable to get new token from facebook")
+		raven.CaptureError(err, nil)
+		return err
+	}
+
+	fbAuthToken := data.FbAuthToken{
+		UserId:    userId,
+		AuthToken: res["access_token"].(string),
+		Expiry:    convertedTime,
+	}
+
+	if err := db.Save(&fbAuthToken).Error; err != nil {
+		raven.CaptureError(err, nil)
+		return err
+	}
+
+	// TODO: we get a long term user access token but this might set of spam filter according to fb
+	// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
 	return nil
 }
 
