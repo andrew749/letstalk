@@ -11,7 +11,7 @@ import {
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Notifications, Font } from 'expo';
+import Expo, { Notifications, Font } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import {
@@ -49,6 +49,7 @@ import QrCodeView from './views/QrCodeView';
 import VerifyEmailView from "./views/VerifyEmailView";
 
 import NotificationService, { Notification } from './services/notification-service';
+import navService from './services/navigation-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
 import { AsyncStorage } from 'react-native';
@@ -81,6 +82,8 @@ const styles = StyleSheet.create({
 interface TabBarState {
   visible: boolean;
 }
+
+const prefix =  Platform.OS == 'android' ? 'hive://hive/' : 'hive://';
 
 class TabBar extends Component<TabBarBottomProps, TabBarState> {
   private keyboardEventListeners: Array<EmitterSubscription>;
@@ -161,12 +164,15 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   Login: {
     screen: LoginView,
+    path: 'login',
   },
   Signup: {
     screen: SignupView,
+    path: 'signup',
   },
   ForgotPassword: {
     screen: ForgotPasswordView,
+    path: 'forgot_password',
   },
   Tabbed: {
     screen: createTabView(),
@@ -184,6 +190,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   MatchProfile: {
     screen: MatchProfileView,
+    path: 'MatchProfile/:userId',
   },
   NotificationView: {
     screen: NotificationView,
@@ -238,10 +245,18 @@ class App extends React.Component<Props, AppState> {
 
     this.handleNotification = this.handleNotification.bind(this);
     this.notificationService = new NotificationService(store);
+    Expo.Linking.addEventListener('url', this._linkHandler);
+    // console.log(Expo.Linking.makeUrl('match_profile', {userId: 1}))
   }
 
   async handleNotification(notification: any) {
     await this.notificationService.handleNotification(notification as Notification);
+  }
+
+  _linkHandler = (event: {url: string}) => {
+    let { path, queryParams } = Expo.Linking.parse(event.url);
+    console.log(path, queryParams);
+    navService.navigate(path, queryParams);
   }
 
   async componentWillMount() {
@@ -260,12 +275,14 @@ class App extends React.Component<Props, AppState> {
     const AppNavigation = createAppNavigation(initialRouteName);
 
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
+      navService.setTopLevelNavigator(navContainer);
+      // TODO: refactor to use navigation service
       this.notificationService.setNavContainer(navContainer);
     }
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
-          <AppNavigation ref={addNavContainer} />
+          <AppNavigation uriPrefix={prefix} ref={addNavContainer} />
           <NotificationComponent
             ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
             notificationBodyComponent={ NotificationBody }
