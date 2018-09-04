@@ -32,6 +32,17 @@ export interface Cohort {
   readonly gradYear: number;
 }
 
+// TODO: Migrate all parts of code to V2
+export interface CohortV2 {
+  readonly cohortId: number;
+  readonly programId: string;
+  readonly programName: string;
+  readonly gradYear: number;
+  readonly isCoop: boolean;
+  readonly sequenceId: string | null;
+  readonly sequenceName: string | null;
+}
+
 type Cohorts = Immutable.List<Cohort>;
 
 export function programOptions(cohorts: Cohorts): ValueLabels {
