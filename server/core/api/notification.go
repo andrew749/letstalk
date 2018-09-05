@@ -31,4 +31,5 @@ type SendAdhocNotificationRequest struct {
 	Thumbnail      *string `json:"thumbnail"`
 	TemplatePath   string  `json:"templatePath" binding:"required"`
 	TemplateParams string  `json:"templateParams"`
+	Link           string  `json:"link"`
 }

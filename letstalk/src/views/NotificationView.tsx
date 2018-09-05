@@ -39,6 +39,8 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
+import navService from '../services/navigation-service';
+import { Linking } from 'expo';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -121,7 +123,16 @@ class NotificationView extends Component<Props, State> {
         type,
         thumbnail,
         message,
+        link,
     } = notification;
+
+    // update action to use deeplink
+    if (link !== null && link !== undefined) {
+      let { path, queryParams } = Linking.parse(link);
+      console.log("Handling notification with path " + path);
+      onPressAction = navService.navigate.bind(this, path, queryParams);
+    }
+
     notifText = <Text>{message}</Text>;
     if (thumbnail) {
       icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;

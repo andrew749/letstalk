@@ -1,6 +1,9 @@
 package linking
 
-import "fmt"
+import (
+	"fmt"
+	"letstalk/server/data"
+)
 
 // NOTE: must be kept in sync with index.tsx in root of letstalk
 const (
@@ -15,7 +18,7 @@ func GetQrScannerUrl() string {
 	return QR_SCANNER_URL
 }
 
-func GetMatchProfileUrl(userId uint) string {
+func GetMatchProfileUrl(userId data.TUserID) string {
 	return fmt.Sprintf(MATCH_PROFILE_URL, userId)
 }
 

@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"fmt"
+	"letstalk/server/core/linking"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -20,6 +21,7 @@ func RequestToMatchNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
 	side RequestToMatchSide,
+	matchUserId data.TUserID,
 	requestId uint,
 	name string,
 ) error {
@@ -36,11 +38,13 @@ func RequestToMatchNotification(
 		data.NOTIF_TYPE_REQUEST_TO_MATCH,
 		nil,
 		extraData,
+		linking.GetMatchProfileUrl(matchUserId),
 	)
 }
 
-func NewMatchNotification(db *gorm.DB, recipient data.TUserID, message string) error {
+func NewMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUserID, message string) error {
 	title := "You got a match!"
+	link := linking.GetMatchProfileUrl(userId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -49,22 +53,24 @@ func NewMatchNotification(db *gorm.DB, recipient data.TUserID, message string) e
 		data.NOTIF_TYPE_NEW_MATCH,
 		nil,
 		map[string]string{},
+		link,
 	)
 }
 
 // NewMentorNotification: Tell a user that they have a new mentor
-func NewMentorNotification(db *gorm.DB, recipient data.TUserID) error {
-	return NewMatchNotification(db, recipient, "You were matched with a new mentor.")
+func NewMentorNotification(db *gorm.DB, recipient data.TUserID, mentorUserId data.TUserID) error {
+	return NewMatchNotification(db, recipient, mentorUserId, "You were matched with a new mentor.")
 }
 
 // NewMenteeNotification: Tell a user they have a new mentee
-func NewMenteeNotification(db *gorm.DB, recipient data.TUserID) error {
-	return NewMatchNotification(db, recipient, "You were matched with a new mentee.")
+func NewMenteeNotification(db *gorm.DB, recipient data.TUserID, menteeUserId data.TUserID) error {
+	return NewMatchNotification(db, recipient, menteeUserId, "You were matched with a new mentee.")
 }
 
-func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName string) error {
+func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName string, userId data.TUserID) error {
 	title := "You verified a match!"
 	message := fmt.Sprintf("Your match with %s is now verified.", userName)
+	link := linking.GetMatchProfileUrl(userId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -73,5 +79,6 @@ func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName str
 		data.NOTIF_TYPE_MATCH_VERIFIED,
 		nil,
 		map[string]string{},
+		link,
 	)
 }
