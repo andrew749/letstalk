@@ -80,6 +80,7 @@ class NotificationView extends Component<Props, State> {
     this.renderRow = this.renderRow.bind(this);
     this.renderNotification = this.renderNotification.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
+    this.navigateHome = this.navigateHome.bind(this);
   }
 
   async componentDidMount() {
@@ -146,10 +147,10 @@ class NotificationView extends Component<Props, State> {
           </Text>
         );
         icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
-        onPressAction = this.navigateHome.bind(this);
+        onPressAction = this.navigateHome;
         break;
       case 'NEW_MATCH':
-        onPressAction = this.navigateHome.bind(this);
+        onPressAction = this.navigateHome;
         break;
       case 'ADHOC_NOTIFICATION':
         onPressAction =  (async () => {
