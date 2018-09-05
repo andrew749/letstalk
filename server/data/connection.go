@@ -23,7 +23,6 @@ const (
 	INTENT_TYPE_SEARCH IntentType = "search"
 	INTENT_TYPE_REC_GENERAL IntentType = "recommendation_general"
 	INTENT_TYPE_REC_COHORT IntentType = "recommendation_cohort"
-	INTENT_TYPE_REFERRAL IntentType = "referral"
 )
 
 type ConnectionIntent struct {
@@ -31,8 +30,6 @@ type ConnectionIntent struct {
 	Connection    *Connection   `gorm:"foreignkey:Connection"`
 	Type          IntentType    `gorm:"not null;size:100"`
 	SearchedTrait *string       `gorm:"type:text"` // Only applies to "search" type
-	Referrer      *User         `gorm:"foreignkey:ReferrerId"`
-	ReferrerId    *TUserID // Only applies to "referral" type
 }
 
 type Mentorship struct {
