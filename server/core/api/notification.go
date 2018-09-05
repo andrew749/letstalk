@@ -16,6 +16,7 @@ type Notification struct {
 	Timestamp      time.Time         `json:"timestamp"`
 	ThumbnailLink  *string           `json:"thumbnail"`
 	Data           map[string]string `json:"data"`
+	Link           string            `json:"link"`
 }
 
 type UpdateNotificationStateRequest struct {

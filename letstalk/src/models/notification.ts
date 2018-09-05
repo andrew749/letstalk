@@ -11,6 +11,7 @@ interface BaseNotification {
   message: string;
   timestamp: Date;
   thumbnail: string;
+  link: string;
 }
 
 interface NewCredentialMatchData {

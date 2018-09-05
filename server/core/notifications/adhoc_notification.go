@@ -12,13 +12,13 @@ import (
 
 // CreateAdHocNotification Creates an adhoc notification as well as a
 // page to render when users click though on the notification.
-func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]string) error {
+func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]string, link string) error {
 	creationTime := time.Now()
 	var err error
 	tx := db.Begin()
 	// note that this cant use the helper create and send notification since we
 	// probably want all data written to our db before being sent to aws
-	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
+	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams, link)
 	if err != nil {
 		tx.Rollback()
 		return err

@@ -23,10 +23,11 @@ func CreateAndSendNotification(
 	class data.NotifType,
 	thumbnail *string,
 	metadata map[string]string,
+	link string,
 ) error {
 	currentTime := time.Now()
 	var err error
-	notification, err := CreateNotification(db, recipient, class, title, message, thumbnail, currentTime, metadata)
+	notification, err := CreateNotification(db, recipient, class, title, message, thumbnail, currentTime, metadata, link)
 	if err != nil {
 		return err
 	}
@@ -67,6 +68,7 @@ func CreateNotification(
 	thumbnail *string,
 	createdAt time.Time,
 	dataMap map[string]string,
+	link string,
 ) (*data.Notification, errs.Error) {
 	notifData, err := json.Marshal(dataMap)
 	if err != nil {
@@ -82,6 +84,7 @@ func CreateNotification(
 		Message:       message,
 		ThumbnailLink: thumbnail,
 		Timestamp:     createdAt,
+		Link:          link,
 	}
 
 	if err := db.Create(dataNotif).Error; err != nil {

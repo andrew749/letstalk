@@ -25,6 +25,7 @@ func NotificationApiToData(notification api.Notification) (*data.Notification, e
 		ThumbnailLink: notification.ThumbnailLink,
 		Timestamp:     notification.Timestamp,
 		Data:          notifData,
+		Link:          notification.Link,
 	}
 
 	return dataNotif, nil
@@ -48,6 +49,7 @@ func NotificationDataToApi(notification data.Notification) (*api.Notification, e
 		Message:        notification.Message,
 		ThumbnailLink:  notification.ThumbnailLink,
 		Data:           dataMap,
+		Link:           notification.Link,
 	}
 
 	return apiNotif, nil
