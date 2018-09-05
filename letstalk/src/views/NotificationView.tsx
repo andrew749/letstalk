@@ -113,7 +113,7 @@ class NotificationView extends Component<Props, State> {
 
     let notifText: ReactNode = null;
     let icon = <MaterialIcons size={ICON_SIZE} name='face'/>;
-    let onPressAction: () => void = null;
+    let onPressAction: () => void = this.navigateHome;
     const {
         notificationId,
         state,
@@ -147,10 +147,8 @@ class NotificationView extends Component<Props, State> {
           </Text>
         );
         icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
-        onPressAction = this.navigateHome;
         break;
       case 'NEW_MATCH':
-        onPressAction = this.navigateHome;
         break;
       case 'ADHOC_NOTIFICATION':
         onPressAction =  (async () => {
@@ -160,7 +158,6 @@ class NotificationView extends Component<Props, State> {
         }).bind(this);
         break;
       default:
-        onPressAction = this.navigateHome.bind(this);
         break;
     }
 
