@@ -28,7 +28,8 @@
       ],
       "transformer": "node_modules/react-native-typescript-transformer/index.js"
     },
-    "orientation": "portrait"
+    "orientation": "portrait",
+    "scheme": "hive"
   },
   "facebookScheme": "fb153025458705124",
   "facebookAppId": "404473003315328",
