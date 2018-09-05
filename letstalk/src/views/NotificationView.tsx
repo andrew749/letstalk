@@ -80,6 +80,7 @@ class NotificationView extends Component<Props, State> {
     this.renderRow = this.renderRow.bind(this);
     this.renderNotification = this.renderNotification.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
+    this.navigateHome = this.navigateHome.bind(this);
   }
 
   async componentDidMount() {
@@ -100,12 +101,19 @@ class NotificationView extends Component<Props, State> {
     this.setState({refreshing: false});
   }
 
+  private async navigateHome() {
+    await this.props.navigation.dispatch(NavigationActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+    }));
+    await this.props.navigation.navigate('Home');
+  }
 
   private renderNotification(notification: Notification) {
 
     let notifText: ReactNode = null;
     let icon = <MaterialIcons size={ICON_SIZE} name='face'/>;
-    let onPressAction: () => void = null;
+    let onPressAction: () => void = this.navigateHome;
     const {
         notificationId,
         state,
@@ -139,13 +147,8 @@ class NotificationView extends Component<Props, State> {
           </Text>
         );
         icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
-        onPressAction = (async () => {
-          await this.props.navigation.dispatch(NavigationActions.reset({
-            index: 0,
-            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
-          }));
-          await this.props.navigation.navigate('Home');
-        }).bind(this);
+        break;
+      case 'NEW_MATCH':
         break;
       case 'ADHOC_NOTIFICATION':
         onPressAction =  (async () => {
@@ -155,8 +158,6 @@ class NotificationView extends Component<Props, State> {
         }).bind(this);
         break;
       default:
-        onPressAction =  (async () => {
-        }).bind(this);
         break;
     }
 
