@@ -164,15 +164,15 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   Login: {
     screen: LoginView,
-    path: 'login',
+    path: 'Login',
   },
   Signup: {
     screen: SignupView,
-    path: 'signup',
+    path: 'Signup',
   },
   ForgotPassword: {
     screen: ForgotPasswordView,
-    path: 'forgot_password',
+    path: 'ForgotPassword',
   },
   Tabbed: {
     screen: createTabView(),
@@ -181,12 +181,14 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   ProfileEdit: {
     screen: ProfileEditView,
+    path: 'ProfileEdit',
   },
   Onboarding: {
     screen: OnboardingView,
   },
   QrScanner: {
     screen: QrScannerView,
+    path:'QrScanner',
   },
   MatchProfile: {
     screen: MatchProfileView,
@@ -194,6 +196,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   NotificationView: {
     screen: NotificationView,
+    path: 'NotificationView',
   },
   WalkthroughView: {
     screen: WalkthroughView,
@@ -203,6 +206,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   NotificationContent: {
     screen: NotificationContentView,
+    path: 'NotificationContent/:notificationId',
   },
   EditProfileSelector: {
     screen: EditProfileSelectorView,
@@ -218,6 +222,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   QrCode: {
     screen: QrCodeView,
+    path: 'QrCode',
   },
   VerifyEmail: {
     screen: VerifyEmailView,
