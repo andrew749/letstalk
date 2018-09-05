@@ -182,6 +182,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   ProfileEdit: {
     screen: ProfileEditView,
     // TODO: needs work on the profile edit view to work properly.
+    // need to add ability to load without props.
     // path: 'ProfileEdit',
   },
   Onboarding: {
@@ -251,7 +252,7 @@ class App extends React.Component<Props, AppState> {
 
     this.handleNotification = this.handleNotification.bind(this);
     this.notificationService = new NotificationService(store);
-    Linking.addEventListener('url', this._linkHandler);
+    Linking.addEventListener('url', this.linkHandler);
     // console.log(Expo.Linking.makeUrl('match_profile', {userId: 1}))
   }
 
@@ -259,7 +260,7 @@ class App extends React.Component<Props, AppState> {
     await this.notificationService.handleNotification(notification as Notification);
   }
 
-  _linkHandler = (event: {url: string}) => {
+  private linkHandler = (event: {url: string}) => {
     let { path, queryParams } = Linking.parse(event.url);
     console.log(path, queryParams);
     navService.navigate(path, queryParams);
