@@ -21,7 +21,6 @@ import {
   State as SearchBarState,
   updateValue,
   updateFocus,
-  updateListType
 } from '../redux/search-bar/reducer';
 import {
   ActionTypes as SearchBarActionTypes,
@@ -38,8 +37,6 @@ interface DispatchActions {
   updateValue: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
   updateFocus: ActionCreator<
-    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
-  updateListType: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -72,18 +69,7 @@ class TopHeader extends Component<Props> {
       style: [styles.icon, styles.rightIcon],
     } : null;
 
-    let placeholder = '';
-    switch (this.props.listType) {
-      case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
-        placeholder = 'Find someone...';
-        break;
-      case SEARCH_LIST_TYPE_CREDENTIALS:
-        placeholder = 'I am a...';
-        break
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = this.props.listType;
-    }
+    let placeholder = 'Find someone...';
 
     const openQr = () => {
       this.props.navigation.navigate({routeName: 'QrScanner'});
@@ -108,11 +94,11 @@ class TopHeader extends Component<Props> {
           value={this.props.value}
           placeholder={placeholder}
           placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-          onFocus={logAnalyticsThenExecute.bind(this, "SearchBar", AnalyticsActions.FOCUS, "", 1, this.props.updateFocus.bind(this, true))}
+          onFocus={logAnalyticsThenExecute.bind(
+            this, "SearchBar", AnalyticsActions.FOCUS, "", 1, this.props.updateFocus.bind(this, true))}
           onBlur={() => {
             this.props.updateFocus(false);
             this.props.updateValue('');
-            this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
           }}
         />
         <TouchableOpacity style={styles.qrButton} onPress={openQr}>
@@ -127,7 +113,7 @@ class TopHeader extends Component<Props> {
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus, updateListType })(TopHeader);
+  { updateValue, updateFocus })(TopHeader);
 
 const SEARCH_BAR_LEFT_MARGIN = 36;
 const SEARCH_BAR_RIGHT_MARGIN = 36;

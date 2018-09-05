@@ -48,7 +48,6 @@ import {
 import {
   State as SearchBarState,
   updateFocus,
-  updateListType
 } from '../redux/search-bar/reducer';
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
@@ -81,8 +80,6 @@ interface DispatchActions {
   fetchCredentials: ActionCreator<
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   updateFocus: ActionCreator<
-    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
-  updateListType: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -140,7 +137,6 @@ class RequestToMatchView extends Component<Props, State> {
     if (credentialsWithState.isEmpty()) {
       const onPress = () => {
         this.props.updateFocus(true);
-        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
       };
       return (
         <View style={styles.noCredentialsContainer}>
@@ -190,7 +186,6 @@ class RequestToMatchView extends Component<Props, State> {
     if (credentialRequestsWithState.isEmpty()) {
       const onPress = () => {
         this.props.updateFocus(true);
-        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
       };
       return (
         <View style={styles.noCredentialsContainer}>
@@ -240,7 +235,6 @@ class RequestToMatchView extends Component<Props, State> {
 
     const onAddCredentialPress = () => {
       this.props.updateFocus(true);
-      this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
     }
 
     // Watch out! Typescript hack below.
@@ -308,7 +302,6 @@ export default connect(
     removeCredential,
     removeCredentialRequest,
     updateFocus,
-    updateListType,
   })(RequestToMatchView);
 
 const styles = StyleSheet.create({

@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
 import { UserSearchResponse } from '../models/user-search';
@@ -41,7 +43,10 @@ class UserSearchService {
   private async doUserSearch(url: string, req: UserSearchRequest): Promise<UserSearchResponse> {
     const sessionToken = await this.auth.getSessionToken();
     const res: UserSearchResponse = await this.requestor.post(url, req, sessionToken);
-    return res;
+    return {
+      ...res,
+      results: Immutable.List(res.results),
+    };
   }
 
   async searchByCohort(req: CohortUserSearchRequest): Promise<UserSearchResponse> {

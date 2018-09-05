@@ -9,11 +9,11 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credential } from '../../models/credential';
+import { MultiTrait } from '../../models/multi-trait';
 import {
   updateSearchValue,
   updateSearchFocus,
-  updateSearchListType,
+  updateSearchSuggestions,
   ActionTypes,
   SearchListType,
   TypeKeys,
@@ -23,13 +23,13 @@ import requestToMatchService from '../../services/request-to-match-service';
 export interface State {
   readonly value: string;
   readonly hasFocus: boolean;
-  readonly listType: SearchListType;
+  readonly suggestions: Immutable.List<MultiTrait>;
 }
 
 const initialState: State = {
   value: '',
   hasFocus: false,
-  listType: 'SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS',
+  suggestions: Immutable.List<MultiTrait>(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -44,10 +44,10 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...state,
         hasFocus: action.hasFocus,
       };
-    case TypeKeys.UPDATE_SEARCH_LIST_TYPE:
+    case TypeKeys.UPDATE_SUGGESTIONS:
       return {
         ...state,
-        listType: action.listType,
+        suggestions: action.suggestions,
       };
     default:
       // Ensure exhaustiveness of select
@@ -70,11 +70,11 @@ const updateFocus: ActionCreator<
   };
 }
 
-const updateListType: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (listType: SearchListType) => {
+const updateSuggestions: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (suggestions: Immutable.List<MultiTrait>) => {
   return async (dispatch: Dispatch<State>) => {
-    return dispatch(updateSearchListType(listType));
+    return dispatch(updateSearchSuggestions(suggestions));
   };
 }
 
-export { updateFocus, updateValue, updateListType };
+export { updateFocus, updateValue, updateSuggestions };

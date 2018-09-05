@@ -33,7 +33,6 @@ import {
 import {
   State as SearchBarState,
   updateFocus,
-  updateListType
 } from '../redux/search-bar/reducer';
 import {
   ActionButton,
@@ -42,7 +41,6 @@ import {
   Header,
 } from '../components';
 import Loading from './Loading';
-import { Credential } from '../models/credential';
 import Colors from '../services/colors';
 import TopHeader, { headerStyle } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
@@ -53,8 +51,6 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   updateFocus: ActionCreator<
-    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
-  updateListType: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -126,7 +122,6 @@ export default connect(
   }, {
     errorToast,
     updateFocus,
-    updateListType,
   })(SearchView);
 
 const styles = StyleSheet.create({
