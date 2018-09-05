@@ -23,6 +23,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
+	"letstalk/server/core/connection"
 )
 
 type handlerWrapper struct {
@@ -169,6 +170,10 @@ func Register(
 	)
 
 	// request-to-match endpoints
+
+	// gets profile data about a match for signed in user
+	v1.OPTIONS("/connection")
+	v1.POST("/connection", hw.wrapHandler(connection.PostRequestConnection, true))
 
 	v1.OPTIONS("/all_credentials")
 	v1.GET(
