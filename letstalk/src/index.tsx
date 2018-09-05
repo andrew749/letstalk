@@ -181,7 +181,8 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   ProfileEdit: {
     screen: ProfileEditView,
-    path: 'ProfileEdit',
+    // TODO: needs work on the profile edit view to work properly.
+    // path: 'ProfileEdit',
   },
   Onboarding: {
     screen: OnboardingView,
