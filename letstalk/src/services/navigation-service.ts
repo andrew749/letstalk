@@ -13,12 +13,16 @@ class NavigationService {
 
   navigate(routeName: string, params: any){
     console.log("navigating to " + routeName)
-    this._navigator.dispatch(
+    if (this._navigator !== undefined) {
+      this._navigator.dispatch(
       NavigationActions.navigate({
         routeName,
         params,
       })
-    );
+      );
+    } else {
+      console.warn("No navigator set!")
+    }
   }
 }
 
