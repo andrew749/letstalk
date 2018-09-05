@@ -11,7 +11,7 @@ import {
 import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
-import Expo, { Notifications, Font } from 'expo';
+import { Notifications, Font, Linking } from 'expo';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import {
@@ -251,7 +251,7 @@ class App extends React.Component<Props, AppState> {
 
     this.handleNotification = this.handleNotification.bind(this);
     this.notificationService = new NotificationService(store);
-    Expo.Linking.addEventListener('url', this._linkHandler);
+    Linking.addEventListener('url', this._linkHandler);
     // console.log(Expo.Linking.makeUrl('match_profile', {userId: 1}))
   }
 
@@ -260,7 +260,7 @@ class App extends React.Component<Props, AppState> {
   }
 
   _linkHandler = (event: {url: string}) => {
-    let { path, queryParams } = Expo.Linking.parse(event.url);
+    let { path, queryParams } = Linking.parse(event.url);
     console.log(path, queryParams);
     navService.navigate(path, queryParams);
   }
