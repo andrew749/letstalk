@@ -15,12 +15,8 @@ const (
 	QR_CODE_URL           = "QrCode"
 )
 
-func getURLBase() string {
-	return utility.GetUrl()
-}
-
 func wrapWithUrlBase(url string) string {
-	return fmt.Sprintf("exp://%s/%s", getURLBase(), url)
+	return fmt.Sprintf("%s://%s", utility.GetDeeplinkPrefix(), url)
 }
 
 func GetQrScannerUrl() string {

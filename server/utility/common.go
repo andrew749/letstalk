@@ -47,7 +47,7 @@ func IsProductionEnvironment() bool {
 	return *isProd
 }
 
-func GetUrl() string {
+func GetDeeplinkPrefix() string {
 	checkBootstrapped()
-	return secrets.GetSecrets().Url
+	return secrets.GetSecrets().DeeplinkPrefix
 }
