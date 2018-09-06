@@ -161,11 +161,6 @@ class NotificationView extends Component<Props, State> {
       case 'NEW_MATCH':
         break;
       case 'ADHOC_NOTIFICATION':
-        onPressAction =  (async () => {
-          this.props.navigation.navigate('NotificationContent', {
-            notificationId: notificationId,
-          });
-        }).bind(this);
         break;
       default:
         break;
