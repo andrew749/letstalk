@@ -39,7 +39,6 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
-import navService from '../services/navigation-service';
 import { Linking } from 'expo';
 
 interface DispatchActions {

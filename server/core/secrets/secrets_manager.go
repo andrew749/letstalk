@@ -16,6 +16,7 @@ type Secrets struct {
 	SentryToken            string `json:"sentry_auth_token"`
 	SentryDSN              string `json:"sentry_dsn"`
 	SendGrid               string `json:"sendgrid"`
+	Url                    string `json:"url"`
 }
 
 type SecretsManager struct {
