@@ -27,7 +27,7 @@ const (
 	INTENT_TYPE_REC_GENERAL IntentType = "recommendation_general"
 	INTENT_TYPE_REC_COHORT IntentType = "recommendation_cohort"
 )
-func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]rune)); return nil }
+func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]uint8)); return nil }
 func (u IntentType) Value() (driver.Value, error)  { return string(u), nil }
 
 type ConnectionIntent struct {

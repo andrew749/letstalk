@@ -1,5 +1,4 @@
 package connection
-
 import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
@@ -41,7 +40,7 @@ func handleRequestConnection(c *ctx.Context, request api.Connection) (*api.Conne
 		return nil, errs.NewRequestError("Invalid user id")
 	}
 	// Assert request does not already exist.
-	existing, err := query.GetConnectionDetails(c.Db, authUser.UserId, connUser.UserId)
+	existing, err := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, connUser.UserId)
 	if err != nil {
 		return nil, errs.NewDbError(err)
 	}
@@ -75,4 +74,53 @@ func handleRequestConnection(c *ctx.Context, request api.Connection) (*api.Conne
 	}
 	request.CreatedAt = connection.CreatedAt
 	return &request, nil
+}
+
+/**
+ * PostAcceptConnection accepts an existing connection request
+ */
+func PostAcceptConnection(c *ctx.Context) errs.Error {
+	var input api.Connection
+	if err := c.GinContext.BindJSON(&input); err != nil {
+		return errs.NewRequestError("Failed to parse input")
+	}
+	rlog.Info("Received input: ", input)
+
+	if newConnection, err := handleConfirmConnection(c, input); err != nil {
+		return err
+	} else {
+		c.Result = newConnection
+	}
+	return nil
+}
+
+func handleConfirmConnection(c *ctx.Context, request api.Connection) (*api.Connection, errs.Error) {
+	// Assert request exists from request user to auth user.
+	connection, err := query.GetConnectionDetails(c.Db, request.UserId, c.SessionData.UserId)
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	if connection == nil || connection.DeletedAt != nil {
+		return nil, errs.NewRequestError("No such connection request exists")
+	}
+	result := api.Connection{
+		UserId: request.UserId,
+		IntentType: connection.Intent.Type,
+		CreatedAt: connection.CreatedAt,
+	}
+	if connection.Intent.SearchedTrait != nil {
+		result.SearchedTrait = *connection.Intent.SearchedTrait
+	}
+	if connection.AcceptedAt != nil {
+		// Already accepted, do nothing.
+		result.AcceptedAt = *connection.AcceptedAt
+		return &result, nil
+	}
+	now := time.Now()
+	connection.AcceptedAt = &now
+	if err := c.Db.Save(connection).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	result.AcceptedAt = *connection.AcceptedAt
+	return &result, nil
 }
