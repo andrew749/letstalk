@@ -11,7 +11,7 @@ const (
 	QR_SCANNER_URL        = "QrScanner"
 	MATCH_PROFILE_URL     = "MatchProfile?userId=%d"
 	NOTIFICATION_VIEW_URL = "NotificationView"
-	ADHOC_URL             = "NotificationContent?notificationId%d"
+	ADHOC_URL             = "NotificationContent?notificationId=%d"
 	QR_CODE_URL           = "QrCode"
 )
 
