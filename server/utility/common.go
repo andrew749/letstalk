@@ -34,12 +34,8 @@ func Bootstrap() {
 
 func checkBootstrapped() {
 	if !bootstrapRun {
-		bootstrapNotRunError()
+		Bootstrap()
 	}
-}
-
-func bootstrapNotRunError() {
-	panic("Need to be bootstrapped first")
 }
 
 func IsProductionEnvironment() bool {
