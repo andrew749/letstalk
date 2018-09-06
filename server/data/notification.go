@@ -39,7 +39,7 @@ type Notification struct {
 	Message       string     `gorm:"not null;type:text"`
 	ThumbnailLink *string    `gorm:"size:190"`
 	Data          JSONBlob   `gorm:"not null;type:text"`
-	Link          string     `gorm:"size:190"`
+	Link          *string    `gorm:"size:190"`
 }
 
 func (u *NotifType) Scan(value interface{}) error { *u = NotifType(value.([]byte)); return nil }

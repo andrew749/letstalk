@@ -130,7 +130,7 @@ class NotificationView extends Component<Props, State> {
     if (link !== null && link !== undefined) {
       let { path, queryParams } = Linking.parse(link);
       console.log("Handling notification with path " + path);
-      onPressAction = navService.navigate.bind(this, path, queryParams);
+      onPressAction = this.props.navigation.navigate.bind(this, path, queryParams);
     }
 
     notifText = <Text>{message}</Text>;

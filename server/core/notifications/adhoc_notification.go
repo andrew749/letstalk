@@ -29,7 +29,8 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 		tx.Rollback()
 		return err
 	}
-	notification.Link = linking.GetAdhocLink(notification.ID)
+	link := linking.GetAdhocLink(notification.ID)
+	notification.Link = &link
 	if err = tx.Save(notification).Error; err != nil {
 		tx.Rollback()
 		return err

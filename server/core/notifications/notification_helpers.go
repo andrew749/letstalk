@@ -84,7 +84,7 @@ func CreateNotification(
 		Message:       message,
 		ThumbnailLink: thumbnail,
 		Timestamp:     createdAt,
-		Link:          link,
+		Link:          &link,
 	}
 
 	if err := db.Create(dataNotif).Error; err != nil {
