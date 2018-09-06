@@ -93,6 +93,7 @@ interface Props extends DispatchActions {
 interface State {
   refreshing: boolean;
 }
+
 class RequestToMatchView extends Component<Props, State> {
   REQUEST_TO_MATCH_VIEW_IDENTIFIER = "RequestToMatchView";
 

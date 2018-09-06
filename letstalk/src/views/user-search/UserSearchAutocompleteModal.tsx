@@ -17,41 +17,43 @@ import {
   View,
 } from 'react-native';
 import { Constants } from 'expo';
+import longestCommonSubsequence from 'longest-common-subsequence';
 
-import { MultiTrait } from '../../models/multi-trait';
+import {
+  MultiTrait,
+  MultiTraitTypes,
+} from '../../models/multi-trait';
+import Colors from '../../services/colors';
+import { greedyMatch } from '../../components/AutocompleteInput';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-export interface FilterableElement {
-  readonly id: any;
-  readonly value: string;
+interface ItemElement {
+  readonly type: 'ITEM';
+  readonly id: string;
+  readonly trait: MultiTrait;
 }
 
-interface FilterableElementType extends FilterableElement {
-  readonly type: 'FILTERABLE_ELEMENT';
-  readonly searchValue: string;
+interface EndOfItemsElement {
+  readonly type: 'END_OF_ITEMS';
+  readonly id: 'END_OF_ITEMS';
+  readonly numElems: number;
 }
 
-interface GapType {
-  readonly type: 'GAP';
-}
-
-interface NoMoreResultsType {
-  readonly type: 'NO_MORE_RESULTS';
-}
-
-interface RawInputType {
-  readonly type: 'RAW_INPUT';
-  readonly searchValue: string;
-}
-
-interface HintType {
+interface HintElement {
   readonly type: 'HINT';
+  readonly id: 'HINT';
   readonly hintText: string;
 }
 
-type Element = FilterableElementType | GapType | NoMoreResultsType | RawInputType | HintType;
+type Element = ItemElement | EndOfItemsElement | HintElement;
+
+const CLICK_HINT: HintElement = {
+  id: 'HINT',
+  type: 'HINT',
+  hintText: 'Click on an option to search for users',
+};
 
 interface Props {
   data: Immutable.List<MultiTrait>;
@@ -63,6 +65,24 @@ interface State {
   keyboardHeight: number;
 }
 
+function longestMatch(str: string, query: string) {
+  str = str.toLowerCase();
+  query = query.toLowerCase();
+  let longestMatchIdxs = null;
+  for (let i = 0; i < str.length; i++) {
+    for (let j = 0; i + j < str.length && j < query.length; j++) {
+      if (query[j] === str[i+j]) {
+        if (longestMatchIdxs === null || j + 1 > (longestMatchIdxs[1] - longestMatchIdxs[0])) {
+          longestMatchIdxs = [i, i+j+1];
+        }
+      } else {
+        break;
+      }
+    }
+  }
+  return longestMatchIdxs;
+}
+
 class UserSearchAutocompleteModal extends Component<Props, State> {
   private ds: ListViewDataSource;
   private keyboardDidShowListener: EmitterSubscription;
@@ -72,7 +92,7 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
     super(props);
 
     this.ds = new ListView.DataSource({
-      rowHasChanged: (r1: FilterableElement, r2: FilterableElement) => r1.id !== r2.id
+      rowHasChanged: (r1: Element, r2: Element) => r1.id !== r2.id
     });
 
     this.state = {
@@ -80,6 +100,7 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
     };
 
     this.renderElement = this.renderElement.bind(this);
+    this.renderItem = this.renderItem.bind(this);
     this.keyboardDidHide = this.keyboardDidHide.bind(this);
     this.keyboardDidShow = this.keyboardDidShow.bind(this);
   }
@@ -107,15 +128,113 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
     this.keyboardDidHideListener.remove()
   }
 
-  private renderElement(trait: MultiTrait) {
+  private renderItem(trait: MultiTrait) {
+    let icon: string = 'color-lens';
+    let color: string = Colors.HIVE_PRIMARY;
+    let tpe: string = 'Trait';
+    let text = null;
+
+    const name = trait.traitName;
+
+    const matched = longestMatch(name, this.props.value);
+    if (!!matched) {
+      text = (
+        <Text>
+          {name.substring(0, matched[0])}
+          <Text style={styles.boldText}>{name.substring(matched[0], matched[1])}</Text>
+          {name.substring(matched[1])}
+        </Text>
+      );
+    } else {
+      text = <Text>{name}</Text>;
+    }
+
+    switch (trait.traitType) {
+      case MultiTraitTypes.COHORT:
+        icon = 'school';
+        color = Colors.HIVE_SUBDUED;
+        tpe = 'Cohort';
+        break;
+      case MultiTraitTypes.POSITION:
+        icon = 'supervisor-account';
+        color = Colors.HIVE_ACCENT;
+        tpe = 'Position';
+        break;
+    }
+
+    const onPress = () => this.props.onSelect(trait);
+
     // TODO: Render different kinds of elements.
-    return <Text>yo</Text>;
+    return (
+      <TouchableOpacity style={styles.searchItem} onPress={onPress}>
+        <MaterialIcons name={icon} color={color} size={24} />
+        <View style={styles.traitContainer}>
+          <Text style={styles.traitText}>{text}</Text>
+          <Text style={[styles.typeText, { color }]}>{tpe}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  private renderElement(el: Element) {
+    const { value, data } = this.props;
+
+    switch (el.type) {
+      case 'ITEM':
+        return this.renderItem(el.trait);
+      case 'END_OF_ITEMS':
+        const padding = {
+          paddingBottom: this.state.keyboardHeight + 80,
+        };
+        let text = '';
+        if (value === '' && data.isEmpty()) {
+          text = 'Start typing to see search options';
+        } else if (data.isEmpty()) {
+          text = 'No search options found for ' + value + ' - try something else';
+        } else if (data.size === 1) {
+          text = 'Showing the best search option';
+        } else {
+          text = 'Showing the best ' + el.numElems + ' search options';
+        }
+
+        return (
+          <View style={[styles.noMoreResults, padding]}>
+            <Text style={{color: 'gray'}}>{ text }</Text>
+          </View>
+        );
+      case 'HINT':
+        return (
+          <View style={[styles.hint]}>
+            <Text style={{color: 'gray'}}>{ el.hintText }</Text>
+          </View>
+        )
+      default:
+        // Ensure exhaustiveness of select
+        const _: never = el;
+    }
   }
 
   render() {
     const { data, value } = this.props;
-    const ds = this.ds.cloneWithRows(data.toJS());
+    let els: Immutable.List<Element> = data.isEmpty() ?
+      Immutable.List() : Immutable.List([CLICK_HINT])
+    els = els.concat(data.map(trait => {
+      const el: ItemElement = {
+        type: 'ITEM',
+        id: trait.traitName,
+        trait,
+      };
+      return el;
+    })).toList();
 
+    let endElem: EndOfItemsElement = {
+      type: 'END_OF_ITEMS',
+      id: 'END_OF_ITEMS',
+      numElems: data.size,
+    };
+    els = els.push(endElem).toList();
+
+    const ds = this.ds.cloneWithRows(els.toJS());
     return (
       <View style={styles.container}>
         <ListView
@@ -142,32 +261,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'white',
   },
-  item: {
-    justifyContent: 'center',
+  searchItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderBottomWidth: 0.5,
     borderColor: '#909090',
     padding: 10,
   },
+  traitContainer: {
+    paddingLeft: 10,
+  },
+  traitText: {
+    fontSize: 16,
+  },
+  typeText: {
+    fontSize: 12,
+  },
+  boldText: {
+    fontWeight: '900',
+  },
   rawInputText: {
     color: '#003CB2',
   },
-  itemText: {
-    fontSize: 18,
-  },
-  gap: {
-    height: 20,
-    borderBottomWidth: 0.5,
-    borderColor: '#909090',
-  },
   noMoreResults: {
     marginTop: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
   },
   hint: {
-    paddingTop: 15,
-    paddingLeft: 5,
-    paddingRight: 5,
-    fontSize: 14,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
     alignItems: 'center',
+    borderBottomWidth: 0.5,
+    borderColor: '#909090',
   },
 });

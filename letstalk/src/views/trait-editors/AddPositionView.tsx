@@ -51,17 +51,18 @@ interface AddPositionFormData {
 }
 
 const THROTTLE_TIME = 250; // ms
+const MAX_SIZE = 10;
 
 const onRoleQueryChange = async (query: string, setData: (data: Array<DataItem>) => void) => {
   let res: Array<DataItem> = [];
-  if (query !== '') res = await autocompleteService.autocompleteRole(query, 10);
+  if (query !== '') res = await autocompleteService.autocompleteRole(query, MAX_SIZE);
   setData(res);
 }
 const onRoleQueryChangeThrottled = _.throttle(onRoleQueryChange, THROTTLE_TIME);
 
 const onOrganizationQueryChange = async (query: string, setData: (data: Array<DataItem>) => void) => {
   let res: Array<DataItem> = [];
-  if (query !== '') res = await autocompleteService.autocompleteOrganization(query, 10);
+  if (query !== '') res = await autocompleteService.autocompleteOrganization(query, MAX_SIZE);
   setData(res);
 }
 const onOrganizationQueryChangeThrottled = _.throttle(onOrganizationQueryChange, THROTTLE_TIME);

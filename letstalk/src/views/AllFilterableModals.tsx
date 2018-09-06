@@ -48,6 +48,7 @@ class AllFilterableModals extends Component<Props> {
 
   private async searchForTrait(trait: MultiTrait): Promise<void> {
     // TODO: Actually search here
+    console.log(trait)
   }
 
   private async onMultiTraitSelect(trait: MultiTrait): Promise<void> {

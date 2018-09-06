@@ -2,7 +2,7 @@ import { CohortV2 } from './cohort';
 import { Position } from './position';
 import { SimpleTrait } from './simple-trait';
 
-enum MultiTraitTypes {
+export enum MultiTraitTypes {
   COHORT       = "COHORT",
   POSITION     = "POSITION",
   SIMPLE_TRAIT = "SIMPLE_TRAIT",

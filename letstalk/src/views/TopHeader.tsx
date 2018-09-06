@@ -15,12 +15,15 @@ import {
   NavigationRoute,
   NavigationParams,
 } from 'react-navigation';
+import _ from 'underscore';
+import Immutable from 'immutable';
 
 import { RootState } from '../redux';
 import {
   State as SearchBarState,
   updateValue,
   updateFocus,
+  updateSuggestions,
 } from '../redux/search-bar/reducer';
 import {
   ActionTypes as SearchBarActionTypes,
@@ -30,13 +33,25 @@ import {
 import Colors from '../services/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import { logAnalyticsThenExecute, AnalyticsActions } from '../services/analytics';
+import autocompleteService from '../services/autocomplete-service';
+import { MultiTrait } from '../models/multi-trait';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const THROTTLE_TIME = 250; // ms
+
+const onQueryChange = async (query: string, setData: (data: Immutable.List<MultiTrait>) => void) => {
+  let res: Immutable.List<MultiTrait> = Immutable.List();
+  if (query !== '') res = await autocompleteService.autocompleteMultiTrait(query, 10);
+  setData(res);
+}
+const onQueryChangeThrottled = _.throttle(onQueryChange, THROTTLE_TIME);
 
 interface DispatchActions {
   updateValue: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
   updateFocus: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateSuggestions: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -51,6 +66,12 @@ class TopHeader extends Component<Props> {
     super(props);
 
     this.searchBar = null;
+
+    this.onFocus = this.onFocus.bind(this);
+    this.onBlur = this.onBlur.bind(this);
+    this.onFocusAfterLog = this.onFocusAfterLog.bind(this);
+    this.onChangeText = this.onChangeText.bind(this);
+    this.onClearText = this.onClearText.bind(this);
   }
 
   componentWillReceiveProps(props: Props) {
@@ -59,6 +80,28 @@ class TopHeader extends Component<Props> {
     } else if (!this.props.hasFocus && props.hasFocus) {
       this.searchBar.focus();
     }
+  }
+
+  private onFocusAfterLog() {
+    this.props.updateFocus(true);
+  }
+
+  private onFocus() {
+    logAnalyticsThenExecute("SearchBar", AnalyticsActions.FOCUS, "", 1, this.onFocusAfterLog);
+  }
+
+  private onBlur() {
+    this.props.updateFocus(false);
+    this.props.updateValue('');
+  }
+
+  private onChangeText(value: string) {
+    this.props.updateValue(value);
+    onQueryChangeThrottled(value, this.props.updateSuggestions);
+  }
+
+  private onClearText() {
+    this.searchBar.blur();
   }
 
   render() {
@@ -87,19 +130,15 @@ class TopHeader extends Component<Props> {
           ref={(ref: SearchBar) => this.searchBar = ref}
           clearIcon={clearIcon}
           icon={{ style: [styles.icon, styles.leftIcon] }}
-          onChangeText={(value: string) => this.props.updateValue(value)}
-          onClearText={() => this.searchBar.blur()}
+          onChangeText={this.onChangeText}
+          onClearText={this.onClearText}
           containerStyle={styles.searchBarContainer}
           inputStyle={styles.searchBarTextInput}
           value={this.props.value}
           placeholder={placeholder}
           placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-          onFocus={logAnalyticsThenExecute.bind(
-            this, "SearchBar", AnalyticsActions.FOCUS, "", 1, this.props.updateFocus.bind(this, true))}
-          onBlur={() => {
-            this.props.updateFocus(false);
-            this.props.updateValue('');
-          }}
+          onFocus={this.onFocus}
+          onBlur={this.onBlur}
         />
         <TouchableOpacity style={styles.qrButton} onPress={openQr}>
           <MaterialIcons name="camera-enhance" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
@@ -113,7 +152,7 @@ class TopHeader extends Component<Props> {
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus })(TopHeader);
+  { updateValue, updateFocus, updateSuggestions })(TopHeader);
 
 const SEARCH_BAR_LEFT_MARGIN = 36;
 const SEARCH_BAR_RIGHT_MARGIN = 36;

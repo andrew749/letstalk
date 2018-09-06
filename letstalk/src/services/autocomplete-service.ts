@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 import requestor, { Requestor } from './requests';
 import { SimpleTrait } from '../models/simple-trait';
 import { MultiTrait } from '../models/multi-trait';
@@ -27,6 +29,7 @@ class AutocompleteService {
     return res
   }
 
+  // TODO: Migrate to using immutable
   async autocompleteSimpleTrait(prefix: string, size: number): Promise<Array<SimpleTrait>> {
     return this.doRequest(AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE, prefix, size);
   }
@@ -39,8 +42,9 @@ class AutocompleteService {
     return this.doRequest(AUTOCOMPLETE_ROLE_ROUTE, prefix, size);
   }
 
-  async autocompleteMultiTrait(prefix: string, size: number): Promise<Array<MultiTrait>> {
-    return this.doRequest(AUTOCOMPLETE_MULTI_TRAIT_ROUTE, prefix, size);
+  async autocompleteMultiTrait(prefix: string, size: number): Promise<Immutable.List<MultiTrait>> {
+    const res = await this.doRequest(AUTOCOMPLETE_MULTI_TRAIT_ROUTE, prefix, size);
+    return Immutable.List(res);
   }
 }
 
