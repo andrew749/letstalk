@@ -39,6 +39,7 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
+import { Linking } from 'expo';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -121,7 +122,16 @@ class NotificationView extends Component<Props, State> {
         type,
         thumbnail,
         message,
+        link,
     } = notification;
+
+    // update action to use deeplink
+    if (link !== null && link !== undefined) {
+      let { path, queryParams } = Linking.parse(link);
+      console.log("Handling notification with path " + path);
+      onPressAction = this.props.navigation.navigate.bind(this, path, queryParams);
+    }
+
     notifText = <Text>{message}</Text>;
     if (thumbnail) {
       icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
@@ -151,11 +161,6 @@ class NotificationView extends Component<Props, State> {
       case 'NEW_MATCH':
         break;
       case 'ADHOC_NOTIFICATION':
-        onPressAction =  (async () => {
-          this.props.navigation.navigate('NotificationContent', {
-            notificationId: notificationId,
-          });
-        }).bind(this);
         break;
       default:
         break;

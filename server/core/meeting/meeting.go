@@ -92,8 +92,8 @@ func updateMatchingObject(tx *gorm.DB, matching data.Matching) error {
 // Send notifications to the two users in a newly verified match.
 func sendMatchVerifiedNotifications(c *ctx.Context, verifyingUser *data.User, matchedUser *data.User) error {
 	db := c.Db
-	err1 := notifications.MatchVerifiedNotification(db, verifyingUser.UserId, matchedUser.FirstName)
-	err2 := notifications.MatchVerifiedNotification(db, matchedUser.UserId, verifyingUser.FirstName)
+	err1 := notifications.MatchVerifiedNotification(db, verifyingUser.UserId, matchedUser.FirstName, matchedUser.UserId)
+	err2 := notifications.MatchVerifiedNotification(db, matchedUser.UserId, verifyingUser.FirstName, verifyingUser.UserId)
 	if err1 != nil {
 		raven.CaptureError(err1, nil)
 	}

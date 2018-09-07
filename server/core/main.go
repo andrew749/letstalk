@@ -29,7 +29,6 @@ var (
 // Authentication flags
 var (
 	profiling  = flag.Bool("profiling", false, "Whether to turn on profiling endpoints.")
-	isProd     = flag.Bool("PROD", false, "Whether to run in debug mode.")
 	useElastic = flag.Bool("use_elastic", true, "Whether to create an Elasticsearch client")
 )
 
@@ -50,7 +49,7 @@ func main() {
 
 	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
 	// work.
-	if *useElastic && !*isProd {
+	if *useElastic && !utility.IsProductionEnvironment() {
 		es, err = utility.GetES()
 		if err != nil {
 			rlog.Error(err)
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	// log in development
-	db.LogMode(!*isProd)
+	db.LogMode(!utility.IsProductionEnvironment())
 
 	// Create tables using utf8mb4 encoding. Only works with MySQL.
 	data.CreateDB(db.Set("gorm:table_options", "CHARSET=utf8mb4"))
@@ -84,10 +83,10 @@ func main() {
 	raven.SetDSN(secrets.GetSecrets().SentryDSN)
 
 	// production specific setup
-	if *isProd {
-		rlog.Info("Running in isProd")
+	if utility.IsProductionEnvironment() {
+		rlog.Info("Running in IsProd")
 		raven.SetTagsContext(map[string]string{
-			"environment": "isProd",
+			"environment": "IsProd",
 		})
 		// setup sentry
 	} else {
