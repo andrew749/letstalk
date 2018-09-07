@@ -17,7 +17,6 @@ import {
   View,
 } from 'react-native';
 import { Constants } from 'expo';
-import longestCommonSubsequence from 'longest-common-subsequence';
 
 import {
   MultiTrait,
@@ -59,6 +58,7 @@ interface Props {
   data: Immutable.List<MultiTrait>;
   onSelect(trait: MultiTrait): Promise<void>;
   value: string;
+  errorMsg: string;
 }
 
 interface State {
@@ -177,7 +177,7 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
   }
 
   private renderElement(el: Element) {
-    const { value, data } = this.props;
+    const { value, data, errorMsg } = this.props;
 
     switch (el.type) {
       case 'ITEM':
@@ -197,9 +197,14 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
           text = 'Showing the best ' + el.numElems + ' search options';
         }
 
+        const errorElem = !!errorMsg ? (
+          <Text style={styles.errorText}>{ errorMsg }</Text>
+        ) : null;
+
         return (
           <View style={[styles.noMoreResults, padding]}>
             <Text style={{color: 'gray'}}>{ text }</Text>
+            {errorElem}
           </View>
         );
       case 'HINT':
@@ -277,11 +282,12 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 12,
   },
+  errorText: {
+    color: Colors.HIVE_ERROR,
+    paddingTop: 5,
+  },
   boldText: {
     fontWeight: '900',
-  },
-  rawInputText: {
-    color: '#003CB2',
   },
   noMoreResults: {
     marginTop: 10,

@@ -14,6 +14,7 @@ import {
   updateSearchValue,
   updateSearchFocus,
   updateSearchSuggestions,
+  updateSearchError,
   ActionTypes,
   SearchListType,
   TypeKeys,
@@ -22,12 +23,14 @@ import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
   readonly value: string;
+  readonly errorMsg: string;
   readonly hasFocus: boolean;
   readonly suggestions: Immutable.List<MultiTrait>;
 }
 
 const initialState: State = {
   value: '',
+  errorMsg: null,
   hasFocus: false,
   suggestions: Immutable.List<MultiTrait>(),
 };
@@ -48,6 +51,11 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       return {
         ...state,
         suggestions: action.suggestions,
+      };
+    case TypeKeys.UPDATE_ERROR:
+      return {
+        ...state,
+        errorMsg: action.errorMsg,
       };
     default:
       // Ensure exhaustiveness of select
@@ -77,4 +85,11 @@ const updateSuggestions: ActionCreator<
   };
 }
 
-export { updateFocus, updateValue, updateSuggestions };
+const updateError: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (errorMsg: string) => {
+  return async (dispatch: Dispatch<State>) => {
+    return dispatch(updateSearchError(errorMsg));
+  };
+}
+
+export { updateFocus, updateValue, updateSuggestions, updateError };

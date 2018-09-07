@@ -24,6 +24,7 @@ import {
   updateValue,
   updateFocus,
   updateSuggestions,
+  updateError,
 } from '../redux/search-bar/reducer';
 import {
   ActionTypes as SearchBarActionTypes,
@@ -39,9 +40,22 @@ import { MultiTrait } from '../models/multi-trait';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const THROTTLE_TIME = 250; // ms
 
-const onQueryChange = async (query: string, setData: (data: Immutable.List<MultiTrait>) => void) => {
+const onQueryChange = async (
+  query: string,
+  setData: (data: Immutable.List<MultiTrait>) => void,
+  onError?: (e: any) => void,
+) => {
   let res: Immutable.List<MultiTrait> = Immutable.List();
-  if (query !== '') res = await autocompleteService.autocompleteMultiTrait(query, 10);
+  if (query !== '') {
+    try {
+      res = await autocompleteService.autocompleteMultiTrait(query, 10);
+    } catch (e) {
+      if (!!onError) {
+        onError(e);
+      }
+      throw e;
+    }
+  }
   setData(res);
 }
 const onQueryChangeThrottled = _.throttle(onQueryChange, THROTTLE_TIME);
@@ -52,6 +66,8 @@ interface DispatchActions {
   updateFocus: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
   updateSuggestions: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateError: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -93,11 +109,17 @@ class TopHeader extends Component<Props> {
   private onBlur() {
     this.props.updateFocus(false);
     this.props.updateValue('');
+    this.props.updateSuggestions(Immutable.List());
   }
 
   private onChangeText(value: string) {
     this.props.updateValue(value);
-    onQueryChangeThrottled(value, this.props.updateSuggestions);
+    onQueryChangeThrottled(value, data => {
+      this.props.updateError(null);
+      this.props.updateSuggestions(data);
+    }, e => {
+      this.props.updateError(e.errorMsg);
+    });
   }
 
   private onClearText() {
@@ -152,7 +174,7 @@ class TopHeader extends Component<Props> {
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus, updateSuggestions })(TopHeader);
+  { updateValue, updateFocus, updateSuggestions, updateError })(TopHeader);
 
 const SEARCH_BAR_LEFT_MARGIN = 36;
 const SEARCH_BAR_RIGHT_MARGIN = 36;

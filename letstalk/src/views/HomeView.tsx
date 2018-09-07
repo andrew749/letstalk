@@ -310,13 +310,6 @@ class HomeView extends Component<Props, State> {
   private renderHome() {
     // A little sketchy to be pasting this in all the cases, but haven't found an easy work around
     // yet.
-    const allModals = (
-      <AllFilterableModals
-        onSelectSuccess={() => {
-          this.props.navigation.navigate({ routeName: 'Requests' });
-        }}
-      />
-    );
     const feedbackPrompt = (
       <View>
         <Text style={styles.feedbackText}>
@@ -340,7 +333,6 @@ class HomeView extends Component<Props, State> {
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for you to finish onboarding</Text>
             <ActionButton onPress={() => this.load()} title="Check again" />
-            { allModals }
           </View>
         );
       case 'account_setup':
@@ -349,7 +341,6 @@ class HomeView extends Component<Props, State> {
             <Text style={styles.headline}>Waiting for your match</Text>
             <ActionButton onPress={() => this.load()} title="Check again" />
             { feedbackPrompt }
-            { allModals }
           </View>
         );
       case 'account_matched':
@@ -368,7 +359,6 @@ class HomeView extends Component<Props, State> {
               { feedbackPrompt }
               { matches }
             </ScrollView>
-            { allModals }
           </View>
         );
       default:
@@ -378,6 +368,13 @@ class HomeView extends Component<Props, State> {
   }
 
   render() {
+    const allModals = (
+      <AllFilterableModals
+        onSelectSuccess={() => {
+          this.props.navigation.navigate({ routeName: 'Requests' });
+        }}
+      />
+    );
     const {
       state,
       errorMsg,
@@ -386,14 +383,17 @@ class HomeView extends Component<Props, State> {
     // If `this.state.refreshing` is true, it means that we are reloading data using the pull
     // down, which means that we want to still display the ScrollView.
     return (
-      <Loading
-        state={this.state.refreshing ? 'success' : state}
-        errorMsg={errorMsg}
-        errorType={errorType}
-        load={this.load}
-        renderBody={this.renderHome}
-        navigation={this.props.navigation}
-      />
+      <View style={{flex: 1}}>
+        <Loading
+          state={this.state.refreshing ? 'success' : state}
+          errorMsg={errorMsg}
+          errorType={errorType}
+          load={this.load}
+          renderBody={this.renderHome}
+          navigation={this.props.navigation}
+        />
+        { allModals }
+      </View>
     );
   }
 }

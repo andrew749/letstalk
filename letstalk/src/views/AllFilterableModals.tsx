@@ -72,6 +72,7 @@ class AllFilterableModals extends Component<Props> {
       value,
       hasFocus,
       suggestions,
+      errorMsg,
     } = this.props.searchBar;
 
     if (!hasFocus) return null;
@@ -81,6 +82,7 @@ class AllFilterableModals extends Component<Props> {
         onSelect={this.onMultiTraitSelect}
         data={suggestions}
         value={value}
+        errorMsg={errorMsg}
       />
     );
   }

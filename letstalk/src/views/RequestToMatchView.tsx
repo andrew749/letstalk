@@ -263,7 +263,6 @@ class RequestToMatchView extends Component<Props, State> {
             {this.renderCredentials()}
           </View>
         </ScrollView>
-        <AllFilterableModals />
       </View>
     );
   }
@@ -280,14 +279,17 @@ class RequestToMatchView extends Component<Props, State> {
     // If `this.state.refreshing` is true, it means that we are reloading data using the pull
     // down, which means that we want to still display the ScrollView.
     return (
-      <Loading
-        state={this.state.refreshing ? 'success' : state}
-        errorMsg={errorMsg}
-        errorType={errorType}
-        load={this.load}
-        renderBody={this.renderBody}
-        navigation={this.props.navigation}
-      />
+      <View style={{flex: 1}}>
+        <Loading
+          state={this.state.refreshing ? 'success' : state}
+          errorMsg={errorMsg}
+          errorType={errorType}
+          load={this.load}
+          renderBody={this.renderBody}
+          navigation={this.props.navigation}
+        />
+        <AllFilterableModals />
+      </View>
     );
   }
 }

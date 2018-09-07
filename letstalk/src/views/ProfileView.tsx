@@ -264,11 +264,6 @@ class ProfileView extends Component<Props, State> {
         <FloatingButton title="Edit Profile" onPress={() => {
           navigate('EditProfileSelector', { profile: this.props.profile });
         }} />
-        <AllFilterableModals
-          onSelectSuccess={() => {
-            this.props.navigation.navigate({ routeName: 'Requests' });
-          }}
-        />
       </View>
     );
   }
@@ -280,14 +275,21 @@ class ProfileView extends Component<Props, State> {
       errorType,
     } = this.props.fetchState;
     return (
-      <Loading
-        state={state}
-        errorMsg={errorMsg}
-        errorType={errorType}
-        load={this.load}
-        renderBody={this.renderBody}
-        navigation={this.props.navigation}
-      />
+      <View style={{flex: 1}}>
+        <Loading
+          state={state}
+          errorMsg={errorMsg}
+          errorType={errorType}
+          load={this.load}
+          renderBody={this.renderBody}
+          navigation={this.props.navigation}
+        />
+        <AllFilterableModals
+          onSelectSuccess={() => {
+            this.props.navigation.navigate({ routeName: 'Requests' });
+          }}
+        />
+      </View>
     );
   }
 }
