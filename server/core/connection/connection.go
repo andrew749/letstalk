@@ -86,7 +86,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	}
 	rlog.Info("Received input: ", input)
 
-	if newConnection, err := handleConfirmConnection(c, input); err != nil {
+	if newConnection, err := handleAcceptConnection(c, input); err != nil {
 		return err
 	} else {
 		c.Result = newConnection
@@ -94,7 +94,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleConfirmConnection(c *ctx.Context, request api.Connection) (*api.Connection, errs.Error) {
+func handleAcceptConnection(c *ctx.Context, request api.Connection) (*api.Connection, errs.Error) {
 	// Assert request exists from request user to auth user.
 	connection, err := query.GetConnectionDetails(c.Db, request.UserId, c.SessionData.UserId)
 	if err != nil {
@@ -113,7 +113,7 @@ func handleConfirmConnection(c *ctx.Context, request api.Connection) (*api.Conne
 	}
 	if connection.AcceptedAt != nil {
 		// Already accepted, do nothing.
-		result.AcceptedAt = *connection.AcceptedAt
+		result.AcceptedAt = connection.AcceptedAt
 		return &result, nil
 	}
 	now := time.Now()
@@ -121,6 +121,6 @@ func handleConfirmConnection(c *ctx.Context, request api.Connection) (*api.Conne
 	if err := c.Db.Save(connection).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
-	result.AcceptedAt = *connection.AcceptedAt
+	result.AcceptedAt = connection.AcceptedAt
 	return &result, nil
 }

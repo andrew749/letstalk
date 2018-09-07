@@ -11,5 +11,5 @@ type Connection struct {
 	SearchedTrait string          `json:"searchedTrait"`
 	// Output fields
 	CreatedAt time.Time `json:"createdAt"`
-	AcceptedAt time.Time `json:"acceptedAt"`
+	AcceptedAt *time.Time `json:"acceptedAt"`
 }
