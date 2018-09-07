@@ -26,14 +26,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { RootState } from '../redux';
 import { errorToast } from '../redux/toast';
 import {
-  ActionTypes as SearchBarActionTypes,
-  SEARCH_LIST_TYPE_CREDENTIALS,
-  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
-} from '../redux/search-bar/actions';
+  ActionTypes as UserSearchActionTypes,
+} from '../redux/user-search/actions';
 import {
   State as SearchBarState,
-  updateFocus,
-} from '../redux/search-bar/reducer';
+} from '../redux/user-search/reducer';
 import {
   ActionButton,
   Button,
@@ -50,11 +47,9 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
-  updateFocus: ActionCreator<
-    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
-interface Props extends DispatchActions {
+interface Props extends DispatchActions, SearchBarState {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
@@ -62,8 +57,8 @@ interface State {
   refreshing: boolean;
 }
 
-class SearchView extends Component<Props, State> {
-  SEARCH_VIEW_IDENTIFIER = "SearchView";
+class ExploreView extends Component<Props, State> {
+  EXPLORE_VIEW_IDENTIFIER = "ExploreView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
@@ -82,7 +77,7 @@ class SearchView extends Component<Props, State> {
 
   async componentDidMount() {
     this.props.navigation.addListener('willFocus', (route) => {
-      AnalyticsHelper.getInstance().recordPage(this.SEARCH_VIEW_IDENTIFIER);
+      AnalyticsHelper.getInstance().recordPage(this.EXPLORE_VIEW_IDENTIFIER);
     });
     this.load();
   }
@@ -97,32 +92,40 @@ class SearchView extends Component<Props, State> {
   }
 
   private renderBody() {
+    return <Text>a</Text>;
   }
 
   render() {
-    return <Text>yo</Text>;
-    // If `this.state.refreshing` is true, it means that we are reloading data using the pull
-    // down, which means that we want to still display the ScrollView.
-    // return (
-    //   <Loading
-    //     state={this.state.refreshing ? 'success' : state}
-    //     errorMsg={errorMsg}
-    //     errorType={errorType}
-    //     load={this.load}
-    //     renderBody={this.renderBody}
-    //     navigation={this.props.navigation}
-    //   />
-    // );
+    const {
+      errorMsg,
+      errorType,
+      state,
+    } = this.props.fetchState;
+
+    console.log(this.props.response);
+
+    return (
+      <View style={{flex: 1}}>
+        <Loading
+          state={state}
+          errorMsg={errorMsg}
+          errorType={errorType}
+          load={this.load}
+          renderBody={this.renderBody}
+          navigation={this.props.navigation}
+        />
+        <AllFilterableModals />
+      </View>
+    );
   }
 }
 
 export default connect(
-  ({ credentialRequests, credentialOptions, credentials }: RootState) => {
-    return { };
+  ({ userSearch }: RootState) => {
+    return userSearch;
   }, {
     errorToast,
-    updateFocus,
-  })(SearchView);
+  })(ExploreView);
 
 const styles = StyleSheet.create({
 })

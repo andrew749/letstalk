@@ -286,7 +286,7 @@ class ProfileView extends Component<Props, State> {
         />
         <AllFilterableModals
           onSelectSuccess={() => {
-            this.props.navigation.navigate({ routeName: 'Requests' });
+            this.props.navigation.navigate({ routeName: 'Explore' });
           }}
         />
       </View>

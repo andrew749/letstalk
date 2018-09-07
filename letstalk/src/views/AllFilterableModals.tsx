@@ -4,7 +4,16 @@ import { ThunkAction } from 'redux-thunk';
 import { Alert } from 'react-native';
 
 import { RootState } from '../redux';
-import { MultiTrait } from '../models/multi-trait';
+import { MultiTrait, MultiTraitTypes } from '../models/multi-trait';
+import {
+  State as UserSearchState,
+  searchByCohort,
+  searchByPosition,
+  searchBySimpleTrait,
+} from '../redux/user-search/reducer';
+import {
+  ActionTypes as UserSearchActionTypes,
+} from '../redux/user-search/actions';
 import {
   State as SearchBarState,
   updateFocus,
@@ -23,12 +32,20 @@ interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   updateFocus: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  searchByCohort: ActionCreator<
+    ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
+  searchByPosition: ActionCreator<
+    ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
+  searchBySimpleTrait: ActionCreator<
+    ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
 }
 
 interface Props extends DispatchActions {
   searchBar: SearchBarState;
   onSelectSuccess?(): void;
 }
+
+const DEFAULT_SEARCH_SIZE = 10;
 
 class AllFilterableModals extends Component<Props> {
 
@@ -47,8 +64,19 @@ class AllFilterableModals extends Component<Props> {
   }
 
   private async searchForTrait(trait: MultiTrait): Promise<void> {
-    // TODO: Actually search here
-    console.log(trait)
+    switch (trait.traitType) {
+      case MultiTraitTypes.COHORT:
+        this.props.searchByCohort(trait.cohortId, DEFAULT_SEARCH_SIZE);
+        break;
+      case MultiTraitTypes.POSITION:
+        this.props.searchByPosition(trait.roleId, trait.organizationId, DEFAULT_SEARCH_SIZE);
+        break;
+      case MultiTraitTypes.SIMPLE_TRAIT:
+        this.props.searchBySimpleTrait(trait.simpleTraitId, DEFAULT_SEARCH_SIZE);
+        break;
+      default:
+        const _: never = trait;
+    }
   }
 
   private async onMultiTraitSelect(trait: MultiTrait): Promise<void> {
@@ -90,8 +118,13 @@ class AllFilterableModals extends Component<Props> {
 
 
 export default connect(({ searchBar }: RootState) => {
-  return { searchBar };
+  return {
+    searchBar,
+  };
 }, {
   errorToast,
   updateFocus,
+  searchByCohort,
+  searchByPosition,
+  searchBySimpleTrait,
 })(AllFilterableModals);

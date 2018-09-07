@@ -371,7 +371,7 @@ class HomeView extends Component<Props, State> {
     const allModals = (
       <AllFilterableModals
         onSelectSuccess={() => {
-          this.props.navigation.navigate({ routeName: 'Requests' });
+          this.props.navigation.navigate({ routeName: 'Explore' });
         }}
       />
     );

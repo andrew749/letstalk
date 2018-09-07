@@ -35,7 +35,7 @@ import ProfileView from './views/ProfileView';
 import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
-import RequestToMatchView from './views/RequestToMatchView';
+import ExploreView from './views/ExploreView';
 import NotificationView from './views/NotificationView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
@@ -120,8 +120,8 @@ const createTabView = () => TabNavigator({
   'Home': {
     screen: HomeView,
   },
-  'Requests': {
-    screen: RequestToMatchView,
+  'Explore': {
+    screen: ExploreView,
   },
   'Profile': {
     screen: ProfileView,
@@ -136,8 +136,8 @@ const createTabView = () => TabNavigator({
         iconName = 'home';
       } else if (routeName === 'Profile') {
         iconName = 'person';
-      } else if (routeName === 'Requests') {
-        iconName = 'supervisor-account';
+      } else if (routeName === 'Explore') {
+        iconName = 'search';
       }
 
       return <MaterialIcons name={iconName} size={24} color={tintColor} />;
