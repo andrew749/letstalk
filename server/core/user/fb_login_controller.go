@@ -63,11 +63,13 @@ func FBController(c *ctx.Context) errs.Error {
 			Birthdate:       user.Birthdate,
 			Role:            data.USER_ROLE_DEFAULT,
 			IsEmailVerified: false,
+			ProfilePic:      &user.ProfilePic,
 		}
 
 		// Generate UUID for FB user.
 		secret, err := uuid.NewRandom()
 		if err != nil {
+			tx.Rollback()
 			return errs.NewInternalError("%v", err)
 		}
 		appUser.Secret = secret.String()
@@ -85,6 +87,7 @@ func FBController(c *ctx.Context) errs.Error {
 		externalAuthRecord.UserId = userId
 		// insert the user's fb auth data
 		if err := tx.Create(&externalAuthRecord).Error; err != nil {
+			tx.Rollback()
 			rlog.Error(err)
 			return errs.NewRequestError("Unable to create user")
 		}
@@ -161,8 +164,9 @@ func GetLongTermFBToken(db *gorm.DB, userId data.TUserID, authToken data.FbAuthT
 				),
 				"Error from facebook api",
 			)
-			rlog.Error(err.Error())
+			rlog.Error(e)
 			raven.CaptureError(e, nil)
+			return err
 		}
 	}
 
@@ -273,13 +277,20 @@ func getFBUser(accessToken string) (*FBUser, error) {
 	}
 
 	return &FBUser{
-		Id:        res["id"].(string),
-		FirstName: res["first_name"].(string),
-		LastName:  res["last_name"].(string),
-		Email:     res["email"].(string),
-		Gender:    gender,
-		Birthdate: res["birthday"].(string),
-		Link:      res["link"].(string),
-		// ProfilePic: res["profile_pic"].(string),
+		Id:         res["id"].(string),
+		FirstName:  res["first_name"].(string),
+		LastName:   res["last_name"].(string),
+		Email:      res["email"].(string),
+		Gender:     gender,
+		Birthdate:  res["birthday"].(string),
+		Link:       res["link"].(string),
+		ProfilePic: getFBProfilePicLink(res["id"].(string)),
 	}, nil
+}
+
+func getFBProfilePicLink(userId string) string {
+	return fmt.Sprintf(
+		"http://graph.facebook.com/%s/picture?type=normal",
+		userId,
+	)
 }
