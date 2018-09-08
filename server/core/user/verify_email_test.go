@@ -12,49 +12,25 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"letstalk/server/core/sessions"
-	"fmt"
 )
-
-var testUserId = 1
-
-func createUserForTest(c *ctx.Context, t *testing.T) data.TUserID {
-	signupRequest := api.SignupRequest{
-		UserPersonalInfo: api.UserPersonalInfo{
-			FirstName: "Andrew",
-			LastName:  "Codispoti",
-			Gender:    0,
-			Birthdate: "1996-10-07",
-		},
-		Email:       fmt.Sprintf("test%d@test.com", testUserId),
-		PhoneNumber: "5555555555",
-		Password:    "test",
-	}
-	testUserId += 1
-	err := writeUser(&signupRequest, c)
-	require.NoError(t, err)
-	userId := c.Result.(struct{ UserId data.TUserID }).UserId
-	return userId
-}
 
 func TestVerifyEmail(t *testing.T) {
 	theTest :=	test.Test{
 		Test: func(db *gorm.DB) {
 			c := ctx.NewContext(nil, db, nil, nil, nil)
 			// Create user with initially unverified email.
-			userId := createUserForTest(c, t)
-			user, _ := query.GetUserById(db, userId)
+			user := CreateUserForTest(t, c.Db)
 			assert.False(t, user.IsEmailVerified)
 			// Send request to send new account verification email.
-			c.SessionData = &sessions.SessionData{UserId: userId}
+			c.SessionData = &sessions.SessionData{UserId: user.UserId}
 			emailRequest := &api.SendAccountVerificationEmailRequest{Email: "foo@edu.uwaterloo.ca"}
 			err := handleSendAccountVerificationEmailRequest(c, emailRequest)
 			assert.NoError(t, err)
 			// Look up verify email id.
 			var verifyEmailId data.VerifyEmailId
-			db.Where(&data.VerifyEmailId{UserId: userId}).First(&verifyEmailId)
-			assert.Equal(t, userId, verifyEmailId.UserId)
+			db.Where(&data.VerifyEmailId{UserId: user.UserId}).First(&verifyEmailId)
+			assert.Equal(t, user.UserId, verifyEmailId.UserId)
 			assert.False(t, verifyEmailId.IsUsed)
 			assert.True(t, verifyEmailId.IsActive)
 			assert.True(t, time.Now().Before(verifyEmailId.ExpirationDate))
@@ -65,17 +41,17 @@ func TestVerifyEmail(t *testing.T) {
 			assert.NoError(t, err)
 			// Assert that expected updates happened.
 			var count uint
-			db.Find(&data.VerifyEmailId{}, &data.VerifyEmailId{UserId: userId}).Count(&count)
+			db.Find(&data.VerifyEmailId{}, &data.VerifyEmailId{UserId: user.UserId}).Count(&count)
 			assert.Equal(t, uint(1), count)
 			var verifyEmailIdFinal data.VerifyEmailId
-			db.Where(&data.VerifyEmailId{UserId: userId}).First(&verifyEmailIdFinal)
+			db.Where(&data.VerifyEmailId{UserId: user.UserId}).First(&verifyEmailIdFinal)
 			assert.False(t, verifyEmailIdFinal.IsActive)
 			assert.True(t, verifyEmailIdFinal.IsUsed)
 			assert.Equal(t, verifyEmailId.Id, verifyEmailIdFinal.Id)
 			assert.Equal(t, verifyEmailId.UserId, verifyEmailIdFinal.UserId)
 			assert.Equal(t, verifyEmailId.Email, verifyEmailIdFinal.Email)
 			assert.Equal(t, verifyEmailId.ExpirationDate, verifyEmailIdFinal.ExpirationDate)
-			user, _ = query.GetUserById(db, userId)
+			user, _ = query.GetUserById(db, user.UserId)
 			assert.True(t, user.IsEmailVerified)
 		},
 		TestName: "Test user account email verification",
@@ -89,8 +65,8 @@ func TestVerifyEmailMultipleRequests(t *testing.T) {
 			Test: func(db *gorm.DB) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				// Create user with initially unverified email.
-				userId := createUserForTest(c, t)
-				c.SessionData = &sessions.SessionData{UserId: userId}
+				user := CreateUserForTest(t, c.Db)
+				c.SessionData = &sessions.SessionData{UserId: user.UserId}
 				emailRequest := &api.SendAccountVerificationEmailRequest{Email: "foo@edu.uwaterloo.ca"}
 				err := handleSendAccountVerificationEmailRequest(c, emailRequest)
 				assert.NoError(t, err)
@@ -100,7 +76,7 @@ func TestVerifyEmailMultipleRequests(t *testing.T) {
 				assert.NoError(t, err)
 				// Look up verify email id entries.
 				var verifyEmailIds []data.VerifyEmailId
-				db.Where(&data.VerifyEmailId{UserId: userId}).Order("expiration_date").Find(&verifyEmailIds)
+				db.Where(&data.VerifyEmailId{UserId: user.UserId}).Order("expiration_date").Find(&verifyEmailIds)
 				verifyEmailIdExpired, verifyEmailIdValid := verifyEmailIds[0], verifyEmailIds[1]
 				assert.False(t, verifyEmailIdExpired.IsActive)
 				assert.Equal(t, "foo@edu.uwaterloo.ca", verifyEmailIdExpired.Email)
@@ -115,7 +91,7 @@ func TestVerifyEmailMultipleRequests(t *testing.T) {
 				err = handleEmailVerification(c, verifyRequest)
 				assert.NoError(t, err)
 				// Assert that correct changes were made to table entries.
-				db.Where(&data.VerifyEmailId{UserId: userId}).Order("expiration_date").Find(&verifyEmailIds)
+				db.Where(&data.VerifyEmailId{UserId: user.UserId}).Order("expiration_date").Find(&verifyEmailIds)
 				verifyEmailIdExpired, verifyEmailIdValid = verifyEmailIds[0], verifyEmailIds[1]
 				assert.False(t, verifyEmailIdExpired.IsActive)
 				assert.False(t, verifyEmailIdValid.IsActive)
@@ -134,12 +110,12 @@ func TestVerifyEmailBadRequests(t *testing.T) {
 			Test: func(db *gorm.DB) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				// Create user and verify their email.
-				userId := createUserForTest(c, t)
-				c.SessionData = &sessions.SessionData{UserId: userId}
+				user := CreateUserForTest(t, c.Db)
+				c.SessionData = &sessions.SessionData{UserId: user.UserId}
 				emailRequest := &api.SendAccountVerificationEmailRequest{Email: "foo@edu.uwaterloo.ca"}
 				handleSendAccountVerificationEmailRequest(c, emailRequest)
 				var verifyEmailId data.VerifyEmailId
-				db.Where(&data.VerifyEmailId{UserId: userId}).First(&verifyEmailId)
+				db.Where(&data.VerifyEmailId{UserId: user.UserId}).First(&verifyEmailId)
 				verifyRequest := &api.VerifyEmailRequest{Id: verifyEmailId.Id}
 				handleEmailVerification(c, verifyRequest)
 				// Try requesting another email verification for the user.
@@ -161,12 +137,12 @@ func TestVerifyEmailBadRequests(t *testing.T) {
 			Test: func(db *gorm.DB) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				// Create user and verify their email.
-				userId := createUserForTest(c, t)
-				c.SessionData = &sessions.SessionData{UserId: userId}
+				user := CreateUserForTest(t, c.Db)
+				c.SessionData = &sessions.SessionData{UserId: user.UserId}
 				emailRequest := &api.SendAccountVerificationEmailRequest{Email: "foo@edu.uwaterloo.ca"}
 				handleSendAccountVerificationEmailRequest(c, emailRequest)
 				var verifyEmailId data.VerifyEmailId
-				db.Where(&data.VerifyEmailId{UserId: userId}).First(&verifyEmailId)
+				db.Where(&data.VerifyEmailId{UserId: user.UserId}).First(&verifyEmailId)
 				// Modify db to set expiration date to the past.
 				verifyEmailId.ExpirationDate = time.Now().AddDate(0, 0, -1)
 				db.Save(verifyEmailId)
