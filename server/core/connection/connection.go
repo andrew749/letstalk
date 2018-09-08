@@ -59,6 +59,7 @@ func handleRequestConnection(c *ctx.Context, request api.Connection) (*api.Conne
 	if len(request.SearchedTrait) > 0 {
 		intent.SearchedTrait = &request.SearchedTrait
 	}
+	// TODO(aklen): send notification to requested user
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		if err := tx.Create(&connection).Error; err != nil {
 			return err
@@ -118,6 +119,7 @@ func handleAcceptConnection(c *ctx.Context, request api.Connection) (*api.Connec
 	}
 	now := time.Now()
 	connection.AcceptedAt = &now
+	// TODO(aklen): send notification to accepted user
 	if err := c.Db.Save(connection).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
