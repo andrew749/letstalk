@@ -109,6 +109,7 @@ func sendNotifications(
 		c.Db,
 		askerId,
 		notifications.REQUEST_TO_MATCH_SIDE_ASKER,
+		answererId,
 		credentialId,
 		name,
 	)
@@ -116,6 +117,7 @@ func sendNotifications(
 		c.Db,
 		answererId,
 		notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
+		answererId,
 		credentialId,
 		name,
 	)
