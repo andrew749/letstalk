@@ -12,7 +12,7 @@ func CreateUserWithAuth(
 	email string,
 	firstName string,
 	lastName string,
-	gender int,
+	gender data.GenderID,
 	birthdate string,
 	role data.UserRole,
 	password string,

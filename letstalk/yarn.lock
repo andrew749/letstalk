@@ -712,9 +712,9 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
 
-"@types/expo@26.0.0":
-  version "26.0.0"
-  resolved "https://registry.yarnpkg.com/@types/expo/-/expo-26.0.0.tgz#7c47dfbe5d4c42097b5ca30804207c819a63fe26"
+"@types/expo@^27.0.8":
+  version "27.0.8"
+  resolved "https://registry.yarnpkg.com/@types/expo/-/expo-27.0.8.tgz#c8780b665eb5785689e6444c23a8ae2c9bd39e07"
   dependencies:
     "@types/fbemitter" "*"
     "@types/react" "*"

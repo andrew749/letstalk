@@ -39,6 +39,7 @@ import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
+import { Linking } from 'expo';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -80,6 +81,7 @@ class NotificationView extends Component<Props, State> {
     this.renderRow = this.renderRow.bind(this);
     this.renderNotification = this.renderNotification.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
+    this.navigateHome = this.navigateHome.bind(this);
   }
 
   async componentDidMount() {
@@ -100,12 +102,19 @@ class NotificationView extends Component<Props, State> {
     this.setState({refreshing: false});
   }
 
+  private async navigateHome() {
+    await this.props.navigation.dispatch(NavigationActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+    }));
+    await this.props.navigation.navigate('Home');
+  }
 
   private renderNotification(notification: Notification) {
 
     let notifText: ReactNode = null;
     let icon = <MaterialIcons size={ICON_SIZE} name='face'/>;
-    let onPressAction: () => void = null;
+    let onPressAction: () => void = this.navigateHome;
     const {
         notificationId,
         state,
@@ -113,7 +122,16 @@ class NotificationView extends Component<Props, State> {
         type,
         thumbnail,
         message,
+        link,
     } = notification;
+
+    // update action to use deeplink
+    if (link !== null && link !== undefined) {
+      let { path, queryParams } = Linking.parse(link);
+      console.log("Handling notification with path " + path);
+      onPressAction = this.props.navigation.navigate.bind(this, path, queryParams);
+    }
+
     notifText = <Text>{message}</Text>;
     if (thumbnail) {
       icon = <Image style={styles.notifImageStyle} source={{uri: thumbnail}}/>;
@@ -139,24 +157,12 @@ class NotificationView extends Component<Props, State> {
           </Text>
         );
         icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
-        onPressAction = (async () => {
-          await this.props.navigation.dispatch(NavigationActions.reset({
-            index: 0,
-            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
-          }));
-          await this.props.navigation.navigate('Home');
-        }).bind(this);
+        break;
+      case 'NEW_MATCH':
         break;
       case 'ADHOC_NOTIFICATION':
-        onPressAction =  (async () => {
-          this.props.navigation.navigate('NotificationContent', {
-            notificationId: notificationId,
-          });
-        }).bind(this);
         break;
       default:
-        onPressAction =  (async () => {
-        }).bind(this);
         break;
     }
 

@@ -18,7 +18,7 @@ func TestCreateUserWithAuth(t *testing.T) {
 				email := "andrew@test.com"
 				firstName := "Andrew"
 				lastName := "Codispoti"
-				gender := 0
+				gender := data.GenderID(0)
 				birthdate := "1996-10-07"
 				password := "test"
 

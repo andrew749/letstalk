@@ -235,7 +235,7 @@ type FBUser struct {
 	FirstName string
 	LastName  string
 	Email     string
-	Gender    int
+	Gender    data.GenderID
 	Birthdate string
 	Link      string
 }
@@ -250,7 +250,7 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, err
 	}
 
-	gender := utility.GenderIdByName(res["gender"].(string))
+	gender := data.GenderID(utility.GenderIdByName(res["gender"].(string)))
 
 	if err != nil {
 		return nil, errors.New("Unable to parse gender")

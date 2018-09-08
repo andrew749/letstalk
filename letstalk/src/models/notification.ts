@@ -11,6 +11,7 @@ interface BaseNotification {
   message: string;
   timestamp: Date;
   thumbnail: string;
+  link: string;
 }
 
 interface NewCredentialMatchData {
@@ -33,6 +34,16 @@ export interface AdhocNotification extends BaseNotification {
   data: AdhocNotificationData,
 }
 
+export interface NewMatchData {
+
+}
+
+export interface NewMatchNotification extends BaseNotification {
+  type: 'NEW_MATCH',
+  data: NewMatchData,
+}
+
 export type Notification =
   | NewCredentialMatchNotification
-  | AdhocNotification;
+  | AdhocNotification
+  | NewMatchNotification;

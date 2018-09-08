@@ -27,6 +27,7 @@ func TestSerializeDeserializeNotification(t *testing.T) {
 				&thumbnail,
 				time.Now(),
 				map[string]string{"test": "test"},
+				"",
 			)
 			assert.NoError(t, err)
 			mockQueue <- notification_queue.DataNotificationModelToQueueModel(*data)
