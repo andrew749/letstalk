@@ -25,10 +25,18 @@ if [[ -z "$DB_USER" ]]; then
     exit 1
 fi
 
+ES_ADDR=$(jq -r '.elastic_search_url' ${SECRETS_PATH})
+if [[ -z "ES_ADDR" ]]; then
+    echo "Database user not set."
+    exit 1
+fi
+
+
 if [[ -z $PROD ]]; then
     echo "REMOTE: running dev"
     python3 run_local.py
 else
     echo "REMOTE: running prod"
-    python3 run_local.py --db_addr="$DB_ADDR" --db_user="$DB_USER" --db_pass="$DB_PASS" --prod
+    python3 run_local.py --db_addr="$DB_ADDR" --db_user="$DB_USER" \
+      --db_pass="$DB_PASS" --es_addr="$ES_ADDR" --prod
 fi
