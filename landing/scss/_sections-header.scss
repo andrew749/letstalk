@@ -1,0 +1,24 @@
+/* Sections Header
+--------------------------------*/
+.section-header .section-title {
+    font-size: 32px;
+    color: #111;
+    text-align: center;
+    font-weight: 400;
+  }
+  
+  .section-header .section-description {
+    text-align: center;
+    padding-bottom: 40px;
+    color: #777;
+    font-style: italic;
+  }
+  
+  .section-header .section-divider {
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(45deg, $secondary-80, $primary-80);
+    margin: 0 auto;
+    margin-bottom: 20px;
+  }

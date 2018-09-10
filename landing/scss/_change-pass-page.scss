@@ -1,3 +1,7 @@
+body {
+  background-color: #eff5f5;
+}
+
 .change-pass {
   margin-top: 100px !important;
   display: flex;
@@ -34,6 +38,27 @@
 .overlay-about {
   height: 1000px;
   top: 0;
+}
+
+.btn-change-pass {
+  @include body-font;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 1px;
+  display: inline-block;
+  padding: 8px 28px;
+  border-radius: 50px;
+  transition: 0.5s;
+  margin: 10px;
+  border: 2px solid #fff;
+  color: #fff;
+  background-color: transparent;
+}
+
+.btn-change-pass:hover {
+  color: $accent;
+  background: #fff;
+  cursor: pointer;
 }
 
 @media (min-width: 768px) {

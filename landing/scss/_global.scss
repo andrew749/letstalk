@@ -1,108 +1,54 @@
-// Global styling for this theme
-
-html {
-  height: 100%;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @include heading-font;
-}
-
 body {
-  height: 100%;
-  min-height: 35rem;
-  position: relative;
+  background: #fff;
+  color: #666666;
+  overflow-x: hidden;
   @include body-font;
 }
 
-.background {
-  position: absolute;
-  z-index: -1;
-  top: 0px;
-  left: 0px;
-  bottom: -900px;
-  right: 0px;
-  width: 100%;
-  overflow: hidden;
-  background-size: cover;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  background-image: url(../img/e7_render_small.jpg);
+a {
+  color: #1dc8cd;
+  transition: 0.5s;
 }
 
-.overlay {
-  position: absolute;
-  height: 200%;
-  min-height: 35rem;
-  width: 100%;
-  background-color: $secondary;
-  opacity: 0.75;
-  z-index: -1;
-  bottom: -900px;
-  @media (min-width: 768px) {
-    min-height: 0;
-  }
-}
-
-.single-page {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-}
-
-.img_highres {
-  display: none;
-}
-
-.center {
-  text-align: center;
-}
-
-#navbar {
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  background-color: #333;
-  width: 100%;
-  z-index: 1;
-}
-
-/* Navbar links */
-#navbar .navbar-links {
-  float: right;
-  display: block;
-  padding: 10px;
-}
-
-#navbar .logo {
-  float: left;
-  display: block;
-}
-
-#navbar .navbar-links a {
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px;
+a:hover, a:active, a:focus {
+  color: $accent;
+  outline: none;
   text-decoration: none;
 }
 
-@media (min-width: 1000px) {
-  .overlay {
-    bottom: 0;
-  }
-  .background {
-    bottom: -700px;
-    height:100%;
-  }
-  .single-page {
-    height: 100%;
-    align-items: center;
-    flex-direction: row;
-  }
+p {
+  padding: 0;
+  margin: 0 0 30px 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @include heading-font;
+  font-weight: 400;
+  margin: 0 0 20px 0;
+  padding: 0;
+}
+
+/* Back to top button */
+.back-to-top {
+  position: fixed;
+  display: none;
+  background: linear-gradient(45deg, $secondary-80, $primary-80);
+  color: #fff;
+  padding: 2px 20px 8px 20px;
+  font-size: 16px;
+  border-radius: 4px 4px 0 0;
+  right: 15px;
+  bottom: 0;
+  transition: none;
+}
+
+.back-to-top:focus {
+  background: linear-gradient(45deg, $secondary-80, $primary-80);
+  color: #fff;
+  outline: none;
+}
+
+.back-to-top:hover {
+  background: $accent;
+  color: #fff;
 }
