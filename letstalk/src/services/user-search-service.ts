@@ -5,9 +5,13 @@ import auth, { Auth } from './auth';
 import { UserSearchResponse } from '../models/user-search';
 import {
   USER_SEARCH_COHORT_ROUTE,
+  USER_SEARCH_MY_COHORT_ROUTE,
   USER_SEARCH_POSITION_ROUTE,
   USER_SEARCH_SIMPLE_TRAIT_ROUTE,
 } from './constants';
+
+const DEFAULT_SEARCH_SIZE = 10;
+export { DEFAULT_SEARCH_SIZE };
 
 interface BaseUserSearchRequest {
   readonly size: number;
@@ -16,6 +20,8 @@ interface BaseUserSearchRequest {
 interface CohortUserSearchRequest extends BaseUserSearchRequest {
   readonly cohortId: number;
 }
+
+interface MyCohortUserSearchRequest extends BaseUserSearchRequest { }
 
 interface PositionUserSearchRequest extends BaseUserSearchRequest {
   readonly roleId: number;
@@ -28,6 +34,7 @@ interface SimpleTraitUserSearchRequest extends BaseUserSearchRequest {
 
 type UserSearchRequest =
   | CohortUserSearchRequest
+  | MyCohortUserSearchRequest
   | PositionUserSearchRequest
   | SimpleTraitUserSearchRequest
 
@@ -51,6 +58,10 @@ class UserSearchService {
 
   async searchByCohort(req: CohortUserSearchRequest): Promise<UserSearchResponse> {
     return this.doUserSearch(USER_SEARCH_COHORT_ROUTE, req);
+  }
+
+  async searchByMyCohort(req: MyCohortUserSearchRequest): Promise<UserSearchResponse> {
+    return this.doUserSearch(USER_SEARCH_MY_COHORT_ROUTE, req);
   }
 
   async searchByPosition(req: PositionUserSearchRequest): Promise<UserSearchResponse> {

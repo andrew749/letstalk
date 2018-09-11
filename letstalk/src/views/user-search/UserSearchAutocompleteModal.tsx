@@ -164,7 +164,6 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
 
     const onPress = () => this.props.onSelect(trait);
 
-    // TODO: Render different kinds of elements.
     return (
       <TouchableOpacity style={styles.searchItem} onPress={onPress}>
         <MaterialIcons name={icon} color={color} size={24} />

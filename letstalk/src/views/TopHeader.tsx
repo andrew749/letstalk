@@ -50,9 +50,7 @@ const onQueryChange = async (
     try {
       res = await autocompleteService.autocompleteMultiTrait(query, 10);
     } catch (e) {
-      if (!!onError) {
-        onError(e);
-      }
+      if (!!onError) onError(e);
       throw e;
     }
   }

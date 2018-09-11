@@ -5,14 +5,17 @@ import { Alert } from 'react-native';
 
 import { RootState } from '../redux';
 import { MultiTrait, MultiTraitTypes } from '../models/multi-trait';
+import { DEFAULT_SEARCH_SIZE } from '../services/user-search-service';
 import {
   State as UserSearchState,
   searchByCohort,
   searchByPosition,
   searchBySimpleTrait,
+  setQuery,
 } from '../redux/user-search/reducer';
 import {
   ActionTypes as UserSearchActionTypes,
+  QueryTypes,
 } from '../redux/user-search/actions';
 import {
   State as SearchBarState,
@@ -38,14 +41,14 @@ interface DispatchActions {
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
   searchBySimpleTrait: ActionCreator<
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
+  setQuery: ActionCreator<
+    ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
 }
 
 interface Props extends DispatchActions {
   searchBar: SearchBarState;
   onSelectSuccess?(): void;
 }
-
-const DEFAULT_SEARCH_SIZE = 10;
 
 class AllFilterableModals extends Component<Props> {
 
@@ -66,12 +69,24 @@ class AllFilterableModals extends Component<Props> {
   private async searchForTrait(trait: MultiTrait): Promise<void> {
     switch (trait.traitType) {
       case MultiTraitTypes.COHORT:
+        await this.props.setQuery({
+          ...trait,
+          type: QueryTypes.SEARCH_COHORT,
+        });
         this.props.searchByCohort(trait.cohortId, DEFAULT_SEARCH_SIZE);
         break;
       case MultiTraitTypes.POSITION:
+        await this.props.setQuery({
+          ...trait,
+          type: QueryTypes.SEARCH_POSITION,
+        });
         this.props.searchByPosition(trait.roleId, trait.organizationId, DEFAULT_SEARCH_SIZE);
         break;
       case MultiTraitTypes.SIMPLE_TRAIT:
+        await this.props.setQuery({
+          ...trait,
+          type: QueryTypes.SEARCH_SIMPLE_TRAIT,
+        });
         this.props.searchBySimpleTrait(trait.simpleTraitId, DEFAULT_SEARCH_SIZE);
         break;
       default:
@@ -127,4 +142,5 @@ export default connect(({ searchBar }: RootState) => {
   searchByCohort,
   searchByPosition,
   searchBySimpleTrait,
+  setQuery,
 })(AllFilterableModals);

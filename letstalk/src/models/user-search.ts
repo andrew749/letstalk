@@ -3,8 +3,8 @@ import Immutable from 'immutable';
 import { CohortV2 } from './cohort';
 import { GenderId } from './user';
 
-interface UserSearchResult {
-  readonly UserId: number;
+export interface UserSearchResult {
+  readonly userId: number;
 	readonly firstName: string;
 	readonly lastName: string;
 	readonly gender: GenderId;
