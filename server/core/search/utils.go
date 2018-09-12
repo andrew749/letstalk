@@ -20,6 +20,10 @@ func NewEsClient(addr string) (*elastic.Client, error) {
 	return elastic.NewClient(elastic.SetURL(addr))
 }
 
+func NewDefaultEsClient() (*elastic.Client, error) {
+	return elastic.NewClient()
+}
+
 // Search client to be used within the request context
 type ClientWithContext struct {
 	client  *elastic.Client

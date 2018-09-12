@@ -26,8 +26,8 @@ if [[ -z "$DB_USER" ]]; then
 fi
 
 ES_ADDR=$(jq -r '.elastic_search_url' ${SECRETS_PATH})
-if [[ -z "ES_ADDR" ]]; then
-    echo "Database user not set."
+if [[ -z "$ES_ADDR" ]]; then
+    echo "Elasic search endpoint not set."
     exit 1
 fi
 
