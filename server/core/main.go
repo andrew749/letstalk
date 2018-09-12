@@ -49,7 +49,7 @@ func main() {
 
 	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
 	// work.
-	if *useElastic && !utility.IsProductionEnvironment() {
+	if *useElastic && utility.IsProductionEnvironment() {
 		es, err = utility.GetES()
 		rlog.Infof("Elastic search status: %s", es.String())
 		if err != nil {
