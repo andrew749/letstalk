@@ -17,7 +17,11 @@ type SuggestInput struct {
 }
 
 func NewEsClient(addr string) (*elastic.Client, error) {
-	return elastic.NewClient(elastic.SetURL(addr))
+	return elastic.NewClient(
+		elastic.SetURL(addr),
+		elastic.SetScheme("https"),
+		elastic.SetSniff(false),
+	)
 }
 
 func NewDefaultEsClient() (*elastic.Client, error) {
