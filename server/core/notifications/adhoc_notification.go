@@ -3,6 +3,7 @@ package notifications
 import (
 	"encoding/json"
 	"letstalk/server/aws_utils"
+	"letstalk/server/core/linking"
 	"letstalk/server/data"
 	"letstalk/server/queue/queues/notification_queue"
 	"time"
@@ -18,11 +19,24 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	tx := db.Begin()
 	// note that this cant use the helper create and send notification since we
 	// probably want all data written to our db before being sent to aws
-	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams)
+
+	// HACK:
+	// TODO: fix this hack later since we want to keep a consistent interface
+	// to create a notification but don't know the notification id until
+	// the notification is saved to db
+	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams, linking.GetNotificationViewUrl())
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
+	link := linking.GetAdhocLink(notification.ID)
+	notification.Link = &link
+	if err = tx.Save(notification).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	// ENDHACK:
+
 	dataString, err := json.Marshal(templateParams)
 	if err != nil {
 		tx.Rollback()

@@ -52,9 +52,9 @@ func AddUserCredentialRequestController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("one of credentialId and name must be non-empty")
 	}
 
-	go query.ResolveRequestToMatchWithDelay(
+	go ResolveRequestToMatchWithDelay(
 		c,
-		query.RESOLVE_TYPE_ASKER,
+		RESOLVE_TYPE_ASKER,
 		credentialId,
 		RESOLVE_WAIT_TIME,
 	)
@@ -104,9 +104,9 @@ func AddUserCredentialController(c *ctx.Context) errs.Error {
 		return err
 	}
 
-	go query.ResolveRequestToMatchWithDelay(
+	go ResolveRequestToMatchWithDelay(
 		c,
-		query.RESOLVE_TYPE_ANSWERER,
+		RESOLVE_TYPE_ANSWERER,
 		*credentialId,
 		RESOLVE_WAIT_TIME,
 	)

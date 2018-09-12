@@ -157,6 +157,28 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add deep linking field on notification",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&Notification{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "user_connections_v1",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&Connection{})
+				tx.AutoMigrate(&ConnectionIntent{})
+				tx.AutoMigrate(&Mentorship{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

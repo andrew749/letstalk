@@ -94,8 +94,8 @@ func sendMatchNotifications(
 	mentorId data.TUserID,
 	menteeId data.TUserID,
 ) errs.Error {
-	err1 := notifications.NewMentorNotification(c.Db, menteeId)
-	err2 := notifications.NewMenteeNotification(c.Db, mentorId)
+	err1 := notifications.NewMentorNotification(c.Db, menteeId, mentorId)
+	err2 := notifications.NewMenteeNotification(c.Db, mentorId, menteeId)
 	var err *errs.CompositeError
 	if err1 != nil {
 		rlog.Debug(err1.Error())

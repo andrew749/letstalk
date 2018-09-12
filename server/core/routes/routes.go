@@ -23,6 +23,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
+	"letstalk/server/core/connection"
 )
 
 type handlerWrapper struct {
@@ -169,6 +170,14 @@ func Register(
 	)
 
 	// request-to-match endpoints
+
+	// request a new connection with another user
+	v1.OPTIONS("/connection")
+	v1.POST("/connection", hw.wrapHandler(connection.PostRequestConnection, true))
+
+	// accept a connection request from another user
+	v1.OPTIONS("/connection/accept")
+	v1.POST("/connection/accept", hw.wrapHandler(connection.PostAcceptConnection, true))
 
 	v1.OPTIONS("/all_credentials")
 	v1.GET(
