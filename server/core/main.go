@@ -51,12 +51,11 @@ func main() {
 	// work.
 	if *useElastic && utility.IsProductionEnvironment() {
 		es, err = utility.GetES()
-		rlog.Infof("Elastic search status: %s", es.String())
 		if err != nil {
 			rlog.Error(err)
 			panic("Failed to connect to elasticsearch.")
 		}
-
+		rlog.Infof("Elastic search status: %s", es.String())
 		rlog.Info("Creating indexes in ES")
 		searchClient := search.NewClientWithContext(es, context.Background())
 		if err := searchClient.CreateEsIndexes(); err != nil {
