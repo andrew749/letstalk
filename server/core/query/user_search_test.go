@@ -78,11 +78,18 @@ func TestSearchUsersByCohort(t *testing.T) {
 			_, err = createUser(db, 2)
 			assert.NoError(t, err)
 
+			myUser, err := createUser(db, 3)
+			assert.NoError(t, err)
+
+			myUser.Cohort = user1.Cohort
+			err = db.Save(myUser.Cohort).Error
+			assert.NoError(t, err)
+
 			req := api.CohortUserSearchRequest{
 				CohortId:                user1.Cohort.CohortId,
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
 			}
-			res, err := SearchUsersByCohort(db, req)
+			res, err := SearchUsersByCohort(db, req, myUser.UserId)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 1, res.NumResults)
@@ -117,7 +124,7 @@ func TestSearchUsersByCohortLimit(t *testing.T) {
 				CohortId:                users[0].Cohort.CohortId,
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
 			}
-			res, err := SearchUsersByCohort(db, req)
+			res, err := SearchUsersByCohort(db, req, 69)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 5, res.NumResults)
@@ -139,20 +146,36 @@ func TestSearchUsersByPosition(t *testing.T) {
 			user2, err := createUser(db, 2)
 			assert.NoError(t, err)
 
-			userTrait1 := data.UserPosition{
+			myUser, err := createUser(db, 3)
+			assert.NoError(t, err)
+
+			userPosition1 := data.UserPosition{
 				UserId:         user1.UserId,
 				RoleId:         data.TRoleID(69),
 				OrganizationId: data.TOrganizationID(69),
 			}
-			err = db.Save(&userTrait1).Error
+			err = db.Save(&userPosition1).Error
 			assert.NoError(t, err)
 
-			userTrait2 := data.UserPosition{
+			// Testing reduping
+			userPosition1.Id = 0
+			err = db.Save(&userPosition1).Error
+			assert.NoError(t, err)
+
+			userPosition2 := data.UserPosition{
 				UserId:         user2.UserId,
 				RoleId:         data.TRoleID(69),
 				OrganizationId: data.TOrganizationID(70),
 			}
-			err = db.Save(&userTrait2).Error
+			err = db.Save(&userPosition2).Error
+			assert.NoError(t, err)
+
+			myUserPosition := data.UserPosition{
+				UserId:         myUser.UserId,
+				RoleId:         data.TRoleID(69),
+				OrganizationId: data.TOrganizationID(69),
+			}
+			err = db.Save(&myUserPosition).Error
 			assert.NoError(t, err)
 
 			req := api.PositionUserSearchRequest{
@@ -160,7 +183,7 @@ func TestSearchUsersByPosition(t *testing.T) {
 				OrganizationId:          data.TOrganizationID(69),
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
 			}
-			res, err := SearchUsersByPosition(db, req)
+			res, err := SearchUsersByPosition(db, req, myUser.UserId)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 1, res.NumResults)
@@ -183,12 +206,12 @@ func TestSearchUsersByPositionLimit(t *testing.T) {
 				user, err := createUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
-				userTrait := data.UserPosition{
+				userPosition := data.UserPosition{
 					UserId:         user.UserId,
 					RoleId:         data.TRoleID(69),
 					OrganizationId: data.TOrganizationID(69),
 				}
-				err = db.Save(&userTrait).Error
+				err = db.Save(&userPosition).Error
 				assert.NoError(t, err)
 			}
 
@@ -197,7 +220,7 @@ func TestSearchUsersByPositionLimit(t *testing.T) {
 				OrganizationId:          data.TOrganizationID(69),
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
 			}
-			res, err := SearchUsersByPosition(db, req)
+			res, err := SearchUsersByPosition(db, req, 69)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 5, res.NumResults)
@@ -219,11 +242,18 @@ func TestSearchUsersBySimpleTrait(t *testing.T) {
 			user2, err := createUser(db, 2)
 			assert.NoError(t, err)
 
+			myUser, err := createUser(db, 3)
+			assert.NoError(t, err)
+
 			userTrait1 := data.UserSimpleTrait{
 				UserId:                 user1.UserId,
 				SimpleTraitId:          data.TSimpleTraitID(69),
 				SimpleTraitIsSensitive: false,
 			}
+			err = db.Save(&userTrait1).Error
+			assert.NoError(t, err)
+
+			userTrait1.Id = 0
 			err = db.Save(&userTrait1).Error
 			assert.NoError(t, err)
 
@@ -234,11 +264,18 @@ func TestSearchUsersBySimpleTrait(t *testing.T) {
 			err = db.Save(&userTrait2).Error
 			assert.NoError(t, err)
 
+			myUserTrait := data.UserSimpleTrait{
+				UserId:        myUser.UserId,
+				SimpleTraitId: data.TSimpleTraitID(69),
+			}
+			err = db.Save(&myUserTrait).Error
+			assert.NoError(t, err)
+
 			req := api.SimpleTraitUserSearchRequest{
 				SimpleTraitId:           data.TSimpleTraitID(69),
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
 			}
-			res, err := SearchUsersBySimpleTrait(db, req)
+			res, err := SearchUsersBySimpleTrait(db, req, myUser.UserId)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 1, res.NumResults)
@@ -281,7 +318,7 @@ func TestSearchUsersBySimpleTraitAnon(t *testing.T) {
 				SimpleTraitId:           data.TSimpleTraitID(69),
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
 			}
-			res, err := SearchUsersBySimpleTrait(db, req)
+			res, err := SearchUsersBySimpleTrait(db, req, 69)
 			assert.NoError(t, err)
 			assert.Equal(t, true, res.IsAnonymous)
 			assert.Equal(t, 1, res.NumResults)
@@ -315,7 +352,7 @@ func TestSearchUsersBySimpleTraitLimit(t *testing.T) {
 				SimpleTraitId:           data.TSimpleTraitID(69),
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
 			}
-			res, err := SearchUsersBySimpleTrait(db, req)
+			res, err := SearchUsersBySimpleTrait(db, req, 69)
 			assert.NoError(t, err)
 			assert.Equal(t, false, res.IsAnonymous)
 			assert.Equal(t, 5, res.NumResults)
