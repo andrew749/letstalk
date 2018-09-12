@@ -142,21 +142,12 @@ gulp.task('js:minify', function() {
 // JS
 gulp.task('js', ['js:minify']);
 
-gulp.task('php', function() {
-  return gulp.src([
-    './php/*.php'
-  ])
-  .pipe(gulp.dest('./php'))
-  .pipe(browserSync.stream());
-})
-
 // Default task
 gulp.task('default', ['css', 'js', 'vendor']);
 
 // Configure the browserSync task
 gulp.task('browserSync', function() {
   browserSync.init({
-    files: ["./php/*.php"],
     server: {
       baseDir: "./"
     }
@@ -164,9 +155,8 @@ gulp.task('browserSync', function() {
 });
 
 // Dev task
-gulp.task('dev', ['vendor', 'css', 'js', 'php', 'browserSync'], function() {
+gulp.task('dev', ['vendor', 'css', 'js', 'browserSync'], function() {
   gulp.watch('./scss/*.scss', ['css']);
   gulp.watch('./js/*.js', ['js']);
-  gulp.watch('./php/*.php', browserSync.reload);
   gulp.watch('./*.html', browserSync.reload);
 });

@@ -87,7 +87,7 @@
     <div class="intro-text">
       <h2>Welcome to Hive</h2>
       <p>We are a peer mentorship and networking community for the University of Waterloo</p>
-      <a href="#about" class="btn-get-started scrollto">Sign Up</a>
+      <a href="#signup-modal" class="btn-get-started">Sign Up</a>
     </div>
 
     <div class="product-screens">
@@ -259,7 +259,7 @@
             <p class="cta-text"> We'd love to have you join our community and meet other diverse and talented people at the University of Waterloo. Hive makes it easy to connect and interact with peers. </p>
           </div>
           <div class="col-lg-3 cta-btn-container text-center">
-            <a class="cta-btn align-middle" href="#">Sign Up</a>
+            <a class="cta-btn align-middle" href="#signup-modal">Sign Up</a>
           </div>
         </div>
       </div>
@@ -339,6 +339,77 @@
     </div>
   </footer><!-- #footer -->
 
+  <!-- Modal -->
+
+  <div id="signup-modal" class="modaloverlay">
+    <div class="signup-modal">
+      <a href="#close" class="close">&times;</a>
+      <form class="container" id="signupForm">
+        <div class="row my-3">
+            <div class="col-12">
+                <h1>Join Hive!</h1>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-lg-6 mt-2 px-1">
+            <input autocomplete="given-name" name="firstName" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required>
+          </div>
+          <div class="col-sm-12 col-lg-6 mt-2 px-1">
+            <input autocomplete="family-name" name="lastName" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-lg-9 mt-2 px-1">
+            <select onchange="formColor(this)" name="programName" class="form-control" aria-label="Program Name" required>
+                <option value="" disabled selected>Program Name</option>
+                <option>Architectural Engineering</option>
+                <option>Architecture</option>
+                <option>Biomedical Engineering</option>
+                <option>Chemical Engineering</option>
+                <option>Civil Engineering</option>
+                <option>Computer Engineering</option>
+                <option>Computer Science</option>
+                <option>Electrical Engineering</option>
+                <option>Environmental Engineering</option>
+                <option>Geological Engineering</option>
+                <option>Management Engineering</option>
+                <option>Math</option>
+                <option>Mechanical Engineering</option>
+                <option>Mechatronics Engineering</option>
+                <option>Nanotechnology Engineering</option>
+                <option>Software Engineering</option>
+                <option>Systems Design Engineering</option>
+                <option>Other</option>
+              </select>
+          </div>
+          <div class="col-sm-12 col-lg-3 mt-2 px-1">
+            <select type="number" onchange="formColor(this)" name="classYear" class="form-control" aria-label="Year" required>
+                <option value="" disabled selected>Year</option>
+                <option value=2017>2017</option>
+                <option>2018</option>
+                <option>2019</option>
+                <option>2020</option>
+                <option>2021</option>
+                <option>2022</option>
+                <option>2023</option>
+              </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 mt-2 px-1">
+            <input autocomplete="email" name="emailAddress" type="email" class="form-control" placeholder="Email Address" aria-label="Email Address" required>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-12 my-auto px-1">
+            <button class="button" type="submit" id="signupBtn">Sign up</button>
+          </div>
+        </div>
+      </form>
+      <div id="messageContainer"></div>
+    </div>
+  </div>
+
   <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 
   <!-- JavaScript Libraries -->
@@ -353,6 +424,15 @@
 
   <!-- Contact Form JavaScript File -->
   <script src="js/contactform.js"></script>
+
+  <script src="js/form-submit.js"></script>
+
+  <script type="text/javascript">
+    function formColor(sel)
+    {
+      sel.style.color = "#000";
+    }
+  </script>
 
   <!-- Template Main Javascript File -->
   <script src="js/main.js"></script>
