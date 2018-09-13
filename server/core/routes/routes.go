@@ -301,6 +301,9 @@ func Register(
 	userSearchV1.OPTIONS("/cohort")
 	userSearchV1.POST("/cohort", hw.wrapHandler(controller.CohortUserSearchController, true))
 
+	userSearchV1.OPTIONS("/my_cohort")
+	userSearchV1.POST("/my_cohort", hw.wrapHandler(controller.MyCohortUserSearchController, true))
+
 	userSearchV1.OPTIONS("/position")
 	userSearchV1.POST("/position", hw.wrapHandler(controller.PositionUserSearchController, true))
 
