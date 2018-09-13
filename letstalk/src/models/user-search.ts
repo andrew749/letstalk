@@ -5,9 +5,9 @@ import { GenderId } from './user';
 
 export interface UserSearchResult {
   readonly userId: number;
-	readonly firstName: string;
-	readonly lastName: string;
-	readonly gender: GenderId;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly gender: GenderId;
   readonly cohort: CohortV2;
   readonly profilePic: string | null;
   readonly reason: string | null;
