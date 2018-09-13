@@ -9,11 +9,12 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { Credential } from '../../models/credential';
+import { MultiTrait } from '../../models/multi-trait';
 import {
   updateSearchValue,
   updateSearchFocus,
-  updateSearchListType,
+  updateSearchSuggestions,
+  updateSearchError,
   ActionTypes,
   SearchListType,
   TypeKeys,
@@ -22,14 +23,16 @@ import requestToMatchService from '../../services/request-to-match-service';
 
 export interface State {
   readonly value: string;
+  readonly errorMsg: string;
   readonly hasFocus: boolean;
-  readonly listType: SearchListType;
+  readonly suggestions: Immutable.List<MultiTrait>;
 }
 
 const initialState: State = {
   value: '',
+  errorMsg: null,
   hasFocus: false,
-  listType: 'SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS',
+  suggestions: Immutable.List<MultiTrait>(),
 };
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
@@ -44,10 +47,15 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...state,
         hasFocus: action.hasFocus,
       };
-    case TypeKeys.UPDATE_SEARCH_LIST_TYPE:
+    case TypeKeys.UPDATE_SUGGESTIONS:
       return {
         ...state,
-        listType: action.listType,
+        suggestions: action.suggestions,
+      };
+    case TypeKeys.UPDATE_ERROR:
+      return {
+        ...state,
+        errorMsg: action.errorMsg,
       };
     default:
       // Ensure exhaustiveness of select
@@ -70,11 +78,18 @@ const updateFocus: ActionCreator<
   };
 }
 
-const updateListType: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (listType: SearchListType) => {
+const updateSuggestions: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (suggestions: Immutable.List<MultiTrait>) => {
   return async (dispatch: Dispatch<State>) => {
-    return dispatch(updateSearchListType(listType));
+    return dispatch(updateSearchSuggestions(suggestions));
   };
 }
 
-export { updateFocus, updateValue, updateListType };
+const updateError: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (errorMsg: string) => {
+  return async (dispatch: Dispatch<State>) => {
+    return dispatch(updateSearchError(errorMsg));
+  };
+}
+
+export { updateFocus, updateValue, updateSuggestions, updateError };

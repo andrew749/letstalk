@@ -1,7 +1,7 @@
 // DEV
 
-// export const BASE_URL = 'https://api.hiveapp.org';
-export const BASE_URL = 'http://10.0.0.63';
+export const BASE_URL = 'https://api.hiveapp.org';
+// export const BASE_URL = 'http://10.0.0.63';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
 // Routes
@@ -33,6 +33,11 @@ export const REMOVE_RTM_MATCHES_ROUTE         = '/v1/remove_rtm_matches';
 export const AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE  = '/v1/autocomplete/simple_trait';
 export const AUTOCOMPLETE_ROLE_ROUTE          = '/v1/autocomplete/role';
 export const AUTOCOMPLETE_ORGANIZATION_ROUTE  = '/v1/autocomplete/organization';
+export const AUTOCOMPLETE_MULTI_TRAIT_ROUTE   = '/v1/autocomplete/multi_trait';
+export const USER_SEARCH_COHORT_ROUTE         = '/v1/user_search/cohort';
+export const USER_SEARCH_MY_COHORT_ROUTE      = '/v1/user_search/my_cohort';
+export const USER_SEARCH_POSITION_ROUTE       = '/v1/user_search/position';
+export const USER_SEARCH_SIMPLE_TRAIT_ROUTE   = '/v1/user_search/simple_trait';
 export const USER_SIMPLE_TRAIT_ROUTE          = '/v1/user_simple_trait';
 export const USER_SIMPLE_TRAIT_BY_NAME_ROUTE  = '/v1/user_simple_trait_by_name';
 export const USER_POSITION                    = '/v1/user_position';

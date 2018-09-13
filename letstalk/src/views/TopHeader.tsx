@@ -15,13 +15,16 @@ import {
   NavigationRoute,
   NavigationParams,
 } from 'react-navigation';
+import _ from 'underscore';
+import Immutable from 'immutable';
 
 import { RootState } from '../redux';
 import {
   State as SearchBarState,
   updateValue,
   updateFocus,
-  updateListType
+  updateSuggestions,
+  updateError,
 } from '../redux/search-bar/reducer';
 import {
   ActionTypes as SearchBarActionTypes,
@@ -31,15 +34,38 @@ import {
 import Colors from '../services/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import { logAnalyticsThenExecute, AnalyticsActions } from '../services/analytics';
+import autocompleteService from '../services/autocomplete-service';
+import { MultiTrait } from '../models/multi-trait';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const THROTTLE_TIME = 250; // ms
+
+const onQueryChange = async (
+  query: string,
+  setData: (data: Immutable.List<MultiTrait>) => void,
+  onError?: (e: any) => void,
+) => {
+  let res: Immutable.List<MultiTrait> = Immutable.List();
+  if (query !== '') {
+    try {
+      res = await autocompleteService.autocompleteMultiTrait(query, 10);
+    } catch (e) {
+      if (!!onError) onError(e);
+      throw e;
+    }
+  }
+  setData(res);
+}
+const onQueryChangeThrottled = _.throttle(onQueryChange, THROTTLE_TIME);
 
 interface DispatchActions {
   updateValue: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
   updateFocus: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
-  updateListType: ActionCreator<
+  updateSuggestions: ActionCreator<
+    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
+  updateError: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
@@ -54,6 +80,12 @@ class TopHeader extends Component<Props> {
     super(props);
 
     this.searchBar = null;
+
+    this.onFocus = this.onFocus.bind(this);
+    this.onBlur = this.onBlur.bind(this);
+    this.onFocusAfterLog = this.onFocusAfterLog.bind(this);
+    this.onChangeText = this.onChangeText.bind(this);
+    this.onClearText = this.onClearText.bind(this);
   }
 
   componentWillReceiveProps(props: Props) {
@@ -64,6 +96,34 @@ class TopHeader extends Component<Props> {
     }
   }
 
+  private onFocusAfterLog() {
+    this.props.updateFocus(true);
+  }
+
+  private onFocus() {
+    logAnalyticsThenExecute("SearchBar", AnalyticsActions.FOCUS, "", 1, this.onFocusAfterLog);
+  }
+
+  private onBlur() {
+    this.props.updateFocus(false);
+    this.props.updateValue('');
+    this.props.updateSuggestions(Immutable.List());
+  }
+
+  private onChangeText(value: string) {
+    this.props.updateValue(value);
+    onQueryChangeThrottled(value, data => {
+      this.props.updateError(null);
+      this.props.updateSuggestions(data);
+    }, e => {
+      this.props.updateError(e.errorMsg);
+    });
+  }
+
+  private onClearText() {
+    this.searchBar.blur();
+  }
+
   render() {
     // Only show clear icon if the element has focus
     const clearIcon = this.props.hasFocus ? {
@@ -72,18 +132,7 @@ class TopHeader extends Component<Props> {
       style: [styles.icon, styles.rightIcon],
     } : null;
 
-    let placeholder = '';
-    switch (this.props.listType) {
-      case SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS:
-        placeholder = 'Find someone...';
-        break;
-      case SEARCH_LIST_TYPE_CREDENTIALS:
-        placeholder = 'I am a...';
-        break
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = this.props.listType;
-    }
+    let placeholder = 'Find someone...';
 
     const openQr = () => {
       this.props.navigation.navigate({routeName: 'QrScanner'});
@@ -101,19 +150,15 @@ class TopHeader extends Component<Props> {
           ref={(ref: SearchBar) => this.searchBar = ref}
           clearIcon={clearIcon}
           icon={{ style: [styles.icon, styles.leftIcon] }}
-          onChangeText={(value: string) => this.props.updateValue(value)}
-          onClearText={() => this.searchBar.blur()}
+          onChangeText={this.onChangeText}
+          onClearText={this.onClearText}
           containerStyle={styles.searchBarContainer}
           inputStyle={styles.searchBarTextInput}
           value={this.props.value}
           placeholder={placeholder}
           placeholderTextColor={Colors.HIVE_LIGHT_FONT}
-          onFocus={logAnalyticsThenExecute.bind(this, "SearchBar", AnalyticsActions.FOCUS, "", 1, this.props.updateFocus.bind(this, true))}
-          onBlur={() => {
-            this.props.updateFocus(false);
-            this.props.updateValue('');
-            this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
-          }}
+          onFocus={this.onFocus}
+          onBlur={this.onBlur}
         />
         <TouchableOpacity style={styles.qrButton} onPress={openQr}>
           <MaterialIcons name="camera-enhance" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
@@ -127,7 +172,7 @@ class TopHeader extends Component<Props> {
 }
 
 export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus, updateListType })(TopHeader);
+  { updateValue, updateFocus, updateSuggestions, updateError })(TopHeader);
 
 const SEARCH_BAR_LEFT_MARGIN = 36;
 const SEARCH_BAR_RIGHT_MARGIN = 36;
