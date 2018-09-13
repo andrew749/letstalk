@@ -7,6 +7,8 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
+	"github.com/romana/rlog"
+	"letstalk/server/core/connection"
 )
 
 func convertUserToRelationshipDataModel(
@@ -97,14 +99,80 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	if onboardingInfo.State != api.ONBOARDING_DONE {
-		// Onboarding not done. We don't need to get relationships.
+		// Onboarding not done. We don't need to get connections.
 		c.Result = response
 		return nil
 	} else {
 		response.State = api.ACCOUNT_SETUP
 	}
 
-	// Fetch mentors and mentees.
+	// Fetch all user's connections.
+
+	connections, err := query.GetAllConnections(c.Db, userId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	rlog.Info("DEBUG: got connections %v", connections)
+
+	response.Connections.IncomingRequests = make([]*api.ConnectionRequest, 0)
+	response.Connections.OutgoingRequests = make([]*api.ConnectionRequest, 0)
+	response.Connections.Mentees = make([]*api.BootstrapConnection, 0)
+	response.Connections.Mentors = make([]*api.BootstrapConnection, 0)
+	response.Connections.Peers = make([]*api.BootstrapConnection, 0)
+
+	for _, conn := range connections {
+		connUserId := conn.UserOneId
+		connUser := conn.UserOne
+		if conn.UserOneId == user.UserId {
+			connUserId = conn.UserTwoId
+			connUser = conn.UserTwo
+		}
+		if connUser == nil {
+			return errs.NewInternalError("Failed to load connection user data")
+		}
+		if conn.AcceptedAt == nil {
+			if conn.UserOneId == user.UserId {
+				// Auth user is the requestor.
+				connApi := connection.DataToApi(connUserId, conn)
+				response.Connections.OutgoingRequests =
+					append(response.Connections.OutgoingRequests, &connApi)
+			} else {
+				// Auth user is the requestee.
+				connApi := connection.DataToApi(connUserId, conn)
+				response.Connections.IncomingRequests =
+					append(response.Connections.IncomingRequests, &connApi)
+			}
+		} else {
+			if conn.Mentorship != nil {
+				// Connection has been upgraded to a mentorship.
+				if conn.Mentorship.MentorUserId == user.UserId {
+					// Auth user is the mentor.
+					bc := api.BootstrapConnection{
+						Request: connection.DataToApi(connUserId, conn),
+						UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_MENTEE),
+					}
+					response.Connections.Mentees =
+						append(response.Connections.Mentees, &bc)
+				} else {
+					// Auth user is the mentee.
+					bc := api.BootstrapConnection{
+						Request: connection.DataToApi(connUserId, conn),
+						UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_MENTOR),
+					}
+					response.Connections.Mentors =
+						append(response.Connections.Mentors, &bc)
+				}
+			} else {
+				// Connection is not a mentorship.
+				bc := api.BootstrapConnection{
+					Request: connection.DataToApi(connUserId, conn),
+					UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_UNKNOWN),
+				}
+				response.Connections.Peers =
+					append(response.Connections.Peers, &bc)
+			}
+		}
+	}
 
 	flag := api.MATCHING_INFO_FLAG_AUTH_DATA | api.MATCHING_INFO_FLAG_COHORT
 	// Matchings where user is the mentee.
@@ -154,7 +222,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			relationships,
 			convertUserToRelationshipDataModel(
 				*asker.AskerUser,
-				data.MATCHING_STATE_UNKNKOWN,
+				data.MATCHING_STATE_UNKNOWN,
 				description,
 				api.USER_TYPE_ASKER,
 			),
@@ -166,7 +234,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			relationships,
 			convertUserToRelationshipDataModel(
 				*answerer.AnswererUser,
-				data.MATCHING_STATE_UNKNKOWN,
+				data.MATCHING_STATE_UNKNOWN,
 				description,
 				api.USER_TYPE_ANSWERER,
 			),

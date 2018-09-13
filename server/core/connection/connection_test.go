@@ -27,7 +27,7 @@ func TestRequestConnection(t *testing.T) {
 				assert.Nil(t, unexpected)
 				// Create new connection request
 				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
-				request := api.Connection{
+				request := api.ConnectionRequest{
 					UserId: userTwo.UserId,
 					IntentType: data.INTENT_TYPE_SEARCH,
 					SearchedTrait: "some trait",
@@ -58,7 +58,7 @@ func TestRequestConnection(t *testing.T) {
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
 				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
-				request := api.Connection{
+				request := api.ConnectionRequest{
 					UserId:        userTwo.UserId,
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: "some trait",
@@ -66,7 +66,7 @@ func TestRequestConnection(t *testing.T) {
 				handleRequestConnection(c, request)
 				// Accept the request as user two.
 				c.SessionData = &sessions.SessionData{ UserId: userTwo.UserId }
-				acceptReq := api.Connection{
+				acceptReq := api.ConnectionRequest{
 					UserId: userOne.UserId,
 				}
 				result, err := handleAcceptConnection(c, acceptReq)
@@ -92,7 +92,7 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 				userOne := user.CreateUserForTest(t, c.Db)
 				// Try to create connection request with nonexistent user.
 				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
-				request := api.Connection{
+				request := api.ConnectionRequest{
 					UserId: 100,
 					IntentType: data.INTENT_TYPE_SEARCH,
 					SearchedTrait: "some trait",
@@ -109,14 +109,14 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
 				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
-				request := api.Connection{
+				request := api.ConnectionRequest{
 					UserId:        userTwo.UserId,
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: "some trait",
 				}
 				handleRequestConnection(c, request)
 				// Accept the request as the same user.
-				acceptReq := api.Connection{
+				acceptReq := api.ConnectionRequest{
 					UserId: userTwo.UserId,
 				}
 				result, err := handleAcceptConnection(c, acceptReq)

@@ -15,7 +15,7 @@ import (
  * PostRequestConnection creates a new unaccepted connection between two users.
  */
 func PostRequestConnection(c *ctx.Context) errs.Error {
-	var input api.Connection
+	var input api.ConnectionRequest
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
@@ -29,7 +29,7 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleRequestConnection(c *ctx.Context, request api.Connection) (*api.Connection, errs.Error) {
+func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
 	// Assert users exist and are not equal.
 	authUser, _ := query.GetUserById(c.Db, c.SessionData.UserId)
 	if c.SessionData.UserId == request.UserId {
@@ -81,7 +81,7 @@ func handleRequestConnection(c *ctx.Context, request api.Connection) (*api.Conne
  * PostAcceptConnection accepts an existing connection request
  */
 func PostAcceptConnection(c *ctx.Context) errs.Error {
-	var input api.Connection
+	var input api.ConnectionRequest
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
@@ -95,7 +95,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAcceptConnection(c *ctx.Context, request api.Connection) (*api.Connection, errs.Error) {
+func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
 	// Assert request exists from request user to auth user.
 	connection, err := query.GetConnectionDetails(c.Db, request.UserId, c.SessionData.UserId)
 	if err != nil {
@@ -104,7 +104,7 @@ func handleAcceptConnection(c *ctx.Context, request api.Connection) (*api.Connec
 	if connection == nil || connection.DeletedAt != nil {
 		return nil, errs.NewRequestError("No such connection request exists")
 	}
-	result := api.Connection{
+	result := api.ConnectionRequest{
 		UserId: request.UserId,
 		IntentType: connection.Intent.Type,
 		CreatedAt: connection.CreatedAt,
@@ -125,4 +125,21 @@ func handleAcceptConnection(c *ctx.Context, request api.Connection) (*api.Connec
 	}
 	result.AcceptedAt = connection.AcceptedAt
 	return &result, nil
+}
+
+// DataToApi converts a data.Connection to an api.ConnectionRequest.
+// otherUserId: Id of the non-auth user involved in the connection.
+// data: Must have non-nil Intent.
+func DataToApi (otherUserId data.TUserID, data data.Connection) api.ConnectionRequest {
+	searchedTrait := ""
+	if data.Intent.SearchedTrait != nil {
+		searchedTrait = *data.Intent.SearchedTrait
+	}
+	return api.ConnectionRequest{
+		UserId: otherUserId,
+		SearchedTrait: searchedTrait,
+		IntentType: data.Intent.Type,
+		CreatedAt: data.CreatedAt,
+		AcceptedAt: data.AcceptedAt,
+	}
 }

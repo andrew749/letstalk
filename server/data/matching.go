@@ -7,7 +7,7 @@ import (
 type MatchingState int
 
 const (
-	MATCHING_STATE_UNKNKOWN MatchingState = iota
+	MATCHING_STATE_UNKNOWN    MatchingState = iota
 	MATCHING_STATE_UNVERIFIED
 	MATCHING_STATE_VERIFIED
 	MATCHING_STATE_EXPIRED

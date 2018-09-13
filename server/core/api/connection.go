@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Connection struct {
+type ConnectionRequest struct {
 	UserId        data.TUserID    `json:"userId" binding:"required"`
 	IntentType    data.IntentType `json:"intentType" binding:"required"`
 	SearchedTrait string          `json:"searchedTrait"`
