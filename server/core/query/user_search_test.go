@@ -157,7 +157,7 @@ func TestSearchUsersByPosition(t *testing.T) {
 			err = db.Save(&userPosition1).Error
 			assert.NoError(t, err)
 
-			// Testing reduping
+			// Testing deduping
 			userPosition1.Id = 0
 			err = db.Save(&userPosition1).Error
 			assert.NoError(t, err)
