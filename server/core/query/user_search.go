@@ -44,16 +44,19 @@ func buildUserSearchResponse(isAnonymous bool, users []data.User) *api.UserSearc
 }
 
 func searchUsersCommon(query *gorm.DB, size int) *gorm.DB {
-	return query.Preload("User.Cohort.Cohort").Limit(size)
+	return query.Preload("User.Cohort.Cohort").Limit(size).Group("user_id")
 }
 
 func SearchUsersByCohort(
 	db *gorm.DB,
 	req api.CohortUserSearchRequest,
+	userId data.TUserID,
 ) (*api.UserSearchResponse, errs.Error) {
 	var userCohorts []data.UserCohort
 
-	query := db.Where(&data.UserCohort{CohortId: req.CohortId})
+	query := db.Where(&data.UserCohort{CohortId: req.CohortId}).Not(&data.UserCohort{
+		UserId: userId,
+	})
 	if err := searchUsersCommon(query, req.Size).Find(&userCohorts).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
@@ -69,11 +72,14 @@ func SearchUsersByCohort(
 func SearchUsersBySimpleTrait(
 	db *gorm.DB,
 	req api.SimpleTraitUserSearchRequest,
+	userId data.TUserID,
 ) (*api.UserSearchResponse, errs.Error) {
 
 	var userSimpleTraits []data.UserSimpleTrait
 
-	query := db.Where(&data.UserSimpleTrait{SimpleTraitId: req.SimpleTraitId})
+	query := db.Where(&data.UserSimpleTrait{
+		SimpleTraitId: req.SimpleTraitId,
+	}).Not(&data.UserSimpleTrait{UserId: userId})
 	if err := searchUsersCommon(query, req.Size).Find(&userSimpleTraits).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
@@ -94,10 +100,14 @@ func SearchUsersBySimpleTrait(
 func SearchUsersByPosition(
 	db *gorm.DB,
 	req api.PositionUserSearchRequest,
+	userId data.TUserID,
 ) (*api.UserSearchResponse, errs.Error) {
 	var userPositions []data.UserPosition
 
-	query := db.Where(&data.UserPosition{RoleId: req.RoleId, OrganizationId: req.OrganizationId})
+	query := db.Where(&data.UserPosition{
+		RoleId:         req.RoleId,
+		OrganizationId: req.OrganizationId,
+	}).Not(&data.UserPosition{UserId: userId})
 	if err := searchUsersCommon(query, req.Size).Find(&userPositions).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
