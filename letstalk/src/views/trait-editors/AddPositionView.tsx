@@ -13,6 +13,7 @@ import {
   Field,
   InjectedFormProps,
   SubmissionError,
+  FormErrors,
 } from 'redux-form';
 import Sentry from 'sentry-expo';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -169,6 +170,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
         component={ModalDatePicker}
+        maxDate={null}
       />
       { selection }
       { roleSelection }
@@ -187,9 +189,18 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
 
 const selector = formValueSelector('add-position');
 
+const endDateAfterStartDate = (values: AddPositionFormData) => {
+  const errors: FormErrors<AddPositionFormData> = {};
+  if (!!values.endDate && !!values.startDate && values.endDate <= values.startDate) {
+    errors.endDate = 'End date must be after start date'
+  }
+  return errors;
+}
+
 const AddPositionFormWithRedux =
   reduxForm<AddPositionFormData, FormP<AddPositionFormData>>({
     form: 'add-position',
+    validate: endDateAfterStartDate,
   })(connect((state: RootState) => ({
     role: selector(state, 'role'),
     organization: selector(state, 'organization'),

@@ -5,15 +5,14 @@ package user
  */
 
 import (
-	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
-	"letstalk/server/core/secrets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"letstalk/server/email"
@@ -41,7 +40,6 @@ func FBController(c *ctx.Context) errs.Error {
 	expiry := time.Unix(loginRequest.Expiry, 0)
 
 	user, err := getFBUser(authToken)
-	db := c.Db
 
 	if err != nil {
 		return errs.NewRequestError("%s", err)
@@ -60,11 +58,13 @@ func FBController(c *ctx.Context) errs.Error {
 			Birthdate:       user.Birthdate,
 			Role:            data.USER_ROLE_DEFAULT,
 			IsEmailVerified: false,
+			ProfilePic:      &user.ProfilePic,
 		}
 
 		// Generate UUID for FB user.
 		secret, err := uuid.NewRandom()
 		if err != nil {
+			tx.Rollback()
 			return errs.NewInternalError("%v", err)
 		}
 		appUser.Secret = secret.String()
@@ -82,10 +82,10 @@ func FBController(c *ctx.Context) errs.Error {
 		externalAuthRecord.UserId = userId
 		// insert the user's fb auth data
 		if err := tx.Create(&externalAuthRecord).Error; err != nil {
+			tx.Rollback()
 			rlog.Error(err)
 			return errs.NewRequestError("Unable to create user")
 		}
-		rlog.Debug("created auth record")
 
 		// the user Id for this application
 
@@ -112,64 +112,8 @@ func FBController(c *ctx.Context) errs.Error {
 			raven.CaptureError(err, nil)
 			rlog.Error(err)
 		}
-		// get a long lived access token from this short term token
-		// do not fail if we cant do this
-		go func() {
-			rlog.Debug("Getting long lived fb token in another fiber.")
-
-			res, err := fb.Get("/oauth/access_token", fb.Params{
-				"grant_type":        "fb_exchange_token",
-				"client_id":         secrets.GetSecrets().AppId,
-				"client_secret":     secrets.GetSecrets().AppSecret,
-				"fb_exchange_token": authToken,
-			})
-
-			if err != nil {
-				// err can be an facebook API error.
-				// if so, the Error struct contains error details.
-				if e, ok := err.(*fb.Error); ok {
-					rlog.Error("facebook error. [message:%v] [type:%v] [code:%v] [subcode:%v]",
-						e.Message, e.Type, e.Code, e.ErrorSubcode)
-					raven.CaptureError(e, nil)
-				}
-			}
-
-			if err != nil {
-				// log the error to sentry
-				// not fatal but this will cause early logout
-				rlog.Error("Unable to get new token from facebook")
-				raven.CaptureError(err, nil)
-				return
-			}
-			expiresIn, err := res["expires_in"].(json.Number).Int64()
-			if err != nil {
-				rlog.Error("Malformed date")
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			convertedTime := time.Unix(expiresIn, 0)
-			if err != nil {
-				rlog.Error("Unable to get new token from facebook")
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			fbAuthToken := data.FbAuthToken{
-				UserId:    userId,
-				AuthToken: res["access_token"].(string),
-				Expiry:    convertedTime,
-			}
-
-			if err := db.Save(&fbAuthToken).Error; err != nil {
-				raven.CaptureError(err, nil)
-				return
-			}
-
-			// TODO: we get a long term user access token but this might set of spam filter according to fb
-			// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
-		}()
 	} else {
+		rlog.Infof("Already found facebook user with fbid %#v", externalAuthRecord)
 		userId = externalAuthRecord.UserId
 	}
 
@@ -231,13 +175,14 @@ func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string
 }
 
 type FBUser struct {
-	Id        string
-	FirstName string
-	LastName  string
-	Email     string
-	Gender    data.GenderID
-	Birthdate string
-	Link      string
+	Id         string
+	FirstName  string
+	LastName   string
+	Email      string
+	Gender     data.GenderID
+	Birthdate  string
+	Link       string
+	ProfilePic string
 }
 
 func getFBUser(accessToken string) (*FBUser, error) {
@@ -256,14 +201,21 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, errors.New("Unable to parse gender")
 	}
 
-	rlog.Debug(res)
 	return &FBUser{
-		Id:        res["id"].(string),
-		FirstName: res["first_name"].(string),
-		LastName:  res["last_name"].(string),
-		Email:     res["email"].(string),
-		Gender:    gender,
-		Birthdate: res["birthday"].(string),
-		Link:      res["link"].(string),
+		Id:         res["id"].(string),
+		FirstName:  res["first_name"].(string),
+		LastName:   res["last_name"].(string),
+		Email:      res["email"].(string),
+		Gender:     gender,
+		Birthdate:  res["birthday"].(string),
+		Link:       res["link"].(string),
+		ProfilePic: getFBProfilePicLink(res["id"].(string)),
 	}, nil
+}
+
+func getFBProfilePicLink(userId string) string {
+	return fmt.Sprintf(
+		"http://graph.facebook.com/%s/picture?type=normal",
+		userId,
+	)
 }
