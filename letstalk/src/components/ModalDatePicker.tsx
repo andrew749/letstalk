@@ -26,6 +26,8 @@ type Props = WrappedFieldProps & {
   mode?: 'date' | 'time' | 'datetime';
   androidMode?: 'default' | 'calendar' | 'spinner';
   cardStyle?: StyleProp<ViewStyle>
+  maxDate?: Date;
+  minDate?: Date;
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -63,6 +65,9 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
     },
   }
 
+  const maxDate = props.maxDate === undefined ? new Date() : props.maxDate;
+  const minDate = props.minDate === undefined ? new Date(1900, 1, 1) : props.minDate;
+
   // TODO: Maybe hold state about what the value is using another onChange, and only call the
   // passed in onChange when the user presses submit.
 
@@ -77,8 +82,8 @@ const ModalDatePicker: React.SFC<Props> = (props) => {
         showIcon={false}
         placeholder="Select Date"
         format="YYYY-MM-DD"
-        minDate={new Date(1900, 1, 1)}
-        maxDate={new Date()}
+        minDate={minDate}
+        maxDate={maxDate}
         confirmBtnText="Confirm"
         cancelBtnText="Cancel"
         // @ts-ignore waiting for https://github.com/DefinitelyTyped/DefinitelyTyped/pull/26237 to land
