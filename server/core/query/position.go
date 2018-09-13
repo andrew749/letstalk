@@ -159,10 +159,16 @@ func AddUserPosition(
 			fmt.Sprintf("startDate %s should be in YYYY-MM-DD format", startDate),
 		)
 	}
-	if endDate != nil && !isValidDate(*endDate) {
-		return nil, errs.NewRequestError(
-			fmt.Sprintf("endDate %s should be in YYYY-MM-DD format", *endDate),
-		)
+	if endDate != nil {
+		if !isValidDate(*endDate) {
+			return nil, errs.NewRequestError(
+				fmt.Sprintf("endDate %s should be in YYYY-MM-DD format", *endDate),
+			)
+		} else if *endDate <= startDate {
+			return nil, errs.NewRequestError(
+				fmt.Sprintf("endDate %s should be after startDate %s", *endDate, startDate),
+			)
+		}
 	}
 
 	var (

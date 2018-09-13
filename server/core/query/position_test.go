@@ -224,6 +224,20 @@ func TestAddUserPositionInvalidEndDate(t *testing.T) {
 	assert.Equal(t, "endDate Monday, June 2nd, 2018 should be in YYYY-MM-DD format", err.Error())
 }
 
+func TestAddUserPositionEndDateNotAfterStartDate(t *testing.T) {
+	endDate := "2018-01-01"
+	_, err := AddUserPosition(nil, nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-02", &endDate)
+	assert.Error(t, err)
+	assert.Equal(t, "endDate 2018-01-01 should be after startDate 2018-01-02", err.Error())
+}
+
+func TestAddUserPositionEndDateSameAsStartDate(t *testing.T) {
+	endDate := "2018-01-02"
+	_, err := AddUserPosition(nil, nil, data.TUserID(1), nil, nil, nil, nil, "2018-01-02", &endDate)
+	assert.Error(t, err)
+	assert.Equal(t, "endDate 2018-01-02 should be after startDate 2018-01-02", err.Error())
+}
+
 func TestRemoveUserPosition(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
