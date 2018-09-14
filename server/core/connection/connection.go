@@ -97,7 +97,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 
 func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
 	// Assert request exists from request user to auth user.
-	connection, err := query.GetConnectionDetails(c.Db, request.UserId, c.SessionData.UserId)
+	connection, err := query.GetConnectionDetails(c.Db, c.SessionData.UserId, request.UserId)
 	if err != nil {
 		return nil, errs.NewDbError(err)
 	}
