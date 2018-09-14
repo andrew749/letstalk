@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 
 	"letstalk/server/core/errs"
 
@@ -21,6 +23,8 @@ func NewEsClient(addr string) (*elastic.Client, error) {
 		elastic.SetURL(addr),
 		elastic.SetScheme("https"),
 		elastic.SetSniff(false),
+		elastic.SetErrorLog(log.New(os.Stderr, "[ERROR](ELASTIC) ", log.LstdFlags)),
+		elastic.SetInfoLog(log.New(os.Stdout, "[INFO](ELASTIC)", log.LstdFlags)),
 	)
 }
 
