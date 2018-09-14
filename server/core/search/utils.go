@@ -44,6 +44,9 @@ func (c *ClientWithContext) CreateEsIndexes() error {
 	compErr = errs.AppendNullableError(compErr, c.createRoleIndex())
 	compErr = errs.AppendNullableError(compErr, c.createOrganizationIndex())
 	compErr = errs.AppendNullableError(compErr, c.createMultiTraitIndex())
+	if compErr == nil {
+		return nil
+	}
 	return compErr
 }
 
