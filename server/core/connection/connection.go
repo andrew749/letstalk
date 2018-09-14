@@ -1,4 +1,5 @@
 package connection
+
 import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
@@ -6,8 +7,8 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
-	"github.com/romana/rlog"
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 	"time"
 )
 
@@ -54,10 +55,9 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		CreatedAt: time.Now(),
 	}
 	intent := data.ConnectionIntent{
-		Type: request.IntentType,
-	}
-	if len(request.SearchedTrait) > 0 {
-		intent.SearchedTrait = &request.SearchedTrait
+		Type:          request.IntentType,
+		SearchedTrait: request.SearchedTrait,
+		Message:       request.Message,
 	}
 	// TODO(aklen): send notification to requested user
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
@@ -105,13 +105,11 @@ func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api
 		return nil, errs.NewRequestError("No such connection request exists")
 	}
 	result := api.ConnectionRequest{
-		UserId: request.UserId,
+		UserId:     request.UserId,
 		IntentType: connection.Intent.Type,
-		CreatedAt: connection.CreatedAt,
+		CreatedAt:  connection.CreatedAt,
 	}
-	if connection.Intent.SearchedTrait != nil {
-		result.SearchedTrait = *connection.Intent.SearchedTrait
-	}
+	result.SearchedTrait = connection.Intent.SearchedTrait
 	if connection.AcceptedAt != nil {
 		// Already accepted, do nothing.
 		result.AcceptedAt = connection.AcceptedAt
@@ -130,16 +128,13 @@ func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api
 // DataToApi converts a data.Connection to an api.ConnectionRequest.
 // otherUserId: Id of the non-auth user involved in the connection.
 // data: Must have non-nil Intent.
-func DataToApi (otherUserId data.TUserID, data data.Connection) api.ConnectionRequest {
-	searchedTrait := ""
-	if data.Intent.SearchedTrait != nil {
-		searchedTrait = *data.Intent.SearchedTrait
-	}
+func DataToApi(otherUserId data.TUserID, data data.Connection) api.ConnectionRequest {
 	return api.ConnectionRequest{
-		UserId: otherUserId,
-		SearchedTrait: searchedTrait,
-		IntentType: data.Intent.Type,
-		CreatedAt: data.CreatedAt,
-		AcceptedAt: data.AcceptedAt,
+		UserId:        otherUserId,
+		SearchedTrait: data.Intent.SearchedTrait,
+		IntentType:    data.Intent.Type,
+		Message:       data.Intent.Message,
+		CreatedAt:     data.CreatedAt,
+		AcceptedAt:    data.AcceptedAt,
 	}
 }
