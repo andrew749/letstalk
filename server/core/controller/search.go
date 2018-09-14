@@ -4,8 +4,6 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-
-	"github.com/romana/rlog"
 )
 
 func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
@@ -15,9 +13,6 @@ func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	}
 
 	searchClient := c.SearchClientWithContext()
-	if err := searchClient.PrintAllSimpleTraits(); err != nil {
-		rlog.Errorf("%#v", err)
-	}
 	traits, err := searchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
