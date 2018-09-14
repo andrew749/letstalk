@@ -99,7 +99,7 @@ func MyCohortUserSearchController(c *ctx.Context) errs.Error {
 		CommonUserSearchRequest: req,
 		CohortId:                cohort.CohortId,
 	}
-	res, err := query.SearchUsersByCohort(c.Db, cohortReq)
+	res, err := query.SearchUsersByCohort(c.Db, cohortReq, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewEsError(err)
 	}
