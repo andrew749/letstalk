@@ -15,6 +15,9 @@ func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	}
 
 	searchClient := c.SearchClientWithContext()
+	if err := searchClient.PrintAllSimpleTraits(); err != nil {
+		rlog.Errorf("%#v", err)
+	}
 	traits, err := searchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
@@ -66,9 +69,6 @@ func OrganizationAutocompleteController(c *ctx.Context) errs.Error {
 
 	searchClient := c.SearchClientWithContext()
 
-	if err := searchClient.PrintAllSimpleTraits(); err != nil {
-		rlog.Errorf("%#v", err)
-	}
 	organizations, err := searchClient.CompletionSuggestionOrganizations(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
