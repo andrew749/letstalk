@@ -10,8 +10,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"letstalk/server/core/user"
 	"letstalk/server/core/sessions"
+	"letstalk/server/core/user"
 )
 
 func TestRequestConnection(t *testing.T) {
@@ -26,11 +26,12 @@ func TestRequestConnection(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Nil(t, unexpected)
 				// Create new connection request
-				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
+				searchedTrait := "some trait"
+				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
 				request := api.ConnectionRequest{
-					UserId: userTwo.UserId,
-					IntentType: data.INTENT_TYPE_SEARCH,
-					SearchedTrait: "some trait",
+					UserId:        userTwo.UserId,
+					IntentType:    data.INTENT_TYPE_SEARCH,
+					SearchedTrait: &searchedTrait,
 				}
 				result, err := handleRequestConnection(c, request)
 				assert.NoError(t, err)
@@ -44,7 +45,7 @@ func TestRequestConnection(t *testing.T) {
 				assert.Equal(t, userTwo.UserId, queried_for.UserTwoId)
 				assert.Nil(t, queried_for.AcceptedAt)
 				assert.Equal(t, request.IntentType, queried_for.Intent.Type)
-				assert.Equal(t, request.SearchedTrait, *queried_for.Intent.SearchedTrait)
+				assert.Equal(t, *request.SearchedTrait, *queried_for.Intent.SearchedTrait)
 				// Assert directed query still returns nil.
 				unexpected, err = query.GetConnectionDetails(c.Db, userTwo.UserId, userOne.UserId)
 				assert.NoError(t, err)
@@ -57,15 +58,16 @@ func TestRequestConnection(t *testing.T) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
-				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
+				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
+				searchedTrait := "some trait"
 				request := api.ConnectionRequest{
 					UserId:        userTwo.UserId,
 					IntentType:    data.INTENT_TYPE_SEARCH,
-					SearchedTrait: "some trait",
+					SearchedTrait: &searchedTrait,
 				}
 				handleRequestConnection(c, request)
 				// Accept the request as user two.
-				c.SessionData = &sessions.SessionData{ UserId: userTwo.UserId }
+				c.SessionData = &sessions.SessionData{UserId: userTwo.UserId}
 				acceptReq := api.ConnectionRequest{
 					UserId: userOne.UserId,
 				}
@@ -91,11 +93,12 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
 				// Try to create connection request with nonexistent user.
-				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
+				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
+				searchedTrait := "some trait"
 				request := api.ConnectionRequest{
-					UserId: 100,
-					IntentType: data.INTENT_TYPE_SEARCH,
-					SearchedTrait: "some trait",
+					UserId:        100,
+					IntentType:    data.INTENT_TYPE_SEARCH,
+					SearchedTrait: &searchedTrait,
 				}
 				result, err := handleRequestConnection(c, request)
 				assert.Error(t, err)
@@ -108,11 +111,12 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
-				c.SessionData = &sessions.SessionData{ UserId: userOne.UserId }
+				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
+				searchedTrait := "some trait"
 				request := api.ConnectionRequest{
 					UserId:        userTwo.UserId,
 					IntentType:    data.INTENT_TYPE_SEARCH,
-					SearchedTrait: "some trait",
+					SearchedTrait: &searchedTrait,
 				}
 				handleRequestConnection(c, request)
 				// Accept the request as the same user.
