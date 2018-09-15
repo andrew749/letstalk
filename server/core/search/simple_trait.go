@@ -83,10 +83,13 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 		Index(SIMPLE_TRAIT_INDEX).
 		Suggester(suggester).
 		Do(c.context)
+	rlog.Debug("Gettinng search results")
 	if err != nil {
+		rlog.Debug("Gettinng search results failed")
 		return nil, err
 	}
 
+	rlog.Debugf("%#v", searchResult.Suggest)
 	traits := make([]SimpleTrait, 0)
 	if searchSuggestions, ok := searchResult.Suggest[SIMPLE_TRAIT_SUGGESTER]; ok {
 		if len(searchSuggestions) > 0 {

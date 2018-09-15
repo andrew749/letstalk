@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"letstalk/server/core/search"
 
 	"github.com/namsral/flag"
@@ -15,13 +16,15 @@ func main() {
 	flag.Parse()
 
 	rlog.Debug("Connecting to elastic search")
-	client, err := search.NewEsClient(*esEndpoint)
+	esClient, err := search.NewEsClient(*esEndpoint)
 	if err != nil {
 		rlog.Error(err)
 		panic(err)
 	}
 	rlog.Debug("Connected to elastic search")
-	rlog.Debug(client.ElasticsearchVersion(*esEndpoint))
+	// c := ctx.Context{Es: esClient}
+	// context := context.Context{}
+	client := search.NewClientWithContext(esClient, context.TODO())
 
-	rlog.Info(client.String())
+	client.PrintAllSimpleTraits()
 }
