@@ -4,25 +4,20 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-
-	"github.com/romana/rlog"
 )
 
 func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	var req api.AutocompleteRequest
-	rlog.Debug("Parsing")
 	if err := c.GinContext.BindJSON(&req); err != nil {
 		return errs.NewRequestError(err.Error())
 	}
 
 	searchClient := c.SearchClientWithContext()
-	rlog.Debug("Searching for %#v", req)
 	traits, err := searchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
 	}
 
-	rlog.Debug("Making %#v", traits)
 	apiTraits := make([]api.SimpleTrait, len(traits))
 	for i, trait := range traits {
 		apiTraits[i] = api.SimpleTrait{

@@ -83,9 +83,7 @@ func (c *ClientWithContext) CompletionSuggestionSimpleTraits(
 		Index(SIMPLE_TRAIT_INDEX).
 		Suggester(suggester).
 		Do(c.context)
-	rlog.Debug("Gettinng search results")
 	if err != nil {
-		rlog.Debug("Gettinng search results failed")
 		return nil, err
 	}
 

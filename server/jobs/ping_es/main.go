@@ -27,4 +27,5 @@ func main() {
 	client := search.NewClientWithContext(esClient, context.TODO())
 
 	client.PrintAllSimpleTraits()
+	client.CompletionSuggestionSimpleTraits("test", 10)
 }
