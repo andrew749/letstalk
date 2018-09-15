@@ -15,7 +15,7 @@ func SimpleTraitAutocompleteController(c *ctx.Context) errs.Error {
 	}
 
 	searchClient := c.SearchClientWithContext()
-	rlog.Debugf("[ANDREW] %#v", req)
+	rlog.Debugf("Prefix: %s, Size: %d", req.Prefix, req.Size)
 	traits, err := searchClient.CompletionSuggestionSimpleTraits(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
