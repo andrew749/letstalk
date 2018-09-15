@@ -99,13 +99,13 @@ func main() {
 			}
 
 			// get the user data for users involved in the matching
-			mentor, err := query.GetUserProfileById(tx, matching.Mentor)
+			mentor, err := query.GetUserProfileById(tx, matching.Mentor, false)
 			if err != nil {
 				rlog.Error(err)
 				continue
 			}
 
-			mentee, err := query.GetUserProfileById(tx, matching.Mentee)
+			mentee, err := query.GetUserProfileById(tx, matching.Mentee, false)
 			if err != nil {
 				rlog.Error(err)
 				continue
