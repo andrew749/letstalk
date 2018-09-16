@@ -23,13 +23,16 @@ export {
   ORGANIZATION_TYPE_UNDETERMINED,
 };
 
-export interface UserPosition {
-  readonly id: number;
+export interface Position {
   readonly roleId: number;
   readonly roleName: string;
   readonly organizationId: number;
   readonly organizationName: string;
   readonly organizationType: OrganizationType,
+}
+
+export interface UserPosition extends Position {
+  readonly id: number;
   readonly startDate: string;
   readonly endDate: string | null;
 };

@@ -48,7 +48,6 @@ import {
 import {
   State as SearchBarState,
   updateFocus,
-  updateListType
 } from '../redux/search-bar/reducer';
 import { ActionTypes as CredentialsActionTypes } from '../redux/credentials/actions';
 import { ActionTypes as CredentialRequestsActionTypes } from '../redux/credential-requests/actions';
@@ -82,8 +81,6 @@ interface DispatchActions {
     ThunkAction<Promise<CredentialsActionTypes>, CredentialsState, void>>;
   updateFocus: ActionCreator<
     ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
-  updateListType: ActionCreator<
-    ThunkAction<Promise<SearchBarActionTypes>, SearchBarState, void>>;
 }
 
 interface Props extends DispatchActions {
@@ -96,6 +93,7 @@ interface Props extends DispatchActions {
 interface State {
   refreshing: boolean;
 }
+
 class RequestToMatchView extends Component<Props, State> {
   REQUEST_TO_MATCH_VIEW_IDENTIFIER = "RequestToMatchView";
 
@@ -140,7 +138,6 @@ class RequestToMatchView extends Component<Props, State> {
     if (credentialsWithState.isEmpty()) {
       const onPress = () => {
         this.props.updateFocus(true);
-        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
       };
       return (
         <View style={styles.noCredentialsContainer}>
@@ -190,7 +187,6 @@ class RequestToMatchView extends Component<Props, State> {
     if (credentialRequestsWithState.isEmpty()) {
       const onPress = () => {
         this.props.updateFocus(true);
-        this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS);
       };
       return (
         <View style={styles.noCredentialsContainer}>
@@ -240,7 +236,6 @@ class RequestToMatchView extends Component<Props, State> {
 
     const onAddCredentialPress = () => {
       this.props.updateFocus(true);
-      this.props.updateListType(SEARCH_LIST_TYPE_CREDENTIALS);
     }
 
     // Watch out! Typescript hack below.
@@ -268,7 +263,6 @@ class RequestToMatchView extends Component<Props, State> {
             {this.renderCredentials()}
           </View>
         </ScrollView>
-        <AllFilterableModals />
       </View>
     );
   }
@@ -285,14 +279,17 @@ class RequestToMatchView extends Component<Props, State> {
     // If `this.state.refreshing` is true, it means that we are reloading data using the pull
     // down, which means that we want to still display the ScrollView.
     return (
-      <Loading
-        state={this.state.refreshing ? 'success' : state}
-        errorMsg={errorMsg}
-        errorType={errorType}
-        load={this.load}
-        renderBody={this.renderBody}
-        navigation={this.props.navigation}
-      />
+      <View style={{flex: 1}}>
+        <Loading
+          state={this.state.refreshing ? 'success' : state}
+          errorMsg={errorMsg}
+          errorType={errorType}
+          load={this.load}
+          renderBody={this.renderBody}
+          navigation={this.props.navigation}
+        />
+        <AllFilterableModals />
+      </View>
     );
   }
 }
@@ -308,7 +305,6 @@ export default connect(
     removeCredential,
     removeCredentialRequest,
     updateFocus,
-    updateListType,
   })(RequestToMatchView);
 
 const styles = StyleSheet.create({

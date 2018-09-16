@@ -13,6 +13,7 @@ import {
   Field,
   InjectedFormProps,
   SubmissionError,
+  FormErrors,
 } from 'redux-form';
 import Sentry from 'sentry-expo';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -51,17 +52,18 @@ interface AddPositionFormData {
 }
 
 const THROTTLE_TIME = 250; // ms
+const MAX_SIZE = 10;
 
 const onRoleQueryChange = async (query: string, setData: (data: Array<DataItem>) => void) => {
   let res: Array<DataItem> = [];
-  if (query !== '') res = await autocompleteService.autocompleteRole(query, 10);
+  if (query !== '') res = await autocompleteService.autocompleteRole(query, MAX_SIZE);
   setData(res);
 }
 const onRoleQueryChangeThrottled = _.throttle(onRoleQueryChange, THROTTLE_TIME);
 
 const onOrganizationQueryChange = async (query: string, setData: (data: Array<DataItem>) => void) => {
   let res: Array<DataItem> = [];
-  if (query !== '') res = await autocompleteService.autocompleteOrganization(query, 10);
+  if (query !== '') res = await autocompleteService.autocompleteOrganization(query, MAX_SIZE);
   setData(res);
 }
 const onOrganizationQueryChangeThrottled = _.throttle(onOrganizationQueryChange, THROTTLE_TIME);
@@ -168,6 +170,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
         component={ModalDatePicker}
+        maxDate={null}
       />
       { selection }
       { roleSelection }
@@ -186,9 +189,18 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
 
 const selector = formValueSelector('add-position');
 
+const endDateAfterStartDate = (values: AddPositionFormData) => {
+  const errors: FormErrors<AddPositionFormData> = {};
+  if (!!values.endDate && !!values.startDate && values.endDate <= values.startDate) {
+    errors.endDate = 'End date must be after start date'
+  }
+  return errors;
+}
+
 const AddPositionFormWithRedux =
   reduxForm<AddPositionFormData, FormP<AddPositionFormData>>({
     form: 'add-position',
+    validate: endDateAfterStartDate,
   })(connect((state: RootState) => ({
     role: selector(state, 'role'),
     organization: selector(state, 'organization'),

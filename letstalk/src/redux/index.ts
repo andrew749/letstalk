@@ -9,6 +9,7 @@ import { reducer as onboarding, State as OnboardingState } from './onboarding/re
 import { reducer as matchProfile, State as MatchProfileState } from './match-profile/reducer';
 import { reducer as notifications, State as NotificationsState } from './notifications/reducer';
 import { reducer as profile, State as ProfileState } from './profile/reducer';
+import { reducer as userSearch, State as UserSearchState } from './user-search/reducer';
 import {
   reducer as credentialRequests,
   State as CredentialRequestsState,
@@ -31,6 +32,7 @@ export interface RootState {
   notifications: NotificationsState;
   profile: ProfileState;
   searchBar: SearchBarState;
+  userSearch: UserSearchState;
 };
 
 const reducers = {
@@ -46,6 +48,7 @@ const reducers = {
   notifications,
   profile,
   searchBar,
+  userSearch,
 };
 
 const appReducer: Reducer<RootState> = combineReducers<RootState>(reducers);

@@ -21,10 +21,13 @@ export {
   SIMPLE_TRAIT_TYPE_UNDETERMINED,
 };
 
-export interface UserSimpleTrait {
-  readonly id: number;
+export interface SimpleTrait {
   readonly simpleTraitId: number;
   readonly simpleTraitName: number;
   readonly simpleTraitType: SimpleTraitType;
   readonly simpleTraitIsSensitive: boolean;
+}
+
+export interface UserSimpleTrait extends SimpleTrait {
+  readonly id: number;
 }

@@ -1,10 +1,14 @@
+import Immutable from 'immutable';
+
 import requestor, { Requestor } from './requests';
 import { SimpleTrait } from '../models/simple-trait';
+import { MultiTrait } from '../models/multi-trait';
 import { Role, Organization } from '../models/position';
 import {
   AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE,
   AUTOCOMPLETE_ROLE_ROUTE,
   AUTOCOMPLETE_ORGANIZATION_ROUTE,
+  AUTOCOMPLETE_MULTI_TRAIT_ROUTE,
 } from './constants';
 
 interface AutocompleteRequest {
@@ -19,22 +23,28 @@ class AutocompleteService {
     this.requestor = requestor;
   }
 
-  async autocompleteSimpleTrait(prefix: string, size: number): Promise<Array<SimpleTrait>> {
+  private async doRequest(url: string, prefix: string, size: number): Promise<any> {
     const req: AutocompleteRequest = { prefix, size };
-    const res = await this.requestor.post(AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE, req);
+    const res = await this.requestor.post(url, req);
     return res
+  }
+
+  // TODO: Migrate to using immutable
+  async autocompleteSimpleTrait(prefix: string, size: number): Promise<Array<SimpleTrait>> {
+    return this.doRequest(AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE, prefix, size);
   }
 
   async autocompleteOrganization(prefix: string, size: number): Promise<Array<Organization>> {
-    const req: AutocompleteRequest = { prefix, size };
-    const res = await this.requestor.post(AUTOCOMPLETE_ORGANIZATION_ROUTE, req);
-    return res
+    return this.doRequest(AUTOCOMPLETE_ORGANIZATION_ROUTE, prefix, size);
   }
 
   async autocompleteRole(prefix: string, size: number): Promise<Array<Role>> {
-    const req: AutocompleteRequest = { prefix, size };
-    const res = await this.requestor.post(AUTOCOMPLETE_ROLE_ROUTE, req);
-    return res
+    return this.doRequest(AUTOCOMPLETE_ROLE_ROUTE, prefix, size);
+  }
+
+  async autocompleteMultiTrait(prefix: string, size: number): Promise<Immutable.List<MultiTrait>> {
+    const res = await this.doRequest(AUTOCOMPLETE_MULTI_TRAIT_ROUTE, prefix, size);
+    return Immutable.List(res);
   }
 }
 
