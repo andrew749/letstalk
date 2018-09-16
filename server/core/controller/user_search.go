@@ -80,30 +80,3 @@ func MyCohortUserSearchController(c *ctx.Context) errs.Error {
 	c.Result = res
 	return nil
 }
-
-func MyCohortUserSearchController(c *ctx.Context) errs.Error {
-	var req api.CommonUserSearchRequest
-	if err := c.GinContext.BindJSON(&req); err != nil {
-		return errs.NewRequestError(err.Error())
-	}
-
-	cohort, err := query.GetUserCohortMappingById(c.Db, c.SessionData.UserId)
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return errs.NewRequestError("Set a cohort to see other users in your class")
-		}
-		return errs.NewDbError(err)
-	}
-
-	cohortReq := api.CohortUserSearchRequest{
-		CommonUserSearchRequest: req,
-		CohortId:                cohort.CohortId,
-	}
-	res, err := query.SearchUsersByCohort(c.Db, cohortReq, c.SessionData.UserId)
-	if err != nil {
-		return errs.NewEsError(err)
-	}
-
-	c.Result = res
-	return nil
-}
