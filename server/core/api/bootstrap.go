@@ -32,9 +32,23 @@ type BootstrapUserRelationshipDataModel struct {
 	MatchingState data.MatchingState `json:"matchingState"`
 }
 
+type BootstrapConnection struct {
+	UserProfile BootstrapUserRelationshipDataModel `json:"userProfile" binding:"required"`
+	Request     ConnectionRequest                  `json:"request" binding:"required"`
+}
+
+type BootstrapConnections struct {
+	OutgoingRequests []*ConnectionRequest   `json:"outgoingRequests" binding:"required"`
+	IncomingRequests []*ConnectionRequest   `json:"incomingRequests" binding:"required"`
+	Mentors          []*BootstrapConnection `json:"mentors" binding:"required"`
+	Mentees          []*BootstrapConnection `json:"mentees" binding:"required"`
+	Peers            []*BootstrapConnection `json:"peers" binding:"required"`
+}
+
 type BootstrapResponse struct {
 	State            BootstrapState                        `json:"state" binding:"required"`
 	Relationships    []*BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort           *data.Cohort                          `json:"cohort" binding:"required"`
 	OnboardingStatus *OnboardingStatus                     `json:"onboardingStatus" binding:"required"`
+	Connections      BootstrapConnections                 `json:"connections" binding:"required"`
 }
