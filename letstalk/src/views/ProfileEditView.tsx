@@ -273,7 +273,6 @@ class EditForm extends Component<EditFormComponentProps, State> {
             label="Bio"
             name="bio"
             component={LabeledFormInput}
-            autoCorrect={false}
             multiline={true}
             numberOfLines={10}
             inputStyle={{width: "100%"}}
