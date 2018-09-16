@@ -63,7 +63,6 @@ func OrganizationAutocompleteController(c *ctx.Context) errs.Error {
 	}
 
 	searchClient := c.SearchClientWithContext()
-
 	organizations, err := searchClient.CompletionSuggestionOrganizations(req.Prefix, req.Size)
 	if err != nil {
 		return errs.NewEsError(err)
