@@ -6,10 +6,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
       - ./server/load_balancer/nginx.debug.conf:/etc/nginx/nginx.conf:ro
       - ./server/load_balancer/mime.types:/etc/nginx/mime.types
       - ./server/dev_certs:/etc/nginx/ssl/hiveapp
+      - "./landing:/var/app/hiveapp"
     depends_on:
       - webapp
     networks:

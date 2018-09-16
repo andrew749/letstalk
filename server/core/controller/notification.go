@@ -2,18 +2,14 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
-	"letstalk/server/aws_utils"
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	notification_helper "letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"letstalk/server/jobs"
-	"letstalk/server/notifications"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
@@ -38,7 +34,7 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 
 	err = c.WithinTx(func(db *gorm.DB) error {
 		tx := db.Begin()
-		// add the token to the
+		// add the token to the database
 		tx.Create(&notificationToken)
 		tx.Model(&data.Session{}).
 			Where("session_id = ?", c.SessionData.SessionId).
@@ -47,26 +43,19 @@ func GetNewNotificationToken(c *ctx.Context) errs.Error {
 			return tx.Error
 		}
 
+		err := data.AddExpoDeviceTokenforUser(tx, c.SessionData.UserId, *c.SessionData.NotificationToken)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
 	if err != nil {
 		return errs.NewRequestError(err.Error())
 	}
+
 	c.Result = "Ok"
-
-	rlog.Debug("Dispatching notification lambda")
-	if err := aws_utils.DispatchLambdaJob(
-		jobs.SendNotification,
-		notifications.ExpoNotification{
-			To:    fmt.Sprintf("ExponentPushToken[%s]", notificationToken.Token),
-			Body:  "Subscribed for notifications.",
-			Title: "Hive",
-		},
-	); err != nil {
-		rlog.Error(err)
-	}
-
 	return nil
 }
 
@@ -106,17 +95,6 @@ func GetNotifications(c *ctx.Context) errs.Error {
 			return err
 		}
 	}
-
-	// dataMap := make(map[string]string)
-	// dataMap["credentialName"] = "Software Engineer at Quora"
-	// dataMap["userName"] = "Wojtek Swiderski"
-	// dataMap["side"] = "ASKER"
-	//
-	// // TODO: Remove
-	// _, err = notification_helper.CreateNotification(db, userId, data.NOTIF_TYPE_NEW_CREDENTIAL_MATCH, "New match", nil, time.Now(), dataMap)
-	// if err != nil {
-	// 	return err
-	// }
 
 	c.Result = apiNotifs
 	return nil
