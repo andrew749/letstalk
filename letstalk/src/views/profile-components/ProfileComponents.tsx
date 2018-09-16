@@ -44,6 +44,7 @@ interface PersonalInfoProps {
   hometown?: string;
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   allowQrCode?: boolean; // default false
+  showConnectedBadge?: boolean; // default false
 }
 
 export class PersonalInfo extends Component<PersonalInfoProps> {
@@ -56,8 +57,15 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       birthdate,
       hometown,
       bio,
-      allowQrCode
+      allowQrCode,
+      showConnectedBadge,
     } = this.props;
+
+    const badge = !!showConnectedBadge ? (
+      <View style={styles.badgeContainer}>
+        <Text style={styles.badgeText}>Connected</Text>
+      </View>
+    ) : null;
 
     const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
     const genderStr = capitalize(genderIdToString(gender));
@@ -78,6 +86,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
     return (
       <View style={styles.personalInfoContainer}>
         <Header>{headerText}</Header>
+        {badge}
         <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
         {!!allowQrCode && <TouchableOpacity style={styles.listItem} onPress={() => {
           this.props.navigation.navigate('QrCode', { secret });
@@ -481,5 +490,16 @@ export const styles = StyleSheet.create({
   personalInfoContainer: {
     flex: 1,
     alignItems: 'center',
+  },
+  badgeContainer: {
+    padding: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    backgroundColor: Colors.GREEN,
+    marginBottom: 5,
+  },
+  badgeText: {
+    color: Colors.WHITE,
+    fontWeight: '900',
   },
 });

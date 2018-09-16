@@ -10,6 +10,9 @@ import {
   UserState,
 } from '../models';
 import {
+  MatchProfileData,
+} from '../models/profile';
+import {
   UserAdditionalData,
   UserPersonalInfo,
 } from '../models/user';
@@ -165,9 +168,10 @@ export class RemoteProfileService implements ProfileService {
     return Immutable.List(response);
   }
 
-  private async getProfile(url: string): Promise<ProfileData> {
+  // NOTE: Could actually just return `ProfileData`, but this makes the types work
+  private async getProfile(url: string): Promise<MatchProfileData> {
     const sessionToken = await this.auth.getSessionToken();
-    const response: ProfileData = await this.requestor.get(url, sessionToken);
+    const response: MatchProfileData = await this.requestor.get(url, sessionToken);
     return {
       ...response,
       userPositions: Immutable.List(response.userPositions),
@@ -179,7 +183,7 @@ export class RemoteProfileService implements ProfileService {
     return this.getProfile(ME_ROUTE);
   }
 
-  async matchProfile(userId: number): Promise<ProfileData> {
+  async matchProfile(userId: number): Promise<MatchProfileData> {
     const url = MATCH_PROFILE_ROUTE + '/' + userId;
     return this.getProfile(url);
   }

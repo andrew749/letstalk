@@ -1,4 +1,4 @@
-import { ProfileData } from '../../models/profile';
+import { MatchProfileData } from '../../models/profile';
 import {
   FetchReceiveAction,
   FetchErrorAction,
@@ -12,11 +12,11 @@ export enum TypeKeys {
   FETCH = 'MATCH_PROFILE/FETCH',
 }
 
-type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, ProfileData>;
+type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, MatchProfileData>;
 type ProfileErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type ProfileStartAction = FetchStartAction<TypeKeys.FETCH>;
 
-function receive(data: ProfileData): ProfileReceiveAction {
+function receive(data: MatchProfileData): ProfileReceiveAction {
   return {
     type: TypeKeys.FETCH,
     fetchType: FetchTypeKeys.RECEIVE,
@@ -39,7 +39,7 @@ function start(): ProfileStartAction {
   };
 }
 
-const fetch: FetchActionCreators<TypeKeys.FETCH, ProfileData> = {
+const fetch: FetchActionCreators<TypeKeys.FETCH, MatchProfileData> = {
   receive,
   error,
   start,

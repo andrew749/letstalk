@@ -5,6 +5,8 @@ import auth, { Auth } from './auth';
 import { Credential, Credentials } from '../models/credential';
 import {
   ALL_CREDENTIAL_ROUTE,
+  CONNECTION_ROUTE,
+  CONNECTION_ACCEPT_ROUTE,
   CREDENTIAL_ROUTE,
   CREDENTIALS_ROUTE,
   CREDENTIAL_REQUEST_ROUTE,
@@ -16,6 +18,7 @@ import {
 } from './constants';
 import { UserPosition } from '../models/position';
 import { UserSimpleTrait } from '../models/simple-trait';
+import { Connection } from '../models/connection';
 
 type GetAllCredentialsResponse = Array<Credential>;
 type GetCredentialsResponse = Array<Credential>;
@@ -137,6 +140,19 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const req: RemoveUserPositionRequest = { userPositionId: id };
     await this.requestor.delete(USER_POSITION, req, sessionToken);
+  }
+
+  async requestConnection(connection: Connection): Promise<Connection> {
+    const sessionToken = await auth.getSessionToken();
+    const res: Connection = await this.requestor.post(CONNECTION_ROUTE, connection, sessionToken);
+    return res;
+  }
+
+  async acceptConnection(userId: number): Promise<Connection> {
+    const sessionToken = await auth.getSessionToken();
+    const res: Connection = await this.requestor.post(
+      CONNECTION_ACCEPT_ROUTE, { userId }, sessionToken);
+    return res;
   }
 }
 

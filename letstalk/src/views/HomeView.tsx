@@ -216,7 +216,7 @@ class HomeView extends Component<Props, State> {
     );
   }
 
-  private renderMatch(relationship: Relationship) {
+  private renderMatch(relationship: Relationship, idx: number, arr: Immutable.List<Relationship>) {
     const {
       userId,
       userType,
@@ -254,10 +254,11 @@ class HomeView extends Component<Props, State> {
       </TouchableOpacity>
     ) : null;
 
+    const extraStyle = arr.size === idx + 1 ? null : {marginBottom: 10};
 
     // TODO: Handle errors for links
     return (
-      <Card key={userId}>
+      <Card key={userId} style={[styles.connectionCard, extraStyle]}>
         <View style={{ flexDirection: 'row' }}>
           <View style={styles.cardProfilePicture}>
             <ProfileAvatar userId={userId.toString()} large/>
@@ -356,8 +357,10 @@ class HomeView extends Component<Props, State> {
                 /> as React.ReactElement<RefreshControlProps>
               }
             >
-              { feedbackPrompt }
-              { matches }
+              <View style={styles.scrollContainer}>
+                { feedbackPrompt }
+                { matches }
+              </View>
             </ScrollView>
           </View>
         );
@@ -439,7 +442,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   feedbackText: {
-    padding: 10,
     fontSize: 14,
   },
   cardProfilePicture: {
@@ -450,11 +452,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   verified: {
-    color: 'green',
+    color: Colors.GREEN,
     fontWeight: 'bold',
   },
   unverified: {
-    color: 'red',
+    color: Colors.RED,
     fontWeight: 'bold',
   },
   deleteRtmMatch: {
@@ -462,4 +464,11 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  scrollContainer: {
+    padding: 10,
+  },
+  connectionCard: {
+    marginHorizontal: 0,
+    marginVertical: 0,
+  }
 })

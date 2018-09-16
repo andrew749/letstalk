@@ -81,7 +81,7 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
  * PostAcceptConnection accepts an existing connection request
  */
 func PostAcceptConnection(c *ctx.Context) errs.Error {
-	var input api.ConnectionRequest
+	var input api.AcceptConnectionRequest
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
@@ -95,7 +95,10 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
+func handleAcceptConnection(
+	c *ctx.Context,
+	request api.AcceptConnectionRequest,
+) (*api.ConnectionRequest, errs.Error) {
 	// Assert request exists from request user to auth user.
 	connection, err := query.GetConnectionDetails(c.Db, request.UserId, c.SessionData.UserId)
 	if err != nil {
@@ -105,11 +108,11 @@ func handleAcceptConnection(c *ctx.Context, request api.ConnectionRequest) (*api
 		return nil, errs.NewRequestError("No such connection request exists")
 	}
 	result := api.ConnectionRequest{
-		UserId:     request.UserId,
-		IntentType: connection.Intent.Type,
-		CreatedAt:  connection.CreatedAt,
+		UserId:        request.UserId,
+		IntentType:    connection.Intent.Type,
+		CreatedAt:     connection.CreatedAt,
+		SearchedTrait: connection.Intent.SearchedTrait,
 	}
-	result.SearchedTrait = connection.Intent.SearchedTrait
 	if connection.AcceptedAt != nil {
 		// Already accepted, do nothing.
 		result.AcceptedAt = connection.AcceptedAt

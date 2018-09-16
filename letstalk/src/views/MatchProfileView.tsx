@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
-import { connect, ActionCreator } from 'react-redux';
+import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import { bindActionCreators } from 'redux'
 import {
@@ -27,9 +27,10 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
+import { infoToast, errorToast } from '../redux/toast';
 import auth from '../services/auth';
 import {fbLogin} from '../services/fb';
-import { ActionButton, Card, Header } from '../components';
+import { FloatingButton, Card, Header } from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -47,22 +48,37 @@ import {
   UserSimpleTraits,
   styles,
 } from './profile-components/ProfileComponents';
+import {
+  RelationshipTypes,
+} from '../models/profile';
+import {
+  IntentTypes,
+  ConnectionIntent,
+} from '../models/connection';
+import requestToMatchService from '../services/request-to-match-service';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   fetchMatchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, MatchProfileState, void>>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+}
+
+interface NavigationParams {
+  readonly userId: number,
+  readonly connectionIntent?: ConnectionIntent,
 }
 
 interface Props extends MatchProfileState, DispatchActions {
-  navigation: NavigationScreenProp<void, NavigationStackAction & { userId: number }>;
+  navigation: NavigationScreenProp<void, NavigationStackAction & NavigationParams>;
 }
 
 class MatchProfileView extends Component<Props> {
   PROFILE_VIEW_IDENTIFIER = "MatchProfileView";
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: 'Match Profile',
+    headerTitle: 'Profile',
     headerStyle,
   })
 
@@ -136,39 +152,97 @@ class MatchProfileView extends Component<Props> {
     )
   }
 
+  private renderRequestButton(connectionIntent: ConnectionIntent) {
+    const { relationshipType } = this.props.profile;
+    let title = 'Request to connect';
+    let color = Colors.HIVE_PRIMARY;
+    let disabled = false;
+    let onPress = () => {
+      this.props.navigation.navigate('RequestConnection', {
+        profile: this.props.profile,
+        connectionIntent,
+      });
+    };
+
+    const userId = this.props.profile.userId;
+
+    switch (relationshipType) {
+      case RelationshipTypes.CONNECTED:
+        // Already connected so we don't show button
+        return null;
+      case RelationshipTypes.YOU_REQUESTED:
+        title = 'Request already sent';
+        disabled = true;
+        onPress = null;
+        break;
+      case RelationshipTypes.THEY_REQUESTED:
+        title = 'Accept request';
+        color = Colors.GREEN;
+        onPress = async () => {
+          try {
+            await requestToMatchService.acceptConnection(userId);
+            await this.props.infoToast('Accepted connection');
+            this.props.fetchMatchProfile(userId);
+          } catch(e) {
+            await this.props.errorToast(e.errorMsg);
+            throw e;
+          }
+        }
+        break;
+    }
+
+    return (
+      <FloatingButton
+        title={title}
+        onPress={onPress}
+        buttonStyle={{ backgroundColor: color }}
+        disabled={disabled}
+      />
+    );
+  }
+
   private renderBody() {
     const { navigate } = this.props.navigation;
+
+    const isConnected = this.props.profile.relationshipType === RelationshipTypes.CONNECTED;
 
     let userId;
     if (this.props.profile) {
       userId = this.props.profile.userId.toString();
     }
 
+    const connectionIntent = this.props.navigation.getParam('connectionIntent', null)
+    const extraStyle = !!connectionIntent && !isConnected ? { paddingBottom: 80 } : null;
+
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.contentContainer} >
-          <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
-          <PersonalInfo
-            {...this.props.profile}
-            navigation={this.props.navigation}
-          />
-          <CohortInfo
-            programId={this.props.profile.programId}
-            sequenceId={this.props.profile.sequenceId}
-            gradYear={this.props.profile.gradYear}
-            navigation={this.props.navigation}
-          />
-          {this.renderContactInfo()}
-          <UserPositions
-            userPositions={this.props.profile.userPositions}
-            navigation={this.props.navigation}
-          />
-          <UserSimpleTraits
-            userSimpleTraits={this.props.profile.userSimpleTraits}
-            navigation={this.props.navigation}
-          />
-        </View>
-      </ScrollView>
+      <View>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={[styles.contentContainer, extraStyle]} >
+            <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+            <PersonalInfo
+              {...this.props.profile}
+              navigation={this.props.navigation}
+              showConnectedBadge={isConnected}
+            />
+            <CohortInfo
+              programId={this.props.profile.programId}
+              sequenceId={this.props.profile.sequenceId}
+              gradYear={this.props.profile.gradYear}
+              navigation={this.props.navigation}
+            />
+            {isConnected ? this.renderContactInfo() : null}
+            <UserPositions
+              userPositions={this.props.profile.userPositions}
+              navigation={this.props.navigation}
+            />
+            <UserSimpleTraits
+              userSimpleTraits={this.props.profile.userSimpleTraits}
+              navigation={this.props.navigation}
+            />
+          </View>
+        </ScrollView>
+        { connectionIntent && this.renderRequestButton(connectionIntent) }
+      </View>
     );
   }
 
@@ -193,5 +267,5 @@ class MatchProfileView extends Component<Props> {
 
 export default connect(
   ({ matchProfile }: RootState) => matchProfile,
-  { fetchMatchProfile },
+  { infoToast, errorToast, fetchMatchProfile },
 )(MatchProfileView);

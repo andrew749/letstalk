@@ -46,7 +46,8 @@ import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
 import QrCodeView from './views/QrCodeView';
-import VerifyEmailView from "./views/VerifyEmailView";
+import VerifyEmailView from './views/VerifyEmailView';
+import RequestConnectionView from './views/RequestConnectionView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import navService from './services/navigation-service';
@@ -228,6 +229,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   VerifyEmail: {
     screen: VerifyEmailView,
+  },
+  RequestConnection: {
+    screen: RequestConnectionView,
   },
 }, {
   initialRouteName,

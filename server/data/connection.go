@@ -24,9 +24,9 @@ type Connection struct {
 type IntentType string
 
 const (
-	INTENT_TYPE_SEARCH      IntentType = "search"
-	INTENT_TYPE_REC_GENERAL IntentType = "recommendation_general"
-	INTENT_TYPE_REC_COHORT  IntentType = "recommendation_cohort"
+	INTENT_TYPE_SEARCH      IntentType = "SEARCH"
+	INTENT_TYPE_REC_GENERAL IntentType = "RECOMMENDATION_GENERAL"
+	INTENT_TYPE_REC_COHORT  IntentType = "RECOMMENDATION_COHORT"
 )
 
 func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]uint8)); return nil }

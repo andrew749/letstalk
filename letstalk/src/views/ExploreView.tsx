@@ -50,6 +50,7 @@ import AllFilterableModals from './AllFilterableModals';
 import { AnalyticsHelper } from '../services';
 import { DEFAULT_SEARCH_SIZE } from '../services/user-search-service';
 import { UserSearchResult } from '../models/user-search';
+import { IntentTypes } from '../models/connection';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -186,6 +187,8 @@ class ExploreView extends Component<Props, State> {
           </Text>
         );
         break;
+      default:
+        const _: never = currentQuery;
     }
 
     const { numResults } = this.props.response;
@@ -210,8 +213,47 @@ class ExploreView extends Component<Props, State> {
       if (!!cohort.sequenceName) cohortText = cohortText + ' ' + cohort.sequenceName;
     }
 
+    const onPress = () => {
+      const { currentQuery } = this.props;
+      let searchedTrait: string = null;
+      let intentType: IntentTypes = IntentTypes.REC_COHORT;
+      switch (currentQuery.type) {
+        case QueryTypes.YOUR_COHORT:
+          intentType = IntentTypes.REC_COHORT;
+          break;
+        case QueryTypes.SEARCH_COHORT:
+          intentType = IntentTypes.SEARCH;
+          const {
+            programName,
+            sequenceName,
+            gradYear,
+          } = currentQuery;
+          searchedTrait = programName + ' ' + gradYear;
+          if (!!sequenceName) searchedTrait = searchedTrait + ' ' + sequenceName;
+          break;
+        case QueryTypes.SEARCH_POSITION:
+          intentType = IntentTypes.SEARCH;
+          const {
+            roleName,
+            organizationName,
+          } = currentQuery;
+          searchedTrait = roleName + ' @ ' + organizationName;
+          break;
+        case QueryTypes.SEARCH_SIMPLE_TRAIT:
+          intentType = IntentTypes.SEARCH;
+          const { simpleTraitName } = currentQuery;
+          searchedTrait = simpleTraitName;
+          break;
+        default:
+          const _: never = currentQuery;
+      }
+
+      const connectionIntent = { intentType, searchedTrait };
+      this.props.navigation.navigate('MatchProfile', { userId, connectionIntent });
+    }
+
     return (
-      <TouchableOpacity onPress={() => console.log('yo')} key={userId} style={styles.resultContainer}>
+      <TouchableOpacity onPress={onPress} key={userId} style={styles.resultContainer}>
         <ProfileAvatar medium userId={userId.toString()} />
         <View style={styles.descriptionContainer}>
           <Text style={styles.nameText}>{ firstName } { lastName }</Text>
