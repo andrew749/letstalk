@@ -68,7 +68,7 @@ func TestRequestConnection(t *testing.T) {
 				handleRequestConnection(c, request)
 				// Accept the request as user two.
 				c.SessionData = &sessions.SessionData{UserId: userTwo.UserId}
-				acceptReq := api.ConnectionRequest{
+				acceptReq := api.AcceptConnectionRequest{
 					UserId: userOne.UserId,
 				}
 				result, err := handleAcceptConnection(c, acceptReq)
@@ -120,7 +120,7 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 				}
 				handleRequestConnection(c, request)
 				// Accept the request as the same user.
-				acceptReq := api.ConnectionRequest{
+				acceptReq := api.AcceptConnectionRequest{
 					UserId: userTwo.UserId,
 				}
 				result, err := handleAcceptConnection(c, acceptReq)
