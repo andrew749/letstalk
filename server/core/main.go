@@ -47,20 +47,18 @@ func main() {
 
 	var es *elastic.Client = nil
 
-	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
-	// work.
-	if *useElastic && !utility.IsProductionEnvironment() {
+	if *useElastic {
 		es, err = utility.GetES()
 		if err != nil {
 			rlog.Error(err)
 			panic("Failed to connect to elasticsearch.")
 		}
-
+		rlog.Infof("Elastic search status: %s", es.String())
 		rlog.Info("Creating indexes in ES")
 		searchClient := search.NewClientWithContext(es, context.Background())
 		if err := searchClient.CreateEsIndexes(); err != nil {
 			// Failures here are okay since the indexes could already exist.
-			rlog.Error(err)
+			rlog.Errorf("Error creating indexes: %#v", err)
 		} else {
 			rlog.Info("Success creating indexes in ES")
 		}

@@ -43,7 +43,7 @@ func (ce *CompositeError) GetHTTPCode() int {
 	return *ce.HttpCode
 }
 
-func (ce CompositeError) AddError(err error) {
+func (ce *CompositeError) AddError(err error) {
 	ce.errors = append(ce.errors, err)
 }
 

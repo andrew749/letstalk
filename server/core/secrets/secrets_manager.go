@@ -17,6 +17,7 @@ type Secrets struct {
 	SentryDSN              string `json:"sentry_dsn"`
 	SendGrid               string `json:"sendgrid"`
 	DeeplinkPrefix         string `json:"deeplinkPrefix"`
+	ElasticSearchUrl       string `json:"elastic_search_url"`
 }
 
 type SecretsManager struct {

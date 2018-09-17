@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 
 	"letstalk/server/core/errs"
 
@@ -17,7 +19,17 @@ type SuggestInput struct {
 }
 
 func NewEsClient(addr string) (*elastic.Client, error) {
-	return elastic.NewClient(elastic.SetURL(addr))
+	return elastic.NewClient(
+		elastic.SetURL(addr),
+		elastic.SetScheme("https"),
+		elastic.SetSniff(false),
+		elastic.SetErrorLog(log.New(os.Stderr, "[ERROR](ELASTIC) ", log.LstdFlags)),
+		elastic.SetInfoLog(log.New(os.Stdout, "[INFO](ELASTIC)", log.LstdFlags)),
+	)
+}
+
+func NewDefaultEsClient() (*elastic.Client, error) {
+	return elastic.NewClient()
 }
 
 // Search client to be used within the request context
@@ -36,6 +48,9 @@ func (c *ClientWithContext) CreateEsIndexes() error {
 	compErr = errs.AppendNullableError(compErr, c.createRoleIndex())
 	compErr = errs.AppendNullableError(compErr, c.createOrganizationIndex())
 	compErr = errs.AppendNullableError(compErr, c.createMultiTraitIndex())
+	if compErr == nil {
+		return nil
+	}
 	return compErr
 }
 
