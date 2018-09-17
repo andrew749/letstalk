@@ -1,14 +1,14 @@
 package bootstrap
 
 import (
+	"github.com/romana/rlog"
 	"letstalk/server/core/api"
+	"letstalk/server/core/connection"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"github.com/romana/rlog"
-	"letstalk/server/core/connection"
 )
 
 func convertUserToRelationshipDataModel(
@@ -149,7 +149,12 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 					// Auth user is the mentor.
 					bc := api.BootstrapConnection{
 						Request: connection.DataToApi(connUserId, conn),
-						UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_MENTEE),
+						UserProfile: *convertUserToRelationshipDataModel(
+							*connUser,
+							data.MATCHING_STATE_UNKNOWN,
+							conn.Intent.SearchedTrait,
+							api.USER_TYPE_MENTEE,
+						),
 					}
 					response.Connections.Mentees =
 						append(response.Connections.Mentees, &bc)
@@ -157,16 +162,30 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 					// Auth user is the mentee.
 					bc := api.BootstrapConnection{
 						Request: connection.DataToApi(connUserId, conn),
-						UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_MENTOR),
+						UserProfile: *convertUserToRelationshipDataModel(
+							*connUser,
+							data.MATCHING_STATE_UNKNOWN,
+							conn.Intent.SearchedTrait,
+							api.USER_TYPE_MENTOR,
+						),
 					}
 					response.Connections.Mentors =
 						append(response.Connections.Mentors, &bc)
 				}
 			} else {
+				userType := api.USER_TYPE_ASKER
+				if conn.UserOneId == user.UserId {
+					userType = api.USER_TYPE_ANSWERER
+				}
 				// Connection is not a mentorship.
 				bc := api.BootstrapConnection{
 					Request: connection.DataToApi(connUserId, conn),
-					UserProfile: *convertUserToRelationshipDataModel(*connUser, data.MATCHING_STATE_UNKNOWN, conn.Intent.SearchedTrait, api.USER_TYPE_UNKNOWN),
+					UserProfile: *convertUserToRelationshipDataModel(
+						*connUser,
+						data.MATCHING_STATE_UNKNOWN,
+						conn.Intent.SearchedTrait,
+						userType,
+					),
 				}
 				response.Connections.Peers =
 					append(response.Connections.Peers, &bc)

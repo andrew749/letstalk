@@ -3,6 +3,7 @@ import Immutable from 'immutable';
 import { Cohort } from './cohort';
 import { UserPersonalInfo } from './user';
 import { OnboardingStatus } from './onboarding';
+import { Connection } from './connection';
 
 export interface Relationship {
   readonly userId: number;
@@ -19,7 +20,17 @@ export interface Relationship {
 }
 
 export function getHumanReadableUserType(userType: number): string {
-    return userType == 1 ? "Mentor" : "Mentee";
+  switch (userType) {
+    case 1:
+      return 'Mentor';
+    case 2:
+      return 'Mentee';
+    case 3:
+      return 'Asker';
+    case 4:
+      return 'Answerer';
+  }
+  return 'Unknown';
 }
 
 export enum MatchingState {
@@ -35,9 +46,23 @@ export type UserState =
   | 'account_setup'
   | 'account_matched';
 
+export interface BootstrapConnection {
+  readonly userProfile: Relationship;
+  readonly request: Connection;
+}
+
+interface BootstrapConnections {
+  readonly outgoingRequests: Immutable.List<Connection>;
+  readonly incomingRequests: Immutable.List<Connection>;
+  readonly mentors: Immutable.List<BootstrapConnection>;
+  readonly mentees: Immutable.List<BootstrapConnection>;
+  readonly peers: Immutable.List<BootstrapConnection>;
+}
+
 export interface BootstrapData {
   readonly relationships: Immutable.List<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
   readonly onboardingStatus: OnboardingStatus;
+  readonly connections: BootstrapConnections;
 };

@@ -65,13 +65,6 @@ type UpdateVectorRequest = PersonalityVector & {
   readonly preferenceType: UserVectorPreferenceType;
 };
 
-export interface BootstrapResponse {
-  readonly relationships: Array<Relationship>;
-  readonly state: UserState;
-  readonly cohort: Cohort;
-  readonly onboardingStatus: OnboardingStatus;
-};
-
 export interface ProfileEditRequest extends UserAdditionalData {
   readonly firstName: string;
   readonly lastName: string;
@@ -155,11 +148,18 @@ export class RemoteProfileService implements ProfileService {
 
   async bootstrap(): Promise<BootstrapData> {
     const sessionToken = await this.auth.getSessionToken();
-    const response: BootstrapResponse = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
+    const response: BootstrapData = await this.requestor.get(BOOTSTRAP_ROUTE, sessionToken);
 
     return {
       ...response,
       relationships: Immutable.List(response.relationships),
+      connections: {
+        outgoingRequests: Immutable.List(response.connections.outgoingRequests),
+        incomingRequests: Immutable.List(response.connections.incomingRequests),
+        mentors: Immutable.List(response.connections.mentors),
+        mentees: Immutable.List(response.connections.mentees),
+        peers: Immutable.List(response.connections.peers),
+      },
     };
   }
 

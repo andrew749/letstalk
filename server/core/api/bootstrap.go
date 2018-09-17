@@ -12,10 +12,10 @@ type BootstrapState string
  * This is currently a linear state hierarchy
  */
 const (
-	ACCOUNT_CREATED        BootstrapState = "account_created" // first state
+	ACCOUNT_CREATED        BootstrapState = "account_created"        // first state
 	ACCOUNT_EMAIL_VERIFIED BootstrapState = "account_email_verified" // UW email has been verified
-	ACCOUNT_SETUP          BootstrapState = "account_setup"   // the account has enough information to proceed
-	ACCOUNT_MATCHED        BootstrapState = "account_matched" // account has been matched a peer
+	ACCOUNT_SETUP          BootstrapState = "account_setup"          // the account has enough information to proceed
+	ACCOUNT_MATCHED        BootstrapState = "account_matched"        // account has been matched a peer
 )
 
 type BootstrapUserRelationshipDataModel struct {
@@ -50,5 +50,5 @@ type BootstrapResponse struct {
 	Relationships    []*BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort           *data.Cohort                          `json:"cohort" binding:"required"`
 	OnboardingStatus *OnboardingStatus                     `json:"onboardingStatus" binding:"required"`
-	Connections      BootstrapConnections                 `json:"connections" binding:"required"`
+	Connections      BootstrapConnections                  `json:"connections" binding:"required"`
 }
