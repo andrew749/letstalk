@@ -47,9 +47,7 @@ func main() {
 
 	var es *elastic.Client = nil
 
-	// Right now, we never load the elasticsearch client on prod. This needs a little bit of infra
-	// work.
-	if *useElastic && utility.IsProductionEnvironment() {
+	if *useElastic {
 		es, err = utility.GetES()
 		if err != nil {
 			rlog.Error(err)
