@@ -24,7 +24,7 @@ type UserAdditionalData struct {
 }
 
 type UserContactInfo struct {
-	Email       string  `json:"email" binding:"required"`
+	Email       *string `json:"email" binding:"required"`
 	PhoneNumber *string `json:"phoneNumber"`
 	FbId        *string `json:"fbId"`
 	FbLink      *string `json:"fbLink"`

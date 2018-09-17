@@ -74,8 +74,12 @@ func UpdateProfile(
 	return nil
 }
 
-func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Error) {
-	user, err := GetUserProfileById(db, userId)
+func GetProfile(
+	db *gorm.DB,
+	userId data.TUserID,
+	includeContactInfo bool,
+) (*api.ProfileResponse, errs.Error) {
+	user, err := GetUserProfileById(db, userId, includeContactInfo)
 	if err != nil {
 		return nil, errs.NewRequestError("Unable to get user data.")
 	}
@@ -83,6 +87,11 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 	if err != nil {
 		// TODO: Should probably check what the errors here are. Right now assume that cohort does not
 		// exist
+	}
+
+	var email *string = nil
+	if includeContactInfo {
+		email = &user.Email
 	}
 
 	userModel := api.ProfileResponse{
@@ -96,7 +105,7 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 			ProfilePic: user.ProfilePic,
 		},
 		UserContactInfo: api.UserContactInfo{
-			Email: user.Email,
+			Email: email,
 		},
 	}
 
@@ -157,55 +166,40 @@ func GetProfile(db *gorm.DB, userId data.TUserID) (*api.ProfileResponse, errs.Er
 	return &userModel, nil
 }
 
+func includeContactInfo(relationshipType api.RelationshipType) bool {
+	return relationshipType == api.RELATIONSHIP_TYPE_CONNECTED
+}
+
 func GetMatchProfile(
 	db *gorm.DB,
 	meUserId data.TUserID,
 	matchUserId data.TUserID,
-) (*api.ProfileResponse, errs.Error) {
+) (*api.MatchProfileResponse, errs.Error) {
+	relationshipType := api.RELATIONSHIP_TYPE_NONE
 
-	// Fetch mentors and mentees.
-	flag := api.MATCHING_INFO_FLAG_NONE
-	// Matchings where user is the mentee.
-	mentors, err := GetMentorsByMenteeId(db, meUserId, flag)
+	connection, dbErr := GetConnectionDetailsUndirected(db, meUserId, matchUserId)
+	if dbErr != nil {
+		return nil, errs.NewDbError(dbErr)
+	} else if connection != nil {
+		if connection.AcceptedAt == nil {
+			if connection.Intent != nil {
+				if meUserId == connection.UserOneId {
+					relationshipType = api.RELATIONSHIP_TYPE_YOU_REQUESTED
+				} else {
+					relationshipType = api.RELATIONSHIP_TYPE_THEY_REQUESTED
+				}
+			}
+		} else {
+			relationshipType = api.RELATIONSHIP_TYPE_CONNECTED
+		}
+	}
+
+	// Only include the contact info if the users are already connected
+	profile, err := GetProfile(db, matchUserId, includeContactInfo(relationshipType))
 	if err != nil {
-		return nil, errs.NewDbError(err)
-	}
-	// Matchings where user is the mentor.
-	mentees, err := GetMenteesByMentorId(db, meUserId, flag)
-	if err != nil {
-		return nil, errs.NewDbError(err)
+		return nil, err
 	}
 
-	reqFlag := api.REQ_MATCHING_INFO_FLAG_NONE
-	// Request matchings where user is answerer.
-	askers, err := GetAskersByAnswererId(db, meUserId, reqFlag)
-	if err != nil {
-		return nil, errs.NewDbError(err)
-	}
-	// Request matchings where user is asker.
-	answerers, err := GetAnswerersByAskerId(db, meUserId, reqFlag)
-	if err != nil {
-		return nil, errs.NewDbError(err)
-	}
-
-	userIds := make(map[data.TUserID]interface{})
-	for _, mentor := range mentors {
-		userIds[mentor.MentorUser.UserId] = nil
-	}
-	for _, mentee := range mentees {
-		userIds[mentee.MenteeUser.UserId] = nil
-	}
-	for _, asker := range askers {
-		userIds[asker.AskerUser.UserId] = nil
-	}
-	for _, answerer := range answerers {
-		userIds[answerer.AnswererUser.UserId] = nil
-	}
-
-	// Check if the user profile being request is actually matched with the calling user
-	if _, ok := userIds[matchUserId]; !ok {
-		return nil, errs.NewRequestError("You are not matched with this user")
-	}
-
-	return GetProfile(db, matchUserId)
+	res := api.MatchProfileResponse{*profile, relationshipType}
+	return &res, nil
 }

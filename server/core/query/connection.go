@@ -7,11 +7,14 @@ import (
 )
 
 // GetConnectionDetails returns details on an existing directed connection between two users.
-func GetConnectionDetails(db *gorm.DB, requestingUser data.TUserID, connectedUser data.TUserID) (*data.Connection, error) {
+func GetConnectionDetails(
+	db *gorm.DB,
+	requestingUser data.TUserID,
+	connectedUser data.TUserID,
+) (*data.Connection, error) {
 	var connection data.Connection
 	q := db.
 		Where(&data.Connection{UserOneId: requestingUser, UserTwoId: connectedUser}).
-		Where("deleted_at IS NULL").
 		Preload("Intent").
 		Preload("Mentorship").
 		First(&connection)
@@ -25,7 +28,11 @@ func GetConnectionDetails(db *gorm.DB, requestingUser data.TUserID, connectedUse
 }
 
 // GetConnectionDetailsUndirected returns details on an existing connection between two users in either direction.
-func GetConnectionDetailsUndirected(db *gorm.DB, firstUser data.TUserID, secondUser data.TUserID) (*data.Connection, error) {
+func GetConnectionDetailsUndirected(
+	db *gorm.DB,
+	firstUser data.TUserID,
+	secondUser data.TUserID,
+) (*data.Connection, error) {
 	if connection, err := GetConnectionDetails(db, firstUser, secondUser); err != nil {
 		return nil, err
 	} else if connection != nil {

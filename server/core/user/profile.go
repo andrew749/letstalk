@@ -30,7 +30,7 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 }
 
 func GetMyProfileController(c *ctx.Context) errs.Error {
-	userModel, err := query.GetProfile(c.Db, c.SessionData.UserId)
+	userModel, err := query.GetProfile(c.Db, c.SessionData.UserId, true)
 	if err != nil {
 		return nil
 	}
