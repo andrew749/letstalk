@@ -1,0 +1,65 @@
+/* Product Features Section
+--------------------------------*/
+#features {
+    background: #fff;
+    padding: 60px 0 0 0;
+    overflow: hidden;
+  }
+  
+  #features .features-img {
+    text-align: center;
+    padding-top: 20px;
+  }
+  
+  @media (min-width: 769px) {
+    #features .features-img {
+      padding-top: 120px;
+      margin-top: -200px;
+    }
+  }
+  
+  #features .features-img img {
+    max-width: 100%;
+  }
+  
+  #features .box {
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  #features .icon {
+    margin-bottom: 10px;
+  }
+  
+  #features .icon i {
+    color: #666666;
+    font-size: 40px;
+    transition: 0.5s;
+  }
+  
+  #features .icon i:before {
+    background: linear-gradient(45deg, $secondary-80, $primary-80);
+    background-clip: border-box;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  #features .title {
+    font-weight: 300;
+    margin-bottom: 15px;
+    font-size: 22px;
+  }
+  
+  #features .title a {
+    color: #111;
+  }
+  
+  #features .description {
+    font-size: 14px;
+    line-height: 24px;
+    margin-bottom: 10px;
+  }
+  
+  #features .section-description {
+    padding-bottom: 10px;
+  }
