@@ -1,8 +1,9 @@
 package errs
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type IError interface {
@@ -34,5 +35,7 @@ func (e *BaseError) GetExtraData() map[string]interface{} {
 
 func NewBaseError(msg string, args ...interface{}) *BaseError {
 	extraData := make(map[string]interface{})
-	return &BaseError{errors.New(fmt.Sprintf(msg, args...)), extraData}
+	// add stack trace context information
+	err := errors.Wrap(errors.New(fmt.Sprintf(msg, args...)), msg)
+	return &BaseError{err, extraData}
 }
