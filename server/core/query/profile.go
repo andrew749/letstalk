@@ -166,6 +166,10 @@ func GetProfile(
 	return &userModel, nil
 }
 
+func includeContactInfo(relationshipType api.RelationshipType) bool {
+	return relationshipType == api.RELATIONSHIP_TYPE_CONNECTED
+}
+
 func GetMatchProfile(
 	db *gorm.DB,
 	meUserId data.TUserID,
@@ -191,7 +195,7 @@ func GetMatchProfile(
 	}
 
 	// Only include the contact info if the users are already connected
-	profile, err := GetProfile(db, matchUserId, relationshipType == api.RELATIONSHIP_TYPE_CONNECTED)
+	profile, err := GetProfile(db, matchUserId, includeContactInfo(relationshipType))
 	if err != nil {
 		return nil, err
 	}
