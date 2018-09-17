@@ -11,6 +11,8 @@ const Colors = {
   WHITE: "#FFFFFF",
   HIVE_SUBDUED: "#808080",
   DARK_GRAY: "#404040",
+  GREEN: 'green',
+  RED: 'red',
 };
 
 export default Colors;

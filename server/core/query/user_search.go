@@ -1,6 +1,8 @@
 package query
 
 import (
+	"fmt"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/converters"
 	"letstalk/server/core/errs"
@@ -43,8 +45,13 @@ func buildUserSearchResponse(isAnonymous bool, users []data.User) *api.UserSearc
 	}
 }
 
-func searchUsersCommon(query *gorm.DB, size int) *gorm.DB {
-	return query.Preload("User.Cohort.Cohort").Limit(size).Group("user_id")
+func searchUsersCommon(query *gorm.DB, size int, extraCols *string) *gorm.DB {
+	cols := "user_id"
+	if extraCols != nil {
+		cols = fmt.Sprintf("%s, %s", cols, *extraCols)
+	}
+
+	return query.Select(fmt.Sprintf("DISTINCT %s", cols)).Preload("User.Cohort.Cohort").Limit(size)
 }
 
 func SearchUsersByCohort(
@@ -57,7 +64,7 @@ func SearchUsersByCohort(
 	query := db.Where(&data.UserCohort{CohortId: req.CohortId}).Not(&data.UserCohort{
 		UserId: userId,
 	})
-	if err := searchUsersCommon(query, req.Size).Find(&userCohorts).Error; err != nil {
+	if err := searchUsersCommon(query, req.Size, nil).Find(&userCohorts).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
@@ -77,10 +84,15 @@ func SearchUsersBySimpleTrait(
 
 	var userSimpleTraits []data.UserSimpleTrait
 
+	extraCols := "simple_trait_is_sensitive"
 	query := db.Where(&data.UserSimpleTrait{
 		SimpleTraitId: req.SimpleTraitId,
 	}).Not(&data.UserSimpleTrait{UserId: userId})
-	if err := searchUsersCommon(query, req.Size).Find(&userSimpleTraits).Error; err != nil {
+	if err := searchUsersCommon(
+		query,
+		req.Size,
+		&extraCols,
+	).Find(&userSimpleTraits).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 
@@ -108,7 +120,7 @@ func SearchUsersByPosition(
 		RoleId:         req.RoleId,
 		OrganizationId: req.OrganizationId,
 	}).Not(&data.UserPosition{UserId: userId})
-	if err := searchUsersCommon(query, req.Size).Find(&userPositions).Error; err != nil {
+	if err := searchUsersCommon(query, req.Size, nil).Find(&userPositions).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 

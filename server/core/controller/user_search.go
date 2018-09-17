@@ -17,7 +17,7 @@ func SimpleTraitUserSearchController(c *ctx.Context) errs.Error {
 
 	res, err := query.SearchUsersBySimpleTrait(c.Db, req, c.SessionData.UserId)
 	if err != nil {
-		return errs.NewEsError(err)
+		return errs.NewDbError(err)
 	}
 
 	c.Result = res
@@ -32,7 +32,7 @@ func PositionUserSearchController(c *ctx.Context) errs.Error {
 
 	res, err := query.SearchUsersByPosition(c.Db, req, c.SessionData.UserId)
 	if err != nil {
-		return errs.NewEsError(err)
+		return errs.NewDbError(err)
 	}
 
 	c.Result = res
@@ -47,7 +47,7 @@ func CohortUserSearchController(c *ctx.Context) errs.Error {
 
 	res, err := query.SearchUsersByCohort(c.Db, req, c.SessionData.UserId)
 	if err != nil {
-		return errs.NewEsError(err)
+		return errs.NewDbError(err)
 	}
 
 	c.Result = res
@@ -74,7 +74,7 @@ func MyCohortUserSearchController(c *ctx.Context) errs.Error {
 	}
 	res, err := query.SearchUsersByCohort(c.Db, cohortReq, c.SessionData.UserId)
 	if err != nil {
-		return errs.NewEsError(err)
+		return errs.NewDbError(err)
 	}
 
 	c.Result = res

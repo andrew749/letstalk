@@ -23,7 +23,7 @@ export {
 
 export interface SimpleTrait {
   readonly simpleTraitId: number;
-  readonly simpleTraitName: number;
+  readonly simpleTraitName: string;
   readonly simpleTraitType: SimpleTraitType;
   readonly simpleTraitIsSensitive: boolean;
 }

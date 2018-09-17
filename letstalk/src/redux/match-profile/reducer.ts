@@ -9,7 +9,7 @@ import {
   getDataOrCur,
   initialFetchState,
 } from '../actions';
-import { ProfileData } from '../../models/profile';
+import { MatchProfileData } from '../../models/profile';
 import {
   fetch,
   ActionTypes,
@@ -18,7 +18,7 @@ import {
 import profileService from '../../services/profile-service';
 
 export interface State {
-  readonly profile?: ProfileData;
+  readonly profile?: MatchProfileData;
   readonly fetchState: FetchState;
 }
 

@@ -3,9 +3,9 @@ import { Position } from './position';
 import { SimpleTrait } from './simple-trait';
 
 export enum MultiTraitTypes {
-  COHORT       = "COHORT",
-  POSITION     = "POSITION",
-  SIMPLE_TRAIT = "SIMPLE_TRAIT",
+  COHORT       = 'COHORT',
+  POSITION     = 'POSITION',
+  SIMPLE_TRAIT = 'SIMPLE_TRAIT',
 }
 
 
