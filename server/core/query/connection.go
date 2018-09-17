@@ -53,8 +53,10 @@ func GetAllConnections(db *gorm.DB, userId data.TUserID) ([]data.Connection, err
 		Where("deleted_at IS NULL").
 		Preload("Intent").
 		Preload("Mentorship").
-		Preload("UserOne").
-		Preload("UserTwo").
+		Preload("UserOne.Cohort.Cohort").
+		Preload("UserTwo.Cohort.Cohort").
+		Preload("UserOne.ExternalAuthData").
+		Preload("UserTwo.ExternalAuthData").
 		Find(&connections)
 	if q.RecordNotFound() {
 		return []data.Connection{}, nil

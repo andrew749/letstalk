@@ -23,6 +23,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
+import { BootstrapConnection } from '../models/bootstrap';
 import { RootState } from '../redux';
 import {
   State as BootstrapState,
@@ -45,6 +46,9 @@ import {
   USER_TYPE_ASKER,
   USER_TYPE_ANSWERER,
 } from '../models/user';
+import {
+  IntentTypes,
+} from '../models/connection';
 import {
   programById,
   sequenceById,
@@ -128,14 +132,58 @@ class HomeView extends Component<Props, State> {
     this.setState({refreshing: false});
   }
 
-  private renderDescription(relationship: Relationship) {
+  private renderDescription(connection: BootstrapConnection) {
     const {
       userType,
-      description,
       cohort,
-    } = relationship;
+    } = connection.userProfile;
+    const {
+      intentType,
+      searchedTrait,
+    } = connection.request;
     const cohortText = cohort === null ? 'some unknown program' :
       programById(cohort.programId) + ' ' + cohort.gradYear;
+
+    let description: ReactNode = null;
+    switch (intentType) {
+      case IntentTypes.REC_COHORT:
+        description = <Text>You are both in the same cohort</Text>;
+        break;
+      case IntentTypes.REC_GENERAL:
+        switch (userType) {
+          case USER_TYPE_ASKER:
+            description = (
+              <Text>They requested to connect with you after you were recommended to them</Text>
+            );
+            break;
+          case USER_TYPE_ANSWERER:
+            description = (
+              <Text>You requested to connect with them after they were recommended to you</Text>
+            );
+            break;
+        }
+        break;
+      case IntentTypes.SEARCH:
+        switch (userType) {
+          case USER_TYPE_ASKER:
+            description = (
+              <Text>{'They requested to connect with you for: '}
+                <Text style={{fontWeight: '900'}}>{ searchedTrait }</Text>
+              </Text>
+            );
+            break;
+          case USER_TYPE_ANSWERER:
+            description = (
+              <Text>{'You requested to connect with them for: '}
+                <Text style={{fontWeight: '900'}}>{ searchedTrait }</Text>
+              </Text>
+            );
+            break;
+        }
+        break;
+      default:
+        const _: never = intentType;
+    }
 
     switch (userType) {
       case USER_TYPE_MENTOR:
@@ -147,17 +195,14 @@ class HomeView extends Component<Props, State> {
           Your mentee in <Text style={styles.bold}>{ cohortText }</Text>
         </Text>;
       case USER_TYPE_ASKER:
-        return <Text style={styles.description}>
-          They're looking for: <Text style={styles.bold}>{ description }</Text>
-        </Text>;
       case USER_TYPE_ANSWERER:
-        return <Text style={styles.description}>
-          You're looking for: <Text style={styles.bold}>{ description }</Text>
-        </Text>;
+        return <Text style={styles.description}>{ description }</Text>;
     }
+    return null;
   }
 
-  private renderContactButton(relationship: Relationship) {
+  private renderContactButton(connection: BootstrapConnection) {
+    const { userProfile } = connection;
     var icon: string;
     var onPress: () => void;
     const {
@@ -166,7 +211,7 @@ class HomeView extends Component<Props, State> {
       fbId,
       fbLink,
       phoneNumber,
-    } = relationship;
+    } = userProfile;
 
     let profileType;
     if (fbLink != null) {
@@ -191,7 +236,7 @@ class HomeView extends Component<Props, State> {
         this,
         "Profile",
         AnalyticsActions.CLICK,
-        getHumanReadableUserType(relationship.userType),
+        getHumanReadableUserType(userProfile.userType),
         1,
         () => {
           this.props.navigation.navigate('MatchProfile', { userId });}
@@ -200,7 +245,7 @@ class HomeView extends Component<Props, State> {
         this,
         "ContactProfile_" + profileType,
         AnalyticsActions.CLICK,
-        getHumanReadableUserType(relationship.userType),
+        getHumanReadableUserType(userProfile.userType),
         1,
         onPress,
       );
@@ -209,24 +254,27 @@ class HomeView extends Component<Props, State> {
     return (
       <View style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
         <TouchableOpacity onPress={ viewProfile }>
-          <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 18, paddingTop: 2 }}>View Profile</Text>
+          <Text style={{ color: Colors.HIVE_PRIMARY, fontSize: 18, paddingTop: 2 }}>
+            View Profile
+          </Text>
         </TouchableOpacity>
         <Button buttonStyle={{ width: 150 }} icon={icon} title="Contact" onPress={onPress} />
       </View>
     );
   }
 
-  private renderMatch(relationship: Relationship, idx: number, arr: Immutable.List<Relationship>) {
+  private renderMatch(
+    connection: BootstrapConnection,
+    idx: number,
+    arr: Immutable.List<BootstrapConnection>,
+  ) {
     const {
       userId,
       userType,
       firstName,
       lastName,
-      matchingState,
-    } = relationship;
-    const isVerified = matchingState === MatchingState.Verified;
-    const isUnverified = matchingState === MatchingState.Unverified;
-    const description = this.renderDescription(relationship);
+    } = connection.userProfile;
+    const description = this.renderDescription(connection);
 
     const onCloseAccept = async () => {
       try {
@@ -264,30 +312,22 @@ class HomeView extends Component<Props, State> {
             <ProfileAvatar userId={userId.toString()} large/>
           </View>
           <View style={{ flex: 2 }}>
-            { isVerified && <Text style={styles.verified}>Verified Match</Text> }
-            { isUnverified && <Text style={styles.unverified}>Unverified Match</Text> }
             <Text style={styles.name}>{firstName + ' ' + lastName}</Text>
             { description }
           </View>
         </View>
-        { this.renderContactButton(relationship) }
+        { this.renderContactButton(connection) }
         { closeButton }
       </Card>
     );
   }
 
   private renderMatches() {
-    const { relationships } = this.props.bootstrap;
+    const { connections } = this.props.bootstrap;
 
-    const mentors = relationships.filter(rel => {
-      return rel.userType === USER_TYPE_MENTOR;
-    }).map(this.renderMatch).toList();
-    const mentees = relationships.filter(rel => {
-      return rel.userType === USER_TYPE_MENTEE;
-    }).map(this.renderMatch).toList();
-    const connections = relationships.filter(rel => {
-      return rel.userType === USER_TYPE_ASKER || rel.userType === USER_TYPE_ANSWERER;
-    }).map(this.renderMatch).toList();
+    const mentors = connections.mentors.map(this.renderMatch).toList();
+    const mentees = connections.mentees.map(this.renderMatch).toList();
+    const peers = connections.peers.map(this.renderMatch).toList();
 
     const elements: Array<ReactNode> = [];
     const pushRels = (title: string, rels: Immutable.List<ReactNode>) => {
@@ -300,9 +340,9 @@ class HomeView extends Component<Props, State> {
     pushRels('Your Mentor', mentors);
     pushRels('Your Mentee', mentees);
 
-    if (connections.size > 0) {
+    if (peers.size > 0) {
       elements.push(<Header key={'Your Connections'}>Your Connections</Header>);
-      elements.push(connections.toJS());
+      elements.push(peers.toJS());
     }
 
     return <View>{ elements }</View>;
