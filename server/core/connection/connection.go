@@ -8,7 +8,6 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
-	"github.com/romana/rlog"
 	"time"
 )
 
@@ -20,7 +19,6 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
-	rlog.Info("Received input: ", input)
 
 	if newConnection, err := handleRequestConnection(c, input); err != nil {
 		return err
@@ -85,7 +83,6 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
-	rlog.Info("Received input: ", input)
 
 	if newConnection, err := handleAcceptConnection(c, input); err != nil {
 		return err
@@ -126,6 +123,36 @@ func handleAcceptConnection(
 	}
 	result.AcceptedAt = connection.AcceptedAt
 	return &result, nil
+}
+
+/**
+ * RemoveConnection removes an existing connection
+ */
+func RemoveConnection(c *ctx.Context) errs.Error {
+	var input api.RemoveConnection
+	if err := c.GinContext.BindJSON(&input); err != nil {
+		return errs.NewRequestError("Failed to parse input")
+	}
+
+	return removeConnection(c, input)
+}
+
+func removeConnection(c *ctx.Context, request api.RemoveConnection) errs.Error {
+	meUserId := c.SessionData.UserId
+	youUserId := request.UserId
+
+	err := c.Db.Where(&data.Connection{
+		UserOneId: meUserId,
+		UserTwoId: youUserId,
+	}).Or(&data.Connection{
+		UserOneId: youUserId,
+		UserTwoId: meUserId,
+	}).Delete(&data.Connection{}).Error
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	return nil
 }
 
 // DataToApi converts a data.Connection to an api.ConnectionRequest.

@@ -154,6 +154,11 @@ export class RemoteRequestToMatchService {
       CONNECTION_ACCEPT_ROUTE, { userId }, sessionToken);
     return res;
   }
+
+  async removeConnection(userId: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    await this.requestor.delete(CONNECTION_ROUTE, { userId }, sessionToken);
+  }
 }
 
 const requestToMatchService = new RemoteRequestToMatchService(requestor, auth);

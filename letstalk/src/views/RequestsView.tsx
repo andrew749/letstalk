@@ -23,6 +23,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
+import requestToMatchService from '../services/request-to-match-service';
 import { BootstrapConnection } from '../models/bootstrap';
 import { RootState } from '../redux';
 import {
@@ -34,7 +35,7 @@ import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
-import { errorToast } from '../redux/toast';
+import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
@@ -64,6 +65,7 @@ import { ConnectionRequestWithName } from '../models/bootstrap';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchMatchProfile: ActionCreator<ThunkAction<Promise<MatchProfileActionTypes>, MatchProfileState, void>>;
 }
@@ -148,7 +150,9 @@ class RequestsView extends Component<Props, State> {
 
     const onCloseAccept = async () => {
       try {
-        console.log('closing');
+        await requestToMatchService.removeConnection(userId);
+        this.props.infoToast('Removed request');
+        this.props.fetchBootstrap();
       } catch (e) {
         await this.props.errorToast(e.errorMsg);
       }
@@ -173,7 +177,9 @@ class RequestsView extends Component<Props, State> {
 
     const onAccept = async () => {
       try {
-        console.log('closing');
+        await requestToMatchService.acceptConnection(userId);
+        this.props.infoToast('Accepted connection');
+        this.props.fetchBootstrap();
       } catch (e) {
         await this.props.errorToast(e.errorMsg);
       }
@@ -333,7 +339,7 @@ class RequestsView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, fetchBootstrap, fetchMatchProfile })(RequestsView);
+  { errorToast, infoToast, fetchBootstrap, fetchMatchProfile })(RequestsView);
 
 const styles = StyleSheet.create({
   container: {
