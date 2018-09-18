@@ -24,7 +24,7 @@ func (e *BaseError) SetExtra(key string, value interface{}) {
 }
 
 func (e *BaseError) Error() string {
-	return e.err.Error()
+	return fmt.Sprintf("%+v", e.err)
 }
 
 func (e *BaseError) GetHTTPCode() int { panic("Abstract Error") }
