@@ -84,10 +84,6 @@ def isHttpResponse1XX(line):
     response = re.search(STATUSONE_REGEX, line)
     return (response is not None)
 
-def get_args():
-    parser.add_argument("--dry-run", action="store_true", help="Dry run does not send data to datadog")
-    return parser.parse_args()
-
 if __name__ == "__main__":
     import sys
     import pprint
