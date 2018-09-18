@@ -15,4 +15,3 @@ services:
       - ./server/load_balancer/nginx.prod.conf:/etc/nginx/nginx.conf
       - "./landing:/var/app/hiveapp"
       - /etc/letsencrypt:/etc/letsencrypt
-      - /var/log/letstalk/:/var/log
