@@ -48,7 +48,54 @@ gulp.task('vendor', function() {
   gulp.src([
       './node_modules/jquery.easing/*.js'
     ])
-    .pipe(gulp.dest('./vendor/jquery-easing'))
+    .pipe(gulp.dest('./vendor/jquery'))
+
+  // jQuery-migrate
+   gulp.src([
+    './node_modules/jquery-migrate/dist/*',
+  ])
+  .pipe(gulp.dest('./vendor/jquery'))
+
+
+  // jQuery-migrate
+  gulp.src([
+    './node_modules/jquery-migrate/dist/*',
+  ])
+  .pipe(gulp.dest('./vendor/jquery'))
+
+  // animate.css
+  gulp.src([
+    './node_modules/animate.css/*.css',
+  ])
+  .pipe(gulp.dest('./vendor/animate'))
+
+  // ionicons
+  gulp.src([
+    './node_modules/ionicons/dist/**/*',
+    '!./node_modules/ionicons/dist/*',
+    '!./node_modules/ionicons/dist/{collection,esm,ionicons,scss,types}/**/*'
+  ])
+  .pipe(gulp.dest('./vendor/ionicons'))
+
+  // magnific-popup
+  gulp.src([
+    './node_modules/magnific-popup/dist/*'
+  ])
+  .pipe(gulp.dest('./vendor/magnific-popup'))
+
+  // superfish
+  gulp.src([
+    './node_modules/superfish/dist/js/*',
+    '!./node_modules/superfish/dist/js/jquery.js',
+    '!./node_modules/superfish/dist/js/supersubs.js'
+  ])
+  .pipe(gulp.dest('./vendor/superfish'))
+
+  // wowjs
+  gulp.src([
+    './node_modules/wowjs/dist/*'
+  ])
+  .pipe(gulp.dest('./vendor/wow'))
 
 });
 

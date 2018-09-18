@@ -1,0 +1,76 @@
+/* Product Advanced Features Section
+--------------------------------*/
+#advanced-features {
+    overflow: hidden;
+  }
+  
+  #advanced-features .features-row {
+    padding: 60px 0 30px 0;
+  }
+  
+  #advanced-features h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #000;
+  }
+  
+  #advanced-features h3 {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    font-style: italic;
+    color: #999;
+  }
+  
+  #advanced-features p {
+    line-height: 24px;
+    color: #777;
+    margin-bottom: 30px;
+  }
+  
+  #advanced-features i {
+    color: #666666;
+    font-size: 64px;
+    transition: 0.5s;
+    float: left;
+    padding: 0 15px 0px 0;
+    line-height: 1;
+  }
+  
+  #advanced-features i:before {
+    background: #1dc8cd;
+    background: linear-gradient(45deg, #1dc8cd 0%, #55fabe 100%);
+    background-clip: border-box;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  #advanced-features .advanced-feature-img-right {
+    max-width: 100%;
+    float: right;
+    padding: 0 0 30px 30px;
+  }
+  
+  #advanced-features .advanced-feature-img-left {
+    max-width: 100%;
+    float: left;
+    padding: 0 30px 30px 0;
+  }
+  
+  #advanced-features img {
+    max-height: 371px;
+  }
+
+  @media (max-width: 768px) {
+    #advanced-features .advanced-feature-img-right, #advanced-features .advanced-feature-img-left {
+      max-width: 50%;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    #advanced-features .advanced-feature-img-right, #advanced-features .advanced-feature-img-left {
+      max-width: 100%;
+      float: none;
+      padding: 0 0 30px 0;
+    }
+  }

@@ -1,2 +1,4 @@
 node_modules/
 css/*.css
+js/*.min.js
+**/.DS_Store

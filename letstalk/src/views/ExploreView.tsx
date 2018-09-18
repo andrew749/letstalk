@@ -313,7 +313,7 @@ class ExploreView extends Component<Props, State> {
     return (
       <ScrollView
         style={styles.container}
-        keyboardShouldPersistTaps={'always'}>
+        keyboardShouldPersistTaps={'always'}
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
