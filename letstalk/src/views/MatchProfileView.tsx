@@ -35,7 +35,7 @@ import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as MatchProfileState, fetchMatchProfile } from '../redux/match-profile/reducer';
-import { ActionTypes } from '../redux/match-profile/actions';
+import { ActionTypes as MatchProfileActionTypes } from '../redux/match-profile/actions';
 import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
@@ -55,12 +55,18 @@ import {
   IntentTypes,
   ConnectionIntent,
 } from '../models/connection';
+import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import requestToMatchService from '../services/request-to-match-service';
+import {
+  State as BootstrapState,
+  fetchBootstrap,
+} from '../redux/bootstrap/reducer';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
-  fetchMatchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, MatchProfileState, void>>;
+  fetchMatchProfile: ActionCreator<ThunkAction<Promise<MatchProfileActionTypes>, MatchProfileState, void>>;
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -181,8 +187,9 @@ class MatchProfileView extends Component<Props> {
         onPress = async () => {
           try {
             await requestToMatchService.acceptConnection(userId);
-            await this.props.infoToast('Accepted connection');
+            this.props.infoToast('Accepted connection');
             this.props.fetchMatchProfile(userId);
+            this.props.fetchBootstrap();
           } catch(e) {
             await this.props.errorToast(e.errorMsg);
             throw e;
@@ -267,5 +274,5 @@ class MatchProfileView extends Component<Props> {
 
 export default connect(
   ({ matchProfile }: RootState) => matchProfile,
-  { infoToast, errorToast, fetchMatchProfile },
+  { infoToast, errorToast, fetchBootstrap, fetchMatchProfile },
 )(MatchProfileView);

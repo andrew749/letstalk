@@ -48,6 +48,7 @@ import AddPositionView from './views/trait-editors/AddPositionView';
 import QrCodeView from './views/QrCodeView';
 import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
+import RequestsView from './views/RequestsView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import navService from './services/navigation-service';
@@ -232,6 +233,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   RequestConnection: {
     screen: RequestConnectionView,
+  },
+  Requests: {
+    screen: RequestsView,
   },
 }, {
   initialRouteName,

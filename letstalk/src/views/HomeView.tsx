@@ -23,6 +23,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
 
+import requestToMatchService from '../services/request-to-match-service';
 import { BootstrapConnection } from '../models/bootstrap';
 import { RootState } from '../redux';
 import {
@@ -34,7 +35,7 @@ import {
   State as CredentialOptionsState,
   fetchCredentialOptions,
 } from '../redux/credential-options/reducer';
-import { errorToast } from '../redux/toast';
+import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
@@ -61,6 +62,7 @@ import AllFilterableModals from './AllFilterableModals';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchCredentialOptions: ActionCreator<
     ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
@@ -168,14 +170,14 @@ class HomeView extends Component<Props, State> {
           case USER_TYPE_ASKER:
             description = (
               <Text>{'They requested to connect with you for: '}
-                <Text style={{fontWeight: '900'}}>{ searchedTrait }</Text>
+                <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
             break;
           case USER_TYPE_ANSWERER:
             description = (
               <Text>{'You requested to connect with them for: '}
-                <Text style={{fontWeight: '900'}}>{ searchedTrait }</Text>
+                <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
             break;
@@ -278,7 +280,9 @@ class HomeView extends Component<Props, State> {
 
     const onCloseAccept = async () => {
       try {
-        await this.props.removeRtmMatches(userId);
+        await requestToMatchService.removeConnection(userId);
+        this.props.infoToast('Removed connection');
+        this.props.fetchBootstrap();
       } catch (e) {
         await this.props.errorToast(e.errorMsg);
       }
@@ -348,6 +352,28 @@ class HomeView extends Component<Props, State> {
     return <View>{ elements }</View>;
   }
 
+  private renderRequestsButton() {
+    const {
+      incomingRequests,
+      outgoingRequests,
+    } = this.props.bootstrap.connections;
+    if (incomingRequests.isEmpty() && outgoingRequests.isEmpty()) return null;
+
+    let description = `You have ${incomingRequests.size} incoming and ${outgoingRequests.size} ` +
+      `outgoing requests to connect.`;
+
+    return (
+      <View>
+        <Text style={styles.requestsButtonText}>{ description }</Text>
+        <Button
+          buttonStyle={styles.feedbackButton}
+          title="View Connection Requests"
+          onPress={() => this.props.navigation.navigate('Requests')}
+        />
+      </View>
+    );
+  }
+
   private renderHome() {
     // A little sketchy to be pasting this in all the cases, but haven't found an easy work around
     // yet.
@@ -364,6 +390,8 @@ class HomeView extends Component<Props, State> {
         />
       </View>
     );
+    const requestsButton = this.renderRequestsButton();
+
     const { state } = this.props.bootstrap;
     switch (state) {
       case 'account_created':
@@ -399,6 +427,7 @@ class HomeView extends Component<Props, State> {
             >
               <View style={styles.scrollContainer}>
                 { feedbackPrompt }
+                { requestsButton }
                 { matches }
               </View>
             </ScrollView>
@@ -442,7 +471,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
+  { errorToast, infoToast, fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
 
 const styles = StyleSheet.create({
   container: {
@@ -482,6 +511,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   feedbackText: {
+    fontSize: 14,
+  },
+  requestsButtonText: {
+    marginTop: 10,
     fontSize: 14,
   },
   cardProfilePicture: {

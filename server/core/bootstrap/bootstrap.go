@@ -114,8 +114,8 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 	rlog.Info("DEBUG: got connections %v", connections)
 
-	response.Connections.IncomingRequests = make([]*api.ConnectionRequest, 0)
-	response.Connections.OutgoingRequests = make([]*api.ConnectionRequest, 0)
+	response.Connections.IncomingRequests = make([]*api.ConnectionRequestWithName, 0)
+	response.Connections.OutgoingRequests = make([]*api.ConnectionRequestWithName, 0)
 	response.Connections.Mentees = make([]*api.BootstrapConnection, 0)
 	response.Connections.Mentors = make([]*api.BootstrapConnection, 0)
 	response.Connections.Peers = make([]*api.BootstrapConnection, 0)
@@ -133,12 +133,20 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		if conn.AcceptedAt == nil {
 			if conn.UserOneId == user.UserId {
 				// Auth user is the requestor.
-				connApi := connection.DataToApi(connUserId, conn)
+				connApi := api.ConnectionRequestWithName{
+					connection.DataToApi(connUserId, conn),
+					conn.UserTwo.FirstName,
+					conn.UserTwo.LastName,
+				}
 				response.Connections.OutgoingRequests =
 					append(response.Connections.OutgoingRequests, &connApi)
 			} else {
 				// Auth user is the requestee.
-				connApi := connection.DataToApi(connUserId, conn)
+				connApi := api.ConnectionRequestWithName{
+					connection.DataToApi(connUserId, conn),
+					conn.UserOne.FirstName,
+					conn.UserOne.LastName,
+				}
 				response.Connections.IncomingRequests =
 					append(response.Connections.IncomingRequests, &connApi)
 			}

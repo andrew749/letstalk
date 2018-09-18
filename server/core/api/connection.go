@@ -19,3 +19,7 @@ type ConnectionRequest struct {
 type AcceptConnectionRequest struct {
 	UserId data.TUserID `json:"userId" binding:"required"`
 }
+
+type RemoveConnection struct {
+	UserId data.TUserID `json:"userId" binding:"required"`
+}

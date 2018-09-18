@@ -46,14 +46,19 @@ export type UserState =
   | 'account_setup'
   | 'account_matched';
 
+export interface ConnectionRequestWithName extends Connection {
+  readonly firstName: string;
+  readonly lastName: string;
+}
+
 export interface BootstrapConnection {
   readonly userProfile: Relationship;
   readonly request: Connection;
 }
 
 interface BootstrapConnections {
-  readonly outgoingRequests: Immutable.List<Connection>;
-  readonly incomingRequests: Immutable.List<Connection>;
+  readonly outgoingRequests: Immutable.List<ConnectionRequestWithName>;
+  readonly incomingRequests: Immutable.List<ConnectionRequestWithName>;
   readonly mentors: Immutable.List<BootstrapConnection>;
   readonly mentees: Immutable.List<BootstrapConnection>;
   readonly peers: Immutable.List<BootstrapConnection>;
