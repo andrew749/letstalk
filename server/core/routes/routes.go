@@ -18,12 +18,13 @@ import (
 	"net/http"
 	"time"
 
+	"letstalk/server/core/connection"
+
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
-	"letstalk/server/core/connection"
 )
 
 type handlerWrapper struct {
@@ -379,13 +380,13 @@ func (hw handlerWrapper) wrapHandlerHTML(handler handlerFunc, needAuth bool) gin
 }
 
 func abortWithErrorHTML(g *gin.Context, err errs.Error) {
-	rlog.Errorf("Returning error: %s\n", err)
+	rlog.Errorf("Returning error: %s\n", err.VerboseError())
 	raven.CaptureError(err, nil)
 	g.AbortWithStatus(err.GetHTTPCode())
 }
 
 func abortWithError(g *gin.Context, err errs.Error) {
-	rlog.Errorf("Returning error: %s\n", err)
+	rlog.Errorf("Returning error: %s\n", err.VerboseError())
 	raven.CaptureError(err, nil)
 	g.AbortWithStatusJSON(err.GetHTTPCode(), gin.H{"Error": convertError(err)})
 }
