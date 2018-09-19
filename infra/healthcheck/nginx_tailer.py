@@ -60,7 +60,7 @@ def isHttpResponse1XX(line):
 
 def parseStatus(line):
     status_res = re.search(STATUS_REGEX, line)
-    return status_res.group(0)
+    return status_res.group(1)
 
 if __name__ == "__main__":
     import sys
