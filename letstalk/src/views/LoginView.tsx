@@ -20,7 +20,7 @@ import { InvalidCredentialsError } from '../services/session-service';
 import auth from '../services/auth';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { required, email } from '../validators';
 
 const styles = StyleSheet.create({
@@ -135,7 +135,9 @@ export default class LoginView extends Component<Props> {
     headerTitle: 'Log in',
     headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Sign up"
       onPress={() => navigation.navigate('Signup')} /> : null,
-    headerStyle,
+      headerStyle, 
+      headerTitleStyle, 
+      headerTintColor 
   })
 
   constructor(props: Props) {

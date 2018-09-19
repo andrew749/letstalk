@@ -6,7 +6,7 @@ import { FormValidationMessage, Text } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import Colors from '../services/colors';
 import { ScrollView } from 'react-native';
 import auth from '../services/auth';
@@ -64,7 +64,9 @@ export class ForgotPasswordView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Forgot Password',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

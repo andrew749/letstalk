@@ -40,7 +40,7 @@ import {
   Header,
   ModalPicker,
 } from '../../components';
-import { headerStyle } from '../TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import profileService from '../../services/profile-service';
@@ -147,7 +147,9 @@ class ChangeCohortView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Change Cohort',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

@@ -239,7 +239,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
 }, {
   initialRouteName,
-});
+}, );
 
 const store = createStore(appReducer, applyMiddleware(thunk));
 

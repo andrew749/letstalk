@@ -40,7 +40,7 @@ import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import {
   CohortInfo,
   PersonalInfo,
@@ -85,7 +85,9 @@ class MatchProfileView extends Component<Props> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Profile',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {

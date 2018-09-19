@@ -24,7 +24,7 @@ import profileService, {SignupRequest} from '../services/profile-service';
 import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import auth from "../services/auth";
 import { required, email, phoneNumber, password } from '../validators';
 
@@ -186,7 +186,9 @@ export default class SignupView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Signup',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

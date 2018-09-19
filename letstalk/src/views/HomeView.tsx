@@ -52,7 +52,7 @@ import {
 import Colors from '../services/colors';
 import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
 import TutorialService from '../services/tutorial_service';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 
 interface DispatchActions {
@@ -75,7 +75,9 @@ class HomeView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {
@@ -370,12 +372,12 @@ class HomeView extends Component<Props, State> {
     const feedbackPrompt = (
       <View>
         <Text style={styles.feedbackText}>
-          Thank you for participating in the Alpha of Hive! If you notice any bugs or
-          have any suggestions, please submit feedback.
+          Thank you for joining Hive! If you notice any bugs or
+          have any suggestions, please let use know!
         </Text>
         <Button
           buttonStyle={styles.feedbackButton}
-          title="Feedback"
+          title="Submit Feedback"
           onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
         />
       </View>

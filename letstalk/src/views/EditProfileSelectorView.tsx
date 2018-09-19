@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import { Card, Header } from '../components';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import Colors from '../services/colors';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileData } from '../models/profile';
@@ -26,7 +26,9 @@ export default class EditProfileSelectorView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Edit Profile',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   async componentDidMount() {

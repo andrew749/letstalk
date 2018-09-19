@@ -127,7 +127,7 @@ export class CohortInfo extends Component<CohortInfoProps> {
     return (
       <View style={styles.sectionContainer}>
         {!!allowEditing && <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
-          <MaterialIcons name="edit" size={32} color={Colors.HIVE_PRIMARY} />
+          <MaterialIcons name="edit" size={25} color={Colors.HIVE_PRIMARY} />
         </TouchableOpacity>}
         <Text style={styles.sectionHeader}>Cohort</Text>
         <Text style={styles.cohortText}>{ program + ', ' + gradYear }</Text>
@@ -231,13 +231,13 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
     if (userPositions.isEmpty()) {
       bottomAction = [
         <Text key={'text'} style={styles.noTraitText}>{ emptyText }</Text>,
-        !!allowEditing && <Button
-          key={'button'}
-          buttonStyle={styles.noTraitButton}
-          title="Add position"
-          onPress={addPosition}
-          color={Colors.HIVE_ACCENT}
-        />,
+        // !!allowEditing && <Button
+        //   key={'button'}
+        //   buttonStyle={styles.noTraitButton}
+        //   title="Add position"
+        //   onPress={addPosition}
+        //   color={Colors.HIVE_PRIMARY}
+        // />,
       ];
     } else if (userPositions.size > MAX_NUMBER_POSITIONS_SHOWN) {
       bottomAction = renderShowLessMore(showAll,
@@ -255,7 +255,7 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Positions</Text>
         {!!allowEditing && <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_ACCENT} />
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
         </TouchableOpacity>}
         { positionItems }
         <View style={styles.traitBottomActionContainer}>
@@ -326,13 +326,13 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     if (userSimpleTraits.isEmpty()) {
       bottomAction = [
         <Text key={'text'} style={styles.noTraitText}>You don't have any traits</Text>,
-        !!allowEditing && <Button
-          key={'button'}
-          buttonStyle={styles.noTraitButton}
-          title="Add trait"
-          onPress={addSimpleTrait}
-          color={Colors.HIVE_PRIMARY}
-        />,
+        // !!allowEditing && <Button
+        //   key={'button'}
+        //   buttonStyle={styles.noTraitButton}
+        //   title="Add trait"
+        //   onPress={addSimpleTrait}
+        //   color={Colors.HIVE_PRIMARY}
+        // />,
       ];
     } else if (userSimpleTraits.size > MAX_NUMBER_SIMPLE_TRAITS_SHOWN) {
       bottomAction = renderShowLessMore(showAll,
@@ -365,6 +365,9 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
 const BUTTON_WIDTH = SCREEN_WIDTH - 80;
 
 export const styles = StyleSheet.create({
+  buttonText: {
+    fontSize: 18,
+  },
   container: {
     paddingTop: 10,
     paddingBottom: 10,
@@ -388,6 +391,7 @@ export const styles = StyleSheet.create({
   },
   changePassButton: {
     width: BUTTON_WIDTH,
+    padding: 20,
     marginTop: 10,
   },
   logoutButtonText: {
@@ -396,6 +400,7 @@ export const styles = StyleSheet.create({
   logoutButton: {
     width: BUTTON_WIDTH,
     marginTop: 10,
+    padding: 20,
     backgroundColor: "gray",
     borderWidth: 0,
   },
@@ -426,7 +431,7 @@ export const styles = StyleSheet.create({
   },
   value: {
     fontSize: 16,
-    color: Colors.HIVE_ACCENT
+    color: Colors.HIVE_PRIMARY
   },
   cohortText: {
     fontSize: 16,
@@ -486,6 +491,7 @@ export const styles = StyleSheet.create({
   noTraitButton: {
     width: 200,
     marginTop: 10,
+    padding: 10
   },
   personalInfoContainer: {
     flex: 1,

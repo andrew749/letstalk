@@ -6,7 +6,7 @@ import { FormValidationMessage, Text } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import Colors from '../services/colors';
 import auth from '../services/auth';
 import {ActionCreator, connect, Dispatch} from 'react-redux';
@@ -73,7 +73,9 @@ export class VerifyEmailView extends Component<Props, State> {
 
   static navigationOptions = {
     headerTitle: 'Verify Email',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

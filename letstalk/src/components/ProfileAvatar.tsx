@@ -1,17 +1,19 @@
 import React from 'react';
 import { Avatar, AvatarProps, FormInput, FormInputProps } from 'react-native-elements';
-import { ImageURISource, StyleSheet } from 'react-native';
+import { ImageURISource, StyleSheet, View } from 'react-native';
 import photoService, {PhotoResult} from '../services/photo_service';
 import {profileService, RemoteProfileService} from '../services/profile-service';
 import { WrappedFieldProps } from 'redux-form';
 import {
     FormProps
 } from '../components'
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import Colors from '../services/colors';
 
 interface ProfileAvatarProps extends AvatarProps {
   userId?: string,
+  edit?: boolean
 }
 
 /**
@@ -53,15 +55,23 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarSta
   render() {
     let props = this.props;
     return (
-      <Avatar
-        {...props}
-        xlarge
-        rounded
-        // default
-        icon={{name: 'person'}}
-        source={ this.state.avatarSource }
-        activeOpacity={0.7}
-      />
+      <View>
+        <Avatar
+          {...props}
+          xlarge
+          rounded
+          // default
+          icon={{name: 'person'}}
+          source={ this.state.avatarSource }
+          activeOpacity={0.7}
+        />
+        {props.edit && <MaterialIcons
+          style={styles.editAvatar}
+          name="camera-alt"
+          size={25}
+          color={Colors.WHITE}
+        />}
+      </View>
     );
   }
 }
@@ -96,7 +106,14 @@ export class ProfileAvatarEditableFormElement extends React.Component<FormElemen
 }
 
 const styles = StyleSheet.create({
-
+  editAvatar: {
+    position: 'absolute',
+    right: 23,
+    bottom: 23,
+    padding: 5,
+    backgroundColor: Colors.HIVE_SUBDUED,
+    borderRadius: 30,
+  }
 });
 
 export default ProfileAvatar;

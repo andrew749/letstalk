@@ -132,7 +132,7 @@ class TopHeader extends Component<Props> {
       style: [styles.icon, styles.rightIcon],
     } : null;
 
-    let placeholder = 'Find someone...';
+    let placeholder = 'Meet someone...';
 
     const openQr = () => {
       this.props.navigation.navigate({routeName: 'QrScanner'});
@@ -156,15 +156,15 @@ class TopHeader extends Component<Props> {
           inputStyle={styles.searchBarTextInput}
           value={this.props.value}
           placeholder={placeholder}
-          placeholderTextColor={Colors.HIVE_LIGHT_FONT}
+          placeholderTextColor={Colors.WHITE}
           onFocus={this.onFocus}
           onBlur={this.onBlur}
         />
         <TouchableOpacity style={styles.qrButton} onPress={openQr}>
-          <MaterialIcons name="camera-enhance" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
+          <MaterialIcons name="camera-enhance" color={Colors.WHITE} size={28} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.notifButton} onPress={openNotif}>
-          <MaterialIcons name="notifications" color={Colors.HIVE_PRIMARY_LIGHT} size={24} />
+          <MaterialIcons name="notifications" color={Colors.WHITE} size={28} />
         </TouchableOpacity>
       </View>
     );
@@ -174,8 +174,8 @@ class TopHeader extends Component<Props> {
 export default connect(({ searchBar }: RootState) => searchBar,
   { updateValue, updateFocus, updateSuggestions, updateError })(TopHeader);
 
-const SEARCH_BAR_LEFT_MARGIN = 36;
-const SEARCH_BAR_RIGHT_MARGIN = 36;
+const SEARCH_BAR_LEFT_MARGIN = 50;
+const SEARCH_BAR_RIGHT_MARGIN = 50;
 
 const styles = StyleSheet.create({
   searchBarTextInput: {
@@ -183,20 +183,24 @@ const styles = StyleSheet.create({
     height: 30,
     fontSize: 16,
     backgroundColor: Colors.HIVE_PRIMARY_LIGHT,
-    color: Colors.HIVE_MAIN_FONT,
+    color: Colors.WHITE,
   },
   qrButton: {
     position: 'absolute',
-    padding: 8,
+    padding: 4.7,
+    marginLeft: 10,
+    marginRight: 10
   },
   notifButton: {
     position: 'absolute',
-    padding: 8,
+    padding: 4.7,
+    marginLeft: 10,
+    marginRight: 10,
     right: 0,
   },
   icon: {
     top: 11.5, // 15.5 - 4 (hard coded top - decrease in margin)
-    color: Colors.HIVE_MAIN_FONT,
+    color: Colors.WHITE,
   },
   leftIcon: {
     left: 12, // 16 - 4 (hard coded left - decrease in margin)
@@ -216,14 +220,21 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: Colors.HIVE_PRIMARY,
+    color: Colors.WHITE
   },
   topLevelHeader: {
     backgroundColor: Colors.HIVE_PRIMARY,
+    color: Colors.WHITE,
     // React Navigation on Android adds extra top margin for nested views
     marginTop: Platform.OS === 'ios' ? 0 : -Constants.statusBarHeight,
+  },
+  topLevelHeaderTitleStyle: {
+    color: Colors.WHITE
   }
 })
 
 const headerStyle = styles.topLevelHeader;
+const headerTitleStyle = styles.topLevelHeaderTitleStyle;
+const headerTintColor = Colors.WHITE;
 
-export { headerStyle };
+export { headerStyle, headerTitleStyle, headerTintColor };

@@ -65,7 +65,7 @@ import {
   MENTORSHIP_PREFERENCE_NONE,
 } from '../models/user';
 import Colors from '../services/colors';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
 import { required, phoneNumber } from '../validators';
 
@@ -329,7 +329,9 @@ class ProfileEditView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Edit Personal Info',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {

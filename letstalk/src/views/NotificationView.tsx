@@ -34,7 +34,7 @@ import {
 } from '../redux/notifications/reducer';
 import { ActionTypes as NotificationsActionTypes } from '../redux/notifications/actions';
 import Loading from './Loading';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { Notification } from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
@@ -68,7 +68,9 @@ class NotificationView extends Component<Props, State> {
 
   static navigationOptions = {
     headerTitle: 'Notifications',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   }
 
   constructor(props: Props) {

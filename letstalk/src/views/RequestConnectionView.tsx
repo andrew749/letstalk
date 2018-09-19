@@ -6,7 +6,7 @@ import { FormValidationMessage, Text } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import {ActionCreator, connect, Dispatch} from 'react-redux';
 import { RootState } from '../redux';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -83,7 +83,9 @@ export class RequestConnectionView extends Component<Props, State> {
 
   static navigationOptions = {
     headerTitle: 'Request Connection',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

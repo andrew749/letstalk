@@ -47,7 +47,7 @@ import { ActionTypes } from '../redux/profile/actions';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { UserPosition } from '../models/position';
 import { UserSimpleTrait } from '../models/simple-trait';
@@ -88,7 +88,9 @@ class ProfileView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   });
 
   constructor(props: Props) {
@@ -227,7 +229,7 @@ class ProfileView extends Component<Props, State> {
       <View>
         <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 65 }]}>
           <View style={styles.contentContainer} >
-            <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+            <ProfileAvatar userId={userId} edit xlarge containerStyle={styles.profilePicture} />
             <PersonalInfo
               {...this.props.profile}
               navigation={this.props.navigation}
@@ -260,12 +262,13 @@ class ProfileView extends Component<Props, State> {
               <View style={{ alignItems: 'center' }}>
                 <Button
                   buttonStyle={styles.changePassButton}
+                  textStyle={styles.buttonText}
                   onPress={this.onChangePasswordPress}
                   title='Change Password'
                 />
                 <Button
                   buttonStyle={styles.logoutButton}
-                  textStyle={styles.logoutButtonText}
+                  textStyle={[styles.logoutButtonText, styles.buttonText]}
                   onPress={this.onLogoutPress}
                   title='Logout'
                 />
@@ -273,9 +276,9 @@ class ProfileView extends Component<Props, State> {
             </View>
           </View>
         </ScrollView>
-        <FloatingButton title="Edit Profile" onPress={() => {
+        {/* <FloatingButton title="Edit Profile" onPress={() => {
           navigate('EditProfileSelector', { profile: this.props.profile });
-        }} />
+        }} /> */}
       </View>
     );
   }
