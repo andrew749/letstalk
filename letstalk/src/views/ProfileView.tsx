@@ -176,6 +176,10 @@ class ProfileView extends Component<Props, State> {
       return items;
     };
 
+    const updateContactInfo = () => {
+      // TODO: Please fill in 
+    };
+
     const contactItems = buildItems([
       phoneNumber ? ['Phone', phoneNumber] : undefined,
       ['Email', email]
@@ -189,8 +193,7 @@ class ProfileView extends Component<Props, State> {
           style={styles.listItem}
           onPress={() => Linking.openURL(fbLink)}
         >
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook</Text>
+          <Text style={styles.value}>Visit Facebook Profile</Text>
         </TouchableOpacity>
       );
     } else {
@@ -211,6 +214,9 @@ class ProfileView extends Component<Props, State> {
 
     return (
       <View style={styles.sectionContainer}>
+        <TouchableOpacity onPress={updateContactInfo} style={styles.addTraitButton}>
+          <MaterialIcons name="edit" size={25} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>
         <Text style={styles.sectionHeader}>Contact Info</Text>
         {contactItems}
       </View>
@@ -234,6 +240,7 @@ class ProfileView extends Component<Props, State> {
               {...this.props.profile}
               navigation={this.props.navigation}
               allowQrCode={true}
+              allowEditing={true}
             />
             <CohortInfo
               programId={this.props.profile.programId}

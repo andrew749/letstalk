@@ -45,6 +45,7 @@ interface PersonalInfoProps {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   allowQrCode?: boolean; // default false
   showConnectedBadge?: boolean; // default false
+  allowEditing?: boolean;
 }
 
 export class PersonalInfo extends Component<PersonalInfoProps> {
@@ -59,6 +60,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       bio,
       allowQrCode,
       showConnectedBadge,
+      allowEditing
     } = this.props;
 
     const badge = !!showConnectedBadge ? (
@@ -83,8 +85,15 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       !allowQrCode ? 'An awesome person that forgot to write a bio' : 'Add bio by editing profile'
     );
 
+    const updatePersonal = () => this.props.navigation.navigate('updatePersonal', {
+      // TODO?
+    });
+
     return (
       <View style={styles.personalInfoContainer}>
+        {!!allowEditing && <TouchableOpacity onPress={updatePersonal} style={styles.addTraitButton}>
+          <MaterialIcons name="edit" size={25} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
         <Header>{headerText}</Header>
         {badge}
         <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
@@ -496,6 +505,7 @@ export const styles = StyleSheet.create({
   personalInfoContainer: {
     flex: 1,
     alignItems: 'center',
+    width: "100%"
   },
   badgeContainer: {
     padding: 5,
