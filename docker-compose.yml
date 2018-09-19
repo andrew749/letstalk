@@ -12,7 +12,6 @@ services:
       - ./server/load_balancer/mime.types:/etc/nginx/mime.types
       - ./server/dev_certs:/etc/nginx/ssl/hiveapp
       - "./landing:/var/app/hiveapp"
-      - /var/log/nginx_container/:/var/log/nginx
     depends_on:
       - webapp
     networks:
