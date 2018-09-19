@@ -373,7 +373,7 @@ class HomeView extends Component<Props, State> {
       <View>
         <Text style={styles.feedbackText}>
           Thank you for joining Hive! If you notice any bugs or
-          have any suggestions, please let use know!
+          have any suggestions, please let us know!
         </Text>
         <Button
           buttonStyle={styles.feedbackButton}
@@ -501,6 +501,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 200,
     marginTop: 10,
+    padding: 10
   },
   feedbackText: {
     fontSize: 14,
