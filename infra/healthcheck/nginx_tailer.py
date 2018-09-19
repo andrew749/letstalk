@@ -54,10 +54,6 @@ def parseAvgTime(line):
             return float(time[1])
         return None
 
-def isHttpResponse1XX(line):
-    response = re.search(STATUSONE_REGEX, line)
-    return (response is not None)
-
 def parseStatus(line):
     status_res = re.search(STATUS_REGEX, line)
     return status_res.group(1)
