@@ -14,22 +14,12 @@ import time
 import re
 
 # mapping between datadog and supervisord log levels #tweaked by technovangelist to add 1xx-4xx status codes
-METRIC_TYPES = {
-    'AVERAGE_RESPONSE': 'nginx.net.avg_response',
-    'FIVE_HUNDRED_STATUS': 'nginx.net.5xx_status',
-    'FOUR_HUNDRED_STATUS': 'nginx.net.4xx_status',
-    'THREE_HUNDRED_STATUS': 'nginx.net.3xx_status',
-    'TWO_HUNDRED_STATUS': 'nginx.net.2xx_status',
-    'ONE_HUNDRED_STATUS': 'nginx.net.1xx_status'
-}
+nginx_status_format = "nginx.net.{}_status"
+nginx_average_response_format = "nginx.net.avg_response"
 
 TIME_REGEX = "\sT=[-+]?[0-9]*\.?[0-9]+\s*"
 TIME_REGEX_SPLIT = re.compile("T=")
-STATUSFIVE_REGEX = "\sS=+5[0-9]{2}\s"
-STATUSFOUR_REGEX = "\sS=+4[0-9]{2}\s"
-STATUSTHREE_REGEX = "\sS=+3[0-9]{2}\s"
-STATUSTWO_REGEX = "\sS=+2[0-9]{2}\s"
-STATUSONE_REGEX = "\sS=+1[0-9]{2}\s"
+STATUS_REGEX = "\sS=([12345]\d{2})\s"
 
 def parse(log, line):
     if len(line) == 0:
@@ -38,18 +28,14 @@ def parse(log, line):
     timestamp = getTimestamp(line)
     avgTime = parseAvgTime(line)
     objToReturn = []
-    if isHttpResponse5XX(line):
-        objToReturn.append((METRIC_TYPES['FIVE_HUNDRED_STATUS'], timestamp, 1, {'metric_type': 'counter'}))
-    if isHttpResponse4XX(line):
-        objToReturn.append((METRIC_TYPES['FOUR_HUNDRED_STATUS'], timestamp, 1, {'metric_type': 'counter'}))
-    if isHttpResponse3XX(line):
-        objToReturn.append((METRIC_TYPES['THREE_HUNDRED_STATUS'], timestamp, 1, {'metric_type': 'counter'}))
-    if isHttpResponse2XX(line):
-        objToReturn.append((METRIC_TYPES['TWO_HUNDRED_STATUS'], timestamp, 1, {'metric_type': 'counter'}))
-    if isHttpResponse1XX(line):
-        objToReturn.append((METRIC_TYPES['ONE_HUNDRED_STATUS'], timestamp, 1, {'metric_type': 'counter'}))
+    status = parseStatus(line)
+    if status is not None:
+        objToReturn.append((
+            nginx_status_format.format(status),
+            timestamp, 1, {'metric_type': 'counter'},
+        ))
     if avgTime is not None:
-        objToReturn.append((METRIC_TYPES['AVERAGE_RESPONSE'], timestamp, avgTime, {'metric_type': 'gauge'}))
+        objToReturn.append((nginx_average_response_format, timestamp, avgTime, {'metric_type': 'gauge'}))
     return objToReturn
 
 def getTimestamp(line):
@@ -68,21 +54,13 @@ def parseAvgTime(line):
             return float(time[1])
         return None
 
-def isHttpResponse5XX(line):
-    response = re.search(STATUSFIVE_REGEX, line)
-    return (response is not None)
-def isHttpResponse4XX(line):
-    response = re.search(STATUSFOUR_REGEX, line)
-    return (response is not None)
-def isHttpResponse3XX(line):
-    response = re.search(STATUSTHREE_REGEX, line)
-    return (response is not None)
-def isHttpResponse2XX(line):
-    response = re.search(STATUSTWO_REGEX, line)
-    return (response is not None)
 def isHttpResponse1XX(line):
     response = re.search(STATUSONE_REGEX, line)
     return (response is not None)
+
+def parseStatus(line):
+    status_res = re.search(STATUS_REGEX, line)
+    return status_res.group(0)
 
 if __name__ == "__main__":
     import sys
