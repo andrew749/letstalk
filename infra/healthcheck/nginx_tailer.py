@@ -14,7 +14,7 @@ import time
 import re
 
 # mapping between datadog and supervisord log levels #tweaked by technovangelist to add 1xx-4xx status codes
-nginx_status_format = "nginx.net.{}_status"
+nginx_status_format = "nginx.net.status.{}"
 nginx_average_response_format = "nginx.net.avg_response"
 
 TIME_REGEX = "\sT=[-+]?[0-9]*\.?[0-9]+\s*"
