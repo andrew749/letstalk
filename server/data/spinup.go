@@ -179,6 +179,114 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Backfill soft/comp eng program/sequence names",
+			Migrate: func(tx *gorm.DB) error {
+				err := tx.Model(&Cohort{}).Where(&Cohort{ProgramId: "SOFTWARE_ENGINEERING"}).Update(&Cohort{
+					ProgramName: "Software Engineering",
+					IsCoop:      true,
+				}).Error
+				if err != nil {
+					return err
+				}
+
+				err = tx.Model(&Cohort{}).Where(&Cohort{ProgramId: "COMPUTER_ENGINEERING"}).Update(&Cohort{
+					ProgramName: "Computer Engineering",
+					IsCoop:      true,
+				}).Error
+				if err != nil {
+					return err
+				}
+
+				sequenceId := "4STREAM"
+				sequenceName := "4 Stream"
+				err = tx.Model(&Cohort{}).Where(&Cohort{SequenceId: &sequenceId}).Update(&Cohort{
+					SequenceName: &sequenceName,
+				}).Error
+				if err != nil {
+					return err
+				}
+
+				sequenceId = "8STREAM"
+				sequenceName = "8 Stream"
+				err = tx.Model(&Cohort{}).Where(&Cohort{SequenceId: &sequenceId}).Update(&Cohort{
+					SequenceName: &sequenceName,
+				}).Error
+				if err != nil {
+					return err
+				}
+
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add engineering cohorts 2018-2023",
+			Migrate: func(tx *gorm.DB) error {
+				var stream8Programs = map[string]string{
+					"SOFTWARE_ENGINEERING":       "Software Engineering",
+					"ELECTRICAL_ENGINEERING":     "Electrical Engineering",
+					"COMPUTER_ENGINEERING":       "Computer Engineering",
+					"CIVIL_ENGINEERING":          "Civil Engineering",
+					"MANAGEMENT_ENGINEERING":     "Management Engineering",
+					"NANOTECHNOLOGY_ENGINEERING": "Nanotechnology Engineering",
+					"MECHANICAL_ENGINEERING":     "Mechanical Engineering",
+					"MECHATRONICS_ENGINEERING":   "Mechatronics Engineering",
+				}
+				var stream4Programs = map[string]string{
+					"ELECTRICAL_ENGINEERING":     "Electrical Engineering",
+					"COMPUTER_ENGINEERING":       "Computer Engineering",
+					"ENVIRONMENTAL_ENGINEERING":  "Environmental Engineering",
+					"GEOLOGICAL_ENGINEERING":     "Geological Engineering",
+					"SYSTEMS_DESIGN_ENGINEERING": "Systems Design Engineering",
+					"MECHANICAL_ENGINEERING":     "Mechanical Engineering",
+					"MECHATRONICS_ENGINEERING":   "Mechatronics Engineering",
+				}
+
+				for gradYear := uint(2018); gradYear <= uint(2023); gradYear++ {
+					for programId, programName := range stream8Programs {
+						sequenceName := "8 Stream"
+						sequenceId := "8STREAM"
+						cohort := &Cohort{
+							ProgramId:    programId,
+							ProgramName:  programName,
+							GradYear:     gradYear,
+							IsCoop:       true,
+							SequenceName: &sequenceName,
+							SequenceId:   &sequenceId,
+						}
+						err := db.Where(cohort).FirstOrCreate(cohort).Error
+						if err != nil {
+							return err
+						}
+					}
+
+					for programId, programName := range stream4Programs {
+						sequenceName := "4 Stream"
+						sequenceId := "4STREAM"
+						cohort := &Cohort{
+							ProgramId:    programId,
+							ProgramName:  programName,
+							GradYear:     gradYear,
+							IsCoop:       true,
+							SequenceName: &sequenceName,
+							SequenceId:   &sequenceId,
+						}
+						err := db.Where(cohort).FirstOrCreate(cohort).Error
+						if err != nil {
+							return err
+						}
+					}
+				}
+
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
