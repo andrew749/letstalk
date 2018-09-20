@@ -34,7 +34,9 @@ install_dependencies() {
       jq \
       software-properties-common \
       python-certbot-nginx \
-      apt-transport-https
+      apt-transport-https \
+      python3 \
+      virtualenv
 }
 
 setup_docker() {
@@ -83,6 +85,14 @@ setup_datadog() {
 install_logging() {
   # put the systemd service in the appropriate folder
   cp $APP/infra/healthcheck/nginx_tailer.service /lib/systemd/system/nginx_tailer.service
+
+  # install pip and dependencies
+  pushd $APP/infra/healthcheck
+    virtualenv -p /usr/bin/python3 .
+    source ./bin/activate
+    pip install -r requirements.txt
+    deactivate
+  popd
   # enable to service to start
   systemctl enable nginx_tailer.service
 }
