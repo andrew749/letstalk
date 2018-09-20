@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=serveradmin
 WorkingDirectory=/var/log/nginx_container
-ExecStart=python /var/app/letstalk/infra/healthcheck/nginx_tailer.py \
+ExecStart=/var/app/letstalk/infra/healthcheck/bin/python /var/app/letstalk/infra/healthcheck/nginx_tailer.py \
   --file=/var/log/nginx_container/access.log \
   --datadog
 Restart=on-failure # or always, on-abort, etc
