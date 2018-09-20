@@ -79,6 +79,14 @@ setup_datadog() {
   systemctl restart datadog-agent
 }
 
+# install logging service
+install_logging() {
+  # put the systemd service in the appropriate folder
+  cp $APP/infra/healthcheck/nginx_tailer.service /lib/systemd/system/nginx_tailer.service
+  # enable to service to start
+  systemctl enable nginx_tailer
+}
+
 # start of actual program
 create_admin_group
 create_admin_user
