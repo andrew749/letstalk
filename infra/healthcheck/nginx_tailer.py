@@ -7,11 +7,11 @@ from functools import partial
 import tailer
 import logging
 
-# setup datadog to talk to local statsd instance and start thread
-initialize(dogstatsd_port=8125)
+initialize(statsd_use_default_route=True)
 stats = ThreadStats()
 stats.start()
 
+# setup datadog to talk to local statsd instance and start thread
 nginx_status_format = "nginx.net.status.{}"
 nginx_average_response_format = "nginx.net.avg_response"
 

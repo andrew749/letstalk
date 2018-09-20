@@ -84,7 +84,7 @@ install_logging() {
   # put the systemd service in the appropriate folder
   cp $APP/infra/healthcheck/nginx_tailer.service /lib/systemd/system/nginx_tailer.service
   # enable to service to start
-  systemctl enable nginx_tailer
+  systemctl enable nginx_tailer.service
 }
 
 # start of actual program
