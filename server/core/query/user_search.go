@@ -51,7 +51,9 @@ func searchUsersCommon(query *gorm.DB, size int, extraCols *string) *gorm.DB {
 		cols = fmt.Sprintf("%s, %s", cols, *extraCols)
 	}
 
-	return query.Select(fmt.Sprintf("DISTINCT %s", cols)).Preload("User.Cohort.Cohort").Limit(size)
+	return query.Select(fmt.Sprintf("DISTINCT %s", cols)).Preload(
+		"User.Cohort.Cohort",
+	).Limit(size).Order("RANDOM ()")
 }
 
 func SearchUsersByCohort(
