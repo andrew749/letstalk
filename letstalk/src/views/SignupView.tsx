@@ -26,7 +26,7 @@ import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle } from './TopHeader';
 import auth from "../services/auth";
-import { required, email, phoneNumber } from '../validators';
+import { required, email, phoneNumber, password } from '../validators';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -130,7 +130,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         ref={(ref: Field<FormInputProps>) => fieldRefs.passwordFieldRef = ref}
         withRef={true}
         secureTextEntry={true}
-        validate={required} // Add some rules for password
+        validate={[required, password]} // Add some rules for password
         autoCapitalize={'none' as 'none'}
         containerStyle={[styles.fieldContainer, {marginBottom: 10}]}
       />
