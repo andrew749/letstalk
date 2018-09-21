@@ -63,7 +63,7 @@ def inc_metric(datadog, metric, timestamp, tags={}):
         stats.increment(metric, tags=tags, timestamp=timestamp)
     log.info("INC {} tags=({})".format(metric, tags))
 
-def gauge_metric(datadog, metric, timestamp, value=1):
+def gauge_metric(datadog, metric, timestamp, value=1, tags={}):
     if datadog:
         stats.gauge(metric, tags=tags, value=value, timestamp=timestamp)
     log.info("GAUGE {} value=({})".format(metric, value))
@@ -80,8 +80,8 @@ stats = ThreadStats()
 
 def main():
     args = parse_args()
-    if datadog:
-        initialize(statsd_use_default_route=True, args.dd_api_key)
+    if args.datadog:
+        initialize(statsd_use_default_route=True, api_key=args.dd_api_key)
     stats.start()
     inc_function = partial(inc_metric, args.datadog)
     gauge_function = partial(gauge_metric, args.datadog)
