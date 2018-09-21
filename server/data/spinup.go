@@ -234,8 +234,11 @@ func migrateDB(db *gorm.DB) {
 					"NANOTECHNOLOGY_ENGINEERING": "Nanotechnology Engineering",
 					"MECHANICAL_ENGINEERING":     "Mechanical Engineering",
 					"MECHATRONICS_ENGINEERING":   "Mechatronics Engineering",
+					"BIOMEDICAL_ENGINEERING":     "Biomedical Engineering",
+					"CHEMICAL_ENGINEERING":       "Chemical Engineering",
 				}
 				var stream4Programs = map[string]string{
+					"ARCHITECTURAL_ENGINEERING":  "Architectural Engineering",
 					"ELECTRICAL_ENGINEERING":     "Electrical Engineering",
 					"COMPUTER_ENGINEERING":       "Computer Engineering",
 					"ENVIRONMENTAL_ENGINEERING":  "Environmental Engineering",
@@ -243,6 +246,7 @@ func migrateDB(db *gorm.DB) {
 					"SYSTEMS_DESIGN_ENGINEERING": "Systems Design Engineering",
 					"MECHANICAL_ENGINEERING":     "Mechanical Engineering",
 					"MECHATRONICS_ENGINEERING":   "Mechatronics Engineering",
+					"CHEMICAL_ENGINEERING":       "Chemical Engineering",
 				}
 
 				for gradYear := uint(2018); gradYear <= uint(2023); gradYear++ {
