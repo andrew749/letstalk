@@ -9,9 +9,9 @@ ADMINGROUP="server_grp"
 ADMINUSER="server"
 
 # directories for the app
-HOME=/var/app/letstalk
-APP=$HOME
-SERVER=${HOME}/server
+APP=/var/app/letstalk
+SERVER=${APP}/server
+SECRETS_PATH=${SERVER}/secrets.json
 DATADOG_CONF=/etc/datadog-agent/conf.d
 DATADOG_DOCKER_CONF=$DATADOG_CONF/docker.d
 
@@ -34,7 +34,13 @@ install_dependencies() {
       jq \
       software-properties-common \
       python-certbot-nginx \
-      apt-transport-https
+      apt-transport-https \
+      python3 \
+      virtualenv \
+      ruby
+
+    gem update
+    gem install mustache
 }
 
 setup_docker() {
@@ -77,6 +83,22 @@ setup_datadog() {
 
   # restart agent
   systemctl restart datadog-agent
+}
+
+# install logging service
+install_logging() {
+  # put the systemd service in the appropriate folder
+  cat $SECRETS_PATH | mustache - $APP/infra/healthcheck/nginx_tailer.service > /lib/systemd/system/nginx_tailer.service
+
+  # install pip and dependencies
+  pushd $APP/infra/healthcheck
+    virtualenv -p /usr/bin/python3 .
+    source ./bin/activate
+    pip install -r requirements.txt
+    deactivate
+  popd
+  # enable to service to start
+  systemctl enable nginx_tailer.service
 }
 
 # start of actual program

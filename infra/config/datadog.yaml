@@ -164,10 +164,10 @@ tags:
 # DogStatsd
 #
 # If you don't want to enable the DogStatsd server, set this option to no
-# use_dogstatsd: yes
+use_dogstatsd: yes
 #
 # Make sure your client is sending to the same UDP port
-# dogstatsd_port: 8125
+dogstatsd_port: 8125
 #
 # The host to bind to receive external metrics (used only by the dogstatsd
 # server for now). For dogstatsd this is ignored if
@@ -558,3 +558,5 @@ tags:
 #   all entries must be surrounded by double quotes and separated by commas
 #   Example: ["(GET|POST) /healthcheck", "GET /V1"]
 #   ignore_resources: []
+
+# handle processing logs

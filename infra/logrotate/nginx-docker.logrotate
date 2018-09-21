@@ -7,3 +7,14 @@
   delaycompress
   copytruncate
 }
+
+# tail mounted nginx log folder
+/var/log/nginx_container/access.log {
+  rotate 7
+  daily
+  compress
+  size=1M
+  missingok
+  delaycompress
+  copytruncate
+}

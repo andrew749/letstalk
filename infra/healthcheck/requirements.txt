@@ -1,0 +1,2 @@
+tailer==0.4.1
+datadog==0.22.0
