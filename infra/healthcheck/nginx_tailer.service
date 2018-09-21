@@ -9,7 +9,7 @@ WorkingDirectory=/var/log/nginx_container
 ExecStart= /var/app/letstalk/infra/healthcheck/bin/python /var/app/letstalk/infra/healthcheck/nginx_tailer.py \
   --file=/var/log/nginx_container/access.log \
   --datadog \
-  --dd_api_key={{dd_api_key}}
+  --dd_api_key={{datadog_api_key}}
 Restart=on-failure # or always, on-abort, etc
 
 [Install]

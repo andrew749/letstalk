@@ -88,7 +88,7 @@ setup_datadog() {
 # install logging service
 install_logging() {
   # put the systemd service in the appropriate folder
-  cat $SERVER/secrets.json | mustache - $APP/infra/healthcheck/nginx_tailer.service > /lib/systemd/system/nginx_tailer.service
+  cat $SECRETS_PATH | mustache - $APP/infra/healthcheck/nginx_tailer.service > /lib/systemd/system/nginx_tailer.service
 
   # install pip and dependencies
   pushd $APP/infra/healthcheck
