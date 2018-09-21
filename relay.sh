@@ -3,6 +3,11 @@
 # note only one person should be able to use this at a time since it uses static port allocation
 # and the firewall needs a port open
 
+# Also note that you need
+# GatewayPorts yes
+# set in the /etc/ssh/sshd_config
+
+
 read -p "Enter username: " username
 read -p "Enter port to forward to: " port
 ssh -g -R 10123:localhost:$port $username@hiveapp.org
