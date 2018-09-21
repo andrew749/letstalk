@@ -42,5 +42,5 @@ func (e *BaseError) GetExtraData() map[string]interface{} {
 func NewBaseError(msg string, args ...interface{}) *BaseError {
 	extraData := make(map[string]interface{})
 	// add stack trace context information
-	return &BaseError{errors.Wrap(fmt.Errorf(msg, args...), msg), extraData}
+	return &BaseError{errors.New(fmt.Sprintf(msg, args...)), extraData}
 }

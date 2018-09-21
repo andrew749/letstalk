@@ -175,7 +175,6 @@ func Register(
 	// request a new connection with another user
 	v1.OPTIONS("/connection")
 	v1.POST("/connection", hw.wrapHandler(connection.PostRequestConnection, true))
-	v1.DELETE("/connection", hw.wrapHandler(connection.RemoveConnection, true))
 
 	// accept a connection request from another user
 	v1.OPTIONS("/connection/accept")
