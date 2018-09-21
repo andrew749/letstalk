@@ -31,13 +31,8 @@ import {
   fetchBootstrap,
   removeRtmMatches,
 } from '../redux/bootstrap/reducer';
-import {
-  State as CredentialOptionsState,
-  fetchCredentialOptions,
-} from '../redux/credential-options/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
-import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
 import {MatchingState, Relationship, getHumanReadableUserType} from '../models/bootstrap';
@@ -64,8 +59,6 @@ interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
-  fetchCredentialOptions: ActionCreator<
-    ThunkAction<Promise<CredentialOptionsActionTypes>, CredentialOptionsState, void>>;
   removeRtmMatches: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
 }
 
@@ -122,10 +115,7 @@ class HomeView extends Component<Props, State> {
   }
 
   private async load() {
-    await Promise.all([
-      this.props.fetchBootstrap(),
-      this.props.fetchCredentialOptions(),
-    ]);
+    await this.props.fetchBootstrap();
   }
 
   private async onRefresh() {
@@ -471,7 +461,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap, fetchCredentialOptions, removeRtmMatches })(HomeView);
+  { errorToast, infoToast, fetchBootstrap, removeRtmMatches })(HomeView);
 
 const styles = StyleSheet.create({
   container: {

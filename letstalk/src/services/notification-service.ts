@@ -6,8 +6,6 @@ import {
 } from 'react-navigation';
 
 import { RootState } from '../redux';
-import { credentialRequestRemove } from '../redux/credential-requests/actions';
-import { credentialRemove } from '../redux/credentials/actions';
 import { fetchBootstrap } from '../redux/bootstrap/reducer';
 
 interface BaseNotificationData {
@@ -81,9 +79,6 @@ export default class NotificationService {
     const data = notification.data;
     switch (data.type) {
       case 'REQUEST_TO_MATCH':
-        if (data.side === SIDE_ASKER) {
-          await this.store.dispatch(credentialRequestRemove(data.requestId));
-        }
         await fetchBootstrap()(this.store.dispatch, null, null);
         break;
       case 'ADHOC_NOTIFICATION':

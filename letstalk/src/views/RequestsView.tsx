@@ -31,13 +31,8 @@ import {
   fetchBootstrap,
   removeRtmMatches,
 } from '../redux/bootstrap/reducer';
-import {
-  State as CredentialOptionsState,
-  fetchCredentialOptions,
-} from '../redux/credential-options/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
-import { ActionTypes as CredentialOptionsActionTypes } from '../redux/credential-options/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
 import {MatchingState, Relationship, getHumanReadableUserType} from '../models/bootstrap';
