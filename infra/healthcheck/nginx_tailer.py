@@ -7,10 +7,6 @@ from functools import partial
 import tailer
 import logging
 
-initialize(statsd_use_default_route=True)
-stats = ThreadStats()
-stats.start()
-
 # setup datadog to talk to local statsd instance and start thread
 nginx_status_format = "nginx.net.status.{}"
 nginx_average_response_format = "nginx.net.avg_response"
@@ -76,10 +72,17 @@ def parse_args():
     parser = ArgumentParser(description="Tail nginx logs")
     parser.add_argument("--datadog", action="store_true", help="Whether to send to datadog.")
     parser.add_argument("--file", required=True, help="File to parse")
+    parser.add_argument("--dd_api_key", help="Api key for datadog")
     return parser.parse_args()
+
+
+stats = ThreadStats()
 
 def main():
     args = parse_args()
+    if datadog:
+        initialize(statsd_use_default_route=True, args.dd_api_key)
+    stats.start()
     inc_function = partial(inc_metric, args.datadog)
     gauge_function = partial(gauge_metric, args.datadog)
     process_func = partial(process, inc_function, gauge_function)
