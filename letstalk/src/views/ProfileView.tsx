@@ -104,14 +104,26 @@ class ProfileView extends Component<Props, State> {
   }
 
   private async onLogoutPress() {
-    try {
-      await auth.logout();
-    } catch (error) { }
-    await this.props.navigation.dispatch(NavigationActions.reset({
-      index: 0,
-      key: null,
-      actions: [NavigationActions.navigate({ routeName: 'Login' })]
-    }));
+    const onLogout = async () => {
+      try {
+        await auth.logout();
+      } catch (error) { }
+      await this.props.navigation.dispatch(NavigationActions.reset({
+        index: 0,
+        key: null,
+        actions: [NavigationActions.navigate({ routeName: 'Login' })]
+      }));
+    }
+
+    Alert.alert(
+      'Logout',
+      `Are you sure you want to logout?`,
+      [
+        {text: 'Cancel', onPress: () => null, style: 'cancel'},
+        {text: 'Logout', onPress: onLogout, style: 'default'},
+      ],
+    );
+
   }
 
   private async onChangePasswordPress() {
