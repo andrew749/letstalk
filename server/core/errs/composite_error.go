@@ -2,6 +2,7 @@ package errs
 
 import (
 	"bytes"
+	"fmt"
 )
 
 /**
@@ -45,6 +46,24 @@ func (ce *CompositeError) GetHTTPCode() int {
 
 func (ce *CompositeError) AddError(err error) {
 	ce.errors = append(ce.errors, err)
+}
+
+const ERROR_FORMAT_STRING = "Error %d:\n%s"
+
+func (ce *CompositeError) VerboseError() string {
+	var buffer bytes.Buffer
+	for i, err := range ce.errors {
+		var errMsg string
+		switch err.(type) {
+		case *BaseError:
+			errSpecific := err.(*BaseError)
+			errMsg = errSpecific.VerboseError()
+		default:
+			errMsg = err.Error()
+		}
+		buffer.WriteString(fmt.Sprintf(ERROR_FORMAT_STRING, i, errMsg))
+	}
+	return buffer.String()
 }
 
 func (ce CompositeError) Error() string {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"fmt"
+	"letstalk/server/core/errs"
 	"letstalk/server/core/routes"
 	"letstalk/server/core/search"
 	"letstalk/server/core/secrets"
@@ -82,9 +83,9 @@ func main() {
 
 	// production specific setup
 	if utility.IsProductionEnvironment() {
-		rlog.Info("Running in IsProd")
+		rlog.Info("Running in Production mode")
 		raven.SetTagsContext(map[string]string{
-			"environment": "IsProd",
+			"environment": "production",
 		})
 		// setup sentry
 	} else {
@@ -102,7 +103,7 @@ func main() {
 		err = http.ListenAndServe(fmt.Sprintf(":%s", *port), router)
 		if err != nil {
 			raven.CaptureError(err, nil)
-			log.Fatal(err)
+			log.Fatal(err.(*errs.BaseError).VerboseError())
 		}
 	}, nil)
 }
