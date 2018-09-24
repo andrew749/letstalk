@@ -32,7 +32,7 @@ const Button: React.SFC<Props> = props => {
       borderColor: props.color || Colors.HIVE_PRIMARY,
       borderWidth: 0.5,
       borderRadius: 5,
-      height: 28,
+      height: 35,
       backgroundColor: 'white',
       alignItems: 'center',
       justifyContent: 'center',

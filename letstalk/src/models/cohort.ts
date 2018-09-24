@@ -60,7 +60,7 @@ type Cohorts = Immutable.List<Cohort>;
 export function programOptions(cohorts: Cohorts): ValueLabels {
   return cohorts.map(row => row.programId).toSet().map(
     programId => ({ value: programId, label: PROGRAMS.get(programId) })
-  ).toList();
+  ).sortBy(program => program.label).toList();
 }
 
 function filteredCohorts(

@@ -3,6 +3,7 @@ import {
   Dimensions,
   EmitterSubscription,
   Picker,
+  Platform,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -54,11 +55,12 @@ import {
 import Colors from '../services/colors';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
-import { required } from '../validators';
+import { required, phoneNumber} from '../validators';
 
 interface EditFormData {
   firstName: string;
   lastName: string;
+  phoneNumber: string;
   gender: number;
   birthdate: string;
   mentorshipPreference: number;
@@ -73,6 +75,7 @@ interface EditFormProps extends FormProps<EditFormData>, EditFormData {
 class EditFormRefs {
   firstNameFieldRef: Field<FormInputProps>;
   lastNameFieldRef: Field<FormInputProps>;
+  phoneNumberFieldRef: Field<FormInputProps>;
 }
 
 interface State {
@@ -152,6 +155,15 @@ class EditForm extends Component<EditFormComponentProps, State> {
             autoCorrect={false}
             validate={required}
           />
+           <Field
+            label="Phone number"
+            name="phoneNumber"
+            component={LabeledFormInput}
+            ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
+            withRef={true}
+            keyboardType={'phone-pad' as 'phone-pad'}
+            validate={phoneNumber}
+          />
           <Field
             label="Gender"
             name="gender"
@@ -175,9 +187,9 @@ class EditForm extends Component<EditFormComponentProps, State> {
             component={ModalDatePicker}
             validate={required}
           />
-          <Text style={[styles.hint, styles.mentorshipLabel]}>
+          {(Platform.OS === 'android') && <Text style={[styles.hint, styles.mentorshipLabel]}>
             Mentorship Preference
-          </Text>
+          </Text>}
           <Field
             label="Mentorship Preference"
             name="mentorshipPreference"
@@ -270,6 +282,7 @@ class ProfileEditView extends Component<Props> {
       const {
         firstName,
         lastName,
+        phoneNumber,
         gender,
         birthdate,
         mentorshipPreference,
@@ -277,7 +290,6 @@ class ProfileEditView extends Component<Props> {
         hometown
       } = values;
       const {
-        phoneNumber,
         programId,
         sequenceId,
         gradYear
@@ -305,6 +317,7 @@ class ProfileEditView extends Component<Props> {
     const {
       firstName,
       lastName,
+      phoneNumber,
       gender,
       birthdate,
       mentorshipPreference,
@@ -314,6 +327,7 @@ class ProfileEditView extends Component<Props> {
     const EditFormWithRedux = EditFormWithReduxBuilder({
       firstName,
       lastName,
+      phoneNumber,
       gender,
       birthdate: Moment.utc(birthdate).format("YYYY-MM-DD"),
       mentorshipPreference,

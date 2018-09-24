@@ -506,7 +506,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 200,
     marginVertical: 15,
-    padding: 15,
   },
   feedbackButtonText: {
     color: Colors.HIVE_PRIMARY,

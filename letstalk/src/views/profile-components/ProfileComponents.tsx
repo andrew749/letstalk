@@ -85,9 +85,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       !allowQrCode ? 'An awesome person that forgot to write a bio' : 'Add a bio through editing your profile!'
     );
 
-    const updatePersonal = () => this.props.navigation.navigate('UpdatePersonal', {
-      // TODO?
-    });
+    const updatePersonal = () => this.props.navigation.navigate('UpdatePersonal', {});
 
     return (
       <View style={styles.personalInfoContainer}>
@@ -221,7 +219,7 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
           <Text>{'\n'}({ frm } - { until })</Text>
         </Text>
         {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
-          <MaterialIcons color={Colors.HIVE_PRIMARY} name="close" size={18} />
+          <MaterialIcons color={Colors.WHITE} name="close" size={18} />
         </TouchableOpacity>}
       </View>
     );
@@ -319,7 +317,7 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
       <View key={ trait.id } style={[styles.pillContainer, padRight]}>
         <Text style={[styles.pillText, styles.boldText]}>{ trait.simpleTraitName }</Text>
         {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
-          <MaterialIcons color={Colors.HIVE_PRIMARY} name="close" size={18} />
+          <MaterialIcons color={Colors.WHITE} name="close" size={18} />
         </TouchableOpacity>}
       </View>
     );
@@ -394,12 +392,12 @@ export const styles = StyleSheet.create({
     fontWeight: '700'
   },
   buttonText: {
-    fontSize: 18
+    fontSize: 16
   },
   changePassButton: {
     borderColor: Colors.HIVE_SUBDUED,
     borderWidth: .7,
-    height: 40,
+    height: 44,
     margin: 0
   },
   changePassButtonText: {
@@ -439,7 +437,7 @@ export const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: Colors.HIVE_SUBDUED,
     borderWidth: 0,
-    height: 40,
+    height: 44,
     margin: 0
   },
   logoutButtonText: {
@@ -462,11 +460,12 @@ export const styles = StyleSheet.create({
     marginHorizontal: 15
   },
   pillContainer: {
-    borderColor: Colors.HIVE_PRIMARY,
+    borderColor: Colors.HIVE_ACCENT,
+    backgroundColor: Colors.HIVE_ACCENT,
     borderWidth: .7,
     marginVertical: 6,
     marginHorizontal: 2.5,
-    padding: 5,
+    padding: 8,
     paddingLeft: 10,
     paddingRight: 10,
     borderRadius: 5
@@ -476,15 +475,15 @@ export const styles = StyleSheet.create({
     marginVertical: 6
   },
   pillText: {
-    color: Colors.HIVE_PRIMARY,
+    color: Colors.WHITE,
     fontWeight: '400',
     fontSize: 14
   },
   profileActionButton: {
     alignSelf: 'center',
     width: BUTTON_WIDTH,
-    padding: 20,
-    marginTop: 10
+    marginTop: 10,
+    padding: 8
   },
   profilePicture: {
     margin: 20
