@@ -385,12 +385,16 @@ class OnboardingView extends Component<Props> {
         return (
           <ScrollView>
             <Header>Nice work, you're done!</Header>
-            <ActionButton onPress={() => {
-              this.props.navigation.dispatch(NavigationActions.reset({
-                index: 0,
-                actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
-              }));
-            }} title="Enter Hive" />
+            <ActionButton 
+              backgroundColor={Colors.HIVE_PRIMARY}
+              onPress={() => {
+                this.props.navigation.dispatch(NavigationActions.reset({
+                  index: 0,
+                  actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+                }));
+              }} 
+              title="Enter Hive" 
+            />
           </ScrollView>
         );
       default:

@@ -44,7 +44,7 @@ const Button: React.SFC<Props> = props => {
   });
   const icon = props.icon ?
     <MaterialIcons
-      style={{ position: 'absolute', left: 2, top: 2 }}
+      style={{ position: 'absolute', left: 2, top: 2, margin: 4 }}
       color={Colors.HIVE_PRIMARY}
       name={props.icon}
       size={24}

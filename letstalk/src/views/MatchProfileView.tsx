@@ -146,8 +146,7 @@ class MatchProfileView extends Component<Props> {
     if (fbLink) {
       contactItems.push(
         <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook</Text>
+          <Text style={styles.value}>Visit Facebook Profile</Text>
         </TouchableOpacity>
       );
     }

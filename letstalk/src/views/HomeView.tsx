@@ -161,14 +161,14 @@ class HomeView extends Component<Props, State> {
         switch (userType) {
           case USER_TYPE_ASKER:
             description = (
-              <Text>{'They requested to connect with you for: '}
+              <Text>{'They connected with you for: '}
                 <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
             break;
           case USER_TYPE_ANSWERER:
             description = (
-              <Text>{'You requested to connect with them for: '}
+              <Text>{'You connected with them for: '}
                 <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
@@ -359,7 +359,8 @@ class HomeView extends Component<Props, State> {
         <Text style={styles.requestsButtonText}>{ description }</Text>
         <Button
           buttonStyle={styles.feedbackButton}
-          title="View Connection Requests"
+          textStyle={styles.feedbackButtonText}
+          title="See Requests"
           onPress={() => this.props.navigation.navigate('Requests')}
         />
       </View>

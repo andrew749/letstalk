@@ -230,7 +230,7 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
     const { showAll } = this.state;
 
     const addPosition = () => this.props.navigation.navigate('AddPosition');
-    const emptyText = allowEditing ? 'You don\'t have any positions' : 'They don\'t have any positions';
+    const emptyText = allowEditing ? 'You don\'t have any positions, press the + to add one!' : 'They don\'t have any positions';
 
     let bottomAction: ReactNode = null;
     if (userPositions.isEmpty()) {
@@ -328,18 +328,12 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     const { showAll } = this.state;
 
     const addSimpleTrait = () => this.props.navigation.navigate('AddSimpleTrait');
+    const emptyText = allowEditing ? 'You don\'t have any traits, press the + to add one!' : 'They don\'t have any traits';
 
     let bottomAction: ReactNode = null;
     if (userSimpleTraits.isEmpty()) {
       bottomAction = [
-        <Text key={'text'} style={styles.noTraitText}>You don't have any traits</Text>,
-        // !!allowEditing && <Button
-        //   key={'button'}
-        //   buttonStyle={styles.noTraitButton}
-        //   title="Add trait"
-        //   onPress={addSimpleTrait}
-        //   color={Colors.HIVE_PRIMARY}
-        // />,
+        <Text key={'text'} style={styles.noTraitText}>{ emptyText }</Text>,
       ];
     } else if (userSimpleTraits.size > MAX_NUMBER_SIMPLE_TRAITS_SHOWN) {
       bottomAction = renderShowLessMore(showAll,

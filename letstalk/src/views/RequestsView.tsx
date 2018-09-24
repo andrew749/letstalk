@@ -217,7 +217,7 @@ class RequestsView extends Component<Props, State> {
         }
         break;
       case IntentTypes.SEARCH:
-        if (dir === Directions.INCOMING) {
+        if (dir === Directions.OUTGOING) {
           description = (
             <Text>
               {'You searched for '}
