@@ -17,8 +17,8 @@ interface ProfileAvatarProps extends AvatarProps {
 }
 
 interface ProfileAvatarFormProps {
-  onChange: any;
-  uri: any;
+  onChange?: any;
+  uri?: any;
 }
 
 /**
