@@ -146,7 +146,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         component={AutocompleteInput}
         onQueryChange={onRoleQueryChangeThrottled}
         validate={required}
-        containerStyle={styles.textInputContainerStyle}
+        containerStyle={[styles.textInputContainerStyle, {zIndex: 2}]}
       />
       <Field
         label="Organization"
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
 
   },
   textInputContainerStyle: {
-    zIndex: 2,
     borderRadius: 5
   },
 });

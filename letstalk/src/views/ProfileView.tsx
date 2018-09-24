@@ -52,7 +52,7 @@ import {
 } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { AnalyticsHelper } from '../services/analytics';
-import { 
+import {
   FormP, FormProps, ProfileAvatarEditableFormElement } from '../components';
 import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
@@ -139,8 +139,8 @@ class ProfileView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle, 
-    headerTitleStyle, 
+    headerStyle,
+    headerTitleStyle,
     headerTintColor
   });
 
@@ -289,13 +289,13 @@ class ProfileView extends Component<Props, State> {
       profilePic = this.props.profile.profilePic;
     }
     const EditFormWithRedux = EditFormWithReduxBuilder({
-      uri: profilePic, 
+      uri: profilePic,
       data: null,
     });
 
     return (
       <View>
-        <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 65 }]}>
+        <ScrollView contentContainerStyle={styles.container}>
           <View style={styles.contentContainer} >
             <EditFormWithRedux onSubmit={this.onSubmit} />
             <PersonalInfo
