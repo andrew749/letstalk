@@ -26,7 +26,7 @@ type Props = WrappedFieldProps & {
   label: string;
   onQueryChange(query: string, setData: (items: Array<DataItem>) => void): Promise<void>;
   placeholder?: string;
-  containerStyle?: ViewStyle;
+  containerStyle?: ViewStyle | Array<ViewStyle>;
 }
 
 interface State {
