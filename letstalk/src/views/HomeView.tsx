@@ -318,6 +318,20 @@ class HomeView extends Component<Props, State> {
     );
   }
 
+  private renderPeerMatches() {
+    const { connections } = this.props.bootstrap;
+    const peers = connections.peers.map(this.renderMatch).toList();
+
+    const elements: Array<ReactNode> = [];
+
+    if (peers.size > 0) {
+      elements.push(<Header key={'Your Connections'}>Your Connections</Header>);
+      elements.push(peers.toJS());
+    }
+
+    return <View>{ elements }</View>;
+  }
+
   private renderMatches() {
     const { connections } = this.props.bootstrap;
 
@@ -399,14 +413,28 @@ class HomeView extends Component<Props, State> {
           </View>
         );
       case 'account_setup':
+        const peerMatches = this.renderPeerMatches();
         return (
 
           <View style={styles.container}>
-            <View style={styles.centeredContainer}>
-              <Text style={styles.headline}>Waiting for your match</Text>
-              <ActionButton onPress={() => this.load()} title="Check again" />
-            </View>
-            { feedbackPrompt }
+            <ScrollView
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this.onRefresh}
+                /> as React.ReactElement<RefreshControlProps>
+              }
+            >
+              <View style={styles.scrollContainer}>
+                <View style={styles.centeredContainer}>
+                  <Text style={styles.headline}>Waiting for your mentorship match</Text>
+                  <ActionButton onPress={() => this.load()} title="Check again" />
+                </View>
+                { feedbackPrompt }
+                { requestsButton }
+                { peerMatches }
+              </View>
+            </ScrollView>
           </View>
         );
       case 'account_matched':

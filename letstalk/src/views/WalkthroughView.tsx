@@ -62,6 +62,30 @@ class WalkthroughView extends Component<Props> {
         level: 10,
       },
       {
+        title: 'Reaching out is simple',
+        text: 'Learn more about your connections and find their contact info!',
+        image: require('../assets/images/profile.jpg'),
+        imageStyle: {
+          height: 400,
+          width: 360,
+        },
+        backgroundColor: background,
+        fontColor: '#fff',
+        level: 10,
+      },
+      {
+        title: 'Tell us about you',
+        text: 'Let others know how awesome you are!',
+        image: require('../assets/images/traits_and_positions.jpg'),
+        imageStyle: {
+          height: 400,
+          width: 360,
+        },
+        backgroundColor: background,
+        fontColor: '#fff',
+        level: 10,
+      },
+      {
         title: 'Built with privacy in mind',
         text: 'Nobody can view your information unless you both connect',
         image: require('../assets/images/lock.png'),

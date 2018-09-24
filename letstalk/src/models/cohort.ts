@@ -10,7 +10,7 @@ const PROGRAMS: Immutable.Map<string, string> = Immutable.Map({
   'ELECTRICAL_ENGINEERING': 'Electrical Engineering',
   'ENVIRONMENTAL_ENGINEERING': 'Environmental Engineering',
   'GEOLOGICAL_ENGINEERING': 'Geological Engineering',
-  'MANAGEMENT_ENGINEERING': ' Management Engineering',
+  'MANAGEMENT_ENGINEERING': 'Management Engineering',
   'MECHANICAL_ENGINEERING': 'Mechanical Engineering',
   'MECHATRONICS_ENGINEERING': 'Mechatronics Engineering',
   'NANOTECHNOLOGY_ENGINEERING': 'Nanotechnology Engineering',
