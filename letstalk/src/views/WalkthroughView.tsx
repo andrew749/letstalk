@@ -66,7 +66,7 @@ class WalkthroughView extends Component<Props> {
         text: 'Learn more about your connections and find their contact info!',
         image: require('../assets/images/profile.png'),
         imageStyle: {
-          height: 400,
+          height: 379,
           width: 360,
         },
         backgroundColor: background,
@@ -78,8 +78,8 @@ class WalkthroughView extends Component<Props> {
         text: 'Let others know how awesome you are!',
         image: require('../assets/images/traits_and_positions.png'),
         imageStyle: {
-          height: 400,
-          width: 316,
+          height: 316,
+          width: 360,
         },
         backgroundColor: background,
         fontColor: '#fff',
