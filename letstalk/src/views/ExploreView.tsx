@@ -372,12 +372,14 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 18,
     paddingBottom: 5,
+    margin: 15
   },
   boldText: {
     fontWeight: '900',
   },
   numResultsText: {
     color: Colors.HIVE_SUBDUED,
+    marginHorizontal: 15
   },
   resultContainer: {
     flexDirection: 'row',

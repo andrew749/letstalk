@@ -82,7 +82,7 @@ export class ForgotPasswordView extends Component<Props> {
     // TODO submit password reset request
     try {
       await auth.forgotPassword(values.email);
-      await this.props.infoToast("Sent an email with reset instructions.");
+      await this.props.infoToast("Check your email for reset instructions!");
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         key: null,

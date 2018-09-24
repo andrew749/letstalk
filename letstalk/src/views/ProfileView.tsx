@@ -33,7 +33,7 @@ import Moment from 'moment';
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
 import {fbLogin} from '../services/fb';
-import { Button, Card, FloatingButton, Header } from '../components';
+import { ActionButton, Button} from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -76,11 +76,15 @@ interface Props extends ProfileState, DispatchActions {
 interface State {
   readonly showAllPositions: boolean;
   readonly showAllSimpleTraits: boolean;
+  readonly forgotPasswordRequest: boolean;
+  readonly logoutRequest: boolean;
 };
 
 const initialState: State = {
   showAllPositions: false,
   showAllSimpleTraits: false,
+  forgotPasswordRequest: false,
+  logoutRequest: false,
 };
 
 class ProfileView extends Component<Props, State> {
@@ -130,9 +134,14 @@ class ProfileView extends Component<Props, State> {
 
   private async onChangePasswordPress() {
     try {
-      await auth.forgotPassword(this.props.profile.email);
-      await this.props.infoToast("Sent an email with reset instructions.");
+      this.setState({...this.state, forgotPasswordRequest: true});
+      let resp = await auth.forgotPassword(this.props.profile.email);
+      let resp2 = await this.props.infoToast("Check your email for reset instructions!");
+      if (resp && resp2) {
+        this.setState({...this.state, forgotPasswordRequest: false});
+      }
     } catch(e) {
+      this.setState({...this.state, forgotPasswordRequest: false});
       await this.props.errorToast(e.errorMsg);
     }
   }
@@ -224,8 +233,6 @@ class ProfileView extends Component<Props, State> {
   }
 
   private renderBody() {
-    const { navigate } = this.props.navigation;
-
     let userId;
     if (this.props.profile) {
       userId = this.props.profile.userId.toString();
@@ -267,25 +274,26 @@ class ProfileView extends Component<Props, State> {
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Account Actions</Text>
               <View style={{ alignItems: 'center' }}>
-                <Button
-                  buttonStyle={styles.changePassButton}
-                  textStyle={styles.buttonText}
+                <ActionButton
+                  backgroundColor={Colors.WHITE}
+                  buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
+                  textStyle={[styles.changePassButtonText, styles.buttonText]}
+                  loading={this.state.forgotPasswordRequest}
+                  title={this.state.forgotPasswordRequest ? null : "Change Password"}
                   onPress={this.onChangePasswordPress}
-                  title='Change Password'
                 />
-                <Button
-                  buttonStyle={styles.logoutButton}
+                <ActionButton
+                  backgroundColor={Colors.HIVE_SUBDUED}
+                  buttonStyle={[styles.logoutButton, styles.profileActionButton]}
                   textStyle={[styles.logoutButtonText, styles.buttonText]}
+                  loading={this.state.logoutRequest}
+                  title={this.state.logoutRequest ? null : "Logout"}
                   onPress={this.onLogoutPress}
-                  title='Logout'
                 />
               </View>
             </View>
           </View>
         </ScrollView>
-        {/* <FloatingButton title="Edit Profile" onPress={() => {
-          navigate('EditProfileSelector', { profile: this.props.profile });
-        }} /> */}
       </View>
     );
   }

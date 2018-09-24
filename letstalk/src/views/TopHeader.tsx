@@ -220,11 +220,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: Colors.HIVE_PRIMARY,
-    color: Colors.WHITE
   },
   topLevelHeader: {
     backgroundColor: Colors.HIVE_PRIMARY,
-    color: Colors.WHITE,
     // React Navigation on Android adds extra top margin for nested views
     marginTop: Platform.OS === 'ios' ? 0 : -Constants.statusBarHeight,
   },

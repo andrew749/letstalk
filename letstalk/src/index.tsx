@@ -49,6 +49,7 @@ import QrCodeView from './views/QrCodeView';
 import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
 import RequestsView from './views/RequestsView';
+import UpdatePersonalView from './views/UpdatePersonalView';
 
 import NotificationService, { Notification } from './services/notification-service';
 import navService from './services/navigation-service';
@@ -161,82 +162,84 @@ const createTabView = () => TabNavigator({
 });
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
+  AddPosition: {
+    screen: AddPositionView
+  },
+  AddSimpleTrait: {
+    screen: AddSimpleTraitView
+  },
   BlankDoNotUse: {
-    screen: View,
+    screen: View
   },
-  Login: {
-    screen: LoginView,
-    path: 'Login',
+  ChangeCohort: {
+    screen: ChangeCohortView
   },
-  Signup: {
-    screen: SignupView,
-    path: 'Signup',
+  EditProfileSelector: {
+    screen: EditProfileSelectorView
   },
   ForgotPassword: {
     screen: ForgotPasswordView,
-    path: 'ForgotPassword',
+    path: 'ForgotPassword'
   },
-  Tabbed: {
-    screen: createTabView(),
-    navigationOptions: {
-    },
-  },
-  ProfileEdit: {
-    screen: ProfileEditView,
-    // TODO: needs work on the profile edit view to work properly.
-    // need to add ability to load without props.
-    // path: 'ProfileEdit',
-  },
-  Onboarding: {
-    screen: OnboardingView,
-  },
-  QrScanner: {
-    screen: QrScannerView,
-    path:'QrScanner',
+  Login: {
+    screen: LoginView,
+    path: 'Login'
   },
   MatchProfile: {
     screen: MatchProfileView,
-    path: 'MatchProfile/:userId',
+    path: 'MatchProfile/:userId'
+  },
+  NotificationContent: {
+    screen: NotificationContentView,
+    path: 'NotificationContent/:notificationId'
   },
   NotificationView: {
     screen: NotificationView,
-    path: 'NotificationView',
+    path: 'NotificationView'
+  },
+  Onboarding: {
+    screen: OnboardingView
+  },
+  ProfileEdit: {
+    screen: ProfileEditView // TODO: needs work on the profile edit view to work properly.
+    // need to add ability to load without props.
+    // path: 'ProfileEdit',
+
+  },
+  QrCode: {
+    screen: QrCodeView,
+    path: 'QrCode'
+  },
+  QrScanner: {
+    screen: QrScannerView,
+    path: 'QrScanner'
+  },
+  RequestConnection: {
+    screen: RequestConnectionView
+  },
+  Requests: {
+    screen: RequestsView
+  },
+  Signup: {
+    screen: SignupView,
+    path: 'Signup'
+  },
+  Tabbed: {
+    screen: createTabView(),
+    navigationOptions: {}
+  },
+  UpdatePersonal: {
+    screen: UpdatePersonalView
+  },
+  VerifyEmail: {
+    screen: VerifyEmailView
   },
   WalkthroughView: {
     screen: WalkthroughView,
     navigationOptions: {
-      header: null,
-    },
-  },
-  NotificationContent: {
-    screen: NotificationContentView,
-    path: 'NotificationContent/:notificationId',
-  },
-  EditProfileSelector: {
-    screen: EditProfileSelectorView,
-  },
-  ChangeCohort: {
-    screen: ChangeCohortView,
-  },
-  AddSimpleTrait: {
-    screen: AddSimpleTraitView,
-  },
-  AddPosition: {
-    screen: AddPositionView,
-  },
-  QrCode: {
-    screen: QrCodeView,
-    path: 'QrCode',
-  },
-  VerifyEmail: {
-    screen: VerifyEmailView,
-  },
-  RequestConnection: {
-    screen: RequestConnectionView,
-  },
-  Requests: {
-    screen: RequestsView,
-  },
+      header: null
+    }
+  }
 }, {
   initialRouteName,
 }, );

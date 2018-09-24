@@ -3,6 +3,18 @@ import Immutable from 'immutable';
 const PROGRAMS: Immutable.Map<string, string> = Immutable.Map({
   'SOFTWARE_ENGINEERING': 'Software Engineering',
   'COMPUTER_ENGINEERING': 'Computer Engineering',
+  'ARCHITECTURAL_ENGINEERING': 'Architecture Engineering',
+  'BIOMEDICAL_ENGINEERING': 'Biomedical Engineering',
+  'CHEMICAL_ENGINEERING': 'Chemical Engineering',
+  'CIVIL_ENGINEERING': 'Civil Engineering',
+  'ELECTRICAL_ENGINEERING': 'Electrical Engineering',
+  'ENVIRONMENTAL_ENGINEERING': 'Environmental Engineering',
+  'GEOLOGICAL_ENGINEERING': 'Geological Engineering',
+  'MANAGEMENT_ENGINEERING': ' Management Engineering',
+  'MECHANICAL_ENGINEERING': 'Mechanical Engineering',
+  'MECHATRONICS_ENGINEERING': 'Mechatronics Engineering',
+  'NANOTECHNOLOGY_ENGINEERING': 'Nanotechnology Engineering',
+  'SYSTEMS_DESIGN_ENGINEERING': 'Systems Design Engineering'
 });
 
 export function programById(programId: string): string {

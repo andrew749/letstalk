@@ -377,6 +377,7 @@ class HomeView extends Component<Props, State> {
         </Text>
         <Button
           buttonStyle={styles.feedbackButton}
+          textStyle={styles.feedbackButtonText}
           title="Submit Feedback"
           onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
         />
@@ -398,9 +399,12 @@ class HomeView extends Component<Props, State> {
         );
       case 'account_setup':
         return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Waiting for your match</Text>
-            <ActionButton onPress={() => this.load()} title="Check again" />
+
+          <View style={styles.container}>
+            <View style={styles.centeredContainer}>
+              <Text style={styles.headline}>Waiting for your match</Text>
+              <ActionButton onPress={() => this.load()} title="Check again" />
+            </View>
             { feedbackPrompt }
           </View>
         );
@@ -498,13 +502,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   feedbackButton: {
+    backgroundColor: Colors.WHITE,
     alignSelf: 'center',
     width: 200,
-    marginTop: 10,
-    padding: 10
+    marginVertical: 15,
+    padding: 15,
+  },
+  feedbackButtonText: {
+    color: Colors.HIVE_PRIMARY,
+    fontSize: 16
   },
   feedbackText: {
     fontSize: 14,
+    marginHorizontal: 15
   },
   requestsButtonText: {
     marginTop: 10,
