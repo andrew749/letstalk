@@ -7,8 +7,9 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 /**
@@ -141,14 +142,18 @@ func removeConnection(c *ctx.Context, request api.RemoveConnection) errs.Error {
 	meUserId := c.SessionData.UserId
 	youUserId := request.UserId
 
-	err := c.Db.Where(&data.Connection{
-		UserOneId: meUserId,
-		UserTwoId: youUserId,
-	}).Or(&data.Connection{
-		UserOneId: youUserId,
-		UserTwoId: meUserId,
-	}).Delete(&data.Connection{}).Error
+	connection, err := query.GetConnectionDetailsUndirected(c.Db, meUserId, youUserId)
 	if err != nil {
+		return errs.NewDbError(err)
+	}
+	if connection == nil {
+		return nil
+	}
+	if connection.AcceptedAt == nil && connection.UserOneId != meUserId {
+		return errs.NewRequestError("cannot delete a connection you did not request")
+	}
+
+	if err := c.Db.Delete(&connection).Error; err != nil {
 		return errs.NewDbError(err)
 	}
 
