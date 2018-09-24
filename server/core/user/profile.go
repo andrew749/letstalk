@@ -57,6 +57,24 @@ func GetMatchProfileController(c *ctx.Context) errs.Error {
 	return nil
 }
 
+// GetPublicProfileController returns profile info when scanning a user's QR code.
+func GetPublicProfileController(c *ctx.Context) errs.Error {
+	userSecret := c.GinContext.Param("code")
+
+	matchUser, dbErr := query.GetUserBySecret(c.Db, userSecret)
+	if dbErr != nil {
+		return errs.NewNotFoundError("no such user")
+	}
+
+	userModel, err := query.GetMatchProfile(c.Db, c.SessionData.UserId, matchUser.UserId)
+	if err != nil {
+		return err
+	}
+
+	c.Result = userModel
+	return nil
+}
+
 func GetProfilePicUrl(ctx *ctx.Context) errs.Error {
 	params := ctx.GinContext.Request.URL.Query()
 	var userId int

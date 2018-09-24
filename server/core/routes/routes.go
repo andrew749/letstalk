@@ -127,6 +127,10 @@ func Register(
 	v1.OPTIONS("/match_profile/:userId")
 	v1.GET("/match_profile/:userId", hw.wrapHandler(user.GetMatchProfileController, true))
 
+	// gets profile data about a scanned user by their qr code
+	v1.OPTIONS("/public_profile/:code")
+	v1.GET("/public_profile/:code", hw.wrapHandler(user.GetPublicProfileController, true))
+
 	// gets profile data about a match for signed in user
 	v1.OPTIONS("/remove_rtm_matches/:userId")
 	v1.DELETE("/remove_rtm_matches/:userId", hw.wrapHandler(controller.RemoveRtmMatches, true))
@@ -172,9 +176,11 @@ func Register(
 
 	// request-to-match endpoints
 
-	// request a new connection with another user
 	v1.OPTIONS("/connection")
+	// request a new connection with another user
 	v1.POST("/connection", hw.wrapHandler(connection.PostRequestConnection, true))
+	// remove a connection
+	v1.DELETE("/connection", hw.wrapHandler(connection.RemoveConnection, true))
 
 	// accept a connection request from another user
 	v1.OPTIONS("/connection/accept")

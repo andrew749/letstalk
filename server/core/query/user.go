@@ -4,6 +4,8 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
+	"errors"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -26,7 +28,7 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{Secret: secret}).First(&user).RecordNotFound() {
-		return nil, errs.NewNotFoundError("Unable to find user")
+		return nil, errors.New("unable to find user")
 	}
 	return &user, nil
 }
