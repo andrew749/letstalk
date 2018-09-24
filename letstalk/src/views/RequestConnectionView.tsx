@@ -63,7 +63,7 @@ const RequestConnectionForm: React.SFC<RequestConnectionFormProps> = props => {
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
-        textStyle={{color: Colors.HIVE_MAIN_FONT}}
+        textStyle={{color: Colors.WHITE}}
         loading={submitting}
         title={submitting ? null : "Send request"}
         onPress={handleSubmit(onSubmitWithReset)}

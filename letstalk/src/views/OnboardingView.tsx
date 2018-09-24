@@ -384,7 +384,13 @@ class OnboardingView extends Component<Props> {
         // TODO: What to do in this case
         return (
           <ScrollView>
-            <Header>You're done</Header>
+            <Header>Nice work, you're done!</Header>
+            <ActionButton onPress={() => {
+              this.props.navigation.dispatch(NavigationActions.reset({
+                index: 0,
+                actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+              }));
+            }} title="Enter Hive" />
           </ScrollView>
         );
       default:

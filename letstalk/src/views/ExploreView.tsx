@@ -302,7 +302,7 @@ class ExploreView extends Component<Props, State> {
     return (
       <View>
         <View style={styles.resultsContainer}>{ userCards }</View>
-        {endText && <View style={styles.footerContainer}>
+        {!!endText && <View style={styles.footerContainer}>
           <Text style={styles.footerText}>
             { endText }
           </Text>

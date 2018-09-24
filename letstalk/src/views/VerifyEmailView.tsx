@@ -54,7 +54,7 @@ const VerifyEmailForm: React.SFC<FormProps<VerifyEmailFormData>> = props => {
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
-        textStyle={{color: Colors.HIVE_MAIN_FONT}}
+        textStyle={{color: Colors.WHITE}}
         disabled={pristine || !valid}
         loading={submitting}
         title={submitting ? null : "Send verification email"}
@@ -91,13 +91,11 @@ export class VerifyEmailView extends Component<Props, State> {
   }
 
   private async load() {
-    await Promise.all([
-      this.props.fetchBootstrap(),
-    ]);
+    await this.props.fetchBootstrap()
   }
 
   async componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_email_verified') {
+    if (nextProps.bootstrap && nextProps.bootstrap.state !== 'account_created') {
       // Email has been verified, move on to onboarding screen.
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
@@ -123,7 +121,7 @@ export class VerifyEmailView extends Component<Props, State> {
         <VerifyEmailFormWithRedux onSubmit={this.onSubmit} />
         <ActionButton
           buttonStyle={{backgroundColor: Colors.HIVE_PRIMARY}}
-          textStyle={{color: Colors.HIVE_MAIN_FONT}}
+          textStyle={{color: Colors.WHITE}}
           title="Refresh"
           onPress={() => this.load()}
         />
