@@ -34,7 +34,7 @@ import {
   ModalDatePicker,
 } from '../../components';
 import { DataItem, Select } from '../../components/AutocompleteInput';
-import { headerStyle } from '../TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import autocompleteService from '../../services/autocomplete-service';
@@ -146,7 +146,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         component={AutocompleteInput}
         onQueryChange={onRoleQueryChangeThrottled}
         validate={required}
-        containerStyle={styles.roleContainerStyle}
+        containerStyle={styles.textInputContainerStyle}
       />
       <Field
         label="Organization"
@@ -155,6 +155,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         component={AutocompleteInput}
         onQueryChange={onOrganizationQueryChangeThrottled}
         validate={required}
+        containerStyle={styles.textInputContainerStyle}
       />
       <Field
         label="Start Date"
@@ -223,6 +224,8 @@ class AddPositionView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'Add Position',
     headerStyle,
+    headerTitleStyle,
+    headerTintColor
   }
 
   constructor(props: Props) {
@@ -273,9 +276,11 @@ const styles = StyleSheet.create({
   },
   selectionText: {
     fontSize: 16,
+
   },
-  roleContainerStyle: {
+  textInputContainerStyle: {
     zIndex: 2,
+    borderRadius: 5
   },
 });
 

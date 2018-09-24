@@ -14,7 +14,7 @@ import {NavigationActions, NavigationScreenProp, NavigationStackAction} from "re
 import {ActionCreator, connect, Dispatch} from "react-redux";
 import {RootState} from "../redux/index";
 import meetingService from "../services/meeting";
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
 import { ThunkAction } from "redux-thunk";
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
@@ -38,7 +38,9 @@ class QrScannerView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Scan A Code',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   })
 
   state = {

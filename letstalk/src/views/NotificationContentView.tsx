@@ -2,7 +2,7 @@ import {WebView} from 'react-native';
 import React from 'react';
 import {Notification} from '../models/notification';
 import { NavigationScreenProp, NavigationStackAction } from 'react-navigation';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { View, Text } from 'react-native';
 import {BASE_URL, NOTIFICATION_PAGE_ROUTE} from '../services/constants';
 import auth from '../services/auth';
@@ -19,7 +19,9 @@ interface State {
 
 class NotificationContentView extends React.Component<Props, State> {
     static navigationOptions = () => ({
-      headerStyle,
+      headerStyle, 
+      headerTitleStyle, 
+      headerTintColor 
     })
     private notificationId: number;
     private sessionId: string;

@@ -32,7 +32,7 @@ const Button: React.SFC<Props> = props => {
       borderColor: props.color || Colors.HIVE_PRIMARY,
       borderWidth: 0.5,
       borderRadius: 5,
-      height: 28,
+      height: 35,
       backgroundColor: 'white',
       alignItems: 'center',
       justifyContent: 'center',
@@ -44,7 +44,7 @@ const Button: React.SFC<Props> = props => {
   });
   const icon = props.icon ?
     <MaterialIcons
-      style={{ position: 'absolute', left: 2, top: 2 }}
+      style={{ position: 'absolute', left: 2, top: 2, margin: 4 }}
       color={Colors.HIVE_PRIMARY}
       name={props.icon}
       size={24}

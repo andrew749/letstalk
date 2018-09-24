@@ -16,6 +16,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  formValueSelector,
+  reduxForm,
+  Field,
+  InjectedFormProps,
+  SubmissionError,
+} from 'redux-form';
 import { Icon } from 'react-native-elements';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
@@ -33,7 +40,7 @@ import Moment from 'moment';
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
 import {fbLogin} from '../services/fb';
-import { Button, Card, FloatingButton, Header } from '../components';
+import { ActionButton, Button} from '../components';
 import Loading from './Loading';
 import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
@@ -45,9 +52,11 @@ import {
 } from '../redux/profile/reducer';
 import { ActionTypes } from '../redux/profile/actions';
 import { AnalyticsHelper } from '../services/analytics';
-import { ProfileAvatar } from '../components';
+import { 
+  FormP, FormProps, ProfileAvatarEditableFormElement } from '../components';
+import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { UserPosition } from '../models/position';
 import { UserSimpleTrait } from '../models/simple-trait';
@@ -60,6 +69,44 @@ import {
 } from './profile-components/ProfileComponents';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+
+type EditFormComponentProps = FormProps<PhotoResult> & PhotoResult;
+
+class EditForm extends Component<EditFormComponentProps, State> {
+  constructor(props: EditFormComponentProps) {
+    super(props)
+  }
+
+  render() {
+    const {
+      error,
+      handleSubmit,
+      onSubmit,
+      reset,
+      submitting,
+      valid,
+      initialValues: { uri }
+    } = this.props;
+
+    return (
+      <View>
+        <Field
+          name="profilePic"
+          component={ProfileAvatarEditableFormElement}
+          onChange={onSubmit}
+          uri={uri}
+        />
+      </View>
+    );
+  }
+}
+
+const EditFormWithReduxBuilder = (initialValues: PhotoResult) => {
+  return reduxForm<PhotoResult, FormP<PhotoResult>>({
+    form: 'profile-pic-edit',
+    initialValues,
+  })(connect()(EditForm));
+}
 
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
@@ -76,11 +123,15 @@ interface Props extends ProfileState, DispatchActions {
 interface State {
   readonly showAllPositions: boolean;
   readonly showAllSimpleTraits: boolean;
+  readonly forgotPasswordRequest: boolean;
+  readonly logoutRequest: boolean;
 };
 
 const initialState: State = {
   showAllPositions: false,
   showAllSimpleTraits: false,
+  forgotPasswordRequest: false,
+  logoutRequest: false,
 };
 
 class ProfileView extends Component<Props, State> {
@@ -88,7 +139,9 @@ class ProfileView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   });
 
   constructor(props: Props) {
@@ -96,11 +149,22 @@ class ProfileView extends Component<Props, State> {
 
     this.state = initialState;
 
+    this.onSubmit = this.onSubmit.bind(this);
     this.onLogoutPress = this.onLogoutPress.bind(this);
     this.onChangePasswordPress = this.onChangePasswordPress.bind(this);
     this.onEditTraitsButtonPress = this.onEditTraitsButtonPress.bind(this);
     this.load = this.load.bind(this);
     this.renderBody = this.renderBody.bind(this);
+  }
+
+  private async onSubmit(profilePic: PhotoResult) {
+    try {
+      if (profilePic && profilePic.uri) {
+        let res = await photoService.uploadProfilePhoto(profilePic.uri);
+      }
+    } catch(e) {
+      throw new SubmissionError({_error: e.errorMsg});
+    }
   }
 
   private async onLogoutPress() {
@@ -128,9 +192,14 @@ class ProfileView extends Component<Props, State> {
 
   private async onChangePasswordPress() {
     try {
-      await auth.forgotPassword(this.props.profile.email);
-      await this.props.infoToast("Sent an email with reset instructions.");
+      this.setState({...this.state, forgotPasswordRequest: true});
+      let resp = await auth.forgotPassword(this.props.profile.email);
+      let resp2 = await this.props.infoToast("Check your email for reset instructions!");
+      if (resp && resp2) {
+        this.setState({...this.state, forgotPasswordRequest: false});
+      }
     } catch(e) {
+      this.setState({...this.state, forgotPasswordRequest: false});
       await this.props.errorToast(e.errorMsg);
     }
   }
@@ -187,8 +256,7 @@ class ProfileView extends Component<Props, State> {
           style={styles.listItem}
           onPress={() => Linking.openURL(fbLink)}
         >
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook</Text>
+          <Text style={styles.value}>Visit Facebook Profile</Text>
         </TouchableOpacity>
       );
     } else {
@@ -216,22 +284,25 @@ class ProfileView extends Component<Props, State> {
   }
 
   private renderBody() {
-    const { navigate } = this.props.navigation;
-
-    let userId;
+    let profilePic;
     if (this.props.profile) {
-      userId = this.props.profile.userId.toString();
+      profilePic = this.props.profile.profilePic;
     }
+    const EditFormWithRedux = EditFormWithReduxBuilder({
+      uri: profilePic, 
+      data: null,
+    });
 
     return (
       <View>
         <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 65 }]}>
           <View style={styles.contentContainer} >
-            <ProfileAvatar userId={userId} xlarge containerStyle={styles.profilePicture} />
+            <EditFormWithRedux onSubmit={this.onSubmit} />
             <PersonalInfo
               {...this.props.profile}
               navigation={this.props.navigation}
               allowQrCode={true}
+              allowEditing={true}
             />
             <CohortInfo
               programId={this.props.profile.programId}
@@ -258,24 +329,26 @@ class ProfileView extends Component<Props, State> {
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Account Actions</Text>
               <View style={{ alignItems: 'center' }}>
-                <Button
-                  buttonStyle={styles.changePassButton}
+                <ActionButton
+                  backgroundColor={Colors.WHITE}
+                  buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
+                  textStyle={[styles.changePassButtonText, styles.buttonText]}
+                  loading={this.state.forgotPasswordRequest}
+                  title={this.state.forgotPasswordRequest ? null : "Change Password"}
                   onPress={this.onChangePasswordPress}
-                  title='Change Password'
                 />
-                <Button
-                  buttonStyle={styles.logoutButton}
-                  textStyle={styles.logoutButtonText}
+                <ActionButton
+                  backgroundColor={Colors.HIVE_SUBDUED}
+                  buttonStyle={[styles.logoutButton, styles.profileActionButton]}
+                  textStyle={[styles.logoutButtonText, styles.buttonText]}
+                  loading={this.state.logoutRequest}
+                  title={this.state.logoutRequest ? null : "Logout"}
                   onPress={this.onLogoutPress}
-                  title='Logout'
                 />
               </View>
             </View>
           </View>
         </ScrollView>
-        <FloatingButton title="Edit Profile" onPress={() => {
-          navigate('EditProfileSelector', { profile: this.props.profile });
-        }} />
       </View>
     );
   }

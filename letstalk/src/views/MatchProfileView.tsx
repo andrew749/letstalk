@@ -40,7 +40,7 @@ import { programById, sequenceById } from '../models/cohort';
 import { AnalyticsHelper } from '../services/analytics';
 import { ProfileAvatar } from '../components';
 import Colors from '../services/colors';
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import {
   CohortInfo,
   PersonalInfo,
@@ -85,7 +85,9 @@ class MatchProfileView extends Component<Props> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Profile',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {
@@ -144,8 +146,7 @@ class MatchProfileView extends Component<Props> {
     if (fbLink) {
       contactItems.push(
         <TouchableOpacity style={styles.listItem} onPress={() => Linking.openURL(fbLink)}>
-          <MaterialIcons name="face" size={24} />
-          <Text style={styles.label}>Facebook</Text>
+          <Text style={styles.value}>Visit Facebook Profile</Text>
         </TouchableOpacity>
       );
     }

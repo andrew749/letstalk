@@ -40,10 +40,11 @@ import {
   Header,
   ModalPicker,
 } from '../../components';
-import { headerStyle } from '../TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import profileService from '../../services/profile-service';
+import { styles } from '../profile-components/ProfileComponents';
 
 interface ChangeCohortFormData {
   programId: string,
@@ -78,12 +79,13 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
   const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
   return (
     <KeyboardAwareScrollView
-      style={{ paddingTop: 10 }}
+      style={styles.scrollViewContainer}
       keyboardShouldPersistTaps="always"
     >
       <Field
         label="Program"
         name="programId"
+        containerStyle={styles.pickerContainer}
         component={ModalPicker}
         validate={required}
       >
@@ -92,6 +94,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
       <Field
         label="Sequence"
         name="sequenceId"
+        containerStyle={styles.pickerContainer}
         component={ModalPicker}
         validate={required}
       >
@@ -100,6 +103,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
       <Field
         label="Grad Year"
         name="gradYear"
+        containerStyle={styles.pickerContainer}
         component={ModalPicker}
         validate={required}
       >
@@ -108,6 +112,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
         backgroundColor={Colors.HIVE_PRIMARY}
+        containerStyle={styles.profileActionButton}
         disabled={!valid}
         loading={submitting}
         title={submitting ? null : "Save"}
@@ -147,7 +152,9 @@ class ChangeCohortView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Change Cohort',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

@@ -45,6 +45,7 @@ interface PersonalInfoProps {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   allowQrCode?: boolean; // default false
   showConnectedBadge?: boolean; // default false
+  allowEditing?: boolean;
 }
 
 export class PersonalInfo extends Component<PersonalInfoProps> {
@@ -59,6 +60,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       bio,
       allowQrCode,
       showConnectedBadge,
+      allowEditing
     } = this.props;
 
     const badge = !!showConnectedBadge ? (
@@ -80,12 +82,14 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
 
     // If allow QrCode is false, we assume that it's not your profile, but someone else's.
     const bioStr = !!bio ? bio : (
-      !allowQrCode ? 'An awesome person that forgot to write a bio' : 'Add bio by editing profile'
+      !allowQrCode ? 'An awesome person that forgot to write a bio' : 'Add a bio through editing your profile!'
     );
+
+    const updatePersonal = () => this.props.navigation.navigate('UpdatePersonal', {});
 
     return (
       <View style={styles.personalInfoContainer}>
-        <Header>{headerText}</Header>
+        <Header textStyle={styles.headerText}>{headerText}</Header>
         {badge}
         <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
         {!!allowQrCode && <TouchableOpacity style={styles.listItem} onPress={() => {
@@ -96,6 +100,9 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
         <View style={styles.sectionContainer}>
           <Text style={styles.description}>{ bioStr }</Text>
         </View>
+        {!!allowEditing && <TouchableOpacity onPress={updatePersonal} style={styles.addTraitButton}>
+          <MaterialIcons name="edit" size={25} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
       </View>
     );
   }
@@ -126,11 +133,11 @@ export class CohortInfo extends Component<CohortInfoProps> {
     });
     return (
       <View style={styles.sectionContainer}>
-        {!!allowEditing && <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
-          <MaterialIcons name="edit" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>}
         <Text style={styles.sectionHeader}>Cohort</Text>
         <Text style={styles.cohortText}>{ program + ', ' + gradYear }</Text>
+        {!!allowEditing && <TouchableOpacity onPress={changeCohort} style={styles.addTraitButton}>
+          <MaterialIcons name="edit" size={25} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
       </View>
     );
   }
@@ -206,11 +213,9 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
 
     const padRight = allowEditing ? { paddingRight: 25 } : null;
     return (
-      <View key={ pos.id } style={[styles.positionContainer, padRight]}>
-        <Text style={styles.positionText}>
-          <Text style={styles.positionBold}>{ pos.roleName }</Text>
-          <Text> @ </Text>
-          <Text style={styles.positionBold}>{ pos.organizationName }</Text>
+      <View key={ pos.id } style={[styles.pillContainer, padRight]}>
+        <Text style={styles.pillText}>
+          <Text style={styles.boldText}>{ pos.roleName } @ {pos.organizationName }</Text>
           <Text>{'\n'}({ frm } - { until })</Text>
         </Text>
         {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
@@ -225,19 +230,19 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
     const { showAll } = this.state;
 
     const addPosition = () => this.props.navigation.navigate('AddPosition');
-    const emptyText = allowEditing ? 'You don\'t have any positions' : 'They don\'t have any positions';
+    const emptyText = allowEditing ? 'You don\'t have any positions, press the + to add one!' : 'They don\'t have any positions';
 
     let bottomAction: ReactNode = null;
     if (userPositions.isEmpty()) {
       bottomAction = [
         <Text key={'text'} style={styles.noTraitText}>{ emptyText }</Text>,
-        !!allowEditing && <Button
-          key={'button'}
-          buttonStyle={styles.noTraitButton}
-          title="Add position"
-          onPress={addPosition}
-          color={Colors.HIVE_ACCENT}
-        />,
+        // !!allowEditing && <Button
+        //   key={'button'}
+        //   buttonStyle={styles.noTraitButton}
+        //   title="Add position"
+        //   onPress={addPosition}
+        //   color={Colors.HIVE_PRIMARY}
+        // />,
       ];
     } else if (userPositions.size > MAX_NUMBER_POSITIONS_SHOWN) {
       bottomAction = renderShowLessMore(showAll,
@@ -254,13 +259,15 @@ export class UserPositions extends Component<UserPositionsProps, UserTraitsState
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Positions</Text>
-        {!!allowEditing && <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_ACCENT} />
-        </TouchableOpacity>}
-        { positionItems }
+        <View style={styles.pillsOuterContainer}>
+          { positionItems }
+        </View>
         <View style={styles.traitBottomActionContainer}>
           { bottomAction }
         </View>
+        {!!allowEditing && <TouchableOpacity onPress={addPosition} style={styles.addTraitButton}>
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
       </View>
     );
   }
@@ -307,8 +314,8 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
 
     const padRight = allowEditing ? { paddingRight: 25 } : null;
     return (
-      <View key={ trait.id } style={[styles.simpleTraitContainer, padRight]}>
-        <Text style={styles.simpleTraitText}>{ trait.simpleTraitName }</Text>
+      <View key={ trait.id } style={[styles.pillContainer, padRight]}>
+        <Text style={[styles.pillText, styles.boldText]}>{ trait.simpleTraitName }</Text>
         {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
           <MaterialIcons color={Colors.WHITE} name="close" size={18} />
         </TouchableOpacity>}
@@ -321,18 +328,12 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     const { showAll } = this.state;
 
     const addSimpleTrait = () => this.props.navigation.navigate('AddSimpleTrait');
+    const emptyText = allowEditing ? 'You don\'t have any traits, press the + to add one!' : 'They don\'t have any traits';
 
     let bottomAction: ReactNode = null;
     if (userSimpleTraits.isEmpty()) {
       bottomAction = [
-        <Text key={'text'} style={styles.noTraitText}>You don't have any traits</Text>,
-        !!allowEditing && <Button
-          key={'button'}
-          buttonStyle={styles.noTraitButton}
-          title="Add trait"
-          onPress={addSimpleTrait}
-          color={Colors.HIVE_PRIMARY}
-        />,
+        <Text key={'text'} style={styles.noTraitText}>{ emptyText }</Text>,
       ];
     } else if (userSimpleTraits.size > MAX_NUMBER_SIMPLE_TRAITS_SHOWN) {
       bottomAction = renderShowLessMore(showAll,
@@ -348,15 +349,15 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionHeader}>Traits</Text>
-        {!!allowEditing && <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
-          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
-        </TouchableOpacity>}
-        <View style={styles.simpleTraitOuterContainer}>
+        <View style={styles.pillsOuterContainer}>
           { traitItems }
         </View>
         <View style={styles.traitBottomActionContainer}>
           { bottomAction }
         </View>
+        {!!allowEditing && <TouchableOpacity onPress={addSimpleTrait} style={styles.addTraitButton}>
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
       </View>
     );
   }
@@ -365,6 +366,41 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
 const BUTTON_WIDTH = SCREEN_WIDTH - 80;
 
 export const styles = StyleSheet.create({
+  addTraitButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0
+  },
+  badgeContainer: {
+    padding: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    backgroundColor: Colors.GREEN,
+    marginBottom: 5
+  },
+  badgeText: {
+    color: Colors.WHITE,
+    fontWeight: '900'
+  },
+  boldText: {
+    fontWeight: '700'
+  },
+  buttonText: {
+    fontSize: 16
+  },
+  changePassButton: {
+    borderColor: Colors.HIVE_SUBDUED,
+    borderWidth: .7,
+    height: 44,
+    margin: 0
+  },
+  changePassButtonText: {
+    color: Colors.HIVE_SUBDUED
+  },
+  cohortText: {
+    fontSize: 16,
+    marginTop: 5
+  },
   container: {
     paddingTop: 10,
     paddingBottom: 10,
@@ -375,42 +411,84 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     flexDirection: 'column',
-    padding: 20,
+    padding: 20
   },
   description: {
     fontSize: 18,
     color: Colors.HIVE_SUBDUED
   },
+  headerText: {
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 16
+  },
   listItem: {
     flex: 1,
     flexDirection: 'row',
-    marginTop: 5,
-  },
-  changePassButton: {
-    width: BUTTON_WIDTH,
-    marginTop: 10,
-  },
-  logoutButtonText: {
-    color: 'white',
+    marginTop: 5
   },
   logoutButton: {
+    backgroundColor: Colors.HIVE_SUBDUED,
+    borderWidth: 0,
+    height: 44,
+    margin: 0
+  },
+  logoutButtonText: {
+    color: 'white'
+  },
+  noTraitButton: {
+    width: 200,
+    marginTop: 10,
+    padding: 10
+  },
+  noTraitText: {
+    marginTop: 10
+  },
+  personalInfoContainer: {
+    flex: 1,
+    alignItems: 'center',
+    width: "100%"
+  },
+  pickerContainer: {
+    marginHorizontal: 15
+  },
+  pillContainer: {
+    borderColor: Colors.HIVE_ACCENT,
+    backgroundColor: Colors.HIVE_ACCENT,
+    borderWidth: .7,
+    marginVertical: 6,
+    marginHorizontal: 2.5,
+    padding: 8,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 5
+  },
+  pillsOuterContainer: {
+    width: "100%",
+    marginVertical: 6
+  },
+  pillText: {
+    color: Colors.WHITE,
+    fontWeight: '400',
+    fontSize: 14
+  },
+  profileActionButton: {
+    alignSelf: 'center',
     width: BUTTON_WIDTH,
     marginTop: 10,
-    backgroundColor: "gray",
-    borderWidth: 0,
+    padding: 8
+  },
+  profilePicture: {
+    margin: 20
   },
   profileTitle: {
     fontSize: 18,
     marginTop: 10,
     alignSelf: 'flex-end'
   },
-  profilePicture: {
-    margin: 20
-  },
-  sectionHeader: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    alignSelf: 'flex-start',
+  scrollViewContainer: {
+    paddingTop: 10
   },
   sectionContainer: {
     width: "100%",
@@ -418,88 +496,27 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     marginTop: 20
   },
+  sectionHeader: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    alignSelf: 'flex-start',
+    marginBottom: 8
+  },
   subHeaderText: {
     fontSize: 18
   },
-  label: {
-    fontSize: 16,
-  },
-  value: {
-    fontSize: 16,
-    color: Colors.HIVE_ACCENT
-  },
-  cohortText: {
-    fontSize: 16,
-    marginTop: 5,
-  },
-  positionContainer: {
-    backgroundColor: Colors.HIVE_ACCENT,
-    marginTop: 5,
-    padding: 5,
-    borderRadius: 5,
-  },
-  positionText: {
-    color: Colors.WHITE,
-    fontSize: 14,
-  },
-  positionBold: {
-    fontWeight: '700',
+  traitBottomActionContainer: {
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   traitDelete: {
     position: 'absolute',
     padding: 5,
     top: 0,
-    right: 0,
+    right: 0
   },
-  simpleTraitOuterContainer: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 2.5,
-  },
-  simpleTraitContainer: {
-    backgroundColor: Colors.HIVE_PRIMARY,
-    marginVertical: 2.5,
-    marginHorizontal: 2.5,
-    padding: 5,
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderRadius: 20,
-  },
-  simpleTraitText: {
-    color: Colors.WHITE,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  traitBottomActionContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  addTraitButton: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-  },
-  noTraitText: {
-    marginTop: 10,
-  },
-  noTraitButton: {
-    width: 200,
-    marginTop: 10,
-  },
-  personalInfoContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  badgeContainer: {
-    padding: 5,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: Colors.GREEN,
-    marginBottom: 5,
-  },
-  badgeText: {
-    color: Colors.WHITE,
-    fontWeight: '900',
-  },
+  value: {
+    fontSize: 16,
+    color: Colors.HIVE_PRIMARY
+  }
 });

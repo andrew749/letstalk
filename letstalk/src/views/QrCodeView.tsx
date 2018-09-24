@@ -7,7 +7,7 @@ import {
   NavigationActions,
 } from 'react-navigation';
 import QRCode from "react-native-qrcode";
-import { headerStyle } from './TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction & { secret: string }>;
@@ -16,7 +16,9 @@ interface Props {
 export default class QrCodeView extends Component<Props> {
   static navigationOptions = {
     headerTitle: 'QR Code',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   }
 
   render() {

@@ -8,11 +8,13 @@ import {
   PickerIOS,
   PickerProperties,
   Platform,
+  StyleProp, 
   StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ViewStyle
 } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 import { FormValidationMessage } from 'react-native-elements';
@@ -30,6 +32,7 @@ const styles = StyleSheet.create({
 
 type Props = PickerProperties & WrappedFieldProps & {
   label: string;
+  containerStyle?: StyleProp<ViewStyle>;
   children?: ReactNode;
 };
 
@@ -93,7 +96,7 @@ class StatefulModalPicker extends Component<Props, State> {
         </BottomModal>
       ),
       'android': (
-        <View>
+        <View style={this.props.containerStyle}>
           <RNPickerSelect placeholder={{label: label, value: null}} items={items} onValueChange={onChange} value={value} />
           {touched && (
             (error && <FormValidationMessage>{error}</FormValidationMessage>) ||

@@ -52,7 +52,7 @@ import {
 import Colors from '../services/colors';
 import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
 import TutorialService from '../services/tutorial_service';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 
 interface DispatchActions {
@@ -75,7 +75,9 @@ class HomeView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {
@@ -159,14 +161,14 @@ class HomeView extends Component<Props, State> {
         switch (userType) {
           case USER_TYPE_ASKER:
             description = (
-              <Text>{'They requested to connect with you for: '}
+              <Text>{'They connected with you for: '}
                 <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
             break;
           case USER_TYPE_ANSWERER:
             description = (
-              <Text>{'You requested to connect with them for: '}
+              <Text>{'You connected with them for: '}
                 <Text style={styles.bold}>{ searchedTrait }</Text>
               </Text>
             );
@@ -316,6 +318,20 @@ class HomeView extends Component<Props, State> {
     );
   }
 
+  private renderPeerMatches() {
+    const { connections } = this.props.bootstrap;
+    const peers = connections.peers.map(this.renderMatch).toList();
+
+    const elements: Array<ReactNode> = [];
+
+    if (peers.size > 0) {
+      elements.push(<Header key={'Your Connections'}>Your Connections</Header>);
+      elements.push(peers.toJS());
+    }
+
+    return <View>{ elements }</View>;
+  }
+
   private renderMatches() {
     const { connections } = this.props.bootstrap;
 
@@ -357,7 +373,8 @@ class HomeView extends Component<Props, State> {
         <Text style={styles.requestsButtonText}>{ description }</Text>
         <Button
           buttonStyle={styles.feedbackButton}
-          title="View Connection Requests"
+          textStyle={styles.feedbackButtonText}
+          title="See Requests"
           onPress={() => this.props.navigation.navigate('Requests')}
         />
       </View>
@@ -370,12 +387,13 @@ class HomeView extends Component<Props, State> {
     const feedbackPrompt = (
       <View>
         <Text style={styles.feedbackText}>
-          Thank you for participating in the Alpha of Hive! If you notice any bugs or
-          have any suggestions, please submit feedback.
+          Thank you for joining Hive! If you notice any bugs or
+          have any suggestions, please let us know!
         </Text>
         <Button
           buttonStyle={styles.feedbackButton}
-          title="Feedback"
+          textStyle={styles.feedbackButtonText}
+          title="Submit Feedback"
           onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
         />
       </View>
@@ -395,11 +413,28 @@ class HomeView extends Component<Props, State> {
           </View>
         );
       case 'account_setup':
+        const peerMatches = this.renderPeerMatches();
         return (
-          <View style={styles.centeredContainer}>
-            <Text style={styles.headline}>Waiting for your match</Text>
-            <ActionButton onPress={() => this.load()} title="Check again" />
-            { feedbackPrompt }
+
+          <View style={styles.container}>
+            <ScrollView
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this.onRefresh}
+                /> as React.ReactElement<RefreshControlProps>
+              }
+            >
+              <View style={styles.scrollContainer}>
+                <View style={styles.centeredContainer}>
+                  <Text style={styles.headline}>Waiting for your mentorship match</Text>
+                  <ActionButton onPress={() => this.load()} title="Check again" />
+                </View>
+                { feedbackPrompt }
+                { requestsButton }
+                { peerMatches }
+              </View>
+            </ScrollView>
           </View>
         );
       case 'account_matched':
@@ -496,12 +531,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   feedbackButton: {
+    backgroundColor: Colors.WHITE,
     alignSelf: 'center',
     width: 200,
-    marginTop: 10,
+    marginVertical: 15,
+  },
+  feedbackButtonText: {
+    color: Colors.HIVE_PRIMARY,
+    fontSize: 16
   },
   feedbackText: {
     fontSize: 14,
+    marginHorizontal: 15
   },
   requestsButtonText: {
     marginTop: 10,

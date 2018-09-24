@@ -31,7 +31,7 @@ import {
   Header,
 } from '../../components';
 import { DataItem, Select } from '../../components/AutocompleteInput';
-import { headerStyle } from '../TopHeader';
+import { headerStyle, headerTitleStyle, headerTintColor } from '../TopHeader';
 import { AnalyticsHelper } from '../../services/analytics';
 import Colors from '../../services/colors';
 import autocompleteService from '../../services/autocomplete-service';
@@ -146,7 +146,9 @@ class AddSimpleTraitView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Add Trait',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   }
 
   constructor(props: Props) {

@@ -45,7 +45,7 @@ import {
 } from '../components';
 import Loading from './Loading';
 import Colors from '../services/colors';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { AnalyticsHelper } from '../services';
 import { DEFAULT_SEARCH_SIZE } from '../services/user-search-service';
@@ -78,7 +78,9 @@ class ExploreView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor
   })
 
   constructor(props: Props) {
@@ -300,7 +302,7 @@ class ExploreView extends Component<Props, State> {
     return (
       <View>
         <View style={styles.resultsContainer}>{ userCards }</View>
-        {endText && <View style={styles.footerContainer}>
+        {!!endText && <View style={styles.footerContainer}>
           <Text style={styles.footerText}>
             { endText }
           </Text>
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     fontSize: 18,
-    paddingBottom: 5,
+    paddingBottom: 5
   },
   boldText: {
     fontWeight: '900',

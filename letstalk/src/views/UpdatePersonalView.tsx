@@ -3,6 +3,7 @@ import {
   Dimensions,
   EmitterSubscription,
   Picker,
+  Platform,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -10,22 +11,18 @@ import {
   View,
 } from 'react-native';
 import {
-  formValueSelector,
   reduxForm,
   Field,
-  InjectedFormProps,
   SubmissionError,
 } from 'redux-form';
 import { connect, ActionCreator } from 'react-redux';
 import { FormValidationMessage, FormInputProps } from 'react-native-elements';
 import { ThunkAction } from 'redux-thunk';
-import { bindActionCreators } from 'redux'
 import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
 import Immutable from 'immutable';
 import Moment from 'moment';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-import auth from '../services/auth';
 import profileService from '../services/profile-service';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
@@ -34,30 +31,21 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 import {
   ActionButton,
-  FloatingButton,
   ButtonPicker,
-  Card,
   FormP,
   FormProps,
   Header,
   LabeledFormInput,
   ModalDatePicker,
   ModalPicker,
-  ProfileAvatarEditableFormElement,
 } from '../components';
 import Loading from './Loading';
-import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import { State as ProfileState, fetchProfile } from '../redux/profile/reducer';
 import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
-import photoService, {PhotoResult} from '../services/photo_service';
 import {
   Cohort,
-  getCohortId,
-  programOptions,
-  sequenceOptions,
-  gradYearOptions,
-  ValueLabel,
+  getCohortId
 } from '../models/cohort';
 import {
   MENTORSHIP_PREFERENCE_MENTOR,
@@ -67,7 +55,7 @@ import {
 import Colors from '../services/colors';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
-import { required, phoneNumber } from '../validators';
+import { required, phoneNumber} from '../validators';
 
 interface EditFormData {
   firstName: string;
@@ -75,13 +63,9 @@ interface EditFormData {
   phoneNumber: string;
   gender: number;
   birthdate: string;
-  programId: string,
-  sequenceId: string;
-  gradYear: number;
   mentorshipPreference: number;
   bio: string | null;
   hometown: string | null;
-  profilePic: PhotoResult;
 }
 
 interface EditFormProps extends FormProps<EditFormData>, EditFormData {
@@ -133,40 +117,22 @@ class EditForm extends Component<EditFormComponentProps, State> {
 
   render() {
     const {
-      cohorts,
       error,
       handleSubmit,
       onSubmit,
       reset,
       submitting,
-      valid,
-      programId,
-      sequenceId,
-      gradYear
+      valid
     } = this.props;
     const { isKeyboardShown } = this.state;
-    const buildItems = (rows: Immutable.List<ValueLabel>) => {
-      return rows.map(({ value, label }) => {
-        return <Picker.Item key={value} label={label} value={value}/>;
-      });
-    };
-    const programItems = buildItems(programOptions(cohorts)).toJS();
-    const sequenceItems = buildItems(sequenceOptions(cohorts, programId)).toJS();
-    const gradYearItems = buildItems(gradYearOptions(cohorts, programId, sequenceId)).toJS();
     const fieldRefs = new EditFormRefs();
     return (
       <View>
         <KeyboardAwareScrollView
           keyboardShouldPersistTaps="always"
+          contentContainerStyle={styles.contentContainer}
         >
           <Header>Personal Info</Header>
-          <View style={styles.profilePicContainer}>
-            <Field
-              name="profilePic"
-              component={ProfileAvatarEditableFormElement}
-              containerStyle={styles.profilePicContainerStyle}
-            />
-          </View>
           <Field
             label="First name"
             name="firstName"
@@ -185,15 +151,11 @@ class EditForm extends Component<EditFormComponentProps, State> {
             name="lastName"
             component={LabeledFormInput}
             ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
-            onSubmitEditing={() => {
-              // @ts-ignore
-              fieldRefs.phoneNumberFieldRef.getRenderedComponent().focus();
-            }}
             withRef={true}
             autoCorrect={false}
             validate={required}
           />
-          <Field
+           <Field
             label="Phone number"
             name="phoneNumber"
             component={LabeledFormInput}
@@ -225,43 +187,22 @@ class EditForm extends Component<EditFormComponentProps, State> {
             component={ModalDatePicker}
             validate={required}
           />
-          <Header>Your Cohort</Header>
-          <Field
-            label="Program"
-            name="programId"
-            component={ModalPicker}
-            validate={required}
-          >
-            {programItems}
-          </Field>
-          <Field
-            label="Sequence"
-            name="sequenceId"
-            component={ModalPicker}
-            validate={required}
-          >
-            {sequenceItems}
-          </Field>
-          <Field
-            label="Grad Year"
-            name="gradYear"
-            component={ModalPicker}
-            validate={required}
-          >
-            {gradYearItems}
-          </Field>
+          {(Platform.OS === 'android') && <Text style={[styles.hint, styles.mentorshipLabel]}>
+            Mentorship Preference
+          </Text>}
           <Field
             label="Mentorship Preference"
             name="mentorshipPreference"
             component={ModalPicker}
             validate={required}
+            containerStyle={styles.adjustMargin}
           >
             <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
             <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
             <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
           </Field>
           <Header>Additional Info</Header>
-          <Text style={styles.hint}>Optional</Text>
+          <Text style={[styles.hint, styles.adjustMargin]}>Optional info to let others know you better</Text>
           <Field
             label="Hometown"
             name="hometown"
@@ -276,42 +217,27 @@ class EditForm extends Component<EditFormComponentProps, State> {
             multiline={true}
             numberOfLines={10}
             inputStyle={{width: "100%"}}
-            containerStyle={!isKeyboardShown && { marginBottom: 40 }}
             placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
           />
-          {isKeyboardShown && <ActionButton
+          <ActionButton
             backgroundColor={Colors.HIVE_PRIMARY}
             disabled={!valid}
             loading={submitting}
             title={submitting ? null : "Save"}
             onPress={handleSubmit(onSubmit)}
-          />}
+           />
           {error && <FormValidationMessage>{error}</FormValidationMessage>}
         </KeyboardAwareScrollView>
-        <FloatingButton
-          backgroundColor={Colors.HIVE_PRIMARY}
-          disabled={!valid}
-          loading={submitting}
-          title={submitting ? null : "Save"}
-          onPress={handleSubmit(onSubmit)}
-        />
       </View>
     );
   }
 }
 
-const cohortSelector = formValueSelector('profile-edit');
-
 const EditFormWithReduxBuilder = (initialValues: EditFormData) => {
   return reduxForm<EditFormData, FormP<EditFormData>>({
     form: 'profile-edit',
     initialValues,
-  })(connect((state: RootState) => ({
-    programId: cohortSelector(state, 'programId'),
-    sequenceId: cohortSelector(state, 'sequenceId'),
-    gradYear: cohortSelector(state, 'gradYear'),
-    cohorts: state.cohorts.cohorts,
-  }))(EditForm));
+  })(connect()(EditForm));
 }
 
 interface DispatchActions {
@@ -359,14 +285,15 @@ class ProfileEditView extends Component<Props> {
         phoneNumber,
         gender,
         birthdate,
-        programId,
-        sequenceId,
-        gradYear,
         mentorshipPreference,
         bio,
-        hometown,
-        profilePic,
+        hometown
       } = values;
+      const {
+        programId,
+        sequenceId,
+        gradYear
+      } = this.props.profile;
       const cohortId = getCohortId(this.props.cohorts.cohorts, programId, sequenceId, gradYear);
       await profileService.profileEdit({
         firstName,
@@ -379,10 +306,6 @@ class ProfileEditView extends Component<Props> {
         bio,
         hometown,
       });
-      // update profile pic
-      if (profilePic && profilePic.uri) {
-        await photoService.uploadProfilePhoto(profilePic.uri);
-      }
       await this.props.fetchProfile();
       await this.props.navigation.goBack();
     } catch(e) {
@@ -394,30 +317,22 @@ class ProfileEditView extends Component<Props> {
     const {
       firstName,
       lastName,
+      phoneNumber,
       gender,
       birthdate,
-      phoneNumber,
-      programId,
-      sequenceId,
-      gradYear,
       mentorshipPreference,
       bio,
       hometown,
-      profilePic,
     } = this.props.profile;
     const EditFormWithRedux = EditFormWithReduxBuilder({
       firstName,
       lastName,
+      phoneNumber,
       gender,
       birthdate: Moment.utc(birthdate).format("YYYY-MM-DD"),
-      phoneNumber,
-      programId,
-      sequenceId,
-      gradYear,
       mentorshipPreference,
       bio,
       hometown,
-      profilePic: {uri: profilePic, data: null},
     });
     return (
       <EditFormWithRedux onSubmit={this.onSubmit} />
@@ -448,20 +363,18 @@ export default connect(({profile, cohorts}: RootState) => {
 }, { fetchProfile, fetchCohorts })(ProfileEditView);
 
 const styles = StyleSheet.create({
-  profilePicContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+  adjustMargin: {
+    marginHorizontal: 10
   },
-  profilePicContainerStyle: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    marginLeft: 20,
+  contentContainer: {
+    margin: 12
   },
   hint: {
-    color: 'gray',
+    color: Colors.HIVE_SUBDUED,
     fontSize: 14,
-    marginTop: -10,
-    marginLeft: 10,
   },
+  mentorshipLabel: {
+    marginTop: 10,
+    marginHorizontal: 15
+  }
 });

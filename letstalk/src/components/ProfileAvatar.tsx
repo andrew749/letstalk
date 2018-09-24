@@ -1,17 +1,24 @@
 import React from 'react';
 import { Avatar, AvatarProps, FormInput, FormInputProps } from 'react-native-elements';
-import { ImageURISource, StyleSheet } from 'react-native';
+import { ImageURISource, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import photoService, {PhotoResult} from '../services/photo_service';
 import {profileService, RemoteProfileService} from '../services/profile-service';
 import { WrappedFieldProps } from 'redux-form';
 import {
     FormProps
 } from '../components'
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 import Colors from '../services/colors';
 
 interface ProfileAvatarProps extends AvatarProps {
   userId?: string,
+  edit?: boolean
+}
+
+interface ProfileAvatarFormProps {
+  onChange?: any;
+  uri?: any;
 }
 
 /**
@@ -53,20 +60,29 @@ class ProfileAvatar extends React.Component<ProfileAvatarProps, ProfileAvatarSta
   render() {
     let props = this.props;
     return (
-      <Avatar
-        {...props}
-        xlarge
-        rounded
-        // default
-        icon={{name: 'person'}}
-        source={ this.state.avatarSource }
-        activeOpacity={0.7}
-      />
+      <View>
+        <Avatar
+          {...props}
+          xlarge
+          rounded
+          // default
+          icon={{name: 'person'}}
+          source={ this.state.avatarSource }
+          activeOpacity={0.7}
+        />
+        {props.edit && <MaterialIcons
+          style={styles.editAvatar}
+          name="camera-alt"
+          size={25}
+          color={Colors.WHITE}
+          onPress={this.props.onPress}
+        />}
+      </View>
     );
   }
 }
 
-type FormElementProps = WrappedFieldProps & ProfileAvatarProps;
+type FormElementProps = WrappedFieldProps & ProfileAvatarProps & ProfileAvatarFormProps;
 export class ProfileAvatarEditableFormElement extends React.Component<FormElementProps> {
   render() {
     let props = this.props;
@@ -84,19 +100,34 @@ export class ProfileAvatarEditableFormElement extends React.Component<FormElemen
     if (props.input.value && props.input.value.uri) {
       let uri = (props.input.value as PhotoResult).uri;
       avatarSource = {uri: uri};
+    } else {
+      avatarSource = {uri: props.uri};
     }
     return (
         <ProfileAvatar
           {...props}
+          xlarge
+          edit
           onPress={ pressAction }
           source={ avatarSource }
+          containerStyle= {styles.profilePicture}
         />
     );
   }
 }
 
 const styles = StyleSheet.create({
-
+  editAvatar: {
+    position: 'absolute',
+    right: 23,
+    bottom: 23,
+    padding: 5,
+    backgroundColor: Colors.HIVE_SUBDUED,
+    borderRadius: 30,
+  },
+  profilePicture: {
+    margin: 20
+  },
 });
 
 export default ProfileAvatar;

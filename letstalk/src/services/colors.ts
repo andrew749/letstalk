@@ -8,7 +8,7 @@ const Colors = {
   HIVE_PRIMARY_LIGHT: '#FFD475',
   HIVE_PRIMARY: "#FFB52A",
   FB_BG: "#3B5998",
-  WHITE: "#FFFFFF",
+  WHITE: "#FCFAFF",
   HIVE_SUBDUED: "#808080",
   DARK_GRAY: "#404040",
   GREEN: 'green',

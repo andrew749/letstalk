@@ -63,6 +63,7 @@ class AllFilterableModals extends Component<Props> {
   }
 
   private selectSuccess() {
+    console.log("Select success");
     if (!!this.props.onSelectSuccess) this.props.onSelectSuccess();
   }
 

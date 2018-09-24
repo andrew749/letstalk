@@ -54,7 +54,7 @@ import {
 import Colors from '../services/colors';
 import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
 import TutorialService from '../services/tutorial_service';
-import TopHeader, { headerStyle } from './TopHeader';
+import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { ConnectionRequestWithName } from '../models/bootstrap';
 
@@ -83,7 +83,9 @@ class RequestsView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Requests',
-    headerStyle,
+    headerStyle, 
+    headerTitleStyle, 
+    headerTintColor 
   })
 
   constructor(props: Props) {
@@ -215,7 +217,7 @@ class RequestsView extends Component<Props, State> {
         }
         break;
       case IntentTypes.SEARCH:
-        if (dir === Directions.INCOMING) {
+        if (dir === Directions.OUTGOING) {
           description = (
             <Text>
               {'You searched for '}

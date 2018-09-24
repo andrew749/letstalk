@@ -54,8 +54,8 @@ export class Auth {
     await this.sessionService.logout(sessionToken);
   }
 
-  async forgotPassword(email: string): Promise<void> {
-    const resp = await requestor.post(FORGOT_PASSWORD_ROUTE, {"email": email});
+  async forgotPassword(email: string): Promise<any> {
+    return await requestor.post(FORGOT_PASSWORD_ROUTE, {"email": email});
   }
 
   async sendVerificationEmail(email: string): Promise<void> {
