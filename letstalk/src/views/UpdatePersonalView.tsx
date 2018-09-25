@@ -130,7 +130,6 @@ class EditForm extends Component<EditFormComponentProps, State> {
       <View>
         <KeyboardAwareScrollView
           keyboardShouldPersistTaps="always"
-          contentContainerStyle={styles.contentContainer}
         >
           <Header>Personal Info</Header>
           <Field
@@ -255,9 +254,9 @@ class ProfileEditView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Edit Personal Info',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   })
 
   constructor(props: Props) {
@@ -365,9 +364,6 @@ export default connect(({profile, cohorts}: RootState) => {
 const styles = StyleSheet.create({
   adjustMargin: {
     marginHorizontal: 10
-  },
-  contentContainer: {
-    margin: 12
   },
   hint: {
     color: Colors.HIVE_SUBDUED,
