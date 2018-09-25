@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 5,
     height: 40,
-    zIndex: 1,
   },
   itemContainer: {
     padding: 10,
