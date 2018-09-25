@@ -167,7 +167,6 @@ class EditForm extends Component<EditFormComponentProps, State> {
             label="Gender"
             name="gender"
             component={ButtonPicker}
-            validate={required}
           >
             <Picker.Item
               label="Male"
@@ -282,7 +281,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender,
+        gender = 3,
         birthdate,
         mentorshipPreference,
         bio,
@@ -317,7 +316,7 @@ class ProfileEditView extends Component<Props> {
       firstName,
       lastName,
       phoneNumber,
-      gender,
+      gender = 3,
       birthdate,
       mentorshipPreference,
       bio,

@@ -135,7 +135,6 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         label="Gender"
         name="gender"
         component={ButtonPicker}
-        validate={required}
       >
         <Picker.Item
           label="Male"
@@ -203,7 +202,7 @@ export default class SignupView extends Component<Props> {
           "lastName": values.lastName,
           "email": values.email,
           "phoneNumber": values.phoneNumber,
-          "gender": values.gender,
+          "gender": values.gender ? values.gender : 3,
           "password": values.password,
           "profilePic": values.profilePic ? values.profilePic.data: undefined,
           "birthdate": values.birthdate,
