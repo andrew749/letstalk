@@ -150,7 +150,7 @@ class AutocompleteInput extends React.Component<Props, State> {
       showSuggestions,
     } = this.state;
     return (
-      <View style={[styles.container, containerStyle]}>
+      <View style={[containerStyle]}>
         {label && <FormLabel>{label}</FormLabel>}
         <View style={styles.outerContainer}>
           <View style={styles.autocompleteContainer}>
@@ -198,10 +198,6 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 5,
     height: 40,
-    zIndex: 1,
-  },
-  container: {
-    zIndex: 1,
   },
   itemContainer: {
     padding: 10,
