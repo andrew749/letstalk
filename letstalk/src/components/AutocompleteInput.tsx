@@ -84,14 +84,16 @@ class AutocompleteInput extends React.Component<Props, State> {
   // current query.
   private changeValue() {
     const { query, items } = this.state;
+    const { onChange } = this.props.input;
     if (query !== '') {
-      const { onChange } = this.props.input;
       const found = this.state.items.find(item => {
         return item.name.trim().toLowerCase() === query.trim().toLowerCase()
       });
       const newValue = !found ? { type: 'CUSTOM_ITEM', name: query.trim() } :
         { type: 'ITEM', id: found.id, name: found.name };
       onChange(newValue);
+    } else {
+      onChange(null);
     }
   }
 
