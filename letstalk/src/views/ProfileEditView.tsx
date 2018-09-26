@@ -29,6 +29,7 @@ import auth from '../services/auth';
 import profileService from '../services/profile-service';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
+import { GenderId } from '../models/user';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -203,10 +204,9 @@ class EditForm extends Component<EditFormComponentProps, State> {
             validate={phoneNumber}
           />
           <Field
-            label="Gender"
+            label="Gender (optional)"
             name="gender"
             component={ButtonPicker}
-            validate={required}
           >
             <Picker.Item
               label="Male"
@@ -329,9 +329,9 @@ class ProfileEditView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Edit Personal Info',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   })
 
   constructor(props: Props) {
@@ -357,7 +357,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender,
+        gender = GenderId.Unspecified,
         birthdate,
         programId,
         sequenceId,
@@ -394,7 +394,7 @@ class ProfileEditView extends Component<Props> {
     const {
       firstName,
       lastName,
-      gender,
+      gender = GenderId.Unspecified,
       birthdate,
       phoneNumber,
       programId,

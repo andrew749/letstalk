@@ -51,6 +51,7 @@ import {
   MENTORSHIP_PREFERENCE_MENTOR,
   MENTORSHIP_PREFERENCE_MENTEE,
   MENTORSHIP_PREFERENCE_NONE,
+  GenderId,
 } from '../models/user';
 import Colors from '../services/colors';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
@@ -164,10 +165,9 @@ class EditForm extends Component<EditFormComponentProps, State> {
             validate={phoneNumber}
           />
           <Field
-            label="Gender"
+            label="Gender (optional)"
             name="gender"
             component={ButtonPicker}
-            validate={required}
           >
             <Picker.Item
               label="Male"
@@ -282,7 +282,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender,
+        gender = GenderId.Unspecified,
         birthdate,
         mentorshipPreference,
         bio,
@@ -317,7 +317,7 @@ class ProfileEditView extends Component<Props> {
       firstName,
       lastName,
       phoneNumber,
-      gender,
+      gender = GenderId.Unspecified,
       birthdate,
       mentorshipPreference,
       bio,

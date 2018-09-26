@@ -9,6 +9,7 @@ import {
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { GenderId } from '../models/user';
 
 import {
   ActionButton,
@@ -132,10 +133,9 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         containerStyle={{marginBottom: 10}}
       />
       <Field
-        label="Gender"
+        label="Gender (optional)"
         name="gender"
         component={ButtonPicker}
-        validate={required}
       >
         <Picker.Item
           label="Male"
@@ -203,7 +203,7 @@ export default class SignupView extends Component<Props> {
           "lastName": values.lastName,
           "email": values.email,
           "phoneNumber": values.phoneNumber,
-          "gender": values.gender,
+          "gender": values.gender ? values.gender : GenderId.Unspecified,
           "password": values.password,
           "profilePic": values.profilePic ? values.profilePic.data: undefined,
           "birthdate": values.birthdate,

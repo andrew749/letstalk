@@ -91,7 +91,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       <View style={styles.personalInfoContainer}>
         <Header textStyle={styles.headerText}>{headerText}</Header>
         {badge}
-        <Text style={styles.subHeaderText}>{age}{genderStr[0]} - {hometownStr}</Text>
+        <Text style={styles.subHeaderText}>{age}{gender != GenderId.Unspecified ? genderStr[0] : ''} - {hometownStr}</Text>
         {!!allowQrCode && <TouchableOpacity style={styles.listItem} onPress={() => {
           this.props.navigation.navigate('QrCode', { secret });
         }}>
