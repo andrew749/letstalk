@@ -38,8 +38,8 @@ class QrScannerView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Scan A Code',
-    headerStyle, 
-    headerTitleStyle, 
+    headerStyle,
+    headerTitleStyle,
     headerTintColor
   })
 
@@ -76,7 +76,7 @@ class QrScannerView extends Component<Props> {
       await this.setState({ lastScannedBarcode: barcode });
       try {
         await meetingService.postMeetingConfirmation({secret: barcode});
-        await this.props.infoToast('Meeting confirmed!');
+        await this.props.infoToast('Connection confirmed!');
         await this.props.fetchBootstrap(); // Update connections list following meeting confirmation.
         await this.props.navigation.dispatch(NavigationActions.back());
       } catch(error) {
