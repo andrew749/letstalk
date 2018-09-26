@@ -366,9 +366,6 @@ const styles = StyleSheet.create({
   adjustMargin: {
     marginHorizontal: 10
   },
-  contentContainer: {
-    margin: 12
-  },
   hint: {
     color: Colors.HIVE_SUBDUED,
     fontSize: 14,

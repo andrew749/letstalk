@@ -61,7 +61,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps="always"
     >
-      <View style={styles.profilePicContainer}
+      <View style={styles.profilePicContainer}>
         <Field
           name="profilePic"
           component={ProfileAvatarEditableFormElement}
@@ -241,17 +241,9 @@ export default class SignupView extends Component<Props> {
 
 // Hack to make submit button available when keyboard is open.
 const styles = StyleSheet.create({
-  fieldContainer: {
-    width: SCREEN_WIDTH * .9
-  },
-  profilePicContainerStyle: {
+  profilePicContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
-    marginLeft: 20,
-  },
-  scrollView: {
-    alignItems: 'center'
   },
   submitButton: {
     marginBottom: 100,
