@@ -38,7 +38,7 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 	}
 
 	if matchingObj == nil {
-		// TODO(acod): abstract
+		// TODO(acod): abstract this logic
 		// create a connection
 		user2, err := query.GetUserBySecret(c.Db, input.Secret)
 		if err != nil {
