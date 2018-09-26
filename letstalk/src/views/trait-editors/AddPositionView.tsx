@@ -84,7 +84,6 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
   } = props;
   let selection: ReactNode = null;
 
-
   if (!!role && !!organization) {
     const dateFmt = "MMM Do, YYYY";
     const untilSelection = !endDate ? 'present' : Moment(endDate).format(dateFmt);
@@ -135,6 +134,8 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
     );
   }
 
+  let maxDate = new Date('April 20, 2420 04:20:00');
+
   return (
     <KeyboardAwareScrollView
       keyboardShouldPersistTaps="always"
@@ -171,7 +172,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
         component={ModalDatePicker}
-        maxDate={null}
+        maxDate={maxDate}
       />
       { selection }
       { roleSelection }
