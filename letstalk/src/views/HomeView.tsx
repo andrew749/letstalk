@@ -75,9 +75,9 @@ class HomeView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   })
 
   constructor(props: Props) {
@@ -142,6 +142,9 @@ class HomeView extends Component<Props, State> {
     switch (intentType) {
       case IntentTypes.REC_COHORT:
         description = <Text>You are both in the same cohort</Text>;
+        break;
+      case IntentTypes.SCAN_CODE:
+        description = <Text>You connected by QR code</Text>;
         break;
       case IntentTypes.REC_GENERAL:
         switch (userType) {
