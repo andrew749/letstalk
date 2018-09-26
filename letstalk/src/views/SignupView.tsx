@@ -132,7 +132,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         secureTextEntry={true}
         validate={[required, password]} // Add some rules for password
         autoCapitalize={'none' as 'none'}
-        containerStyle={{marginBottom: 10}}
+        containerStyle={[styles.fieldContainer, {marginBottom: 10}]}
       />
       <Field
         label="Gender (optional)"
