@@ -14,6 +14,6 @@ func TestGenderIdByNameFemale(t *testing.T) {
 	assert.Equal(t, GenderIdByName("FEMALE"), 1)
 }
 
-func TestGenderIdByNameOther(t *testing.T) {
-	assert.Equal(t, GenderIdByName("test"), 0)
+func TestGenderIdByNameUnspecified(t *testing.T) {
+	assert.Equal(t, GenderIdByName(""), 3)
 }
