@@ -65,12 +65,6 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         component={ProfileAvatarEditableFormElement}
         containerStyle={styles.profilePicContainerStyle}
       />
-      <View style={styles.profilePicContainer}>
-        <Field
-          name="profilePic"
-          component={ProfileAvatarEditableFormElement}
-        />
-      </View>
       <Field
         label="First name"
         name="firstName"
