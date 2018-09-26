@@ -203,7 +203,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
             validate={phoneNumber}
           />
           <Field
-            label="Gender"
+            label="Gender (optional)"
             name="gender"
             component={ButtonPicker}
           >
@@ -328,9 +328,9 @@ class ProfileEditView extends Component<Props> {
 
   static navigationOptions = () => ({
     headerTitle: 'Edit Personal Info',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   })
 
   constructor(props: Props) {

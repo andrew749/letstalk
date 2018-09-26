@@ -132,7 +132,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         containerStyle={{marginBottom: 10}}
       />
       <Field
-        label="Gender"
+        label="Gender (optional)"
         name="gender"
         component={ButtonPicker}
       >
