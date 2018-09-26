@@ -13,6 +13,8 @@ export function genderIdToString(genderId: GenderId): string {
       return 'male';
     case GenderId.Female:
       return 'female';
+    case GenderId.Deprecated_Other:
+      return 'other';
     default:
       const _: never = genderId;
   }

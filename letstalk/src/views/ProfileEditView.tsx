@@ -357,7 +357,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender = GenderId.Other,
+        gender = GenderId.Unspecified,
         birthdate,
         programId,
         sequenceId,
@@ -394,7 +394,7 @@ class ProfileEditView extends Component<Props> {
     const {
       firstName,
       lastName,
-      gender = GenderId.Other,
+      gender = GenderId.Unspecified,
       birthdate,
       phoneNumber,
       programId,
