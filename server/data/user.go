@@ -11,10 +11,13 @@ import (
 type UserRole string
 type GenderID EntID
 
+// ONLY ADD TO THE BOTTOM
 const (
-	GENDER_OTHER GenderID = iota
-	GENDER_FEMALE
-	GENDER_MALE
+	// Deprecated since this value is falsy
+	DEPRECATED_GENDER_OTHER GenderID = 0
+	GENDER_FEMALE                    = 1
+	GENDER_MALE                      = 2
+	GENDER_UNSPECIFIED               = 3
 )
 
 const (
@@ -43,7 +46,7 @@ type User struct {
 	AdditionalData   *UserAdditionalData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	UserPositions    []UserPosition      `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	UserSimpleTraits []UserSimpleTrait   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
-	IsEmailVerified  bool `gorm:"not null;default=false"`
+	IsEmailVerified  bool                `gorm:"not null;default=false"`
 }
 
 func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }

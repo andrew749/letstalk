@@ -42,7 +42,8 @@ func FBController(c *ctx.Context) errs.Error {
 	user, err := getFBUser(authToken)
 
 	if err != nil {
-		return errs.NewRequestError("%s", err)
+		rlog.Errorf("Unable to create user because: %+v", err)
+		return errs.NewRequestError("Unable to link Facebook. Please signup manually.")
 	}
 
 	tx := c.Db.Begin()
@@ -143,7 +144,7 @@ func FBLinkController(c *ctx.Context) errs.Error {
 
 	var fbUser *FBUser
 	if fbUser, err = getFBUser(loginRequest.Token); err != nil {
-		return errs.NewInternalError("Unable to get FB Identity")
+		return errs.NewInternalError("Error linking facebook account. Please signup manually.")
 	}
 
 	var fbUserID = fbUser.Id
@@ -195,21 +196,65 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, err
 	}
 
-	gender := data.GenderID(utility.GenderIdByName(res["gender"].(string)))
+	var gender data.GenderID
+	if rawGender, ok := res["gender"].(string); !ok {
+		gender = data.GenderID(utility.GenderIdByName(rawGender))
+	} else {
+		gender = data.GENDER_UNSPECIFIED
+	}
 
 	if err != nil {
 		return nil, errors.New("Unable to parse gender")
 	}
 
+	// Field validation
+
+	var (
+		id             string
+		firstName      string
+		lastName       string
+		email          string
+		birthday       string
+		link           string
+		profilePicLink string
+	)
+
+	var ok bool
+	// Fields that should not be required
+	if birthday, ok = res["birthday"].(string); !ok {
+		return nil, errors.New("No birthday.")
+	}
+
+	if lastName, ok = res["last_name"].(string); !ok {
+		return nil, errors.New("No last name")
+	}
+
+	if id, ok = res["id"].(string); !ok {
+		return nil, errors.New("Bad Facebook Id")
+	}
+	profilePicLink = getFBProfilePicLink(id)
+
+	if firstName, ok = res["first_name"].(string); !ok {
+		return nil, errors.New("No first name")
+	}
+
+	if email, ok = res["email"].(string); !ok {
+		return nil, errors.New("No email on account")
+	}
+
+	if link, ok = res["link"].(string); !ok {
+		return nil, errors.New("No profile link")
+	}
+
 	return &FBUser{
-		Id:         res["id"].(string),
-		FirstName:  res["first_name"].(string),
-		LastName:   res["last_name"].(string),
-		Email:      res["email"].(string),
+		Id:         id,
+		FirstName:  firstName,
+		LastName:   lastName,
+		Email:      email,
 		Gender:     gender,
-		Birthdate:  res["birthday"].(string),
-		Link:       res["link"].(string),
-		ProfilePic: getFBProfilePicLink(res["id"].(string)),
+		Birthdate:  birthday,
+		Link:       link,
+		ProfilePic: profilePicLink,
 	}, nil
 }
 
