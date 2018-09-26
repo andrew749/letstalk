@@ -209,6 +209,9 @@ class RequestsView extends Component<Props, State> {
       case IntentTypes.REC_COHORT:
         description = <Text>They are in your cohort</Text>;
         break;
+      case IntentTypes.SCAN_CODE:
+        description = <Text>You connected using QR code</Text>;
+        break;
       case IntentTypes.REC_GENERAL:
         if (dir === Directions.INCOMING) {
           description = <Text>You were recommended to them</Text>;

@@ -100,7 +100,7 @@ export class ProfileAvatarEditableFormElement extends React.Component<FormElemen
     if (props.input.value && props.input.value.uri) {
       let uri = (props.input.value as PhotoResult).uri;
       avatarSource = {uri: uri};
-    } else {
+    } else if (!!props.uri) {
       avatarSource = {uri: props.uri};
     }
     return (
