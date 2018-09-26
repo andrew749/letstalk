@@ -2,6 +2,7 @@ export enum IntentTypes {
   SEARCH = 'SEARCH',
   REC_GENERAL = 'RECOMMENDATION_GENERAL',
   REC_COHORT = 'RECOMMENDATION_COHORT',
+  SCAN_CODE = 'SCAN_CODE',
 }
 
 export interface Connection {
