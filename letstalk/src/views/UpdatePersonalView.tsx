@@ -131,7 +131,6 @@ class EditForm extends Component<EditFormComponentProps, State> {
       <View>
         <KeyboardAwareScrollView
           keyboardShouldPersistTaps="always"
-          contentContainerStyle={styles.contentContainer}
         >
           <Header>Personal Info</Header>
           <Field
