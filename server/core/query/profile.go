@@ -101,6 +101,7 @@ func GetProfile(
 			LastName:   user.LastName,
 			Gender:     user.Gender,
 			Birthdate:  user.Birthdate,
+			Secret:     user.Secret,
 			ProfilePic: user.ProfilePic,
 		},
 		UserContactInfo: api.UserContactInfo{
