@@ -11,6 +11,6 @@ func GenderIdByName(gender string) int {
 	case "male":
 		return 2
 	default:
-		return 0
+		return 3
 	}
 }
