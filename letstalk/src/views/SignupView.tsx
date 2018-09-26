@@ -1,6 +1,6 @@
 import {FileSystem} from 'expo';
 import React, { Component } from 'react';
-import { Dimensions, Picker, ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, Picker, ScrollView, StyleSheet, View } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
