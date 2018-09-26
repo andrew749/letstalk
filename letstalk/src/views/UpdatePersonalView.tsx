@@ -130,6 +130,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
       <View>
         <KeyboardAwareScrollView
           keyboardShouldPersistTaps="always"
+          contentContainerStyle={styles.contentContainer}
         >
           <Header>Personal Info</Header>
           <Field
@@ -164,7 +165,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
             validate={phoneNumber}
           />
           <Field
-            label="Gender"
+            label="Gender (optional)"
             name="gender"
             component={ButtonPicker}
           >
@@ -363,6 +364,9 @@ export default connect(({profile, cohorts}: RootState) => {
 const styles = StyleSheet.create({
   adjustMargin: {
     marginHorizontal: 10
+  },
+  contentContainer: {
+    margin: 12
   },
   hint: {
     color: Colors.HIVE_SUBDUED,
