@@ -225,6 +225,12 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		return nil, errors.New("No birthday.")
 	}
 
+	t, err := time.Parse("01/02/2006", birthday)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Invalid birthday: %s", err.Error()))
+	}
+	birthday = t.Format("2006-01-02")
+
 	if lastName, ok = res["last_name"].(string); !ok {
 		return nil, errors.New("No last name")
 	}
