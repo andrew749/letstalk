@@ -29,6 +29,7 @@ import auth from '../services/auth';
 import profileService from '../services/profile-service';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
+import { GenderId } from '../models/user';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -356,7 +357,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender = 3,
+        gender = GenderId.Other,
         birthdate,
         programId,
         sequenceId,
@@ -393,7 +394,7 @@ class ProfileEditView extends Component<Props> {
     const {
       firstName,
       lastName,
-      gender = 3,
+      gender = GenderId.Other,
       birthdate,
       phoneNumber,
       programId,

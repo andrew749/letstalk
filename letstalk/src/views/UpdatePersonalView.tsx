@@ -51,6 +51,7 @@ import {
   MENTORSHIP_PREFERENCE_MENTOR,
   MENTORSHIP_PREFERENCE_MENTEE,
   MENTORSHIP_PREFERENCE_NONE,
+  GenderId,
 } from '../models/user';
 import Colors from '../services/colors';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
@@ -282,7 +283,7 @@ class ProfileEditView extends Component<Props> {
         firstName,
         lastName,
         phoneNumber,
-        gender = 3,
+        gender = GenderId.Unspecified,
         birthdate,
         mentorshipPreference,
         bio,
@@ -317,7 +318,7 @@ class ProfileEditView extends Component<Props> {
       firstName,
       lastName,
       phoneNumber,
-      gender = 3,
+      gender = GenderId.Unspecified,
       birthdate,
       mentorshipPreference,
       bio,

@@ -1,13 +1,14 @@
 export enum GenderId {
-  Other = 3,
-  Female,
-  Male,
+  Deprecated_Other = 0,
+  Female = 1,
+  Male = 2,
+  Unspecified = 3,
 };
 
 export function genderIdToString(genderId: GenderId): string {
   switch (genderId) {
-    case GenderId.Other:
-      return 'other';
+    case GenderId.Unspecified:
+      return '';
     case GenderId.Male:
       return 'male';
     case GenderId.Female:

@@ -1,6 +1,6 @@
 import {FileSystem} from 'expo';
 import React, { Component } from 'react';
-import { Dimensions, Picker, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, Picker, ScrollView, StyleSheet } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -9,6 +9,7 @@ import {
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import { FormValidationMessage, FormInputProps, FormInput } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { GenderId } from '../models/user';
 
 import {
   ActionButton,
@@ -207,7 +208,7 @@ export default class SignupView extends Component<Props> {
           "lastName": values.lastName,
           "email": values.email,
           "phoneNumber": values.phoneNumber,
-          "gender": values.gender ? values.gender : 3,
+          "gender": values.gender ? values.gender : GenderId.Unspecified,
           "password": values.password,
           "profilePic": values.profilePic ? values.profilePic.data: undefined,
           "birthdate": values.birthdate,
