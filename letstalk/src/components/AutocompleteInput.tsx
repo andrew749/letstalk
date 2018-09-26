@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   autocompleteContainer: {
     flex: 1,
     left: 0,
-    position: 'absolute',
+    position: 'relative',
     right: 0,
     top: 0,
     zIndex: 1,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   outerContainer: {
     margin: 10,
     marginBottom: 5,
-    height: 40,
+    flex: 1,
     zIndex: 1,
   },
   container: {
