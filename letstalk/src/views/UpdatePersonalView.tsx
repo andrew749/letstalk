@@ -282,7 +282,7 @@ class ProfileEditView extends Component<Props> {
         lastName,
         phoneNumber,
         gender = GenderId.Unspecified,
-        birthdate = "",
+        birthdate,
         mentorshipPreference,
         bio,
         hometown
@@ -327,7 +327,7 @@ class ProfileEditView extends Component<Props> {
       lastName,
       phoneNumber,
       gender,
-      birthdate: Moment.utc(birthdate).format("YYYY-MM-DD") || "",
+      birthdate: birthdate && Moment.utc(birthdate).format("YYYY-MM-DD"),
       mentorshipPreference,
       bio,
       hometown,
