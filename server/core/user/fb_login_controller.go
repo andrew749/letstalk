@@ -122,8 +122,8 @@ func FBController(c *ctx.Context) errs.Error {
 	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId, &loginRequest.NotificationToken)
 
 	if err != nil {
-		rlog.Error("Unable to create a new session")
-		return errs.NewInternalError("%s", err)
+		rlog.Errorf("Unable to create a new session %+v", err)
+		return errs.NewInternalError("Unable to login. Please try again later.")
 	}
 
 	c.Result = api.LoginResponse{
