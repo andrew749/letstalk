@@ -181,7 +181,7 @@ type FBUser struct {
 	LastName   string
 	Email      string
 	Gender     data.GenderID
-	Birthdate  string
+	Birthdate  *string
 	Link       string
 	ProfilePic string
 }
@@ -214,22 +214,23 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		firstName      string
 		lastName       string
 		email          string
-		birthday       string
+		birthday       *string
 		link           string
 		profilePicLink string
 	)
 
 	var ok bool
 	// Fields that should not be required
-	if birthday, ok = res["birthday"].(string); !ok {
-		return nil, errors.New("No birthday.")
-	}
+	birthday, ok = res["birthday"].(*string)
 
-	t, err := time.Parse("01/02/2006", birthday)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Invalid birthday: %s", err.Error()))
+	if birthday != nil {
+		t, err := time.Parse("01/02/2006", *birthday)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Invalid birthday: %s", err.Error()))
+		}
+		birthdayTemp := t.Format("2006-01-02")
+		birthday = &birthdayTemp
 	}
-	birthday = t.Format("2006-01-02")
 
 	if lastName, ok = res["last_name"].(string); !ok {
 		return nil, errors.New("No last name")

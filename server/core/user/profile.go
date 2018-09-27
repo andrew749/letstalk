@@ -17,8 +17,8 @@ func ProfileEditController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 
-	if len(request.Birthdate) != 0 {
-		if requestErr := validateUserBirthday(request.Birthdate); requestErr != nil {
+	if request.Birthdate != nil {
+		if requestErr := validateUserBirthday(*request.Birthdate); requestErr != nil {
 			return requestErr
 		}
 	}

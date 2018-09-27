@@ -28,7 +28,7 @@ func TestCreateUserWithAuth(t *testing.T) {
 					firstName,
 					lastName,
 					gender,
-					birthdate,
+					&birthdate,
 					data.USER_ROLE_DEFAULT,
 					password,
 				)

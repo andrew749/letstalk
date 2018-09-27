@@ -36,7 +36,7 @@ type User struct {
 	Email            string    `gorm:"type:varchar(128);not null;unique"`
 	Secret           string    `gorm:"type:char(36);not null;unique"`
 	Gender           GenderID  `gorm:"not null"`
-	Birthdate        string    `gorm:"type:varchar(100);not null"`
+	Birthdate        *string   `gorm:"type:varchar(100)"`
 	Role             UserRole  `gorm:"not null"`
 	ProfilePic       *string
 	Sessions         []Session           `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
@@ -58,7 +58,7 @@ func CreateUser(
 	firstName string,
 	lastName string,
 	gender GenderID,
-	birthdate string,
+	birthdate *string,
 	role UserRole,
 ) (*User, error) {
 	user := User{

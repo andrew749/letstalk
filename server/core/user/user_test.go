@@ -16,12 +16,13 @@ import (
 )
 
 func TestCreateNewUser(t *testing.T) {
+	birthdate := "1996-10-07"
 	signupRequest := api.SignupRequest{
 		UserPersonalInfo: api.UserPersonalInfo{
 			FirstName: "Andrew",
 			LastName:  "Codispoti",
 			Gender:    0,
-			Birthdate: "1996-10-07",
+			Birthdate: &birthdate,
 		},
 		Email:       "test@test.com",
 		PhoneNumber: "5555555555",

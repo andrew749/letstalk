@@ -13,7 +13,7 @@ func CreateUserWithAuth(
 	firstName string,
 	lastName string,
 	gender data.GenderID,
-	birthdate string,
+	birthdate *string,
 	role data.UserRole,
 	password string,
 ) (*data.User, error) {
