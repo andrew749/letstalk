@@ -314,16 +314,6 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
-		{
-			ID: "Make user birthdate optional",
-			Migrate: func(tx *gorm.DB) error {
-				// modify column to be nullable
-				return db.Model(&User{}).ModifyColumn("birthdate", "varchar(100)").Error
-			},
-			Rollback: func(tx *gorm.DB) error {
-				return nil
-			},
-		},
 	})
 
 	if err := m.Migrate(); err != nil {
