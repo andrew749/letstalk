@@ -40,7 +40,7 @@ func TestCreateUserWithAuth(t *testing.T) {
 				assert.Equal(t, firstName, user2.FirstName)
 				assert.Equal(t, lastName, user2.LastName)
 				assert.Equal(t, gender, user2.Gender)
-				assert.Equal(t, birthdate, user2.Birthdate)
+				assert.Equal(t, birthdate, *user2.Birthdate)
 				hash, err := query.GetHashForUser(db, tempUser.UserId)
 				assert.NoError(t, err)
 				assert.True(t, utility.CheckPasswordHash(password, *hash))
