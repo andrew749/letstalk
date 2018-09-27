@@ -6,6 +6,10 @@ import (
 	"gopkg.in/gormigrate.v1"
 )
 
+func isSQLite(db *gorm.DB) bool {
+	return db.Dialect().GetName() == "sqlite3"
+}
+
 func migrateDB(db *gorm.DB) {
 	options := gormigrate.Options{
 		TableName:      "migrations",
@@ -73,7 +77,9 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&Cohort{})
 				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
 				// exists.
-				tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(190)")
+				if !isSQLite(tx) {
+					tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(190)")
+				}
 				tx.AutoMigrate(&UserCohort{})
 				return tx.Error
 			},
@@ -95,6 +101,10 @@ func migrateDB(db *gorm.DB) {
 			ID: "User Devices Creation From Session",
 			Migrate: func(tx *gorm.DB) error {
 				// for every session create a new user device entry
+				if isSQLite(tx) {
+					rlog.Warn("Skipping migration since sqlite")
+					return nil
+				}
 
 				// create required table
 				tx.AutoMigrate(&UserDevice{})
@@ -286,6 +296,19 @@ func migrateDB(db *gorm.DB) {
 				}
 
 				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Make user birthdate optional",
+			Migrate: func(tx *gorm.DB) error {
+				// modify column to be nullable
+				if !isSQLite(tx) {
+					return db.Model(&User{}).ModifyColumn("birthdate", "varchar(100)").Error
+				}
+				return nil
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil

@@ -122,8 +122,8 @@ func FBController(c *ctx.Context) errs.Error {
 	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId, &loginRequest.NotificationToken)
 
 	if err != nil {
-		rlog.Error("Unable to create a new session")
-		return errs.NewInternalError("%s", err)
+		rlog.Errorf("Unable to create a new session %+v", err)
+		return errs.NewInternalError("Unable to login. Please try again later.")
 	}
 
 	c.Result = api.LoginResponse{
@@ -181,7 +181,7 @@ type FBUser struct {
 	LastName   string
 	Email      string
 	Gender     data.GenderID
-	Birthdate  string
+	Birthdate  *string
 	Link       string
 	ProfilePic string
 }
@@ -214,22 +214,24 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		firstName      string
 		lastName       string
 		email          string
-		birthday       string
+		birthday       *string
 		link           string
 		profilePicLink string
 	)
 
 	var ok bool
 	// Fields that should not be required
-	if birthday, ok = res["birthday"].(string); !ok {
-		return nil, errors.New("No birthday.")
+	tempBirthday, ok := res["birthday"].(string)
+	if ok {
+		t, err := time.Parse("01/02/2006", tempBirthday)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Invalid birthday: %s", err.Error()))
+		}
+		birthdayTemp := t.Format("2006-01-02")
+		birthday = &birthdayTemp
+	} else {
+		birthday = nil
 	}
-
-	t, err := time.Parse("01/02/2006", birthday)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Invalid birthday: %s", err.Error()))
-	}
-	birthday = t.Format("2006-01-02")
 
 	if lastName, ok = res["last_name"].(string); !ok {
 		return nil, errors.New("No last name")

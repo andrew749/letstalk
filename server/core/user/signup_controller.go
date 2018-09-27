@@ -70,8 +70,10 @@ func SignupUser(c *ctx.Context) errs.Error {
 		return errs.NewDbError(err)
 	}
 
-	if requestErr := validateUserBirthday(user.Birthdate); requestErr != nil {
-		return requestErr
+	if user.Birthdate != nil {
+		if requestErr := validateUserBirthday(*user.Birthdate); requestErr != nil {
+			return requestErr
+		}
 	}
 
 	err = writeUser(user, c)

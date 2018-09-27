@@ -8,10 +8,11 @@ import (
 	"letstalk/server/data"
 	"testing"
 
-	"github.com/jinzhu/gorm"
-	"github.com/stretchr/testify/assert"
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
+
+	"github.com/jinzhu/gorm"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRequestConnection(t *testing.T) {

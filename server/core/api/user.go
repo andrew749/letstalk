@@ -10,7 +10,7 @@ type UserPersonalInfo struct {
 	FirstName string        `json:"firstName" binding:"required"`
 	LastName  string        `json:"lastName" binding:"required"`
 	Gender    data.GenderID `json:"gender" binding:"required"`
-	Birthdate string        `json:"birthdate" binding:"required"` // unix time
+	Birthdate *string       `json:"birthdate"` // unix time
 
 	// TODO: Does this belong here?
 	Secret     string  `json:"secret"`

@@ -1,23 +1,25 @@
 package user
 
 import (
-	"testing"
-	"github.com/jinzhu/gorm"
-	"letstalk/server/data"
-	"letstalk/server/core/api"
 	"fmt"
+	"letstalk/server/core/api"
+	"letstalk/server/data"
+	"testing"
+
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/require"
 )
 
 var testUserId = 1
 
 func CreateUserForTest(t *testing.T, db *gorm.DB) *data.User {
+	birthdate := "1996-10-07"
 	req := api.SignupRequest{
 		UserPersonalInfo: api.UserPersonalInfo{
 			FirstName: "Firstname",
 			LastName:  "Lastname",
 			Gender:    0,
-			Birthdate: "1996-10-07",
+			Birthdate: &birthdate,
 		},
 		Email:       fmt.Sprintf("test%d@test.com", testUserId),
 		PhoneNumber: "5555555555",
