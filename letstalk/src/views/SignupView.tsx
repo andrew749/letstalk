@@ -206,7 +206,7 @@ export default class SignupView extends Component<Props> {
           "gender": values.gender ? values.gender : GenderId.Unspecified,
           "password": values.password,
           "profilePic": values.profilePic ? values.profilePic.data: undefined,
-          "birthdate": values.birthdate,
+          "birthdate": values.birthdate ? values.birthdate : "",
         }
       });
     } catch(e) {

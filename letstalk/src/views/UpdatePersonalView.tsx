@@ -179,12 +179,11 @@ class EditForm extends Component<EditFormComponentProps, State> {
             />
           </Field>
           <Field
-            label="Birthday"
+            label="Birthday (optional)"
             name="birthdate"
             mode={'date' as 'date'}
             androidMode={'spinner' as 'spinner'}
             component={ModalDatePicker}
-            validate={required}
           />
           {(Platform.OS === 'android') && <Text style={[styles.hint, styles.mentorshipLabel]}>
             Mentorship Preference
@@ -283,7 +282,7 @@ class ProfileEditView extends Component<Props> {
         lastName,
         phoneNumber,
         gender = GenderId.Unspecified,
-        birthdate,
+        birthdate = "",
         mentorshipPreference,
         bio,
         hometown
@@ -328,7 +327,7 @@ class ProfileEditView extends Component<Props> {
       lastName,
       phoneNumber,
       gender,
-      birthdate: Moment.utc(birthdate).format("YYYY-MM-DD"),
+      birthdate: Moment.utc(birthdate).format("YYYY-MM-DD") || "",
       mentorshipPreference,
       bio,
       hometown,
