@@ -147,12 +147,11 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         />
       </Field>
       <Field
-        label="Birthday"
+        label="Birthday (optional)"
         name="birthdate"
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
         component={ModalDatePicker}
-        validate={required}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton

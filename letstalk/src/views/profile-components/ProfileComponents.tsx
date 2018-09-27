@@ -38,7 +38,7 @@ interface PersonalInfoProps {
 	firstName: string;
 	lastName: string;
 	gender: GenderId;
-	birthdate: string
+	birthdate?: string
   secret?: string // only required if `allowQrCode` is true
   bio?: string;
   hometown?: string;
@@ -74,9 +74,14 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
 
     const hometownStr = hometown === null || hometown === '' ? 'Some place on Earth' : hometown;
 
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
-    const age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
+    let age;
+
+    if (birthdate) {
+      const timeDiff = new Date().valueOf() - new Date(birthdate).valueOf();
+      age = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
+    } else {
+      age = "";
+    }
 
     const headerText = firstName + ' ' + lastName;
 
@@ -91,7 +96,7 @@ export class PersonalInfo extends Component<PersonalInfoProps> {
       <View style={styles.personalInfoContainer}>
         <Header textStyle={styles.headerText}>{headerText}</Header>
         {badge}
-        <Text style={styles.subHeaderText}>{age}{gender != GenderId.Unspecified ? genderStr[0] : ''} - {hometownStr}</Text>
+        <Text style={styles.subHeaderText}>{age}{gender != GenderId.Unspecified ? genderStr[0] : ''}{(!age && gender == GenderId.Unspecified) ? '' : ' - '}{hometownStr}</Text>
         {!!allowQrCode && <TouchableOpacity style={styles.listItem} onPress={() => {
           this.props.navigation.navigate('QrCode', { secret });
         }}>
