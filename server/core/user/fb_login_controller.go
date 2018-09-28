@@ -203,10 +203,6 @@ func getFBUser(accessToken string) (*FBUser, error) {
 		gender = data.GENDER_UNSPECIFIED
 	}
 
-	if err != nil {
-		return nil, errors.New("Unable to parse gender")
-	}
-
 	// Field validation
 
 	var (
