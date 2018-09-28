@@ -2,7 +2,12 @@ import Expo from 'expo';
 
 // TODO: How to store this in some type of secrets file?
 const API_KEY = '404473003315328';
-const PERMISSIONS = ['public_profile', 'email', 'user_birthday'];
+const PERMISSIONS = [
+  'public_profile',
+  'email',
+  'user_birthday',
+  'user_link'
+];
 
 type AccessToken = {token: string, expires: number};
 
