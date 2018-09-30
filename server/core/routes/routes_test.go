@@ -61,7 +61,7 @@ func TestHandlerAuthBad(t *testing.T) {
 func TestHandlerAuthGood(t *testing.T) {
 	db, sm := setupSessionManager(t)
 
-	session, err := sm.CreateNewSessionForUserId(1, nil)
+	session, err := sm.CreateNewSessionForUserId(1)
 	assert.Nil(t, err)
 
 	hw := handlerWrapper{db, nil, &sm}
@@ -82,7 +82,7 @@ func TestHandlerAuthGood(t *testing.T) {
 func TestHandlerExpiredToken(t *testing.T) {
 	db, sm := setupSessionManager(t)
 
-	session, err := sm.CreateNewSessionForUserIdWithExpiry(1, nil, time.Unix(0, 0))
+	session, err := sm.CreateNewSessionForUserIdWithExpiry(1, time.Unix(0, 0))
 	assert.Nil(t, err)
 
 	hw := handlerWrapper{db, nil, &sm}
