@@ -1,6 +1,6 @@
 package data
 
-type NotificationToken struct {
+type DEPRECATED_NotificationToken struct {
 	SessionId string `gorm:"not null;primary_key;size:190"`
 	Token     string `gorm:"not null;primary_key;size:190"`
 	Service   string

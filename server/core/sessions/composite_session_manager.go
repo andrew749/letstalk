@@ -74,7 +74,7 @@ func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, error) {
-	session, err := CreateSessionData(userId, notificationToken, expiry)
+	session, err := CreateSessionData(userId, expiry)
 	if err != nil {
 		return nil, errors.New("Unable to create new session")
 	}

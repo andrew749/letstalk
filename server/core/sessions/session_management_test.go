@@ -61,7 +61,7 @@ func TestWriteThroughCache(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
 			sd := CreateDBSessionStore(db)
-			sessionData, err := CreateSessionData(1, nil, time.Now())
+			sessionData, err := CreateSessionData(1, time.Now())
 			assert.NoError(t, err)
 
 			sd.AddNewSession(sessionData)
