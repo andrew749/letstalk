@@ -26,21 +26,9 @@ func (sm DatabaseSessionStore) AddNewSession(session *SessionData) error {
 		ExpiryDate: session.ExpiryDate,
 	}
 
-	tx := sm.DB.Begin()
-	if e := tx.Error; e != nil {
-		tx.Rollback()
-		return e
-	}
-
-	if e := tx.FirstOrCreate(&sessionModel).Error; e != nil {
-		tx.Rollback()
+	if e := sm.DB.FirstOrCreate(&sessionModel).Error; e != nil {
 		rlog.Error(e)
 		return e
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return err
 	}
 
 	return nil
