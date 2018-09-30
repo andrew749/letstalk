@@ -17,10 +17,8 @@ npm install -g gulp
 ln -s /usr/bin/nodejs /usr/bin/node
 fi
 
-if [[ -z $(which gulp) ]]; then
-  # install dependencies
-  npm --prefix $FRONTEND_DIRECTORY install
-fi
+# install dependencies
+npm --prefix $FRONTEND_DIRECTORY install
 
 # build
 gulp --cwd $FRONTEND_DIRECTORY
