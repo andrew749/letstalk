@@ -43,7 +43,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 
 	rlog.Debug("Successfully Checked Password")
 
-	session, err := (*sm).CreateNewSessionForUserId(userModel.UserId, req.NotificationToken)
+	session, err := (*sm).CreateNewSessionForUserId(userModel.UserId)
 	if err != nil {
 		return errs.NewRequestError("%s", err)
 	}

@@ -63,27 +63,18 @@ func (sm CompositeSessionManager) AddNewSession(session *SessionData) error {
 
 func (sm CompositeSessionManager) CreateNewSessionForUserId(
 	userId data.TUserID,
-	notificationToken *string,
 ) (*SessionData, error) {
 	defaultExpiry := time.Now().Add(time.Duration(DEFAULT_EXPIRY) * time.Hour)
-	return sm.CreateNewSessionForUserIdWithExpiry(userId, notificationToken, defaultExpiry)
+	return sm.CreateNewSessionForUserIdWithExpiry(userId, defaultExpiry)
 }
 
 func (sm CompositeSessionManager) CreateNewSessionForUserIdWithExpiry(
 	userId data.TUserID,
-	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, error) {
 	session, err := CreateSessionData(userId, expiry)
 	if err != nil {
 		return nil, errors.New("Unable to create new session")
-	}
-
-	// store device
-	if notificationToken != nil {
-		if err := data.AddExpoDeviceTokenforUser(sm.db, userId, *notificationToken); err != nil {
-			return nil, errors.New("Unable to register device in db.")
-		}
 	}
 
 	// maintain mappings

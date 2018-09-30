@@ -13,7 +13,7 @@ func TestCreateAndGetSession(t *testing.T) {
 	ss := CreateInMemorySessionStore()
 	sm := CreateCompositeSessionManager(nil, ss)
 
-	session, _ := sm.CreateNewSessionForUserId(1, nil)
+	session, _ := sm.CreateNewSessionForUserId(1)
 
 	sessions, _ := sm.GetUserSessions(1)
 
@@ -24,8 +24,8 @@ func TestCreateAndGetMultipleSessions(t *testing.T) {
 	ss := CreateInMemorySessionStore()
 	sm := CreateCompositeSessionManager(nil, ss)
 
-	session1, _ := sm.CreateNewSessionForUserId(1, nil)
-	session2, _ := sm.CreateNewSessionForUserId(1, nil)
+	session1, _ := sm.CreateNewSessionForUserId(1)
+	session2, _ := sm.CreateNewSessionForUserId(1)
 
 	sessions, _ := sm.GetUserSessions(1)
 
@@ -37,7 +37,7 @@ func TestCreateAndGetSessionBySessionId(t *testing.T) {
 	ss := CreateInMemorySessionStore()
 	sm := CreateCompositeSessionManager(nil, ss)
 
-	session1, _ := sm.CreateNewSessionForUserId(1, nil)
+	session1, _ := sm.CreateNewSessionForUserId(1)
 
 	session, _ := sm.GetSessionForSessionId(*session1.SessionId)
 	assert.Equal(t, session1, session)
@@ -48,7 +48,7 @@ func TestDatabaseSessionStore(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			sd := CreateDBSessionStore(db)
 			sm := CreateCompositeSessionManager(db, sd)
-			session1, _ := sm.CreateNewSessionForUserId(1, nil)
+			session1, _ := sm.CreateNewSessionForUserId(1)
 			session, _ := sm.GetSessionForSessionId(*session1.SessionId)
 			assert.Equal(t, session1.SessionId, session.SessionId)
 		},
