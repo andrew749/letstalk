@@ -172,12 +172,25 @@ func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string
 		return err
 	}
 
-	// update the user data
-	if err := db.Model(&externalAuthRecord).
-		Updates(&data.ExternalAuthData{FbUserId: &fbUserID, FbProfileLink: &fbLink}).Error; err != nil {
+	var record *data.ExternalAuthData
+
+	// check for records with this facebook id
+	if record, err = query.GetExternalAuthRecordByFBIDNoAssert(db, &fbUserID); err != nil {
+		return err
 	}
 
-	return nil
+	// if there are no records
+	if record == nil {
+		// if the facebook account isn't linked, update the profile
+		if err := db.
+			Model(&externalAuthRecord).
+			Updates(&data.ExternalAuthData{FbUserId: &fbUserID, FbProfileLink: &fbLink}).
+			Error; err != nil {
+			return err
+		}
+	}
+
+	return errors.New("This facebook account is already linked")
 }
 
 type FBUser struct {
