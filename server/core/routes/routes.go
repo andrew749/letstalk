@@ -1,8 +1,12 @@
 package routes
 
 import (
+	"net/http"
+	"time"
+
 	"letstalk/server/core/auth"
 	"letstalk/server/core/bootstrap"
+	"letstalk/server/core/connection"
 	"letstalk/server/core/contact_info"
 	"letstalk/server/core/controller"
 	"letstalk/server/core/ctx"
@@ -15,10 +19,6 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
-	"net/http"
-	"time"
-
-	"letstalk/server/core/connection"
 
 	"github.com/getsentry/raven-go"
 	"github.com/gin-gonic/gin"
@@ -35,7 +35,7 @@ type handlerWrapper struct {
 
 type handlerFunc func(*ctx.Context) errs.Error
 
-func debugAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) gin.HandlerFunc {
+func adminAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBase) gin.HandlerFunc {
 	return func(g *gin.Context) {
 		session, err := getSessionData(g, sessionManager)
 		if err != nil {
@@ -314,15 +314,18 @@ func Register(
 	userSearchV1.OPTIONS("/position")
 	userSearchV1.POST("/position", hw.wrapHandler(controller.PositionUserSearchController, true))
 
-	// Debug route group.
-	debug := router.Group("/debug")
-	debug.Use(debugAuthMiddleware(hw.db, hw.sm))
+	// Admin route group.
+	admin := router.Group("/admin")
+	admin.Use(adminAuthMiddleware(hw.db, hw.sm))
 
-	debug.OPTIONS("/matching")
-	debug.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
+	admin.OPTIONS("/matching")
+	admin.POST("/matching", hw.wrapHandler(matching.PostMatchingController, false))
 
-	debug.OPTIONS("/adhoc_notification")
-	debug.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
+	admin.OPTIONS("/mentorship")
+	admin.POST("/mentorship", hw.wrapHandler(connection.AddMentorshipController, false))
+
+	admin.OPTIONS("/adhoc_notification")
+	admin.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
 
 	return router
 }
