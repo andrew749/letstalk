@@ -2,10 +2,10 @@ package utility
 
 import (
 	"letstalk/server/aws_utils"
+	"letstalk/server/constants"
 	"letstalk/server/core/secrets"
-	"letstalk/server/queue/queues/notification_queue"
+	sqs_notification_processor "letstalk/server/jobs/sqs_notification_processor/src"
 
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/namsral/flag"
 )
 
@@ -42,9 +42,7 @@ func Bootstrap() {
 	// Check if we are in a production environment and do special setup
 	if !IsProductionEnvironment() {
 		var queue SQSMock
-		queue.SubscribeListener(notification_queue.NotificationQueueUrl, func(arg1 *events.SQSEvent) {
-
-		})
+		queue.SubscribeListener(constants.NotificationQueueUrl, sqs_notification_processor.SendNotificationLambda)
 		QueueHelper = queue
 	} else {
 		QueueHelper, err = aws_utils.GetSQSServiceClient()
