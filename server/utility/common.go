@@ -2,9 +2,7 @@ package utility
 
 import (
 	"letstalk/server/aws_utils"
-	"letstalk/server/constants"
 	"letstalk/server/core/secrets"
-	sqs_notification_processor "letstalk/server/jobs/sqs_notification_processor/src"
 
 	"github.com/namsral/flag"
 )
@@ -41,9 +39,7 @@ func Bootstrap() {
 
 	// Check if we are in a production environment and do special setup
 	if !IsProductionEnvironment() {
-		var queue SQSMock
-		queue.SubscribeListener(constants.NotificationQueueUrl, sqs_notification_processor.SendNotificationLambda)
-		QueueHelper = queue
+		QueueHelper = CreateMockSQSClient()
 	} else {
 		QueueHelper, err = aws_utils.GetSQSServiceClient()
 		if err != nil {

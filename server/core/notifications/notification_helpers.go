@@ -2,7 +2,6 @@ package notifications
 
 import (
 	"encoding/json"
-	"letstalk/server/aws_utils"
 	"letstalk/server/core/converters"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -32,14 +31,9 @@ func CreateAndSendNotification(
 		return err
 	}
 
-	sqsHelper, err := aws_utils.GetSQSServiceClient()
-	if err != nil {
-		return err
-	}
-
 	// push to sqs
 	// TODO: if doesn't send then try again or set some bit saying that it wasnt sent so we can have a job retry
-	return notification_queue.PushNotificationToQueue(sqsHelper, *notification)
+	return notification_queue.PushNotificationToQueue(*notification)
 }
 
 func UpdateNotificationState(
