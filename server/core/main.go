@@ -99,10 +99,13 @@ func main() {
 
 		// setup queue listeners for local delivery
 		sqs := utility.QueueHelper.(utility.SQSMock)
-		sqs.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) {
+		go sqs.QueueProcessor()
+		sqs.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) error {
 			if err := sqs_notification_processor.SendNotificationLambda(*event); err != nil {
 				rlog.Critical(err)
+				return err
 			}
+			return nil
 		})
 	}
 
