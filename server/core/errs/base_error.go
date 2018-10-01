@@ -33,6 +33,12 @@ func (e *BaseError) VerboseError() string {
 	return fmt.Sprintf("%+v", e.err)
 }
 
+func (e *BaseError) StackTrace() errors.StackTrace {
+	return e.err.(interface {
+		StackTrace() errors.StackTrace
+	}).StackTrace()
+}
+
 func (e *BaseError) GetHTTPCode() int { panic("Abstract Error") }
 
 func (e *BaseError) GetExtraData() map[string]interface{} {
