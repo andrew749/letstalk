@@ -11,16 +11,6 @@ import (
 	"github.com/romana/rlog"
 )
 
-type InvalidPasswordError struct {
-	errs.IError
-}
-
-func invalidPassError() errs.Error {
-	return &InvalidPasswordError{
-		errs.NewRequestError("Invalid Password. Try again."),
-	}
-}
-
 /**
  * Method to get called in login route
  * ```
@@ -40,7 +30,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 	var userModel data.User
 	if err := c.Db.Where("email = ?", req.Email).Preload("AuthData").First(&userModel).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return invalidPassError()
+			return errs.InvalidPassError()
 		} else {
 			return errs.NewDbError(err)
 		}
@@ -48,7 +38,7 @@ func LoginUser(c *ctx.Context) errs.Error {
 
 	// check if the password is correct
 	if !utility.CheckPasswordHash(req.Password, userModel.AuthData.PasswordHash) {
-		return invalidPassError()
+		return errs.InvalidPassError()
 	}
 
 	rlog.Debug("Successfully Checked Password")
