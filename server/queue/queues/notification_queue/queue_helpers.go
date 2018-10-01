@@ -3,8 +3,8 @@ package notification_queue
 import (
 	"letstalk/server/data"
 	"letstalk/server/queue"
+	"letstalk/server/utility"
 
-	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 )
@@ -34,9 +34,9 @@ func QueueModelToDataNotificationModel(db *gorm.DB, notification NotificationQue
 	return res, err
 }
 
-func PushNotificationToQueue(sqs *sqs.SQS, notification data.Notification) error {
+func PushNotificationToQueue(notification data.Notification) error {
 	rlog.Debugf("%#v", notification)
 	queueData := DataNotificationModelToQueueModel(notification)
-	_, err := queue.AddNewMessage(sqs, NotificationQueueID, NotificationQueueUrl, queueData)
+	_, err := queue.AddNewMessage(utility.QueueHelper, NotificationQueueID, NotificationQueueUrl, queueData)
 	return err
 }

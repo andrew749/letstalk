@@ -1,8 +1,11 @@
 package utility
 
 import (
+	"letstalk/server/aws_utils"
 	"letstalk/server/core/secrets"
+	"letstalk/server/queue/queues/notification_queue"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/namsral/flag"
 )
 
@@ -23,6 +26,10 @@ var (
 	bootstrapRun = false
 )
 
+var (
+	QueueHelper SQSQueue
+)
+
 // Methods to run before a client is initialized
 func Bootstrap() {
 	flag.Parse()
@@ -30,6 +37,21 @@ func Bootstrap() {
 	// bootstrap secrets from local file
 	secrets.LoadSecrets(*secretsPath)
 	bootstrapRun = true
+	var err error
+
+	// Check if we are in a production environment and do special setup
+	if !IsProductionEnvironment() {
+		var queue SQSMock
+		queue.SubscribeListener(notification_queue.NotificationQueueUrl, func(arg1 *events.SQSEvent) {
+
+		})
+		QueueHelper = queue
+	} else {
+		QueueHelper, err = aws_utils.GetSQSServiceClient()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func checkBootstrapped() {
