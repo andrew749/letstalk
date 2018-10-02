@@ -26,7 +26,6 @@ export interface NewCredentialMatchNotification extends BaseNotification {
 }
 
 interface AdhocNotificationData {
-
 }
 
 export interface AdhocNotification extends BaseNotification {
@@ -35,7 +34,6 @@ export interface AdhocNotification extends BaseNotification {
 }
 
 export interface NewMatchData {
-
 }
 
 export interface NewMatchNotification extends BaseNotification {
@@ -43,7 +41,25 @@ export interface NewMatchNotification extends BaseNotification {
   data: NewMatchData,
 }
 
+export interface ConnectionRequestedData {
+}
+
+export interface ConnectionRequestedNotification extends BaseNotification {
+  type: 'CONNECTION_REQUESTED',
+  data: ConnectionRequestedData,
+}
+
+export interface ConnectionAcceptedData {
+}
+
+export interface ConnectionAcceptedNotification extends BaseNotification {
+  type: 'CONNECTION_ACCEPTED',
+  data: ConnectionAcceptedData,
+}
+
 export type Notification =
   | NewCredentialMatchNotification
   | AdhocNotification
-  | NewMatchNotification;
+  | NewMatchNotification
+  | ConnectionRequestedNotification
+  | ConnectionAcceptedNotification;
