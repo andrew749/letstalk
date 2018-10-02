@@ -46,3 +46,13 @@ func NewDbError(err error) IError {
 func NewEsError(err error) IError {
 	return &ElasticsearchError{NewInternalError("Encountered elasticsearch error: %s", err)}
 }
+
+type InvalidPasswordError struct {
+	IError
+}
+
+func InvalidPassError() Error {
+	return &InvalidPasswordError{
+		NewRequestError("Invalid Password. Try again."),
+	}
+}

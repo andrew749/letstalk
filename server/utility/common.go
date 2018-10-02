@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"letstalk/server/aws_utils"
 	"letstalk/server/core/secrets"
 
 	"github.com/namsral/flag"
@@ -23,6 +24,10 @@ var (
 	bootstrapRun = false
 )
 
+var (
+	QueueHelper SQSQueue
+)
+
 // Methods to run before a client is initialized
 func Bootstrap() {
 	flag.Parse()
@@ -30,6 +35,17 @@ func Bootstrap() {
 	// bootstrap secrets from local file
 	secrets.LoadSecrets(*secretsPath)
 	bootstrapRun = true
+	var err error
+
+	// Check if we are in a production environment and do special setup
+	if !IsProductionEnvironment() {
+		QueueHelper = CreateMockSQSClient()
+	} else {
+		QueueHelper, err = aws_utils.GetSQSServiceClient()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func checkBootstrapped() {

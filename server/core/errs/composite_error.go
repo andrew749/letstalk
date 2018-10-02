@@ -3,6 +3,8 @@ package errs
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 /**
@@ -11,15 +13,16 @@ import (
  * can fail.
  */
 type CompositeError struct {
-	errors   []error
-	HttpCode *int
+	errors     []error
+	HttpCode   *int
+	stackError error
 }
 
 func CreateCompositeError() *CompositeError {
 	ok := 200
 	return &CompositeError{
-		make([]error, 0),
-		&ok,
+		errors:   make([]error, 0),
+		HttpCode: &ok,
 	}
 }
 
@@ -49,6 +52,18 @@ func (ce *CompositeError) AddError(err error) {
 }
 
 const ERROR_FORMAT_STRING = "Error %d:\n%s"
+
+func (ce *CompositeError) StackTrace() errors.StackTrace {
+	// sorta hacky so that we have a trace
+	for _, err := range ce.errors {
+		if e, ok := err.(interface {
+			StackTrace() errors.StackTrace
+		}); ok {
+			return e.StackTrace()
+		}
+	}
+	return []errors.Frame{}
+}
 
 func (ce *CompositeError) VerboseError() string {
 	var buffer bytes.Buffer
