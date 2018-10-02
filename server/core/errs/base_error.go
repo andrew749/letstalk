@@ -9,6 +9,7 @@ import (
 type IError interface {
 	error
 	GetHTTPCode() int
+	StackTrace() errors.StackTrace
 	GetExtraData() map[string]interface{} // key value attributes associated with error
 	VerboseError() string
 }
@@ -33,6 +34,12 @@ func (e *BaseError) VerboseError() string {
 	return fmt.Sprintf("%+v", e.err)
 }
 
+func (e *BaseError) StackTrace() errors.StackTrace {
+	return e.err.(interface {
+		StackTrace() errors.StackTrace
+	}).StackTrace()
+}
+
 func (e *BaseError) GetHTTPCode() int { panic("Abstract Error") }
 
 func (e *BaseError) GetExtraData() map[string]interface{} {
@@ -41,6 +48,9 @@ func (e *BaseError) GetExtraData() map[string]interface{} {
 
 func NewBaseError(msg string, args ...interface{}) *BaseError {
 	extraData := make(map[string]interface{})
-	// add stack trace context information
-	return &BaseError{errors.New(fmt.Sprintf(msg, args...)), extraData}
+	message := fmt.Sprintf(msg, args...)
+	return &BaseError{
+		errors.New(message),
+		extraData,
+	}
 }
