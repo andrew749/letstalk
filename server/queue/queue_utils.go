@@ -2,6 +2,7 @@ package queue
 
 import (
 	"encoding/json"
+	"letstalk/server/utility"
 
 	"github.com/aws/aws-sdk-go/service/sqs"
 )
@@ -37,7 +38,7 @@ func GetQueueLocation(sess *sqs.SQS, queueName *string) (*string, error) {
 }
 
 func AddNewMessage(
-	sess *sqs.SQS,
+	sess utility.SQSQueue,
 	queueId string,
 	queueUrl string,
 	payload interface{},

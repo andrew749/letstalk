@@ -2,7 +2,6 @@ package notifications
 
 import (
 	"encoding/json"
-	"letstalk/server/aws_utils"
 	"letstalk/server/core/linking"
 	"letstalk/server/data"
 	"letstalk/server/queue/queues/notification_queue"
@@ -54,14 +53,8 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 		return err
 	}
 
-	sqsHelper, err := aws_utils.GetSQSServiceClient()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
 	// push to sqs
-	err = notification_queue.PushNotificationToQueue(sqsHelper, *notification)
+	err = notification_queue.PushNotificationToQueue(*notification)
 	if err != nil {
 		tx.Rollback()
 		return err

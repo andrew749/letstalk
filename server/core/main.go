@@ -6,13 +6,16 @@ import (
 	"net/http"
 
 	"fmt"
+	"letstalk/server/constants"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/routes"
 	"letstalk/server/core/search"
 	"letstalk/server/core/secrets"
 	"letstalk/server/core/sessions"
 	"letstalk/server/data"
+	sqs_notification_processor "letstalk/server/jobs/sqs_notification_processor/src"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/gin-contrib/pprof"
 	"github.com/namsral/flag"
 
@@ -92,6 +95,17 @@ func main() {
 		rlog.Info("Running in Development mode")
 		raven.SetTagsContext(map[string]string{
 			"environment": "development",
+		})
+
+		// setup queue listeners for local delivery
+		sqs := utility.QueueHelper.(utility.SQSMock)
+		go sqs.QueueProcessor()
+		sqs.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) error {
+			if err := sqs_notification_processor.SendNotificationLambda(*event); err != nil {
+				rlog.Critical(err)
+				return err
+			}
+			return nil
 		})
 	}
 
