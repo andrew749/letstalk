@@ -35,7 +35,7 @@ type Notification struct {
 	UserId        TUserID    `gorm:"not null"`
 	User          User       `gorm:"foreignkey:UserId"`
 	Type          NotifType  `gorm:"not null;size:190"`
-	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
+	Timestamp     time.Time  `gorm:"not null"` // when the notification was created in the system (not in db)
 	State         NotifState `gorm:"not null;size:190"`
 	Title         string     `gorm:"not null;size:190"`
 	Message       string     `gorm:"not null;type:text"`
