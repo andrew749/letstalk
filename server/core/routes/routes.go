@@ -77,6 +77,9 @@ func Register(
 
 	v1 := router.Group("/v1")
 
+	// additional asset routes
+	v1.Static("/assets", "web/dist/assets/")
+
 	// create a new user
 	v1.OPTIONS("/signup")
 	v1.POST("/signup", hw.wrapHandler(user.SignupUser, false))
@@ -411,6 +414,11 @@ func convertError(e errs.Error) query.Error {
 
 func getSessionData(g *gin.Context, sessionManager *sessions.ISessionManagerBase) (*sessions.SessionData, errs.Error) {
 	sessionId := g.GetHeader("sessionId")
+
+	// if no session id, try checking Cookie
+	if sessionId == "" {
+		sessionId, _ = g.Cookie("sessionId")
+	}
 
 	// check that the user provided a session id
 	if sessionId == "" {
