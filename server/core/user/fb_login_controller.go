@@ -122,8 +122,10 @@ func FBController(c *ctx.Context) errs.Error {
 	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId)
 
 	// store device notification token if one exists
-	if err := data.AddExpoDeviceTokenforUser(c.Db, userId, loginRequest.NotificationToken); err != nil {
-		return errs.NewDbError(errors.Wrap(err, "Unable to register device in db."))
+	if loginRequest.NotificationToken != nil {
+		if err := data.AddExpoDeviceTokenforUser(c.Db, userId, loginRequest.NotificationToken); err != nil {
+			return errs.NewDbError(errors.Wrap(err, "Unable to register device in db."))
+		}
 	}
 
 	if err != nil {
@@ -188,9 +190,11 @@ func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string
 			Error; err != nil {
 			return err
 		}
+	} else {
+		return errors.New("This facebook account is already linked")
 	}
 
-	return errors.New("This facebook account is already linked")
+	return nil
 }
 
 type FBUser struct {
