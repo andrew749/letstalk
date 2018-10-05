@@ -6,40 +6,44 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"letstalk/server/core/notifications"
+
+	"github.com/jinzhu/gorm"
 )
 
 /**
  * AddMentorshipController is an admin function that adds a new mentorship connection.
  */
 func AddMentorshipController(c *ctx.Context) errs.Error {
-	var input api.CreateMentorship
+	var input api.CreateMentorshipByEmail
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
-	if err := handleAddMentorship(c, &input); err != nil {
+	if err := handleAddMentorship(c.Db, &input); err != nil {
 		return err
 	}
-	if err := sendMentorshipNotifications(c, &input); err != nil {
+	if err := sendMentorshipNotifications(c.Db, &input); err != nil {
 		return err
 	}
 	c.Result = "Ok"
 	return nil
 }
 
-func handleAddMentorship(c *ctx.Context, request *api.CreateMentorship) errs.Error {
-	if request.MentorId == request.MenteeId {
+func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
+	var mentor, mentee *data.User
+	var err error
+	if request.MentorEmail == request.MenteeEmail {
 		return errs.NewRequestError("mentor and mentee user must be different")
 	}
-	if user, err := query.GetUserById(c.Db, request.MentorId); err != nil || user == nil {
-		return errs.NewRequestError("no such user %d", request.MentorId)
+	if mentor, err = query.GetUserByEmail(db, request.MentorEmail); err != nil || mentor == nil {
+		return errs.NewRequestError("no such user %s", request.MentorEmail)
 	}
-	if user, err := query.GetUserById(c.Db, request.MenteeId); err != nil || user == nil {
-		return errs.NewRequestError("no such user %d", request.MenteeId)
+	if mentee, err = query.GetUserByEmail(db, request.MenteeEmail); err != nil || mentee == nil {
+		return errs.NewRequestError("no such user %s", request.MenteeEmail)
 	}
-	if conn, err := query.GetConnectionDetailsUndirected(c.Db, request.MentorId, request.MenteeId); err != nil {
+	if conn, err := query.GetConnectionDetailsUndirected(db, mentor.UserId, mentee.UserId); err != nil {
 		return errs.NewDbError(err)
 	} else if conn != nil {
 		return errs.NewRequestError("connection already exists")
@@ -49,30 +53,37 @@ func handleAddMentorship(c *ctx.Context, request *api.CreateMentorship) errs.Err
 	}
 	createdAt := time.Now()
 	mentorship := data.Mentorship{
-		MentorUserId: request.MentorId,
+		MentorUserId: mentor.UserId,
 		CreatedAt: createdAt,
 	}
 	conn := data.Connection{
-		UserOneId: request.MentorId,
-		UserTwoId: request.MenteeId,
+		UserOneId: mentor.UserId,
+		UserTwoId: mentee.UserId,
 		CreatedAt: createdAt,
 		AcceptedAt: &createdAt, // Automatically accept.
 		Intent: &intent,
 		Mentorship: &mentorship,
 	}
-	if err := c.Db.Create(&conn).Error; err != nil {
+	if err := db.Create(&conn).Error; err != nil {
 		return errs.NewDbError(err)
 	}
 	return nil
 }
 
-func sendMentorshipNotifications(c *ctx.Context, request *api.CreateMentorship) errs.Error {
+func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
+	mentor, err := query.GetUserByEmail(db, request.MentorEmail)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+	mentee, _ := query.GetUserByEmail(db, request.MenteeEmail)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
 	// Send notifications to matched pair.
-	notifErr1 := notifications.NewMenteeNotification(c.Db, request.MentorId, request.MenteeId)
-	notifErr2 := notifications.NewMentorNotification(c.Db, request.MenteeId, request.MentorId)
+	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee.UserId)
+	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor.UserId)
 	if notifErr1 != nil || notifErr2 != nil {
 		return errs.NewInternalError("error sending user notifications: %v; %v", notifErr1, notifErr2)
 	}
 	return nil
 }
-

@@ -1,12 +1,13 @@
 package connection
 
 import (
+	"testing"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/query"
 	"letstalk/server/core/test"
 	"letstalk/server/data"
-	"testing"
 
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
@@ -19,19 +20,16 @@ func TestAddMentorship(t *testing.T) {
 	tests := []test.Test{
 		{
 			Test: func(db *gorm.DB) {
-				c := ctx.NewContext(nil, db, nil, nil, nil)
-				userOne := user.CreateUserForTest(t, c.Db)
-				userTwo := user.CreateUserForTest(t, c.Db)
-				// Create new connection request
-				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
-				request := api.CreateMentorship{
-					MentorId: userOne.UserId,
-					MenteeId: userTwo.UserId,
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				request := api.CreateMentorshipByEmail{
+					MentorEmail: userOne.Email,
+					MenteeEmail: userTwo.Email,
 				}
-				requestError := handleAddMentorship(c, &request)
+				requestError := handleAddMentorship(db, &request)
 				assert.NoError(t, requestError)
 				// Check all database tables are updated.
-				conn, err := query.GetConnectionDetails(c.Db, userOne.UserId, userTwo.UserId)
+				conn, err := query.GetConnectionDetails(db, userOne.UserId, userTwo.UserId)
 				assert.NoError(t, err)
 				assert.Equal(t, userOne.UserId, conn.UserOneId)
 				assert.Equal(t, userTwo.UserId, conn.UserTwoId)
@@ -46,12 +44,12 @@ func TestAddMentorship(t *testing.T) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
-				request := api.CreateMentorship{
-					MentorId: userOne.UserId,
-					MenteeId: userOne.UserId,
+				request := api.CreateMentorshipByEmail{
+					MentorEmail: userOne.Email,
+					MenteeEmail: userOne.Email,
 				}
 				// Same user id.
-				assert.Error(t, handleAddMentorship(c, &request))
+				assert.Error(t, handleAddMentorship(c.Db, &request))
 				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
 				connRequest := api.ConnectionRequest{
 					UserId:        userTwo.UserId,
@@ -59,17 +57,17 @@ func TestAddMentorship(t *testing.T) {
 				}
 				handleRequestConnection(c, connRequest)
 				// Connection already exists.
-				request = api.CreateMentorship{
-					MentorId: userOne.UserId,
-					MenteeId: userTwo.UserId,
+				request = api.CreateMentorshipByEmail{
+					MentorEmail: userOne.Email,
+					MenteeEmail: userTwo.Email,
 				}
-				assert.Error(t, handleAddMentorship(c, &request))
-				request = api.CreateMentorship{
-					MentorId: 100,
-					MenteeId: userTwo.UserId,
+				assert.Error(t, handleAddMentorship(c.Db, &request))
+				request = api.CreateMentorshipByEmail{
+					MentorEmail: "bademail@mail.com",
+					MenteeEmail: userTwo.Email,
 				}
 				// No such user.
-				assert.Error(t, handleAddMentorship(c, &request))
+				assert.Error(t, handleAddMentorship(c.Db, &request))
 			},
 			TestName: "Test bad requests",
 		},

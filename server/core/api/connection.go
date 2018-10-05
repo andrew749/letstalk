@@ -24,7 +24,7 @@ type RemoveConnection struct {
 	UserId data.TUserID `json:"userId" binding:"required"`
 }
 
-type CreateMentorship struct {
-	MenteeId data.TUserID `json:"menteeId" binding:"required"`
-	MentorId data.TUserID `json:"mentorId" binding:"required"`
+type CreateMentorshipByEmail struct {
+	MenteeEmail string `json:"menteeEmail" binding:"required"`
+	MentorEmail string `json:"mentorEmail" binding:"required"`
 }
