@@ -94,10 +94,10 @@ func NewMultiTraitFromUserCohort(userCohort *data.UserCohort) (string, *CohortMu
 	id := fmt.Sprintf("%s-%d", MULTI_TRAIT_TYPE_COHORT, cohort.CohortId)
 
 	var traitName string
-	if cohort.SequenceName != nil {
-		traitName = fmt.Sprintf("%s %d %s", cohort.ProgramName, cohort.GradYear, *cohort.SequenceName)
-	} else {
+	if cohort.SequenceName == nil || *cohort.SequenceId == "OTHER" {
 		traitName = fmt.Sprintf("%s %d", cohort.ProgramName, cohort.GradYear)
+	} else {
+		traitName = fmt.Sprintf("%s %d %s", cohort.ProgramName, cohort.GradYear, *cohort.SequenceName)
 	}
 
 	cohortMultiTrait := &CohortMultiTrait{
