@@ -1,13 +1,15 @@
 package connection
 
 import (
+	"fmt"
+	"time"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-
-	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -58,13 +60,20 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		SearchedTrait: request.SearchedTrait,
 		Message:       request.Message,
 	}
-	// TODO(aklen): send notification to requested user
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		if err := tx.Create(&connection).Error; err != nil {
 			return err
 		}
 		intent.ConnectionId = connection.ConnectionId
 		if err := tx.Create(&intent).Error; err != nil {
+			return err
+		}
+		if err := notifications.ConnectionRequestedNotification(
+			tx,
+			connUser.UserId,
+			authUser.UserId,
+			fmt.Sprintf("%s %s", authUser.FirstName, authUser.LastName),
+		); err != nil {
 			return err
 		}
 		return nil
@@ -116,10 +125,31 @@ func handleAcceptConnection(
 		result.AcceptedAt = connection.AcceptedAt
 		return &result, nil
 	}
+	authUser, err := query.GetUserById(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return nil, errs.NewRequestError("Cannot find myself")
+	}
+	connUser, err := query.GetUserById(c.Db, request.UserId)
+	if err != nil {
+		return nil, errs.NewRequestError("Invalid user id")
+	}
 	now := time.Now()
 	connection.AcceptedAt = &now
-	// TODO(aklen): send notification to accepted user
-	if err := c.Db.Save(connection).Error; err != nil {
+	dbErr := c.WithinTx(func(tx *gorm.DB) error {
+		if err := tx.Save(connection).Error; err != nil {
+			return err
+		}
+		if err := notifications.ConnectionAcceptedNotification(
+			tx,
+			connUser.UserId,
+			authUser.UserId,
+			fmt.Sprintf("%s %s", authUser.FirstName, authUser.LastName),
+		); err != nil {
+			return err
+		}
+		return nil
+	})
+	if dbErr != nil {
 		return nil, errs.NewDbError(err)
 	}
 	result.AcceptedAt = connection.AcceptedAt
@@ -148,9 +178,6 @@ func removeConnection(c *ctx.Context, request api.RemoveConnection) errs.Error {
 	}
 	if connection == nil {
 		return nil
-	}
-	if connection.AcceptedAt == nil && connection.UserOneId != meUserId {
-		return errs.NewRequestError("cannot delete a connection you did not request")
 	}
 
 	if err := c.Db.Delete(&connection).Error; err != nil {

@@ -21,6 +21,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "1",
 			Migrate: func(tx *gorm.DB) error {
+				// TODO: Do error checking here like below.
 				tx.AutoMigrate(&AuthenticationData{})
 				tx.AutoMigrate(&Cohort{})
 				tx.AutoMigrate(&User{})
@@ -48,8 +49,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "2",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Notification{})
-				return tx.Error
+				return tx.AutoMigrate(&Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -58,8 +58,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "3",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&NotificationPage{})
-				return tx.Error
+				return tx.AutoMigrate(&NotificationPage{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -68,20 +67,40 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "TRAITS_DATA_MODELS_V1_5",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Organization{})
-				tx.AutoMigrate(&Role{})
-				tx.AutoMigrate(&UserPosition{})
-				tx.AutoMigrate(&SimpleTrait{})
-				tx.AutoMigrate(&UserSimpleTrait{})
-				tx.AutoMigrate(&UserLocation{})
-				tx.AutoMigrate(&Cohort{})
+				err := tx.AutoMigrate(&Organization{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&Role{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserPosition{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&SimpleTrait{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserSimpleTrait{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserLocation{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&Cohort{}).Error
+				if err != nil {
+					return err
+				}
 				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
 				// exists.
 				if !isSQLite(tx) {
 					tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(190)")
 				}
-				tx.AutoMigrate(&UserCohort{})
-				return tx.Error
+				return tx.AutoMigrate(&UserCohort{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -90,8 +109,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Pending sent notifications",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&ExpoPendingNotification{})
-				return tx.Error
+				return tx.AutoMigrate(&ExpoPendingNotification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -107,7 +125,10 @@ func migrateDB(db *gorm.DB) {
 				}
 
 				// create required table
-				tx.AutoMigrate(&UserDevice{})
+				err := tx.AutoMigrate(&UserDevice{}).Error
+				if err != nil {
+					return err
+				}
 
 				// row to scan results into
 				type Row struct {
@@ -149,8 +170,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Add book-keeping for monthly notification",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(SentMonthlyNotification{})
-				return tx.Error
+				return tx.AutoMigrate(SentMonthlyNotification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -159,9 +179,11 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Verify email id",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&VerifyEmailId{})
-				tx.AutoMigrate(&User{}) // Added IsEmailVerified column.
-				return tx.Error
+				err := tx.AutoMigrate(&VerifyEmailId{}).Error
+				if err != nil {
+					return err
+				}
+				return tx.AutoMigrate(&User{}).Error // Added IsEmailVerified column.
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -170,8 +192,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Add deep linking field on notification",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Notification{})
-				return tx.Error
+				return tx.AutoMigrate(&Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil

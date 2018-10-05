@@ -51,7 +51,7 @@ import RequestConnectionView from './views/RequestConnectionView';
 import RequestsView from './views/RequestsView';
 import UpdatePersonalView from './views/UpdatePersonalView';
 
-import NotificationService, { Notification } from './services/notification-service';
+import NotificationService, { RawNotification } from './services/notification-service';
 import navService from './services/navigation-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
@@ -268,7 +268,7 @@ class App extends React.Component<Props, AppState> {
   }
 
   async handleNotification(notification: any) {
-    await this.notificationService.handleNotification(notification as Notification);
+    await this.notificationService.handleNotification(notification as RawNotification);
   }
 
   private linkHandler = (event: {url: string}) => {
