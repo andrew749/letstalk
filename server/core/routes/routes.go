@@ -44,6 +44,7 @@ func adminAuthMiddleware(db *gorm.DB, sessionManager *sessions.ISessionManagerBa
 		}
 		authUser, e := query.GetUserById(db, session.UserId)
 		if e != nil || !auth.HasAdminAccess(authUser) {
+			rlog.Infof("rejected non-admin user with id %d", authUser.UserId)
 			g.AbortWithStatusJSON(http.StatusNotFound, "404 page not found")
 			return
 		}
