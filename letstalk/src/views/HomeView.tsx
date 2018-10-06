@@ -29,7 +29,6 @@ import { RootState } from '../redux';
 import {
   State as BootstrapState,
   fetchBootstrap,
-  removeRtmMatches,
 } from '../redux/bootstrap/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
@@ -59,7 +58,6 @@ interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
-  removeRtmMatches: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
 }
 
 interface Props extends BootstrapState, DispatchActions {
@@ -118,6 +116,7 @@ class HomeView extends Component<Props, State> {
 
   private async load() {
     await this.props.fetchBootstrap();
+    console.log("fetched bootstrap", this.props.bootstrap);
   }
 
   private async onRefresh() {
@@ -499,7 +498,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap, removeRtmMatches })(HomeView);
+  { errorToast, infoToast, fetchBootstrap })(HomeView);
 
 const styles = StyleSheet.create({
   container: {
