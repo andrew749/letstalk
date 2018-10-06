@@ -11,6 +11,7 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 /**
@@ -22,6 +23,7 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 	if err := handleAddMentorship(c.Db, &input); err != nil {
+		rlog.Error("failed to add mentorship for mentor/mentee pair", input)
 		return err
 	}
 	if err := sendMentorshipNotifications(c.Db, &input); err != nil {
@@ -83,7 +85,9 @@ func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEma
 	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee.UserId)
 	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor.UserId)
 	if notifErr1 != nil || notifErr2 != nil {
-		return errs.NewInternalError("error sending user notifications: %v; %v", notifErr1, notifErr2)
+		err := errs.NewInternalError("error sending user notifications: %v; %v", notifErr1, notifErr2)
+		rlog.Error(err)
+		return err
 	}
 	return nil
 }

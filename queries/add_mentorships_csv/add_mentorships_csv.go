@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 
 	"golang.org/x/crypto/ssh/terminal"
-	"letstalk/server/core/query"
 )
 
 const mentorField = "Mentor Email"
@@ -40,6 +40,7 @@ func login(server string) string {
 	if password, err = terminal.ReadPassword(0); err != nil {
 		panic(err)
 	}
+	fmt.Println()
 	// Log in with credentials.
 	loginRequest := api.LoginRequestData{
 		Email: strings.TrimSpace(email),
@@ -120,10 +121,12 @@ func main() {
 	for _, line := range fullCsv[1:] {
 		mentorEmail := line[fields[mentorField]]
 		menteeEmail := line[fields[menteeField]]
-		fmt.Printf("mentor '%s', mentee '%s'\n", mentorEmail, menteeEmail)
+		fmt.Printf("mentor: '%s', mentee: '%s'", mentorEmail, menteeEmail)
 		if len(*serverFlag) > 0 {
 			if err := addMentorship(server, sessionId, mentorEmail, menteeEmail); err != nil {
-				fmt.Println("failed to add", err)
+				fmt.Printf("\nfailed to add (%s,%s): %v\n", mentorEmail, menteeEmail, err)
+			} else {
+				fmt.Println(" ok!")
 			}
 		}
 	}
