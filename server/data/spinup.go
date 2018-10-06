@@ -21,6 +21,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "1",
 			Migrate: func(tx *gorm.DB) error {
+				// TODO: Do error checking here like below.
 				tx.AutoMigrate(&AuthenticationData{})
 				tx.AutoMigrate(&Cohort{})
 				tx.AutoMigrate(&User{})
@@ -48,8 +49,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "2",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Notification{})
-				return tx.Error
+				return tx.AutoMigrate(&Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -58,8 +58,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "3",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&NotificationPage{})
-				return tx.Error
+				return tx.AutoMigrate(&NotificationPage{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -68,20 +67,40 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "TRAITS_DATA_MODELS_V1_5",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Organization{})
-				tx.AutoMigrate(&Role{})
-				tx.AutoMigrate(&UserPosition{})
-				tx.AutoMigrate(&SimpleTrait{})
-				tx.AutoMigrate(&UserSimpleTrait{})
-				tx.AutoMigrate(&UserLocation{})
-				tx.AutoMigrate(&Cohort{})
+				err := tx.AutoMigrate(&Organization{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&Role{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserPosition{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&SimpleTrait{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserSimpleTrait{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&UserLocation{}).Error
+				if err != nil {
+					return err
+				}
+				err = tx.AutoMigrate(&Cohort{}).Error
+				if err != nil {
+					return err
+				}
 				// NOTE: Need to make Cohort.SequenceId nullable, since we not longer enforce that it
 				// exists.
 				if !isSQLite(tx) {
 					tx.Model(&Cohort{}).ModifyColumn("sequence_id", "varchar(190)")
 				}
-				tx.AutoMigrate(&UserCohort{})
-				return tx.Error
+				return tx.AutoMigrate(&UserCohort{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -90,8 +109,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Pending sent notifications",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&ExpoPendingNotification{})
-				return tx.Error
+				return tx.AutoMigrate(&ExpoPendingNotification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -107,7 +125,10 @@ func migrateDB(db *gorm.DB) {
 				}
 
 				// create required table
-				tx.AutoMigrate(&UserDevice{})
+				err := tx.AutoMigrate(&UserDevice{}).Error
+				if err != nil {
+					return err
+				}
 
 				// row to scan results into
 				type Row struct {
@@ -149,8 +170,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Add book-keeping for monthly notification",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(SentMonthlyNotification{})
-				return tx.Error
+				return tx.AutoMigrate(SentMonthlyNotification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -159,9 +179,11 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Verify email id",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&VerifyEmailId{})
-				tx.AutoMigrate(&User{}) // Added IsEmailVerified column.
-				return tx.Error
+				err := tx.AutoMigrate(&VerifyEmailId{}).Error
+				if err != nil {
+					return err
+				}
+				return tx.AutoMigrate(&User{}).Error // Added IsEmailVerified column.
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -170,8 +192,7 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "Add deep linking field on notification",
 			Migrate: func(tx *gorm.DB) error {
-				tx.AutoMigrate(&Notification{})
-				return tx.Error
+				return tx.AutoMigrate(&Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
@@ -307,6 +328,117 @@ func migrateDB(db *gorm.DB) {
 				// modify column to be nullable
 				if !isSQLite(tx) {
 					return db.Model(&User{}).ModifyColumn("birthdate", "varchar(100)").Error
+				}
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add other programs 2018 - 2023",
+			Migrate: func(tx *gorm.DB) error {
+				var programs = map[string]string{
+					"ACCOUNTING_AND_FINANCIAL_MANAGEMENT":                        "Accounting and Financial Management",
+					"ACTUARIAL_SCIENCE":                                          "Actuarial Science",
+					"ANTHROPOLOGY":                                               "Anthropology",
+					"APPLIED_MATHEMATICS":                                        "Applied Mathematics",
+					"ARCHITECTURE":                                               "Architecture",
+					"BIOCHEMISTRY":                                               "Biochemistry",
+					"BIOLOGY":                                                    "Biology",
+					"BIOMEDICAL_SCIENCES":                                        "Biomedical Sciences",
+					"BIOSTATISTICS":                                              "Biostatistics",
+					"BIOTECHNOLOGY/CHARTERED_PROFESSIONAL_ACCOUNTANCY":           "Biotechnology/Chartered Professional Accountancy",
+					"BIOTECHNOLOGY/ECONOMICS":                                    "Biotechnology/Economics",
+					"BUSINESS_ADMINISTRATION_AND_COMPUTER_SCIENCE_DOUBLE_DEGREE": "Business Administration and Computer Science Double Degree",
+					"BUSINESS_ADMINISTRATION_AND_MATHEMATICS_DOUBLE_DEGREE":      "Business Administration and Mathematics Double Degree",
+					"CHEMISTRY":                                 "Chemistry",
+					"CLASSICAL_STUDIES":                         "Classical Studies",
+					"COMBINATORICS_AND_OPTIMIZATION":            "Combinatorics and Optimization",
+					"COMPUTATIONAL_MATHEMATICS":                 "Computational Mathematics",
+					"COMPUTER_SCIENCE":                          "Computer Science",
+					"COMPUTING_AND_FINANCIAL_MANAGEMENT":        "Computing and Financial Management",
+					"DATA_SCIENCE":                              "Data Science",
+					"EARTH_SCIENCES":                            "Earth Sciences",
+					"ECONOMICS":                                 "Economics",
+					"ENGLISH":                                   "English",
+					"ENVIRONMENT_AND_BUSINESS":                  "Environment and Business",
+					"ENVIRONMENT,_RESOURCES_AND_SUSTAINABILITY": "Environment, Resources and Sustainability",
+					"ENVIRONMENTAL_SCIENCE":                     "Environmental Science",
+					"FINE_ARTS":                                 "Fine Arts",
+					"FRENCH":                                    "French",
+					"GENDER_AND_SOCIAL_JUSTICE":                 "Gender and Social Justice",
+					"GEOGRAPHY_AND_AVIATION":                    "Geography and Aviation",
+					"GEOGRAPHY_AND_ENVIRONMENTAL_MANAGEMENT":    "Geography and Environmental Management",
+					"GEOMATICS":                                 "Geomatics",
+					"GERMAN":                                    "German",
+					"GLOBAL_BUSINESS_AND_DIGITAL_ARTS":                   "Global Business and Digital Arts",
+					"HEALTH_STUDIES":                                     "Health Studies",
+					"HISTORY":                                            "History",
+					"HONOURS_ARTS":                                       "Honours Arts",
+					"HONOURS_ARTS_AND_BUSINESS":                          "Honours Arts and Business",
+					"HONOURS_SCIENCE":                                    "Honours Science",
+					"INFORMATION_TECHNOLOGY_MANAGEMENT":                  "Information Technology Management",
+					"INTERNATIONAL_DEVELOPMENT":                          "International Development",
+					"KINESIOLOGY":                                        "Kinesiology",
+					"KNOWLEDGE_INTEGRATION":                              "Knowledge Integration",
+					"LEGAL_STUDIES":                                      "Legal Studies",
+					"LIBERAL_STUDIES":                                    "Liberal Studies",
+					"LIFE_PHYSICS":                                       "Life Physics",
+					"LIFE_SCIENCES":                                      "Life Sciences",
+					"MATERIALS_AND_NANOSCIENCES":                         "Materials and Nanosciences",
+					"MATHEMATICAL_ECONOMICS":                             "Mathematical Economics",
+					"MATHEMATICAL_FINANCE":                               "Mathematical Finance",
+					"MATHEMATICAL_OPTIMIZATION":                          "Mathematical Optimization",
+					"MATHEMATICAL_PHYSICS":                               "Mathematical Physics",
+					"MATHEMATICAL_STUDIES":                               "Mathematical Studies",
+					"MATHEMATICS":                                        "Mathematics",
+					"MATHEMATICS/BUSINESS_ADMINISTRATION":                "Mathematics/Business Administration",
+					"MATHEMATICS/CHARTERED_PROFESSIONAL_ACCOUNTANCY":     "Mathematics/Chartered Professional Accountancy",
+					"MATHEMATICS/FINANCIAL_ANALYSIS_AND_RISK_MANAGEMENT": "Mathematics/Financial Analysis and Risk Management",
+					"MEDICINAL_CHEMISTRY":                                "Medicinal Chemistry",
+					"MEDIEVAL_STUDIES":                                   "Medieval Studies",
+					"MUSIC":                                              "Music",
+					"PEACE_AND_CONFLICT_STUDIES":     "Peace and Conflict Studies",
+					"PHILOSOPHY":                     "Philosophy",
+					"PHYSICAL_SCIENCES":              "Physical Sciences",
+					"PHYSICS":                        "Physics",
+					"PHYSICS_AND_ASTRONOMY":          "Physics and Astronomy",
+					"PLANNING":                       "Planning",
+					"POLITICAL_SCIENCE":              "Political Science",
+					"PSYCHOLOGY":                     "Psychology",
+					"PUBLIC_HEALTH":                  "Public Health",
+					"PURE_MATHEMATICS":               "Pure Mathematics",
+					"RECREATION_AND_LEISURE_STUDIES": "Recreation and Leisure Studies",
+					"RECREATION_AND_SPORT_BUSINESS":  "Recreation and Sport Business",
+					"SCIENCE_AND_AVIATION":           "Science and Aviation",
+					"SCIENCE_AND_BUSINESS":           "Science and Business",
+					"SPANISH":                        "Spanish",
+					"SPEECH_COMMUNICATION":           "Speech Communication",
+					"STATISTICS":                     "Statistics",
+					"THEATRE_AND_PERFORMANCE":        "Theatre and Performance",
+					"THERAPEUTIC_RECREATION":         "Therapeutic Recreation",
+					"TOURISM_DEVELOPMENT":            "Tourism Development",
+					"OTHER":                          "Other",
+				}
+
+				for gradYear := uint(2018); gradYear <= uint(2023); gradYear++ {
+					for programId, programName := range programs {
+						sequenceName := "Other"
+						sequenceId := "OTHER"
+						cohort := &Cohort{
+							ProgramId:    programId,
+							ProgramName:  programName,
+							GradYear:     gradYear,
+							IsCoop:       false,
+							SequenceName: &sequenceName,
+							SequenceId:   &sequenceId,
+						}
+						err := db.Save(cohort).Error
+						if err != nil {
+							return err
+						}
+					}
 				}
 				return nil
 			},

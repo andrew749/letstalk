@@ -68,9 +68,9 @@ class NotificationView extends Component<Props, State> {
 
   static navigationOptions = {
     headerTitle: 'Notifications',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   }
 
   constructor(props: Props) {
@@ -130,7 +130,6 @@ class NotificationView extends Component<Props, State> {
     // update action to use deeplink
     if (link !== null && link !== undefined) {
       let { path, queryParams } = Linking.parse(link);
-      console.log("Handling notification with path " + path);
       onPressAction = this.props.navigation.navigate.bind(this, path, queryParams);
     }
 

@@ -74,6 +74,7 @@ interface DispatchActions {
 interface NavigationParams {
   readonly userId: number,
   readonly connectionIntent?: ConnectionIntent,
+  readonly showRequestButton?: string,
 }
 
 interface Props extends MatchProfileState, DispatchActions {
@@ -85,9 +86,9 @@ class MatchProfileView extends Component<Props> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: 'Profile',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   })
 
   constructor(props: Props) {
@@ -219,7 +220,14 @@ class MatchProfileView extends Component<Props> {
       userId = this.props.profile.userId.toString();
     }
 
-    const connectionIntent = this.props.navigation.getParam('connectionIntent', null)
+    let connectionIntent = this.props.navigation.getParam('connectionIntent', null)
+    if (!connectionIntent && !!this.props.navigation.getParam('showRequestButton', null)) {
+      // Little bit of a hack to get the accepted at button to show.
+      connectionIntent = {
+        intentType: IntentTypes.REC_GENERAL,
+        searchedTrait: null,
+      };
+    }
     const extraStyle = !!connectionIntent && !isConnected ? { paddingBottom: 80 } : null;
 
     return (
