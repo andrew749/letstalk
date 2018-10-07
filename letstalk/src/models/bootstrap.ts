@@ -65,7 +65,6 @@ interface BootstrapConnections {
 }
 
 export interface BootstrapData {
-  readonly relationships: Immutable.List<Relationship>;
   readonly state: UserState;
   readonly cohort: Cohort;
   readonly onboardingStatus: OnboardingStatus;

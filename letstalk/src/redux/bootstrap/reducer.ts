@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import { ActionCreator, Dispatch } from 'redux'
 import { ThunkAction } from 'redux-thunk';
 
@@ -15,7 +14,6 @@ import {
 import { setOnboardingStatusAction } from '../onboarding/actions';
 import {
   fetch,
-  removeRtmMatchesAction,
   ActionTypes,
   TypeKeys,
 } from './actions';
@@ -43,23 +41,9 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         fetchState: fetchStateReducer(action),
         bootstrap: getDataOrCur(action, state.bootstrap),
       };
-    case TypeKeys.REMOVE_RTM_MATCHES:
-      if (state.bootstrap === null) return state;
-      const relationships = state.bootstrap.relationships.filterNot(relationship => {
-        return (relationship.userType === USER_TYPE_ASKER ||
-          relationship.userType === USER_TYPE_ANSWERER) &&
-          relationship.userId === action.userId;
-      }).toList();
-      return {
-        ...state,
-        bootstrap: {
-          ...state.bootstrap,
-          relationships
-        },
-      };
     default:
       // Ensure exhaustiveness of select
-      const _: never = action;
+      const _: never = action.type;
       return state;
   }
 };
@@ -78,12 +62,4 @@ const fetchBootstrap: ActionCreator<
   };
 }
 
-const removeRtmMatches: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = (userId: number) => {
-  return async (dispatch: Dispatch<State>) => {
-    await requestToMatchService.removeRtmMatches(userId);
-    return dispatch(removeRtmMatchesAction(userId));
-  }
-}
-
-export { fetchBootstrap, removeRtmMatches };
+export { fetchBootstrap };

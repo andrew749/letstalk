@@ -29,7 +29,6 @@ import { RootState } from '../redux';
 import {
   State as BootstrapState,
   fetchBootstrap,
-  removeRtmMatches,
 } from '../redux/bootstrap/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';

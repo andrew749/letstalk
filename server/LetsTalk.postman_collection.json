@@ -322,7 +322,7 @@
 			"response": []
 		},
 		{
-			"name": "New Matching",
+			"name": "Request Connection",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -337,16 +337,108 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"mentor\": 1,\n\t\"mentee\": 2\n}"
+					"raw": "{\n\t\"userId\": 5,\n\t\"intentType\": \"search\"\n}"
 				},
 				"url": {
-					"raw": "{{server_ip}}/debug/matching",
+					"raw": "{{server_ip}}/v1/connection",
 					"host": [
 						"{{server_ip}}"
 					],
 					"path": [
-						"debug",
-						"matching"
+						"v1",
+						"connection"
+					]
+				},
+				"description": "Update the user vector"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin Add Mentorship",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "{{session_id}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"mentorId\": 5,\n\t\"menteeId\": 6\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/admin/mentorship",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"admin",
+						"mentorship"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Connection",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "sessionId",
+						"value": "{{session_id}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"userId\": 4,\n\t\"intentType\": \"search\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/connection/accept",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"connection",
+						"accept"
+					]
+				},
+				"description": "Update the user vector"
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"1d46c008-e805-4f8a-9094-baa691a1e550\"\n}"
+				},
+				"url": {
+					"raw": "{{server_ip}}/v1/verify_email",
+					"host": [
+						"{{server_ip}}"
+					],
+					"path": [
+						"v1",
+						"verify_email"
 					]
 				},
 				"description": "Update the user vector"

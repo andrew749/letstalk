@@ -1,5 +1,3 @@
-import { Action } from 'redux'
-
 import { BootstrapData } from '../../models/bootstrap';
 import {
   FetchReceiveAction,
@@ -12,24 +10,11 @@ import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH              = 'BOOTSTRAP/FETCH',
-  REMOVE_RTM_MATCHES = 'BOOTSTRAP/REMOVE_RTM_MATCHES',
 }
 
 type BootstrapReceiveAction = FetchReceiveAction<TypeKeys.FETCH, BootstrapData>;
 type BootstrapErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type BootstrapStartAction = FetchStartAction<TypeKeys.FETCH>;
-
-export interface BootstrapRemoveRtmMatchesAction extends Action {
-  readonly type: TypeKeys.REMOVE_RTM_MATCHES;
-  readonly userId: number;
-}
-
-export function removeRtmMatchesAction(userId: number): BootstrapRemoveRtmMatchesAction {
-  return {
-    type: TypeKeys.REMOVE_RTM_MATCHES,
-    userId,
-  };
-}
 
 function receive(data: BootstrapData): BootstrapReceiveAction {
   return {
@@ -66,4 +51,3 @@ export type ActionTypes =
   | BootstrapReceiveAction
   | BootstrapErrorAction
   | BootstrapStartAction
-  | BootstrapRemoveRtmMatchesAction
