@@ -286,6 +286,13 @@ class RequestsView extends Component<Props, State> {
     } = this.props.bootstrap.connections;
 
     const elements: Array<ReactNode> = [];
+    if (incomingRequests.isEmpty() && outgoingRequests.isEmpty()) {
+      elements.push(
+        <View key={'no-more-results'} style={styles.noMoreResults}>
+          <Text style={{color: 'gray'}}>You have no more requests</Text>
+        </View>
+      );
+    }
     if (!incomingRequests.isEmpty()) {
       elements.push(<Header key={'incoming'}>Incoming Requests</Header>);
       elements.push(incomingRequests.map((req, idx, lst) => {
@@ -377,5 +384,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+  },
+  noMoreResults: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+    alignItems: 'center',
   },
 })
