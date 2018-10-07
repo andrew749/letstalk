@@ -116,7 +116,6 @@ class HomeView extends Component<Props, State> {
 
   private async load() {
     await this.props.fetchBootstrap();
-    console.log("fetched bootstrap", this.props.bootstrap);
   }
 
   private async onRefresh() {
