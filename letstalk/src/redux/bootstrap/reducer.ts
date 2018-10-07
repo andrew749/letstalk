@@ -43,7 +43,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       };
     default:
       // Ensure exhaustiveness of select
-      const _: never = action;
+      const _: never = action.type;
       return state;
   }
 };
