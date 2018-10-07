@@ -71,7 +71,7 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 	}
 
 	// Send push notifications asynchronously.
-	sendMatchNotifications(c, mentor.UserId, mentee.UserId)
+	sendMatchNotifications(c, mentor, mentee)
 
 	c.Result = convertMatchingDataToApi(matching)
 	return nil
@@ -91,11 +91,11 @@ func convertMatchingDataToApi(matching *data.Matching) *api.Matching {
 
 func sendMatchNotifications(
 	c *ctx.Context,
-	mentorId data.TUserID,
-	menteeId data.TUserID,
+	mentor *data.User,
+	mentee *data.User,
 ) errs.Error {
-	err1 := notifications.NewMentorNotification(c.Db, menteeId, mentorId)
-	err2 := notifications.NewMenteeNotification(c.Db, mentorId, menteeId)
+	err1 := notifications.NewMentorNotification(c.Db, mentee.UserId, mentor)
+	err2 := notifications.NewMenteeNotification(c.Db, mentor.UserId, mentee)
 	var err *errs.CompositeError
 	if err1 != nil {
 		rlog.Debug(err1.Error())

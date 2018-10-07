@@ -42,8 +42,7 @@ func RequestToMatchNotification(
 	)
 }
 
-func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUserID, message string) error {
-	title := "You got a match!"
+func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUserID, title string, message string) error {
 	link := linking.GetMatchProfileUrl(userId)
 	return CreateAndSendNotification(
 		db,
@@ -57,14 +56,18 @@ func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUser
 	)
 }
 
-// NewMentorNotification: Tell a user that they have a new mentor
-func NewMentorNotification(db *gorm.DB, recipient data.TUserID, mentorUserId data.TUserID) error {
-	return newMatchNotification(db, recipient, mentorUserId, "You were matched with a new mentor.")
+// NewMentorNotification tells a user that they have a new mentor.
+func NewMentorNotification(db *gorm.DB, recipient data.TUserID, mentor *data.User) error {
+	title := "You have a new mentor!"
+	message := fmt.Sprintf("You've been matched with a new mentor: %s %s", mentor.FirstName, mentor.LastName)
+	return newMatchNotification(db, recipient, mentor.UserId, title, message)
 }
 
-// NewMenteeNotification: Tell a user they have a new mentee
-func NewMenteeNotification(db *gorm.DB, recipient data.TUserID, menteeUserId data.TUserID) error {
-	return newMatchNotification(db, recipient, menteeUserId, "You were matched with a new mentee.")
+// NewMenteeNotification tells a user they have a new mentee.
+func NewMenteeNotification(db *gorm.DB, recipient data.TUserID, mentee *data.User) error {
+	title := "You have a new mentee!"
+	message := fmt.Sprintf("You've been matched with a new mentee: %s %s", mentee.FirstName, mentee.LastName)
+	return newMatchNotification(db, recipient, mentee.UserId, title, message)
 }
 
 func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName string, userId data.TUserID) error {
