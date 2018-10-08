@@ -10,8 +10,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
-import NotificationService from '../services/notification-service';
-import { Linking } from 'expo';
 
 const styles = StyleSheet.create({
   root: {
