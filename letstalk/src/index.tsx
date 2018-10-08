@@ -80,6 +80,12 @@ const styles = StyleSheet.create({
   toastMessageStyle: {
     color: 'white',
   },
+  toastContainerStyle: {
+    backgroundColor: Colors.HIVE_PRIMARY,
+  },
+  toastErrorStyle: {
+    backgroundColor: Colors.HIVE_ERROR,
+  },
 });
 
 interface TabBarState {
@@ -305,7 +311,10 @@ class App extends React.Component<Props, AppState> {
             ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
             notificationBodyComponent={ NotificationBody }
           />
-          <Toast messageStyle={styles.toastMessageStyle} />
+          <Toast
+            containerStyle={styles.toastContainerStyle}
+            messageStyle={styles.toastMessageStyle}
+            errorStyle={styles.toastErrorStyle} />
         </View>
       </Provider>
     );
