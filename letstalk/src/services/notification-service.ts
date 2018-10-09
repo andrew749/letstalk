@@ -12,6 +12,7 @@ import { Notification } from '../models/notification';
 
 export interface RawNotification {
   readonly data: Notification;
+  readonly origin: 'selected' | 'received';
 }
 
 export default class NotificationService {
@@ -67,6 +68,7 @@ export default class NotificationService {
   }
 
   private onPress(notification: Notification) {
+    // update action to use deeplink
     return () => {
       switch (notification.type) {
         case 'ADHOC_NOTIFICATION':
@@ -86,13 +88,16 @@ export default class NotificationService {
 
   async handleNotification(notification: RawNotification): Promise<void> {
     if (!!this.notification) {
-      this.notification.show({
-        title: notification.data.title,
-        message: notification.data.message,
-        onPress: this.onPress(notification.data),
-      });
+      if (notification.origin === 'received') {
+        this.notification.show({
+          title: notification.data.title,
+          message: notification.data.message,
+          onPress: this.onPress(notification.data),
+        });
+      } else if (notification.origin === 'selected') {
+        this.onPress(notification.data)();
+      }
+      await this.actOnNotification(notification.data);
     }
-
-    await this.actOnNotification(notification.data);
   }
 }
