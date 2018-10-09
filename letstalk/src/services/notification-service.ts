@@ -92,10 +92,10 @@ export default class NotificationService {
         this.notification.show({
           title: notification.data.title,
           message: notification.data.message,
-          onPress: this.onPress.bind(this, notification.data),
+          onPress: this.onPress(notification.data),
         });
       } else if (notification.origin === 'selected') {
-        this.onPress(notification.data);
+        this.onPress(notification.data)();
       }
       await this.actOnNotification(notification.data);
     }
