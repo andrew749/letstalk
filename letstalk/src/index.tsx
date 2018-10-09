@@ -264,7 +264,6 @@ class App extends React.Component<Props, AppState> {
     this.handleNotification = this.handleNotification.bind(this);
     this.notificationService = new NotificationService(store);
     Linking.addEventListener('url', this.linkHandler);
-    // console.log(Expo.Linking.makeUrl('match_profile', {userId: 1}))
   }
 
   async handleNotification(notification: any) {
@@ -273,7 +272,6 @@ class App extends React.Component<Props, AppState> {
 
   private linkHandler = (event: {url: string}) => {
     let { path, queryParams } = Linking.parse(event.url);
-    console.log(path, queryParams);
     navService.navigate(path, queryParams);
   }
 
