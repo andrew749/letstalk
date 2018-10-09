@@ -4,48 +4,14 @@ import {
   NavigationContainerComponent,
   NavigationParams,
 } from 'react-navigation';
+import { Linking } from 'expo';
 
 import { RootState } from '../redux';
 import { fetchBootstrap } from '../redux/bootstrap/reducer';
+import { Notification } from '../models/notification';
 
-interface BaseNotificationData {
-  readonly title: string;
-  readonly message: string;
-}
-
-const SIDE_ASKER = "ASKER";
-const SIDE_ANSWERER = "ANSWERER";
-
-interface RequestToMatchNotificationData extends BaseNotificationData {
-  readonly type: 'REQUEST_TO_MATCH';
-  readonly side: string;
-  readonly requestId: number;
-}
-
-interface AdHocNotificationData extends BaseNotificationData {
-  readonly type: 'ADHOC_NOTIFICATION';
-}
-
-interface NewMatchNotificationData extends BaseNotificationData {
-  readonly type: 'NEW_MATCH';
-}
-
-interface NewCredentialMatchNotificationData extends BaseNotificationData {
-  readonly type: 'NEW_CREDENTIAL_MATCH';
-}
-
-interface NewMatchVerifiedNotificationData extends BaseNotificationData {
-  readonly type: 'MATCH_VERIFIED';
-}
-
-type NotificationData = RequestToMatchNotificationData
-| AdHocNotificationData
-| NewMatchNotificationData
-| NewCredentialMatchNotificationData
-| NewMatchVerifiedNotificationData;
-
-export interface Notification {
-  readonly data: NotificationData;
+export interface RawNotification {
+  readonly data: Notification;
 }
 
 export default class NotificationService {
@@ -75,53 +41,58 @@ export default class NotificationService {
     }
   }
 
+  navigateToLink(link: string) {
+    if (!!link) {
+      let { path, queryParams } = Linking.parse(link);
+      this.navContainer.dispatch(NavigationActions.navigate({
+        routeName: path,
+        params: queryParams,
+      }));
+    }
+  }
+
   private async actOnNotification(notification: Notification): Promise<void> {
-    const data = notification.data;
-    switch (data.type) {
-      case 'REQUEST_TO_MATCH':
-        await fetchBootstrap()(this.store.dispatch, null, null);
-        break;
+    switch (notification.type) {
       case 'ADHOC_NOTIFICATION':
       case 'NEW_MATCH':
       case 'NEW_CREDENTIAL_MATCH':
-      case 'MATCH_VERIFIED':
+      case 'CONNECTION_REQUESTED':
+      case 'CONNECTION_ACCEPTED':
         break;
       default:
         // Ensure exhaustiveness of select
-        const _: never = data;
+        const _: never = notification;
         // This case could happen, but we wouldn't do anything anyways
     }
   }
 
   private onPress(notification: Notification) {
     return () => {
-      switch (notification.data.type) {
-        case 'REQUEST_TO_MATCH':
-          // TODO: Make this do a reset instead
-          this.navigate('Home');
-          break;
+      switch (notification.type) {
         case 'ADHOC_NOTIFICATION':
         case 'NEW_MATCH':
         case 'NEW_CREDENTIAL_MATCH':
-        case 'MATCH_VERIFIED':
+        case 'CONNECTION_REQUESTED':
+        case 'CONNECTION_ACCEPTED':
+          this.navigateToLink(notification.link);
           break;
         default:
           // Ensure exhaustiveness of select
-          const _: never = notification.data;
+          const _: never = notification;
           // This case could happen, but we wouldn't do anything anyways
       }
     };
   }
 
-  async handleNotification(notification: Notification): Promise<void> {
+  async handleNotification(notification: RawNotification): Promise<void> {
     if (!!this.notification) {
       this.notification.show({
         title: notification.data.title,
         message: notification.data.message,
-        onPress: this.onPress(notification),
+        onPress: this.onPress(notification.data),
       });
     }
 
-    await this.actOnNotification(notification);
+    await this.actOnNotification(notification.data);
   }
 }

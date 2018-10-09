@@ -27,6 +27,10 @@ func GetMatchProfileUrl(userId data.TUserID) string {
 	return wrapWithUrlBase(fmt.Sprintf(MATCH_PROFILE_URL, userId))
 }
 
+func GetMatchProfileWithButtonUrl(userId data.TUserID) string {
+	return fmt.Sprintf("%s&showRequestButton=true", GetMatchProfileUrl(userId))
+}
+
 func GetNotificationViewUrl() string {
 	return wrapWithUrlBase(NOTIFICATION_VIEW_URL)
 }

@@ -36,6 +36,7 @@ import {
   searchBySimpleTrait,
   State as UserSearchState,
 } from '../redux/user-search/reducer';
+import { humanReadableCohort } from '../models/cohort';
 import {
   ActionButton,
   Button,
@@ -78,8 +79,8 @@ class ExploreView extends Component<Props, State> {
 
   static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
     headerTitle: <TopHeader navigation={navigation} />,
-    headerStyle, 
-    headerTitleStyle, 
+    headerStyle,
+    headerTitleStyle,
     headerTintColor
   })
 
@@ -150,13 +151,7 @@ class ExploreView extends Component<Props, State> {
         );
         break;
       case QueryTypes.SEARCH_COHORT:
-        const {
-          programName,
-          sequenceName,
-          gradYear,
-        } = currentQuery;
-        let cohortText = programName + ' ' + gradYear;
-        if (!!sequenceName) cohortText = cohortText + ' ' + sequenceName;
+        const cohortText = humanReadableCohort(currentQuery);
         header = (
           <Text>
             <Text>{'Users in "'}</Text>
@@ -211,8 +206,7 @@ class ExploreView extends Component<Props, State> {
 
     let cohortText = null;
     if (!!cohort) {
-      cohortText = cohort.programName + ' ' + cohort.gradYear;
-      if (!!cohort.sequenceName) cohortText = cohortText + ' ' + cohort.sequenceName;
+      cohortText = humanReadableCohort(cohort);
     }
 
     const onPress = () => {
@@ -225,13 +219,7 @@ class ExploreView extends Component<Props, State> {
           break;
         case QueryTypes.SEARCH_COHORT:
           intentType = IntentTypes.SEARCH;
-          const {
-            programName,
-            sequenceName,
-            gradYear,
-          } = currentQuery;
-          searchedTrait = programName + ' ' + gradYear;
-          if (!!sequenceName) searchedTrait = searchedTrait + ' ' + sequenceName;
+          searchedTrait = humanReadableCohort(currentQuery);
           break;
         case QueryTypes.SEARCH_POSITION:
           intentType = IntentTypes.SEARCH;

@@ -152,7 +152,6 @@ export class RemoteProfileService implements ProfileService {
 
     return {
       ...response,
-      relationships: Immutable.List(response.relationships),
       connections: {
         outgoingRequests: Immutable.List(response.connections.outgoingRequests),
         incomingRequests: Immutable.List(response.connections.incomingRequests),

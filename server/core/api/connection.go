@@ -23,3 +23,8 @@ type AcceptConnectionRequest struct {
 type RemoveConnection struct {
 	UserId data.TUserID `json:"userId" binding:"required"`
 }
+
+type CreateMentorshipByEmail struct {
+	MenteeEmail string `json:"menteeEmail" binding:"required"`
+	MentorEmail string `json:"mentorEmail" binding:"required"`
+}

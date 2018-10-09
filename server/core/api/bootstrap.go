@@ -53,7 +53,6 @@ type BootstrapConnections struct {
 
 type BootstrapResponse struct {
 	State            BootstrapState                        `json:"state" binding:"required"`
-	Relationships    []*BootstrapUserRelationshipDataModel `json:"relationships" binding:"required"`
 	Cohort           *data.Cohort                          `json:"cohort" binding:"required"`
 	OnboardingStatus *OnboardingStatus                     `json:"onboardingStatus" binding:"required"`
 	Connections      BootstrapConnections                  `json:"connections" binding:"required"`

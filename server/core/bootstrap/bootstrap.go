@@ -112,8 +112,10 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	rlog.Info("DEBUG: got connections %v", connections)
 
+	if len(connections) > 0 {
+		response.State = api.ACCOUNT_MATCHED
+	}
 	response.Connections.IncomingRequests = make([]*api.ConnectionRequestWithName, 0)
 	response.Connections.OutgoingRequests = make([]*api.ConnectionRequestWithName, 0)
 	response.Connections.Mentees = make([]*api.BootstrapConnection, 0)
@@ -134,19 +136,21 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			if conn.UserOneId == user.UserId {
 				// Auth user is the requestor.
 				connApi := api.ConnectionRequestWithName{
-					connection.DataToApi(connUserId, conn),
-					conn.UserTwo.FirstName,
-					conn.UserTwo.LastName,
+					ConnectionRequest: connection.DataToApi(connUserId, conn),
+					FirstName: conn.UserTwo.FirstName,
+					LastName: conn.UserTwo.LastName,
 				}
+				rlog.Debug("adding outgoing request", connApi)
 				response.Connections.OutgoingRequests =
 					append(response.Connections.OutgoingRequests, &connApi)
 			} else {
 				// Auth user is the requestee.
 				connApi := api.ConnectionRequestWithName{
-					connection.DataToApi(connUserId, conn),
-					conn.UserOne.FirstName,
-					conn.UserOne.LastName,
+					ConnectionRequest: connection.DataToApi(connUserId, conn),
+					FirstName: conn.UserOne.FirstName,
+					LastName: conn.UserOne.LastName,
 				}
+				rlog.Debug("adding incoming request", connApi)
 				response.Connections.IncomingRequests =
 					append(response.Connections.IncomingRequests, &connApi)
 			}
@@ -164,6 +168,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 							api.USER_TYPE_MENTEE,
 						),
 					}
+					rlog.Debug("adding mentee", bc)
 					response.Connections.Mentees =
 						append(response.Connections.Mentees, &bc)
 				} else {
@@ -177,6 +182,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 							api.USER_TYPE_MENTOR,
 						),
 					}
+					rlog.Debug("adding mentor", bc)
 					response.Connections.Mentors =
 						append(response.Connections.Mentors, &bc)
 				}
@@ -195,84 +201,13 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 						userType,
 					),
 				}
+				rlog.Debug("adding other connection", bc)
 				response.Connections.Peers =
 					append(response.Connections.Peers, &bc)
 			}
 		}
 	}
 
-	flag := api.MATCHING_INFO_FLAG_AUTH_DATA | api.MATCHING_INFO_FLAG_COHORT
-	// Matchings where user is the mentee.
-	mentors, err := query.GetMentorsByMenteeId(c.Db, userId, flag)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	// Matchings where user is the mentor.
-	mentees, err := query.GetMenteesByMentorId(c.Db, userId, flag)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-
-	reqFlag := api.REQ_MATCHING_INFO_FLAG_CREDENTIAL | api.REQ_MATCHING_INFO_FLAG_AUTH_DATA
-	// Request matchings where user is answerer.
-	askers, err := query.GetAskersByAnswererId(c.Db, userId, reqFlag)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-	// Request matchings where user is asker.
-	answerers, err := query.GetAnswerersByAskerId(c.Db, userId, reqFlag)
-	if err != nil {
-		return errs.NewDbError(err)
-	}
-
-	// Construct relationship api objects.
-	relationships := make(
-		[]*api.BootstrapUserRelationshipDataModel,
-		0,
-		len(mentors)+len(mentees)+len(askers)+len(answerers),
-	)
-	for _, mentor := range mentors {
-		relationships = append(
-			relationships,
-			convertUserToRelationshipDataModel(*mentor.MentorUser, mentor.State, nil, api.USER_TYPE_MENTOR),
-		)
-	}
-	for _, mentee := range mentees {
-		relationships = append(
-			relationships,
-			convertUserToRelationshipDataModel(*mentee.MenteeUser, mentee.State, nil, api.USER_TYPE_MENTEE),
-		)
-	}
-	for _, asker := range askers {
-		description := getDescriptionForRequestToMatch(asker)
-		relationships = append(
-			relationships,
-			convertUserToRelationshipDataModel(
-				*asker.AskerUser,
-				data.MATCHING_STATE_UNKNOWN,
-				description,
-				api.USER_TYPE_ASKER,
-			),
-		)
-	}
-	for _, answerer := range answerers {
-		description := getDescriptionForRequestToMatch(answerer)
-		relationships = append(
-			relationships,
-			convertUserToRelationshipDataModel(
-				*answerer.AnswererUser,
-				data.MATCHING_STATE_UNKNOWN,
-				description,
-				api.USER_TYPE_ANSWERER,
-			),
-		)
-	}
-	if len(relationships) > 0 {
-		response.State = api.ACCOUNT_MATCHED
-	}
-
-	response.Relationships = relationships
 	c.Result = response
-
 	return nil
 }

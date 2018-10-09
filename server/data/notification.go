@@ -17,6 +17,8 @@ const (
 	NOTIF_TYPE_REQUEST_TO_MATCH     NotifType = "REQUEST_TO_MATCH"
 	NOTIF_TYPE_NEW_MATCH            NotifType = "NEW_MATCH"
 	NOTIF_TYPE_MATCH_VERIFIED       NotifType = "MATCH_VERIFIED"
+	NOTIF_TYPE_CONNECTION_REQUESTED NotifType = "CONNECTION_REQUESTED"
+	NOTIF_TYPE_CONNECTION_ACCEPTED  NotifType = "CONNECTION_ACCEPTED"
 )
 
 type NotifState string
@@ -33,7 +35,7 @@ type Notification struct {
 	UserId        TUserID    `gorm:"not null"`
 	User          User       `gorm:"foreignkey:UserId"`
 	Type          NotifType  `gorm:"not null;size:190"`
-	Timestamp     time.Time  `gorm:"not null;default:now()"` // when the notification was created in the system (not in db)
+	Timestamp     time.Time  `gorm:"not null"` // when the notification was created in the system (not in db)
 	State         NotifState `gorm:"not null;size:190"`
 	Title         string     `gorm:"not null;size:190"`
 	Message       string     `gorm:"not null;type:text"`

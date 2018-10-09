@@ -27,7 +27,8 @@ const (
 	INTENT_TYPE_SEARCH      IntentType = "SEARCH"
 	INTENT_TYPE_REC_GENERAL IntentType = "RECOMMENDATION_GENERAL"
 	INTENT_TYPE_REC_COHORT  IntentType = "RECOMMENDATION_COHORT"
-	INTENT_TYPE_SCAN_CODE  IntentType = "SCAN_CODE"
+	INTENT_TYPE_SCAN_CODE   IntentType = "SCAN_CODE"
+	INTENT_TYPE_ASSIGNED    IntentType = "ASSIGNED_MATCH"
 )
 
 func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]uint8)); return nil }
