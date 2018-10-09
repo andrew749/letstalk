@@ -5,7 +5,6 @@ package user
  */
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/google/uuid"
 	fb "github.com/huandu/facebook"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -119,7 +119,14 @@ func FBController(c *ctx.Context) errs.Error {
 	}
 
 	// create new session for user id
-	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId, &loginRequest.NotificationToken)
+	session, err := (*c.SessionManager).CreateNewSessionForUserId(userId)
+
+	// store device notification token if one exists
+	if loginRequest.NotificationToken != nil {
+		if err := data.AddExpoDeviceTokenforUser(c.Db, userId, *loginRequest.NotificationToken); err != nil {
+			return errs.NewDbError(errors.Wrap(err, "Unable to register device in db."))
+		}
+	}
 
 	if err != nil {
 		rlog.Errorf("Unable to create a new session %+v", err)
@@ -167,9 +174,24 @@ func linkFBUser(db *gorm.DB, userID data.TUserID, fbUserID string, fbLink string
 		return err
 	}
 
-	// update the user data
-	if err := db.Model(&externalAuthRecord).
-		Updates(&data.ExternalAuthData{FbUserId: &fbUserID, FbProfileLink: &fbLink}).Error; err != nil {
+	var record *data.ExternalAuthData
+
+	// check for records with this facebook id
+	if record, err = query.GetExternalAuthRecordByFBIDNoAssert(db, &fbUserID); err != nil {
+		return err
+	}
+
+	// if there are no records
+	if record == nil {
+		// if the facebook account isn't linked, update the profile
+		if err := db.
+			Model(&externalAuthRecord).
+			Updates(&data.ExternalAuthData{FbUserId: &fbUserID, FbProfileLink: &fbLink}).
+			Error; err != nil {
+			return err
+		}
+	} else {
+		return errors.New("This facebook account is already linked")
 	}
 
 	return nil

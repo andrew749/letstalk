@@ -15,3 +15,17 @@ func GetExternalAuthRecord(db *gorm.DB, userID data.TUserID) (*data.ExternalAuth
 	}
 	return &auth, nil
 }
+
+func GetExternalAuthRecordByFBIDNoAssert(db *gorm.DB, fbUserID *string) (*data.ExternalAuthData, error) {
+	var externalAuthRecord data.ExternalAuthData
+	if err := db.
+		Where(&data.ExternalAuthData{FbUserId: fbUserID}).
+		First(&externalAuthRecord).
+		Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &externalAuthRecord, nil
+}
