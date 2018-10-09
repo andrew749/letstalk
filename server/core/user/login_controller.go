@@ -52,7 +52,6 @@ func LoginUser(c *ctx.Context) errs.Error {
 	// add device token to db
 	if notificationToken != nil {
 		if err := data.AddExpoDeviceTokenforUser(c.Db, userModel.UserId, *notificationToken); err != nil {
-			// failing this should not fail login
 			return errs.NewInternalError("Unable to register device in db.")
 		}
 	}
