@@ -115,10 +115,13 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
-			ID: "User Devices Creation",
+			ID: "User Devices Creation From Session",
 			Migrate: func(tx *gorm.DB) error {
 				// create required table
 				err := tx.AutoMigrate(&UserDevice{}).Error
+
+				// This method originally migrated notifications from sessions to a new table
+				// we dont do that anymore and thus removed the logic for this (in the event of a new table spinup.)
 				return err
 			},
 			Rollback: func(tx *gorm.DB) error {
