@@ -97,7 +97,7 @@ export default class NotificationService {
       } else if (notification.origin === 'selected') {
         this.onPress(notification.data);
       }
+      await this.actOnNotification(notification.data);
     }
-    await this.actOnNotification(notification.data);
   }
 }
