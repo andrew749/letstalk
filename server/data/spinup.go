@@ -29,7 +29,6 @@ func migrateDB(db *gorm.DB) {
 				tx.AutoMigrate(&UserVector{})
 				tx.AutoMigrate(&UserCohort{})
 				tx.AutoMigrate(&UserAdditionalData{})
-				tx.AutoMigrate(&NotificationToken{})
 				tx.AutoMigrate(&ExternalAuthData{})
 				tx.AutoMigrate(&FbAuthToken{})
 				tx.AutoMigrate(&Matching{})

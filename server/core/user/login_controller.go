@@ -43,10 +43,19 @@ func LoginUser(c *ctx.Context) errs.Error {
 
 	rlog.Debug("Successfully Checked Password")
 
-	session, err := (*sm).CreateNewSessionForUserId(userModel.UserId, req.NotificationToken)
+	session, err := (*sm).CreateNewSessionForUserId(userModel.UserId)
 	if err != nil {
 		return errs.NewRequestError("%s", err)
 	}
+
+	notificationToken := req.NotificationToken
+	// add device token to db
+	if notificationToken != nil {
+		if err := data.AddExpoDeviceTokenforUser(c.Db, userModel.UserId, *notificationToken); err != nil {
+			return errs.NewInternalError("Unable to register device in db.")
+		}
+	}
+
 	c.Result = api.LoginResponse{
 		SessionId:  *session.SessionId,
 		ExpiryDate: session.ExpiryDate,

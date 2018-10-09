@@ -10,15 +10,13 @@ import (
  * Stores data related to a certain session.
  */
 type SessionData struct {
-	SessionId         *string
-	UserId            data.TUserID
-	NotificationToken *string
-	ExpiryDate        time.Time
+	SessionId  *string
+	UserId     data.TUserID
+	ExpiryDate time.Time
 }
 
 func CreateSessionData(
 	userId data.TUserID,
-	notificationToken *string,
 	expiry time.Time,
 ) (*SessionData, error) {
 	sessionId, err := utility.GenerateRandomString(32)
@@ -26,5 +24,5 @@ func CreateSessionData(
 		return nil, err
 	}
 
-	return &SessionData{&sessionId, userId, notificationToken, expiry}, nil
+	return &SessionData{&sessionId, userId, expiry}, nil
 }
