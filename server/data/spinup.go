@@ -117,50 +117,12 @@ func migrateDB(db *gorm.DB) {
 		{
 			ID: "User Devices Creation From Session",
 			Migrate: func(tx *gorm.DB) error {
-				// for every session create a new user device entry
-				if isSQLite(tx) {
-					rlog.Warn("Skipping migration since sqlite")
-					return nil
-				}
-
 				// create required table
 				err := tx.AutoMigrate(&UserDevice{}).Error
-				if err != nil {
-					return err
-				}
 
-				// row to scan results into
-				type Row struct {
-					token string
-					uid   uint
-				}
-
-				rows, err := tx.Table("notification_tokens").
-					Select("notification_tokens.token, sessions.user_id").
-					Joins("inner join sessions on sessions.session_id=notification_tokens.session_id").
-					Rows()
-
-				if err != nil {
-					return err
-				}
-
-				for rows.Next() {
-					res := Row{}
-
-					err := rows.Scan(&res.token, &res.uid)
-					if err != nil {
-						return err
-					}
-
-					// insert row into devices table
-					err = AddExpoDeviceTokenforUser(tx, TUserID(res.uid), res.token)
-
-					if err != nil {
-						return err
-					}
-				}
-
-				return nil
+				// This method originally migrated notifications from sessions to a new table
+				// we dont do that anymore and thus removed the logic for this (in the event of a new table spinup.)
+				return err
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
