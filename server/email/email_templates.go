@@ -7,6 +7,8 @@ const (
 	PasswordChangeEmail = "5bd55885-2793-4848-8ed1-18d2483188f8"
 	NewAccount          = "3df07433-f8a3-453f-a94c-1408e85d35e4"
 	AccountVerifyEmail  = "0f4be460-b8b2-42bb-8682-222af0ddba99"
+	NewMentorEmail      = ""
+	NewMenteeEmail      = ""
 )
 
 func SendSubscribeEmail(
@@ -68,11 +70,18 @@ func SendAccountVerifyEmail(
 func SendNewMentorEmail(
 	to *mail.Email,
 	mentorName string,
+	menteeName string,
+	mentorCohort string,
+	menteeCohort string,
 ) error {
 	var emailContext interface{} = struct {
+		MentorName   string `email_sub:":mentor_name"`
+		MenteeName   string `email_sub:":mentee_name"`
+		MentorCohort string `email_sub:":mentor_cohort"`
+		MenteeCohort string `email_sub:":mentee_cohort"`
 	}{}
 
-	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+	message := CreateBasicTemplatedEmail(to, NewMentorEmail, &emailContext)
 
 	return SendEmail(message)
 }
@@ -81,11 +90,17 @@ func SendNewMenteeEmail(
 	to *mail.Email,
 	mentorName string,
 	menteeName string,
+	mentorCohort string,
+	menteeCohort string,
 ) error {
 	var emailContext interface{} = struct {
+		MentorName   string `email_sub:":mentor_name"`
+		MenteeName   string `email_sub:":mentee_name"`
+		MentorCohort string `email_sub:":mentor_cohort"`
+		MenteeCohort string `email_sub:":mentee_cohort"`
 	}{}
 
-	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+	message := CreateBasicTemplatedEmail(to, NewMenteeEmail, &emailContext)
 
 	return SendEmail(message)
 }
