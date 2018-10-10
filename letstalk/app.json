@@ -4,7 +4,7 @@
   "expo": {
     "name": "Hive",
     "icon": "./src/img/logo.png",
-    "version": "0.0.1",
+    "version": "1.0.1",
     "slug": "hive-alpha",
     "sdkVersion": "27.0.0",
     "ios": {
@@ -18,7 +18,7 @@
     },
     "android": {
       "icon": "./src/img/logo_android.png",
-      "versionCode": 10,
+      "versionCode": 11,
       "package": "org.hiveapp.hive",
       "googleServicesFile": "./google-services.json"
     },
