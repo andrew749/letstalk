@@ -53,7 +53,7 @@ func SendAccountVerifyEmail(
 	verifyEmailLink string,
 ) error {
 	var emailContext interface{} = struct {
-		RecipientEmail     string `email_sub:":recipientemail"`
+		RecipientEmail  string `email_sub:":recipientemail"`
 		VerifyEmailLink string `email_sub:":verifyemaillink"`
 	}{
 		to.Address,
@@ -65,3 +65,27 @@ func SendAccountVerifyEmail(
 	return SendEmail(message)
 }
 
+func SendNewMentorEmail(
+	to *mail.Email,
+	mentorName string,
+) error {
+	var emailContext interface{} = struct {
+	}{}
+
+	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+
+	return SendEmail(message)
+}
+
+func SendNewMenteeEmail(
+	to *mail.Email,
+	mentorName string,
+	menteeName string,
+) error {
+	var emailContext interface{} = struct {
+	}{}
+
+	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+
+	return SendEmail(message)
+}
