@@ -322,6 +322,9 @@ func Register(
 	admin.OPTIONS("/adhoc_notification")
 	admin.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
 
+	admin.OPTIONS("/nuke_user")
+	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
+
 	return router
 }
 
