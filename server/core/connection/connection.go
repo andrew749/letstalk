@@ -71,7 +71,7 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		if err := notifications.ConnectionRequestedNotification(
 			tx,
 			connUser.UserId,
-			authUser.UserId,
+			authUser,
 			fmt.Sprintf("%s %s", authUser.FirstName, authUser.LastName),
 		); err != nil {
 			return err
@@ -142,7 +142,7 @@ func handleAcceptConnection(
 		if err := notifications.ConnectionAcceptedNotification(
 			tx,
 			connUser.UserId,
-			authUser.UserId,
+			authUser,
 			fmt.Sprintf("%s %s", authUser.FirstName, authUser.LastName),
 		); err != nil {
 			return err

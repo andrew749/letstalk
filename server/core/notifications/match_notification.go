@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"fmt"
+
 	"letstalk/server/core/linking"
 	"letstalk/server/data"
 
@@ -17,11 +18,18 @@ const (
 	REQUEST_TO_MATCH_SIDE_ANSWERER RequestToMatchSide = "ANSWERER"
 )
 
+func setImageUrlIfExists(extraData map[string]string, profilePic *string) {
+	const IMAGE_URL = "imageUrl"
+	if profilePic != nil {
+		extraData[IMAGE_URL] = *profilePic
+	}
+}
+
 func RequestToMatchNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
 	side RequestToMatchSide,
-	matchUserId data.TUserID,
+	matchData *data.User,
 	requestId uint,
 	name string,
 ) error {
@@ -30,6 +38,7 @@ func RequestToMatchNotification(
 		title     string            = "You got a match!"
 		message   string            = fmt.Sprintf("You got matched for \"%s\"", name)
 	)
+	setImageUrlIfExists(extraData, matchData.ProfilePic)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -38,12 +47,14 @@ func RequestToMatchNotification(
 		data.NOTIF_TYPE_REQUEST_TO_MATCH,
 		nil,
 		extraData,
-		linking.GetMatchProfileUrl(matchUserId),
+		linking.GetMatchProfileUrl(matchData.UserId),
 	)
 }
 
-func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUserID, title string, message string) error {
-	link := linking.GetMatchProfileUrl(userId)
+func newMatchNotification(db *gorm.DB, recipient data.TUserID, matchData *data.User, title string, message string) error {
+	link := linking.GetMatchProfileUrl(matchData.UserId)
+	extraData := make(map[string]string)
+	setImageUrlIfExists(extraData, matchData.ProfilePic)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -51,7 +62,7 @@ func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUser
 		recipient,
 		data.NOTIF_TYPE_NEW_MATCH,
 		nil,
-		map[string]string{},
+		extraData,
 		link,
 	)
 }
@@ -60,14 +71,14 @@ func newMatchNotification(db *gorm.DB, recipient data.TUserID, userId data.TUser
 func NewMentorNotification(db *gorm.DB, recipient data.TUserID, mentor *data.User) error {
 	title := "You have a new mentor!"
 	message := fmt.Sprintf("You've been matched with a new mentor: %s %s", mentor.FirstName, mentor.LastName)
-	return newMatchNotification(db, recipient, mentor.UserId, title, message)
+	return newMatchNotification(db, recipient, mentor, title, message)
 }
 
 // NewMenteeNotification tells a user they have a new mentee.
 func NewMenteeNotification(db *gorm.DB, recipient data.TUserID, mentee *data.User) error {
 	title := "You have a new mentee!"
 	message := fmt.Sprintf("You've been matched with a new mentee: %s %s", mentee.FirstName, mentee.LastName)
-	return newMatchNotification(db, recipient, mentee.UserId, title, message)
+	return newMatchNotification(db, recipient, mentee, title, message)
 }
 
 func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName string, userId data.TUserID) error {

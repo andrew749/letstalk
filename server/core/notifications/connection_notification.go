@@ -12,13 +12,15 @@ import (
 func ConnectionRequestedNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
-	fromUserId data.TUserID,
+	fromUserData *data.User,
 	fromName string,
 ) error {
 	var (
+		extraData map[string]string = map[string]string{}
 		title   string = "New connection request"
 		message string = fmt.Sprintf("You got a connection request from %s", fromName)
 	)
+	setImageUrlIfExists(extraData, fromUserData.ProfilePic)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -26,21 +28,23 @@ func ConnectionRequestedNotification(
 		recipient,
 		data.NOTIF_TYPE_CONNECTION_REQUESTED,
 		nil,
-		map[string]string{},
-		linking.GetMatchProfileWithButtonUrl(fromUserId),
+		extraData,
+		linking.GetMatchProfileWithButtonUrl(fromUserData.UserId),
 	)
 }
 
 func ConnectionAcceptedNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
-	fromUserId data.TUserID,
+	fromUserData *data.User,
 	fromName string,
 ) error {
 	var (
+		extraData map[string]string = map[string]string{}
 		title   string = "Connection request accepted"
 		message string = fmt.Sprintf("%s accepted your connection request", fromName)
 	)
+	setImageUrlIfExists(extraData, fromUserData.ProfilePic)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -48,7 +52,7 @@ func ConnectionAcceptedNotification(
 		recipient,
 		data.NOTIF_TYPE_CONNECTION_ACCEPTED,
 		nil,
-		map[string]string{},
-		linking.GetMatchProfileUrl(fromUserId),
+		extraData,
+		linking.GetMatchProfileUrl(fromUserData.UserId),
 	)
 }
