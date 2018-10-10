@@ -19,7 +19,7 @@ func TestNewContext(t *testing.T) {
 	db := &gorm.DB{}
 	sm := sessions.CreateCompositeSessionManager(db)
 	es := &elastic.Client{}
-	sessionData, _ := sessions.CreateSessionData(1, nil, time.Now())
+	sessionData, _ := sessions.CreateSessionData(1, time.Now())
 	c := ctx.NewContext(g, db, es, sessionData, &sm)
 	assert.Equal(t, db, c.Db)
 	assert.Equal(t, es, c.Es)

@@ -149,12 +149,6 @@ func Register(
 		true),
 	)
 
-	v1.OPTIONS("/register_notification")
-	v1.POST("/register_notification", hw.wrapHandler(
-		controller.GetNewNotificationToken,
-		true),
-	)
-
 	v1.OPTIONS("/logout")
 	v1.POST("/logout", hw.wrapHandler(
 		user.LogoutHandler,

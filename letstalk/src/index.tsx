@@ -80,6 +80,12 @@ const styles = StyleSheet.create({
   toastMessageStyle: {
     color: 'white',
   },
+  toastContainerStyle: {
+    backgroundColor: Colors.HIVE_PRIMARY,
+  },
+  toastErrorStyle: {
+    backgroundColor: Colors.HIVE_ERROR,
+  },
 });
 
 interface TabBarState {
@@ -264,7 +270,6 @@ class App extends React.Component<Props, AppState> {
     this.handleNotification = this.handleNotification.bind(this);
     this.notificationService = new NotificationService(store);
     Linking.addEventListener('url', this.linkHandler);
-    // console.log(Expo.Linking.makeUrl('match_profile', {userId: 1}))
   }
 
   async handleNotification(notification: any) {
@@ -273,7 +278,6 @@ class App extends React.Component<Props, AppState> {
 
   private linkHandler = (event: {url: string}) => {
     let { path, queryParams } = Linking.parse(event.url);
-    console.log(path, queryParams);
     navService.navigate(path, queryParams);
   }
 
@@ -305,7 +309,10 @@ class App extends React.Component<Props, AppState> {
             ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
             notificationBodyComponent={ NotificationBody }
           />
-          <Toast messageStyle={styles.toastMessageStyle} />
+          <Toast
+            containerStyle={styles.toastContainerStyle}
+            messageStyle={styles.toastMessageStyle}
+            errorStyle={styles.toastErrorStyle} />
         </View>
       </Provider>
     );

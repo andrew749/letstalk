@@ -10,5 +10,5 @@ type FBLoginRequestDataCore struct {
  */
 type FBLoginRequestData struct {
 	FBLoginRequestDataCore
-	NotificationToken string `json:"notificationToken"`
+	NotificationToken *string `json:"notificationToken"`
 }
