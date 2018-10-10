@@ -7,6 +7,7 @@ import {
   View,
   Platform,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import { Constants } from 'expo';
@@ -90,8 +91,10 @@ class TopHeader extends Component<Props> {
 
   componentWillReceiveProps(props: Props) {
     if (this.props.hasFocus && !props.hasFocus) {
+      BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
       this.searchBar.blur();
     } else if (!this.props.hasFocus && props.hasFocus) {
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
       this.searchBar.focus();
     }
   }
@@ -103,6 +106,11 @@ class TopHeader extends Component<Props> {
   private onFocus() {
     logAnalyticsThenExecute("SearchBar", AnalyticsActions.FOCUS, "", 1, this.onFocusAfterLog);
   }
+
+  private handleBackPress = () => {
+    this.props.updateFocus(false);
+    return true;
+  };
 
   private onBlur() {
     this.props.updateFocus(false);
