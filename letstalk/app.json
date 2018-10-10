@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./src/img/logo.png",
       "bundleIdentifier": "org.hiveapp.hive",
-      "buildNumber": "11",
+      "buildNumber": "12",
       "infoPlist": {
         "NSCameraUsageDescription": "Hive uses the camera to scan QR codes and take profile pictures.",
         "NSPhotoLibraryUsageDescription": "Hive uses your photo library to select a profile picture."
