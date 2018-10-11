@@ -1,6 +1,8 @@
 package email
 
 import (
+	"fmt"
+
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
@@ -74,18 +76,16 @@ func SendNewMentorEmail(
 	mentorName string,
 	menteeName string,
 	mentorCohort string,
-	menteeCohort string,
+	mentorYear uint,
 ) error {
 	var emailContext interface{} = struct {
 		MentorName   string `email_sub:":mentorname"`
 		MenteeName   string `email_sub:":menteename"`
 		MentorCohort string `email_sub:":mentorcohort"`
-		MenteeCohort string `email_sub:":menteecohort"`
 	}{
 		mentorName,
 		menteeName,
-		mentorCohort,
-		menteeCohort,
+		fmt.Sprintf("%s %d", mentorCohort, mentorYear),
 	}
 
 	message := CreateBasicTemplatedEmail(to, NewMentorEmail, &emailContext)
@@ -97,19 +97,17 @@ func SendNewMenteeEmail(
 	to *mail.Email,
 	mentorName string,
 	menteeName string,
-	mentorCohort string,
 	menteeCohort string,
+	menteeYear uint,
 ) error {
 	var emailContext interface{} = struct {
 		MentorName   string `email_sub:":mentorname"`
 		MenteeName   string `email_sub:":menteename"`
-		MentorCohort string `email_sub:":mentorcohort"`
 		MenteeCohort string `email_sub:":menteecohort"`
 	}{
 		mentorName,
 		menteeName,
-		mentorCohort,
-		menteeCohort,
+		fmt.Sprintf("%s %d", menteeCohort, menteeYear),
 	}
 
 	message := CreateBasicTemplatedEmail(to, NewMenteeEmail, &emailContext)

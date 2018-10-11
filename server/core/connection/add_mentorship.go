@@ -107,8 +107,8 @@ func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEma
 	mentorEmail := mail.NewEmail(mentor.FirstName, mentor.Email)
 	menteeEmail := mail.NewEmail(mentee.FirstName, mentee.Email)
 
-	emailErr1 := email.SendNewMenteeEmail(mentorEmail, mentor.FirstName, mentee.FirstName, mentorCohort.ProgramName, menteeCohort.ProgramName)
-	emailErr2 := email.SendNewMentorEmail(menteeEmail, mentor.FirstName, mentee.FirstName, mentorCohort.ProgramName, menteeCohort.ProgramName)
+	emailErr1 := email.SendNewMenteeEmail(mentorEmail, mentor.FirstName, mentee.FirstName, menteeCohort.ProgramName, menteeCohort.GradYear)
+	emailErr2 := email.SendNewMentorEmail(menteeEmail, mentor.FirstName, mentee.FirstName, mentorCohort.ProgramName, mentorCohort.GradYear)
 	var compositeError *errs.CompositeError
 	compositeError = errs.AppendNullableError(compositeError, notifErr1)
 	compositeError = errs.AppendNullableError(compositeError, notifErr2)
