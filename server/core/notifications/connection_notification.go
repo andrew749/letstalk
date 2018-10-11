@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 
@@ -9,18 +10,22 @@ import (
 	"letstalk/server/data"
 )
 
+func setConnUserId(extraData map[string]string, connUserId data.TUserID) {
+	extraData["connUserId"] = strconv.Itoa(int(connUserId))
+}
+
 func ConnectionRequestedNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
-	fromUserData *data.User,
+	fromUserId data.TUserID,
 	fromName string,
 ) error {
 	var (
 		extraData map[string]string = map[string]string{}
-		title   string = "New connection request"
-		message string = fmt.Sprintf("You got a connection request from %s", fromName)
+		title     string = "New connection request"
+		message   string = fmt.Sprintf("You got a connection request from %s", fromName)
 	)
-	setImageUrlIfExists(extraData, fromUserData.ProfilePic)
+	setConnUserId(extraData, fromUserId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -29,22 +34,22 @@ func ConnectionRequestedNotification(
 		data.NOTIF_TYPE_CONNECTION_REQUESTED,
 		nil,
 		extraData,
-		linking.GetMatchProfileWithButtonUrl(fromUserData.UserId),
+		linking.GetMatchProfileWithButtonUrl(fromUserId),
 	)
 }
 
 func ConnectionAcceptedNotification(
 	db *gorm.DB,
 	recipient data.TUserID,
-	fromUserData *data.User,
+	fromUserId data.TUserID,
 	fromName string,
 ) error {
 	var (
 		extraData map[string]string = map[string]string{}
-		title   string = "Connection request accepted"
-		message string = fmt.Sprintf("%s accepted your connection request", fromName)
+		title     string = "Connection request accepted"
+		message   string = fmt.Sprintf("%s accepted your connection request", fromName)
 	)
-	setImageUrlIfExists(extraData, fromUserData.ProfilePic)
+	setConnUserId(extraData, fromUserId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -53,6 +58,6 @@ func ConnectionAcceptedNotification(
 		data.NOTIF_TYPE_CONNECTION_ACCEPTED,
 		nil,
 		extraData,
-		linking.GetMatchProfileUrl(fromUserData.UserId),
+		linking.GetMatchProfileUrl(fromUserId),
 	)
 }

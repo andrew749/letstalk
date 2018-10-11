@@ -18,7 +18,6 @@ interface NewCredentialMatchData {
   credentialName: string,
   userName: string,
   side: "ASKER" | "ANSWERER",
-  imageUrl?: string,
 }
 
 export interface NewCredentialMatchNotification extends BaseNotification {
@@ -35,7 +34,7 @@ export interface AdhocNotification extends BaseNotification {
 }
 
 export interface NewMatchData {
-  imageUrl?: string,
+  matchUserId: string,
 }
 
 export interface NewMatchNotification extends BaseNotification {
@@ -44,7 +43,7 @@ export interface NewMatchNotification extends BaseNotification {
 }
 
 export interface ConnectionRequestedData {
-  imageUrl?: string,
+  connUserId: string,
 }
 
 export interface ConnectionRequestedNotification extends BaseNotification {
@@ -53,7 +52,7 @@ export interface ConnectionRequestedNotification extends BaseNotification {
 }
 
 export interface ConnectionAcceptedData {
-  imageUrl?: string,
+  connUserId: string,
 }
 
 export interface ConnectionAcceptedNotification extends BaseNotification {

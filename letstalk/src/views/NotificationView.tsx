@@ -40,6 +40,7 @@ import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
 import { Linking } from 'expo';
+import ProfileAvatar from "../components/ProfileAvatar";
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -157,16 +158,23 @@ class NotificationView extends Component<Props, State> {
             </Text>
           </Text>
         );
-        if (data.imageUrl) {
-          icon = <Image style={styles.notifImageStyle} source={{uri: data.imageUrl}}/>;
+        icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
+        break;
+      case 'CONNECTION_REQUESTED':
+      case 'CONNECTION_ACCEPTED':
+        const { data: {connUserId } } = notification;
+        if (connUserId) {
+          icon = <ProfileAvatar userId={connUserId} medium/>
+        } else {
+          icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
         }
         break;
       case 'NEW_MATCH':
-      case 'CONNECTION_REQUESTED':
-      case 'CONNECTION_ACCEPTED':
-        const { data: {imageUrl} } = notification;
-        if (imageUrl) {
-          icon = <Image style={styles.notifImageStyle} source={{uri: imageUrl}}/>;
+        const { data: {matchUserId} } = notification;
+        if (matchUserId) {
+          icon = <ProfileAvatar userId={matchUserId} medium/>
+        } else {
+          icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
         }
         break;
       case 'ADHOC_NOTIFICATION':

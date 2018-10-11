@@ -13,7 +13,6 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
-	"letstalk/server/core/query"
 )
 
 type ResolveType int
@@ -101,24 +100,24 @@ func getPotentialMatchUserIds(
 
 func sendNotifications(
 	c *ctx.Context,
-	asker *data.User,
-	answerer *data.User,
+	askerId data.TUserID,
+	answererId data.TUserID,
 	credentialId uint,
 	name string,
 ) errs.Error {
 	err1 := notifications.RequestToMatchNotification(
 		c.Db,
-		asker.UserId,
+		askerId,
 		notifications.REQUEST_TO_MATCH_SIDE_ASKER,
-		answerer,
+		answererId,
 		credentialId,
 		name,
 	)
 	err2 := notifications.RequestToMatchNotification(
 		c.Db,
-		answerer.UserId,
+		answererId,
 		notifications.REQUEST_TO_MATCH_SIDE_ANSWERER,
-		answerer,
+		answererId,
 		credentialId,
 		name,
 	)
@@ -205,12 +204,10 @@ func ResolveRequestToMatch(
 
 		tx.Commit()
 
-		asker, _ := query.GetUserById(c.Db, askerId)
-		answerer, _ := query.GetUserById(c.Db, answererId)
 		err = sendNotifications(
 			c,
-			asker,
-			answerer,
+			askerId,
+			answererId,
 			credentialId,
 			credential.Name,
 		)
