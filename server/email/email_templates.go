@@ -7,8 +7,8 @@ const (
 	PasswordChangeEmail = "5bd55885-2793-4848-8ed1-18d2483188f8"
 	NewAccount          = "3df07433-f8a3-453f-a94c-1408e85d35e4"
 	AccountVerifyEmail  = "0f4be460-b8b2-42bb-8682-222af0ddba99"
-	NewMentorEmail      = ""
-	NewMenteeEmail      = ""
+	NewMentorEmail      = "d-7d402b5dbdee4bb9b2b94f4eb6e1bdb5"
+	NewMenteeEmail      = "d-f082bc47341e40b3ad40c71d2f93621d"
 )
 
 func SendSubscribeEmail(
