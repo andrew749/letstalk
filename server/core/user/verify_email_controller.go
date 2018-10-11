@@ -9,12 +9,12 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/email"
 
-	"github.com/google/uuid"
+	"fmt"
+	"regexp"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"time"
-	"regexp"
-	"fmt"
 )
 
 var uwEmailRegex = regexp.MustCompile("(?i)^[A-Z0-9._%+-]+@(edu\\.)?uwaterloo\\.ca$")
@@ -42,10 +42,10 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 		return errs.NewRequestError("Account email has already been verified.")
 	}
 	// TODO ensure that this email hasn't already been used for a different account
-	dbErr := c.WithinTx(func (tx *gorm.DB) error {
+	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		var verifyEmailId *data.VerifyEmailId
 		var err error
-		if verifyEmailId, err = generateNewVerifyEmailId(tx, user.UserId, req.Email); err != nil {
+		if verifyEmailId, err = query.GenerateNewVerifyEmailId(tx, user.UserId, req.Email); err != nil {
 			return err
 		}
 		if err = sendAccountVerifyEmail(verifyEmailId, user, req.Email); err != nil {
@@ -57,32 +57,6 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 		return errs.NewInternalError("error sending account verify email: %v", dbErr)
 	}
 	return nil
-}
-
-// First parameter should be a db transaction.
-func generateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, emailAddr string) (*data.VerifyEmailId, error) {
-	var id = uuid.New()
-	verifyEmailData := data.VerifyEmailId{
-		Id:             id.String(),
-		UserId:         userId,
-		Email:          emailAddr,
-		IsActive:       true,
-		IsUsed:         false,
-		ExpirationDate: time.Now().AddDate(0, 0, 1), // Verification email valid for 24 hours.
-	}
-	// Set all existing VerifyEmailId entries for this user to inactive.
-	err := tx.Model(&data.VerifyEmailId{}).
-		Where(&data.VerifyEmailId{UserId: userId}).
-		Update("is_active", false).
-		Error
-	if err != nil {
-		return nil, err
-	}
-	// Insert the new VerifyEmailId entry.
-	if err := tx.Save(&verifyEmailData).Error; err != nil {
-		return nil, err
-	}
-	return &verifyEmailData, nil
 }
 
 func sendAccountVerifyEmail(requestId *data.VerifyEmailId, user *data.User, emailAddr string) error {
@@ -136,8 +110,8 @@ func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.E
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		// Set all existing VerifyEmailId entries for this user to inactive.
 		err := tx.Model(&data.VerifyEmailId{}).
-				Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
-				Update("is_active", false).Error
+			Where(&data.VerifyEmailId{UserId: verifyEmailId.UserId}).
+			Update("is_active", false).Error
 		if err != nil {
 			return err
 		}
