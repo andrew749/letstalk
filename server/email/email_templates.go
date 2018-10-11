@@ -77,11 +77,16 @@ func SendNewMentorEmail(
 	menteeCohort string,
 ) error {
 	var emailContext interface{} = struct {
-		MentorName   string `email_sub:":mentor_name"`
-		MenteeName   string `email_sub:":mentee_name"`
-		MentorCohort string `email_sub:":mentor_cohort"`
-		MenteeCohort string `email_sub:":mentee_cohort"`
-	}{}
+		MentorName   string `email_sub:":mentorname"`
+		MenteeName   string `email_sub:":menteename"`
+		MentorCohort string `email_sub:":mentorcohort"`
+		MenteeCohort string `email_sub:":menteecohort"`
+	}{
+		mentorName,
+		menteeName,
+		mentorCohort,
+		menteeCohort,
+	}
 
 	message := CreateBasicTemplatedEmail(to, NewMentorEmail, &emailContext)
 
@@ -96,11 +101,16 @@ func SendNewMenteeEmail(
 	menteeCohort string,
 ) error {
 	var emailContext interface{} = struct {
-		MentorName   string `email_sub:":mentor_name"`
-		MenteeName   string `email_sub:":mentee_name"`
-		MentorCohort string `email_sub:":mentor_cohort"`
-		MenteeCohort string `email_sub:":mentee_cohort"`
-	}{}
+		MentorName   string `email_sub:":mentorname"`
+		MenteeName   string `email_sub:":menteename"`
+		MentorCohort string `email_sub:":mentorcohort"`
+		MenteeCohort string `email_sub:":menteecohort"`
+	}{
+		mentorName,
+		menteeName,
+		mentorCohort,
+		menteeCohort,
+	}
 
 	message := CreateBasicTemplatedEmail(to, NewMenteeEmail, &emailContext)
 
