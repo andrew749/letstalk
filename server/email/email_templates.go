@@ -1,6 +1,8 @@
 package email
 
-import "github.com/sendgrid/sendgrid-go/helpers/mail"
+import (
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+)
 
 const (
 	SubscribeEmail      = "eaf48eac-ef8a-4dfc-9b10-e09f2dc4b337"
