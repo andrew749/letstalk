@@ -34,6 +34,7 @@ export interface AdhocNotification extends BaseNotification {
 }
 
 export interface NewMatchData {
+  matchUserId: string,
 }
 
 export interface NewMatchNotification extends BaseNotification {
@@ -42,6 +43,7 @@ export interface NewMatchNotification extends BaseNotification {
 }
 
 export interface ConnectionRequestedData {
+  connUserId: string,
 }
 
 export interface ConnectionRequestedNotification extends BaseNotification {
@@ -50,6 +52,7 @@ export interface ConnectionRequestedNotification extends BaseNotification {
 }
 
 export interface ConnectionAcceptedData {
+  connUserId: string,
 }
 
 export interface ConnectionAcceptedNotification extends BaseNotification {

@@ -77,13 +77,13 @@ func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEma
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	mentee, _ := query.GetUserByEmail(db, request.MenteeEmail)
+	mentee, err := query.GetUserByEmail(db, request.MenteeEmail)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
 	// Send notifications to matched pair.
-	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee.UserId)
-	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor.UserId)
+	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee)
+	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor)
 	if notifErr1 != nil || notifErr2 != nil {
 		err := errs.NewInternalError("error sending user notifications: %v; %v", notifErr1, notifErr2)
 		rlog.Error(err)
