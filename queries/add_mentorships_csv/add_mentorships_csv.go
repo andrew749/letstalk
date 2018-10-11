@@ -22,7 +22,7 @@ const mentorField = "Mentor Email"
 const menteeField = "Mentee Email"
 
 func printUsage() {
-	fmt.Println("Usage: go run add_mentorships_csv.go -file=mentorships.csv [-server=server]")
+	fmt.Println("Usage: go run add_mentorships_csv.go -file=mentorships.csv [-server=server] [-not-dry-run]")
 }
 
 // Return session token.
@@ -66,8 +66,16 @@ func login(server string) string {
 	return loginResponse.Result.SessionId
 }
 
-func addMentorship(server string, sessionId string, mentorEmail string, menteeEmail string) error {
-	createRequest := api.CreateMentorshipByEmail{MentorEmail: mentorEmail, MenteeEmail: menteeEmail}
+func addMentorship(server string, sessionId string, mentorEmail string, menteeEmail string, notDryRun bool) error {
+	requestType := api.CREATE_MENTORSHIP_TYPE_DRY_RUN
+	if notDryRun {
+		requestType = api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN
+	}
+	createRequest := api.CreateMentorshipByEmail{
+		MentorEmail: mentorEmail,
+		MenteeEmail: menteeEmail,
+		RequestType: requestType,
+	}
 	var buf = &bytes.Buffer{}
 	json.NewEncoder(buf).Encode(createRequest)
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/admin/mentorship", server), buf)
@@ -88,14 +96,18 @@ func addMentorship(server string, sessionId string, mentorEmail string, menteeEm
 func main() {
 	fileFlag := flag.String("file", "", "csv file to parse")
 	serverFlag := flag.String("server", "", "hive server")
-
-	// Once all flags are declared, call `flag.Parse()`
-	// to execute the command-line parsing.
+	notDryRun := flag.Bool("not-dry-run", false, "whether to actually insert connections in database")
 	flag.Parse()
 
 	if len(*fileFlag) == 0 {
 		printUsage()
 		os.Exit(1)
+	}
+
+	if *notDryRun {
+		fmt.Println("STARTING ACTUAL (NON-DRY) RUN!!")
+	} else {
+		fmt.Println("dry run, no changes will be made")
 	}
 
 	var server, sessionId string
@@ -114,16 +126,26 @@ func main() {
 		fmt.Println("failed to parse file", err)
 		os.Exit(1)
 	}
+
 	fields := make(map[string]int)
 	for i, field := range fullCsv[0] {
 		fields[field] = i
 	}
+	if _, ok := fields[mentorField]; !ok {
+		fmt.Printf("header missing mentor email field '%s'\n", mentorField)
+		os.Exit(1)
+	}
+	if _, ok := fields[menteeField]; !ok {
+		fmt.Printf("header missing mentee email field '%s'\n", menteeField)
+		os.Exit(1)
+	}
+
 	for _, line := range fullCsv[1:] {
 		mentorEmail := line[fields[mentorField]]
 		menteeEmail := line[fields[menteeField]]
 		fmt.Printf("mentor: '%s', mentee: '%s'", mentorEmail, menteeEmail)
 		if len(*serverFlag) > 0 {
-			if err := addMentorship(server, sessionId, mentorEmail, menteeEmail); err != nil {
+			if err := addMentorship(server, sessionId, mentorEmail, menteeEmail, *notDryRun); err != nil {
 				fmt.Printf("\nfailed to add (%s,%s): %v\n", mentorEmail, menteeEmail, err)
 			} else {
 				fmt.Println(" ok!")

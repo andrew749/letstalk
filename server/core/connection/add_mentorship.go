@@ -26,8 +26,10 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 		rlog.Error("failed to add mentorship for mentor/mentee pair", input)
 		return err
 	}
-	if err := sendMentorshipNotifications(c.Db, &input); err != nil {
-		return err
+	if input.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		if err := sendMentorshipNotifications(c.Db, &input); err != nil {
+			return err
+		}
 	}
 	c.Result = "Ok"
 	return nil
@@ -66,8 +68,11 @@ func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 		Intent: &intent,
 		Mentorship: &mentorship,
 	}
-	if err := db.Create(&conn).Error; err != nil {
-		return errs.NewDbError(err)
+	if request.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		rlog.Infof("not a dry run, adding (%s, %s)", mentor.Email, mentee.Email)
+		if err := db.Create(&conn).Error; err != nil {
+			return errs.NewDbError(err)
+		}
 	}
 	return nil
 }
