@@ -24,7 +24,14 @@ type RemoveConnection struct {
 	UserId data.TUserID `json:"userId" binding:"required"`
 }
 
+type CreateMentorshipType string
+const (
+	CREATE_MENTORSHIP_TYPE_DRY_RUN CreateMentorshipType = "DRY_RUN"
+	CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN CreateMentorshipType = "NOT_DRY_RUN"
+)
+
 type CreateMentorshipByEmail struct {
-	MenteeEmail string `json:"menteeEmail" binding:"required"`
-	MentorEmail string `json:"mentorEmail" binding:"required"`
+	MenteeEmail string               `json:"menteeEmail" binding:"required"`
+	MentorEmail string               `json:"mentorEmail" binding:"required"`
+	RequestType CreateMentorshipType `json:"requestType" binding:"required"`
 }
