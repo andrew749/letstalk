@@ -19,13 +19,18 @@ func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 
 func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	var user data.User
+	var err error
 	if db.Where(&data.User{Email: email}).First(&user).RecordNotFound() {
 		// fallback to looking for uwaterloo email
 		var verifyEmailId data.VerifyEmailId
-		if db.Where(&data.VerifyEmailId{Email: email}).Preload("User").First(&verifyEmailId).RecordNotFound() {
+		if db.Where(&data.VerifyEmailId{Email: email}).First(&verifyEmailId).RecordNotFound() {
 			return nil, errs.NewNotFoundError("Unable to find user")
 		}
-		return &verifyEmailId.User, nil
+		var userTemp *data.User
+		if userTemp, err = GetUserById(db, verifyEmailId.UserId); err != nil {
+			return nil, errs.NewNotFoundError("Unable to find user")
+		}
+		user = *userTemp
 	}
 	return &user, nil
 }
