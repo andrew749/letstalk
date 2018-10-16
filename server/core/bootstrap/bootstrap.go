@@ -9,6 +9,7 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
+	"letstalk/server/core/survey"
 )
 
 func convertUserToRelationshipDataModel(
@@ -97,6 +98,17 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		onboardingInfo.State,
 		onboardingInfo.UserType,
 	}
+
+	// Fetch user's survey information
+	responses, surveyErr := survey.GetSurveyResponses(c.Db, user.UserId, survey.Generic_v1.Version)
+	if surveyErr != nil {
+		return surveyErr
+	}
+	userSurvey := survey.Generic_v1
+	if responses != nil {
+		userSurvey.Responses = *responses
+	}
+	response.Survey = &userSurvey
 
 	if onboardingInfo.State != api.ONBOARDING_DONE {
 		// Onboarding not done. We don't need to get connections.

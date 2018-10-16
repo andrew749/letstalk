@@ -407,6 +407,16 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add surveys table",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&UserSurvey{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
