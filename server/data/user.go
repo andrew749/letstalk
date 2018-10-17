@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql/driver"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
@@ -29,15 +28,14 @@ const (
 type TUserID EntID
 
 type User struct {
-	CreatedAt        time.Time `gorm:"not null"`
-	UserId           TUserID   `gorm:"not null;primary_key;auto_increment"`
-	FirstName        string    `gorm:"not null"`
-	LastName         string    `gorm:"not null"`
-	Email            string    `gorm:"type:varchar(128);not null;unique"`
-	Secret           string    `gorm:"type:char(36);not null;unique"`
-	Gender           GenderID  `gorm:"not null"`
-	Birthdate        *string   `gorm:"type:varchar(100)"`
-	Role             UserRole  `gorm:"not null"`
+	UserId           TUserID  `gorm:"not null;primary_key;auto_increment"`
+	FirstName        string   `gorm:"not null"`
+	LastName         string   `gorm:"not null"`
+	Email            string   `gorm:"type:varchar(128);not null;unique"`
+	Secret           string   `gorm:"type:char(36);not null;unique"`
+	Gender           GenderID `gorm:"not null"`
+	Birthdate        *string  `gorm:"type:varchar(100)"`
+	Role             UserRole `gorm:"not null"`
 	ProfilePic       *string
 	Sessions         []Session           `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	AuthData         *AuthenticationData `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
@@ -47,6 +45,7 @@ type User struct {
 	UserPositions    []UserPosition      `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	UserSimpleTraits []UserSimpleTrait   `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
 	IsEmailVerified  bool                `gorm:"not null;default=false"`
+	Times
 }
 
 func (u *UserRole) Scan(value interface{}) error { *u = UserRole(value.([]byte)); return nil }
