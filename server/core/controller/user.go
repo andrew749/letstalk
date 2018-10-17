@@ -7,7 +7,8 @@ import (
 	"letstalk/server/core/query"
 )
 
-// SendAdhocNotification Endpoint to send an adhoc notification to a user with the given params
+// Nuke user deletes all data about the given user. User caution with this endpoint as it has
+// some effects.
 func NukeUser(c *ctx.Context) errs.Error {
 	var req api.NukeUserRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {

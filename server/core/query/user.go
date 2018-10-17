@@ -77,6 +77,8 @@ func NukeUser(
 		if err != nil {
 			return err
 		}
+
+		// BEGIN TRAITS
 		err = db.Where(&data.UserLocation{UserId: userId}).Delete(&data.UserLocation{}).Error
 		if err != nil {
 			return err
@@ -93,11 +95,10 @@ func NukeUser(
 		if err != nil {
 			return err
 		}
+		// END TRAITS
+
+		// BEGIN EXTRA USER DATA
 		err = db.Where(&data.AuthenticationData{UserId: userId}).Delete(&data.AuthenticationData{}).Error
-		if err != nil {
-			return err
-		}
-		err = db.Where(&data.Notification{UserId: userId}).Delete(&data.Notification{}).Error
 		if err != nil {
 			return err
 		}
@@ -113,18 +114,63 @@ func NukeUser(
 		if err != nil {
 			return err
 		}
-		err = db.Where(&data.FbAuthToken{UserId: userId}).Delete(&data.FbAuthToken{}).Error
-		if err != nil {
-			return err
-		}
-		err = db.Where(&data.FbAuthToken{UserId: userId}).Delete(&data.FbAuthToken{}).Error
-		if err != nil {
-			return err
-		}
 		err = db.Where(&data.Session{UserId: userId}).Delete(&data.Session{}).Error
 		if err != nil {
 			return err
 		}
+		err = db.Where(&data.Notification{UserId: userId}).Delete(&data.Notification{}).Error
+		if err != nil {
+			return err
+		}
+		// END EXTRA USER DATA
+
+		// BEGIN TOKENS
+		err = db.Where(&data.FbAuthToken{UserId: userId}).Delete(&data.FbAuthToken{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.VerifyEmailId{UserId: userId}).Delete(&data.VerifyEmailId{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.ForgotPasswordId{UserId: userId}).Delete(&data.ForgotPasswordId{}).Error
+		if err != nil {
+			return err
+		}
+		// END TOKENS
+
+		// BEGIN OLD STUFF
+		err = db.Where(&data.RequestMatching{Asker: userId}).Delete(&data.RequestMatching{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.RequestMatching{Answerer: userId}).Delete(&data.RequestMatching{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.Matching{Mentor: userId}).Delete(&data.Matching{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.Matching{Mentee: userId}).Delete(&data.Matching{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.UserVector{UserId: userId}).Delete(&data.UserVector{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.UserCredential{UserId: userId}).Delete(&data.UserCredential{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.UserCredentialRequest{UserId: userId}).Delete(
+			&data.UserCredentialRequest{},
+		).Error
+		if err != nil {
+			return err
+		}
+		// END OLD STUFF
 
 		connections, err := GetAllConnections(db, userId)
 		if err != nil {
