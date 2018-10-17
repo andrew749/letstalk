@@ -35,11 +35,12 @@ import {
 import { ActionTypes as NotificationsActionTypes } from '../redux/notifications/actions';
 import Loading from './Loading';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
-import { Notification } from '../models/notification';
+import {NewMatchNotification, Notification} from '../models/notification';
 import Colors from '../services/colors';
 import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
 import { Linking } from 'expo';
+import ProfileAvatar from "../components/ProfileAvatar";
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -157,9 +158,24 @@ class NotificationView extends Component<Props, State> {
             </Text>
           </Text>
         );
-        icon = <MaterialIcons size={ICON_SIZE} name='people'/>;
+        icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
+        break;
+      case 'CONNECTION_REQUESTED':
+      case 'CONNECTION_ACCEPTED':
+        const { data: {connUserId } } = notification;
+        if (connUserId) {
+          icon = <ProfileAvatar userId={connUserId} medium/>
+        } else {
+          icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
+        }
         break;
       case 'NEW_MATCH':
+        const { data: {matchUserId} } = notification;
+        if (matchUserId) {
+          icon = <ProfileAvatar userId={matchUserId} medium/>
+        } else {
+          icon = <MaterialIcons size={ICON_SIZE} name='account-circle'/>;
+        }
         break;
       case 'ADHOC_NOTIFICATION':
         break;

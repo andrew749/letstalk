@@ -19,12 +19,14 @@ import (
 func TestAddMentorship(t *testing.T) {
 	tests := []test.Test{
 		{
+			TestName: "Test basic admin add mentorship",
 			Test: func(db *gorm.DB) {
 				userOne := user.CreateUserForTest(t, db)
 				userTwo := user.CreateUserForTest(t, db)
 				request := api.CreateMentorshipByEmail{
 					MentorEmail: userOne.Email,
 					MenteeEmail: userTwo.Email,
+					RequestType: api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN,
 				}
 				requestError := handleAddMentorship(db, &request)
 				assert.NoError(t, requestError)
@@ -37,9 +39,9 @@ func TestAddMentorship(t *testing.T) {
 				assert.Equal(t, data.INTENT_TYPE_ASSIGNED, conn.Intent.Type)
 				assert.Equal(t, userOne.UserId, conn.Mentorship.MentorUserId)
 			},
-			TestName: "Test basic admin add mentorship",
 		},
 		{
+			TestName: "Test bad requests",
 			Test: func(db *gorm.DB) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
@@ -47,6 +49,7 @@ func TestAddMentorship(t *testing.T) {
 				request := api.CreateMentorshipByEmail{
 					MentorEmail: userOne.Email,
 					MenteeEmail: userOne.Email,
+					RequestType: api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN,
 				}
 				// Same user id.
 				assert.Error(t, handleAddMentorship(c.Db, &request))
@@ -69,7 +72,24 @@ func TestAddMentorship(t *testing.T) {
 				// No such user.
 				assert.Error(t, handleAddMentorship(c.Db, &request))
 			},
-			TestName: "Test bad requests",
+		},
+		{
+			TestName: "Test dry run",
+			Test: func(db *gorm.DB) {
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				request := api.CreateMentorshipByEmail{
+					MentorEmail: userOne.Email,
+					MenteeEmail: userTwo.Email,
+					RequestType: api.CREATE_MENTORSHIP_TYPE_DRY_RUN,
+				}
+				requestError := handleAddMentorship(db, &request)
+				assert.NoError(t, requestError)
+				// Check database tables are not updated.
+				conn, err := query.GetConnectionDetails(db, userOne.UserId, userTwo.UserId)
+				assert.NoError(t, err)
+				assert.Nil(t, conn)
+			},
 		},
 	}
 	test.RunTestsWithDb(tests)

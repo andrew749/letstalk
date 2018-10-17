@@ -9,9 +9,11 @@ import (
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
+	"letstalk/server/email"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 /**
@@ -26,8 +28,10 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 		rlog.Error("failed to add mentorship for mentor/mentee pair", input)
 		return err
 	}
-	if err := sendMentorshipNotifications(c.Db, &input); err != nil {
-		return err
+	if input.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		if err := sendMentorshipNotifications(c.Db, &input); err != nil {
+			return err
+		}
 	}
 	c.Result = "Ok"
 	return nil
@@ -56,18 +60,21 @@ func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	createdAt := time.Now()
 	mentorship := data.Mentorship{
 		MentorUserId: mentor.UserId,
-		CreatedAt: createdAt,
+		CreatedAt:    createdAt,
 	}
 	conn := data.Connection{
-		UserOneId: mentor.UserId,
-		UserTwoId: mentee.UserId,
-		CreatedAt: createdAt,
+		UserOneId:  mentor.UserId,
+		UserTwoId:  mentee.UserId,
+		CreatedAt:  createdAt,
 		AcceptedAt: &createdAt, // Automatically accept.
-		Intent: &intent,
+		Intent:     &intent,
 		Mentorship: &mentorship,
 	}
-	if err := db.Create(&conn).Error; err != nil {
-		return errs.NewDbError(err)
+	if request.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		rlog.Infof("not a dry run, adding (%s, %s)", mentor.Email, mentee.Email)
+		if err := db.Create(&conn).Error; err != nil {
+			return errs.NewDbError(err)
+		}
 	}
 	return nil
 }
@@ -77,17 +84,55 @@ func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEma
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-	mentee, _ := query.GetUserByEmail(db, request.MenteeEmail)
+
+	mentee, err := query.GetUserByEmail(db, request.MenteeEmail)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
+
+	mentorCohort, err := query.GetUserCohort(db, mentor.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	menteeCohort, err := query.GetUserCohort(db, mentee.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
 	// Send notifications to matched pair.
-	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee.UserId)
-	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor.UserId)
-	if notifErr1 != nil || notifErr2 != nil {
-		err := errs.NewInternalError("error sending user notifications: %v; %v", notifErr1, notifErr2)
-		rlog.Error(err)
-		return err
+	notifErr1 := notifications.NewMenteeNotification(db, mentor.UserId, mentee)
+	notifErr2 := notifications.NewMentorNotification(db, mentee.UserId, mentor)
+
+	mentorEmail := mail.NewEmail(mentor.FirstName, mentor.Email)
+	menteeEmail := mail.NewEmail(mentee.FirstName, mentee.Email)
+
+	emailErr1 := email.SendNewMenteeEmail(mentorEmail, mentor.FirstName, mentee.FirstName, menteeCohort.ProgramName, menteeCohort.GradYear)
+	emailErr2 := email.SendNewMentorEmail(menteeEmail, mentor.FirstName, mentee.FirstName, mentorCohort.ProgramName, mentorCohort.GradYear)
+	var compositeError *errs.CompositeError
+	compositeError = errs.AppendNullableError(compositeError, notifErr1)
+	compositeError = errs.AppendNullableError(compositeError, notifErr2)
+	compositeError = errs.AppendNullableError(compositeError, emailErr1)
+	compositeError = errs.AppendNullableError(compositeError, emailErr2)
+	if emailErr1 != nil {
+		rlog.Errorf("Unable to send email to user %d with email: %s;Error: %+v", mentor.UserId, mentor.Email, emailErr1)
+	}
+
+	if emailErr2 != nil {
+		rlog.Errorf("Unable to send email to user %d with email: %s;Error: %+v", mentee.UserId, mentee.Email, emailErr2)
+	}
+
+	if notifErr1 != nil {
+		rlog.Errorf("Unable to send notification to user %d with email: %s;Error: %+v", mentor.UserId, mentor.Email, notifErr1)
+	}
+
+	if notifErr2 != nil {
+		rlog.Errorf("Unable to send notification to user %d with email: %s;Error: %+v", mentee.UserId, mentee.Email, notifErr2)
+	}
+
+	if compositeError != nil {
+		rlog.Errorf("%+v", compositeError)
+		return compositeError
 	}
 	return nil
 }

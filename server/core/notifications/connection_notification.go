@@ -2,12 +2,17 @@ package notifications
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 
 	"letstalk/server/core/linking"
 	"letstalk/server/data"
 )
+
+func setConnUserId(extraData map[string]string, connUserId data.TUserID) {
+	extraData["connUserId"] = strconv.Itoa(int(connUserId))
+}
 
 func ConnectionRequestedNotification(
 	db *gorm.DB,
@@ -16,9 +21,11 @@ func ConnectionRequestedNotification(
 	fromName string,
 ) error {
 	var (
-		title   string = "New connection request"
-		message string = fmt.Sprintf("You got a connection request from %s", fromName)
+		extraData map[string]string = map[string]string{}
+		title     string = "New connection request"
+		message   string = fmt.Sprintf("You got a connection request from %s", fromName)
 	)
+	setConnUserId(extraData, fromUserId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -26,7 +33,7 @@ func ConnectionRequestedNotification(
 		recipient,
 		data.NOTIF_TYPE_CONNECTION_REQUESTED,
 		nil,
-		map[string]string{},
+		extraData,
 		linking.GetMatchProfileWithButtonUrl(fromUserId),
 	)
 }
@@ -38,9 +45,11 @@ func ConnectionAcceptedNotification(
 	fromName string,
 ) error {
 	var (
-		title   string = "Connection request accepted"
-		message string = fmt.Sprintf("%s accepted your connection request", fromName)
+		extraData map[string]string = map[string]string{}
+		title     string = "Connection request accepted"
+		message   string = fmt.Sprintf("%s accepted your connection request", fromName)
 	)
+	setConnUserId(extraData, fromUserId)
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -48,7 +57,7 @@ func ConnectionAcceptedNotification(
 		recipient,
 		data.NOTIF_TYPE_CONNECTION_ACCEPTED,
 		nil,
-		map[string]string{},
+		extraData,
 		linking.GetMatchProfileUrl(fromUserId),
 	)
 }
