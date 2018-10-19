@@ -1,6 +1,8 @@
 package user
 
 import (
+	"net/http"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -61,5 +63,14 @@ func LoginUser(c *ctx.Context) errs.Error {
 		ExpiryDate: session.ExpiryDate,
 	}
 
+	return nil
+}
+
+const loginPageTemplate = "login.html"
+
+// RenderLoginPage Renders a login page that tries to login and sets cookie with session id
+func RenderLoginPage(ctx *ctx.Context) errs.Error {
+	ctx.GinContext.HTML(http.StatusOK, loginPageTemplate, &map[string]string{})
+	ctx.Result = nil
 	return nil
 }
