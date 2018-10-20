@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
   entry: {
     index: path.resolve(__dirname, 'src', 'index.jsx'),
+    sample_template: path.resolve(__dirname, 'src', 'sample_template.jsx')
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -44,6 +45,12 @@ module.exports = {
       filename: "../index.html",
       title: "{{.WebpageTitle}}",
       chunks: ['index']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../sample_template.html",
+      title: "{{.WebpageTitle}}",
+      chunks: ['sample_template']
     }),
   ]
 };
