@@ -67,7 +67,7 @@ func Register(
 	router.OPTIONS("/testAuth")
 	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
 
-	router.LoadHTMLGlob("templates/**/*")
+	router.LoadHTMLGlob("templates/*")
 
 	v1 := router.Group("/v1")
 
@@ -269,7 +269,7 @@ func Register(
 
 	// Html login page
 	v1.OPTIONS("/login_page")
-	v1.GET("/login_page", hw.wrapHandler(user.RenderLoginPage,false))
+	v1.GET("/login_page", hw.wrapHandler(user.RenderLoginPage, false))
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")
@@ -329,8 +329,8 @@ func Register(
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
 	// Render a page to make it easy to send notification campaigns
-	admin.OPTIONS("/notification_console")
-	admin.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
+	//admin.OPTIONS("/notification_console")
+	//admin.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
 
 	return router
 }
