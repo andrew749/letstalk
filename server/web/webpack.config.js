@@ -42,6 +42,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: "../index.html",
+      title: "{{.WebpageTitle}}",
       chunks: ['index']
     }),
   ]

@@ -71,7 +71,11 @@ const loginPageTemplate = "index.html"
 
 // RenderLoginPage Renders a login page that tries to login and sets cookie with session id
 func RenderLoginPage(ctx *ctx.Context) errs.Error {
-	ctx.GinContext.HTML(http.StatusOK, loginPageTemplate, &map[string]string{})
+	ctx.GinContext.HTML(
+		http.StatusOK,
+		loginPageTemplate,
+		&map[string]string{"WebpageTitle": "Login"},
+	)
 	ctx.Result = nil
 	return nil
 }

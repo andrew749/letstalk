@@ -330,10 +330,6 @@ func Register(
 	admin.OPTIONS("/nuke_user")
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
-	// Render a page to make it easy to send notification campaigns
-	//admin.OPTIONS("/notification_console")
-	//admin.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
-
 	return router
 }
 
