@@ -4,6 +4,7 @@ import { Button, FormGroup, FormControl, ControlLabel, Alert } from "react-boots
 import CookieAwareComponent from './cookie_aware_component.jsx'
 import {withCookies} from 'react-cookie';
 import getProperty from './context.jsx';
+import './scss/sample_template.scss';
 
 export default class SampleNotification extends React.Component {
     render() {
@@ -11,10 +12,10 @@ export default class SampleNotification extends React.Component {
       const body = getProperty('body');
       const thumbnail = getProperty('thumbnail');
       return (
-        <div>
-          <h1>{title}</h1>
-          <p>{body}</p>
-          <img src={thumbnail}/>
+        <div className="notification-content">
+          <h1 className="notificationTitle">{title}</h1>
+          <p className="notification-body">{body}</p>
+          <img className="notification-image" src={thumbnail}/>
         </div>
       );
     }
