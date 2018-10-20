@@ -1,25 +1,13 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Button, FormGroup, FormControl, ControlLabel, Alert } from "react-bootstrap";
-import {CookiesProvider, withCookies} from 'react-cookie';
+import CookieAwareComponent from './cookie_aware_component.jsx'
+import {withCookies} from 'react-cookie';
 
 const serverUrl = "http://localhost/v1";
 
 
-export function CookieAwareComponent(WrappedComponent) {
-    return class extends React.Component {
-        render() {
-            return (
-                <CookiesProvider>
-                    <WrappedComponent {...this.props}/>
-                </CookiesProvider>
-            );
-        }
-    }
-}
-
-
-class LoginPage extends React.Component {
+export class LoginPage extends React.Component {
     constructor(props) {
         super(props);
 
@@ -118,7 +106,6 @@ class LoginPage extends React.Component {
     }
 }
 
-const WrappedLoginPage = withCookies(LoginPage);
-const CookieAwareLoginPage = CookieAwareComponent(WrappedLoginPage)
+const CookieAwareLoginPage = CookieAwareComponent(withCookies(LoginPage));
 
-ReactDOM.render(<CookieAwareLoginPage/>, document.body);
+ReactDOM.render(<CookieAwareLoginPage/>, document.getElementById('content'));
