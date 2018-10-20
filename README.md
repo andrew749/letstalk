@@ -80,14 +80,3 @@ Run the following command on ec2 server.
 ```
 ./prod.sh
 ```
-
-## Push new image to docker registry (COMING)
-Note you need to `docker login` with credentials associated with my docker hub account.
-```
-docker build . -t andrewcodispoti/hive
-docker push andrewcodispoti/hive
-```
-
-## Push new files to server
-The following script provides an easy way to push files to ec2 in the event we dont want to keep a git repo on the server.
-```python infra/push_files.py FILES --destination="~" --username=andrew --private_key=~/.ssh/id_rsa```
