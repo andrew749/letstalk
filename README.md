@@ -73,6 +73,14 @@ Build a docker container and launch the container. Note this will rebuild the se
 NOTE: because of a bug you might have to run `dep ensure` ON YOUR LOCAL MACHINE
 since in development mode, the downloaded dependencies will get clobbered.
 
+If you are working with frontend code, you also need to start a separate process
+to build the javascript assets so they can be served. You can do this by going to
+`server/web` and running:
+
+```
+yarn dev
+```
+
 ## Infrastructure
 
 ## Build and startup server on ec2

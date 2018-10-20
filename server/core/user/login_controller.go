@@ -66,7 +66,8 @@ func LoginUser(c *ctx.Context) errs.Error {
 	return nil
 }
 
-const loginPageTemplate = "login.html"
+// built from webpack
+const loginPageTemplate = "index.html"
 
 // RenderLoginPage Renders a login page that tries to login and sets cookie with session id
 func RenderLoginPage(ctx *ctx.Context) errs.Error {

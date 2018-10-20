@@ -6,7 +6,7 @@ module.exports = {
     index: path.resolve(__dirname, 'src', 'index.jsx'),
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist', 'assets'),
     filename: '[name].js'
   },
   resolve: {
@@ -40,7 +40,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'src/index.html'
-    })
+      template: 'src/index.html',
+      filename: "../index.html",
+      chunks: ['index']
+    }),
   ]
 };

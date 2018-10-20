@@ -68,6 +68,12 @@ func Register(
 	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
 
 	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("web/dist/*.html")
+	router.Static("/assets", "web/dist/assets/")
+
+	// Html login page
+	router.OPTIONS("/login_page")
+	router.GET("/login_page", hw.wrapHandlerHTML(user.RenderLoginPage, false))
 
 	v1 := router.Group("/v1")
 
@@ -266,10 +272,6 @@ func Register(
 		"/user_position",
 		hw.wrapHandler(controller.RemoveUserPositionController, true),
 	)
-
-	// Html login page
-	v1.OPTIONS("/login_page")
-	v1.GET("/login_page", hw.wrapHandler(user.RenderLoginPage, false))
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")
