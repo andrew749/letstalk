@@ -17,5 +17,5 @@ type Survey struct {
 	Group     data.SurveyGroup      `json:"group" binding:"required"`
 	Version   int                   `json:"version" binding:"required"`
 	Questions []SurveyQuestion      `json:"questions" binding:"required"`
-	Responses *data.SurveyResponses `json:"responses" binding:"required"`
+	Responses *data.SurveyResponses `json:"responses"`
 }

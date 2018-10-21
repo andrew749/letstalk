@@ -8,6 +8,7 @@ import {
   OnboardingState,
   OnboardingStatus,
 } from './onboarding';
+import { Survey } from './survey'
 
 export {
   BootstrapData,
@@ -18,4 +19,5 @@ export {
   ProfileData,
   Relationship,
   UserState,
+  Survey,
 };
