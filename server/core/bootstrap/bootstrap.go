@@ -100,13 +100,13 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	}
 
 	// Fetch user's survey information
-	responses, surveyErr := survey.GetSurveyResponses(c.Db, user.UserId, survey.Generic_v1.Version)
+	surveyResponses, surveyErr := survey.GetSurveyResponses(c.Db, user.UserId, survey.Generic_v1.Group)
 	if surveyErr != nil {
 		return surveyErr
 	}
 	userSurvey := survey.Generic_v1
-	if responses != nil {
-		userSurvey.Responses = *responses
+	if surveyResponses != nil {
+		userSurvey.Responses = surveyResponses
 	}
 	response.Survey = &userSurvey
 

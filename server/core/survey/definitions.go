@@ -3,7 +3,8 @@ package survey
 import "letstalk/server/core/api"
 
 var Generic_v1 api.Survey = api.Survey{
-	Version: "generic_v1",
+	Group: "generic",
+	Version: 1,
 	Questions: []api.SurveyQuestion{
 		{
 			Key:    "friday_night",

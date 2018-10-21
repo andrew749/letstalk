@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type SurveyVersion string
+type SurveyGroup string
 type SurveyQuestionKey string
 type SurveyOptionKey string
 
@@ -17,12 +17,13 @@ type SurveyResponses map[SurveyQuestionKey]SurveyOptionKey
 type UserSurvey struct {
 	gorm.Model
 	UserId    TUserID         `gorm:"not null"`
-	Version   SurveyVersion   `gorm:"not null;size:190"`
+	Group     SurveyGroup     `gorm:"not null;size:190"`
+	Version   int             `gorm:"not null"`
 	Responses SurveyResponses `gorm:"not null;type:text"`
 }
 
-func (u *SurveyVersion) Scan(value interface{}) error { *u = SurveyVersion(value.([]uint8)); return nil }
-func (u SurveyVersion) Value() (driver.Value, error)  { return string(u), nil }
+func (u *SurveyGroup) Scan(value interface{}) error { *u = SurveyGroup(value.([]uint8)); return nil }
+func (u SurveyGroup) Value() (driver.Value, error)  { return string(u), nil }
 func (u *SurveyQuestionKey) Scan(value interface{}) error { *u = SurveyQuestionKey(value.([]uint8)); return nil }
 func (u SurveyQuestionKey) Value() (driver.Value, error)  { return string(u), nil }
 func (u *SurveyOptionKey) Scan(value interface{}) error { *u = SurveyOptionKey(value.([]uint8)); return nil }
