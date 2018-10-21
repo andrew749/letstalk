@@ -434,6 +434,18 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Create jobmine",
+			Migrate: func(tx *gorm.DB) error {
+				if err := tx.AutoMigrate(JobRecord{}).Error; err != nil {
+					return err
+				}
+				return tx.AutoMigrate(TaskRecord{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
