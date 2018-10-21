@@ -70,5 +70,4 @@ export interface BootstrapData {
   readonly cohort: Cohort;
   readonly onboardingStatus: OnboardingStatus;
   readonly connections: BootstrapConnections;
-  readonly survey?: Survey,
 };

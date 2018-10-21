@@ -99,17 +99,6 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		onboardingInfo.UserType,
 	}
 
-	// Fetch user's survey information
-	surveyResponses, surveyErr := survey.GetSurveyResponses(c.Db, user.UserId, survey.Generic_v1.Group)
-	if surveyErr != nil {
-		return surveyErr
-	}
-	userSurvey := survey.Generic_v1
-	if surveyResponses != nil {
-		userSurvey.Responses = surveyResponses
-	}
-	response.Survey = &userSurvey
-
 	if onboardingInfo.State != api.ONBOARDING_DONE {
 		// Onboarding not done. We don't need to get connections.
 		c.Result = response

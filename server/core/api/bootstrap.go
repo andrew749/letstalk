@@ -56,5 +56,4 @@ type BootstrapResponse struct {
 	Cohort           *data.Cohort         `json:"cohort" binding:"required"`
 	OnboardingStatus *OnboardingStatus    `json:"onboardingStatus" binding:"required"`
 	Connections      BootstrapConnections `json:"connections" binding:"required"`
-	Survey           *Survey              `json:"survey"`
 }

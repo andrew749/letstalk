@@ -36,9 +36,7 @@ import profileService, {
   PersonalityVector,
   UserVectorPreferenceType,
 } from '../services/profile-service';
-import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
-import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
-import { State as SurveyState } from '../redux/survey/reducer';
+import {fetchSurvey, State as SurveyState} from '../redux/survey/reducer';
 import {
   ActionTypes as SurveyActionTypes,
   setSurveyQuestionsAction,
@@ -58,7 +56,7 @@ import {headerStyle, headerTintColor, headerTitleStyle} from "./TopHeader";
 import {SurveyQuestion} from "../models/survey";
 
 interface DispatchActions {
-  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setSurveyStateAction: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setSurveyQuestionsAction: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setSurveyResponsesAction: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
@@ -87,22 +85,12 @@ class SurveyView extends Component<Props> {
   }
 
   async componentDidMount() {
-    AnalyticsHelper.getInstance().recordPage(this.ONBOARDING_VIEW_IDENTIFIER);
+    AnalyticsHelper.getInstance().recordPage(this.SURVEY_VIEW_IDENTIFIER);
     await this.load();
   }
 
   private async load() {
-    await this.props.fetchBootstrap();
-  }
-
-  async componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.bootstrap && nextProps.bootstrap.survey) {
-      if (!this.props.survey) {
-        await this.props.setSurveyStateAction(nextProps.bootstrap.survey)
-      } else {
-        await this.props.setSurveyQuestionsAction(nextProps.bootstrap.survey.questions)
-      }
-    }
+    await this.props.fetchSurvey();
   }
 
   async onSkipRemaining() {
@@ -179,4 +167,4 @@ const styles = StyleSheet.create({
 });
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { fetchBootstrap, setSurveyStateAction, setSurveyQuestionsAction, setSurveyResponsesAction,  })(SurveyView);
+  { fetchSurvey, setSurveyStateAction, setSurveyQuestionsAction, setSurveyResponsesAction,  })(SurveyView);

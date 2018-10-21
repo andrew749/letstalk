@@ -1,10 +1,11 @@
-import Immutable from 'immutable';
-
 import {
-  ActionTypes,
+  ActionTypes, setSurvey,
   TypeKeys,
 } from './actions';
-import {Survey, SurveyQuestions} from "../../models/survey";
+import {Survey} from "../../models/survey";
+import {ActionCreator, Dispatch} from "react-redux";
+import {ThunkAction} from "redux-thunk";
+import surveyService from "../../services/survey";
 
 export interface State {
   readonly survey?: Survey
@@ -12,30 +13,14 @@ export interface State {
 
 const initialState: State = { };
 
-// TODO need to test this
-function updateQuestionsRemovingStaleResponses(oldState: State, questions: SurveyQuestions) {
-  const { survey } = oldState;
-  const { responses:currentResponses } = survey;
-  if (!currentResponses) {
-      return { ...oldState, survey: { ...survey, questions } };
-  } else {
-    const newQuestionKeys = questions.map(({key}) => key).toSet();
-    const responses : Immutable.Map<string, string> =
-      Immutable.Map(currentResponses.filterNot(({key}) => newQuestionKeys.has(key)));
-    return { ...oldState, survey: { ...survey, questions, responses } };
-  }
-}
-
 export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
-    case TypeKeys.SET_STATE:
+    case TypeKeys.SET_SURVEY:
       return {
         ...state,
         survey: action.survey,
       };
-    case TypeKeys.SET_QUESTIONS:
-      return updateQuestionsRemovingStaleResponses(state, action.questions);
-    case TypeKeys.SET_RESPONSES:
+    case TypeKeys.SET_SURVEY_RESPONSES:
       return {
         ...state,
         survey: {
@@ -48,4 +33,20 @@ export function reducer(state: State = initialState, action: ActionTypes): State
       const _: never = action;
       return state;
   }
+}
+
+const fetchSurvey: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = () => {
+  return async (dispatch: Dispatch<State>) => {
+    await dispatch(fetch.start());
+    try {
+      const survey = await surveyService.getSurvey();
+      await dispatch(setSurvey(survey));
+      return dispatch(fetch.receive(data));
+    } catch(e) {
+      return dispatch(fetch.error(e));
+    }
+  };
 };
+
+export { fetchSurvey };

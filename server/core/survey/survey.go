@@ -10,9 +10,32 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-/**
- * PostSurveyResponses saves a response to an onboarding survey.
- */
+// GetSurvey gets the most up-to-date survey and responses for the auth user.
+func GetSurvey(c *ctx.Context) errs.Error {
+	// Fetch user's survey information
+	if responses, err := getSurveyResponses(c.Db, c.SessionData.UserId, Generic_v1.Group); err != nil {
+		return err
+	} else {
+		userSurvey := Generic_v1
+		if responses != nil {
+			userSurvey.Responses = responses
+		}
+		c.Result = &userSurvey
+		return nil
+	}
+}
+
+func getSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*data.SurveyResponses, errs.Error) {
+	if userSurvey, err := query.GetUserSurvey(db, userId, group); err != nil {
+		return nil, errs.NewDbError(err)
+	} else if userSurvey == nil {
+		return nil, nil
+	} else {
+		return &userSurvey.Responses, nil
+	}
+}
+
+//PostSurveyResponses saves a response to an onboarding survey.
 func PostSurveyResponses(c *ctx.Context) errs.Error {
 	var input api.Survey
 	if err := c.GinContext.BindJSON(&input); err != nil {
@@ -44,14 +67,4 @@ func saveSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGrou
 		return errs.NewInternalError("Error saving survey responses: %v", err)
 	}
 	return nil
-}
-
-func GetSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*data.SurveyResponses, errs.Error) {
-	if userSurvey, err := query.GetUserSurvey(db, userId, group); err != nil {
-		return nil, errs.NewDbError(err)
-	} else if userSurvey == nil {
-		return nil, nil
-	} else {
-		return &userSurvey.Responses, nil
-	}
 }

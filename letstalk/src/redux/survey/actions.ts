@@ -4,54 +4,38 @@ import { OnboardingStatus } from '../../models';
 import {Survey, SurveyQuestions, SurveyResponses} from "../../models/survey";
 
 export enum TypeKeys {
-  SET_STATE = 'SURVEY/SET_STATE',
-  SET_QUESTIONS = 'SURVEY/SET_QUESTIONS',
-  SET_RESPONSES = 'SURVEY/SET_RESPONSES',
+  SET_SURVEY = 'SURVEY/SET_SURVEY',
+  SET_SURVEY_RESPONSES = 'SURVEY/SET_SURVEY_RESPONSES',
 }
 
-export interface SetSurveyStateAction extends Action {
-  readonly type: TypeKeys.SET_STATE;
+export interface SetSurveyAction extends Action {
+  readonly type: TypeKeys.SET_SURVEY;
   readonly survey: Survey;
 }
 
-export interface SetSurveyQuestionsAction extends Action {
-  readonly type: TypeKeys.SET_QUESTIONS;
-  readonly questions: SurveyQuestions;
-}
-
 export interface SetSurveyResponsesAction extends Action {
-  readonly type: TypeKeys.SET_RESPONSES;
+  readonly type: TypeKeys.SET_SURVEY_RESPONSES;
   readonly responses: SurveyResponses;
 }
 
-export function setSurveyStateAction(
+export function setSurvey(
   survey: Survey
-): SetSurveyStateAction {
+): SetSurveyAction {
   return {
-    type: TypeKeys.SET_STATE,
+    type: TypeKeys.SET_SURVEY,
     survey,
   };
 }
 
-export function setSurveyQuestionsAction(
-  questions: SurveyQuestions
-): SetSurveyQuestionsAction {
-  return {
-    type: TypeKeys.SET_QUESTIONS,
-    questions,
-  };
-}
-
-export function setSurveyResponsesAction(
+export function setSurveyResponses(
   responses: SurveyResponses
 ): SetSurveyResponsesAction {
   return {
-    type: TypeKeys.SET_RESPONSES,
+    type: TypeKeys.SET_SURVEY_RESPONSES,
     responses,
   };
 }
 
 export type ActionTypes =
-  | SetSurveyStateAction
-  | SetSurveyQuestionsAction
+  | SetSurveyAction
   | SetSurveyResponsesAction
