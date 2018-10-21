@@ -7,16 +7,17 @@ import (
 )
 
 type Notification struct {
-	NotificationId uint              `json:"notificationId"`
-	UserId         data.TUserID      `json:"userId"`
-	Type           data.NotifType    `json:"type"`
-	State          data.NotifState   `json:"state"`
-	Title          string            `json:"title"`
-	Message        string            `json:"message"`
-	Timestamp      time.Time         `json:"timestamp"`
-	ThumbnailLink  *string           `json:"thumbnail"`
-	Data           map[string]string `json:"data"`
-	Link           *string           `json:"link"`
+	NotificationId uint                   `json:"notificationId"`
+	UserId         data.TUserID           `json:"userId"`
+	Type           data.NotifType         `json:"type"`
+	State          data.NotifState        `json:"state"`
+	Title          string                 `json:"title"`
+	Message        string                 `json:"message"`
+	Timestamp      time.Time              `json:"timestamp"`
+	ThumbnailLink  *string                `json:"thumbnail"`
+	Data           map[string]interface{} `json:"data"`
+	Link           *string                `json:"link"`
+	RunId          *string                `json:"runId"`
 }
 
 type UpdateNotificationStateRequest struct {

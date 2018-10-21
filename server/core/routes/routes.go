@@ -330,6 +330,9 @@ func Register(
 	admin.OPTIONS("/adhoc_notification")
 	admin.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
 
+	admin.OPTIONS("/campaign")
+	admin.POST("/campaign", hw.wrapHandler(controller.NotificationCampaignController, false))
+
 	admin.OPTIONS("/nuke_user")
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
