@@ -15,18 +15,18 @@ import (
 
 var (
 	inFile     = flag.String("in", "", "Input csv file containing emails of users to add")
-	groupIdStr = flag.String("group-id", "", "Id for the group (uppercase please)")
-	groupName  = flag.String("group-name", "", "Name for the group (capitalized please)")
+	groupIdStr = flag.String("group_id", "", "Id for the group (uppercase please)")
+	groupName  = flag.String("group_name", "", "Name for the group (capitalized please)")
 )
 
 func main() {
 	flag.Parse()
 
 	if groupIdStr == nil || *groupIdStr == "" {
-		panic("Must provide --group-id")
+		panic("Must provide -group_id")
 	}
 	if groupName == nil || *groupName == "" {
-		panic("Must provide --group-name")
+		panic("Must provide -group_name")
 	}
 	groupId := data.TGroupID(*groupIdStr)
 
@@ -53,7 +53,7 @@ func main() {
 	for _, record := range records {
 		user, err := query.GetUserByEmail(db, record[0])
 		if err != nil {
-			if _, ok := err.(errs.NotFoundError); ok {
+			if _, ok := err.(*errs.NotFoundError); ok {
 				missingEmails = append(missingEmails, record[0])
 			} else {
 				panic(err)

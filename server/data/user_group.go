@@ -1,12 +1,16 @@
 package data
 
-import "github.com/jinzhu/gorm"
+import (
+	"database/sql/driver"
+	"github.com/jinzhu/gorm"
+)
 
 type (
-	TUserGroupID  EntID
-	TGroupID      string
-	UserGroupType string
+	TUserGroupID EntID
+	TGroupID     string
 )
+
+func (u TGroupID) Value() (driver.Value, error) { return string(u), nil }
 
 // Stores groups that a user is a part of
 type UserGroup struct {
