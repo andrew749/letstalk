@@ -1,9 +1,16 @@
 import { Action } from 'redux'
-
-import { OnboardingStatus } from '../../models';
-import {Survey, SurveyQuestions, SurveyResponses} from "../../models/survey";
+import {Survey, SurveyResponses} from "../../models/survey";
+import {
+  FetchReceiveAction,
+  FetchErrorAction,
+  FetchStartAction,
+  FetchTypeKeys,
+  FetchActionCreators,
+} from '../actions';
+import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
+  FETCH = 'SURVEY/FETCH',
   SET_SURVEY = 'SURVEY/SET_SURVEY',
   SET_SURVEY_RESPONSES = 'SURVEY/SET_SURVEY_RESPONSES',
 }
@@ -18,14 +25,9 @@ export interface SetSurveyResponsesAction extends Action {
   readonly responses: SurveyResponses;
 }
 
-export function setSurvey(
-  survey: Survey
-): SetSurveyAction {
-  return {
-    type: TypeKeys.SET_SURVEY,
-    survey,
-  };
-}
+type FetchSurveyReceiveAction = FetchReceiveAction<TypeKeys.FETCH, Survey>;
+type FetchSurveyErrorAction = FetchErrorAction<TypeKeys.FETCH>;
+type FetchSurveyStartAction = FetchStartAction<TypeKeys.FETCH>;
 
 export function setSurveyResponses(
   responses: SurveyResponses
@@ -36,6 +38,40 @@ export function setSurveyResponses(
   };
 }
 
+function receive(data: Survey): FetchSurveyReceiveAction {
+  return {
+    type: TypeKeys.FETCH,
+    fetchType: FetchTypeKeys.RECEIVE,
+    data,
+  };
+}
+
+function error(error: APIError): FetchSurveyErrorAction {
+  return {
+    type: TypeKeys.FETCH,
+    fetchType: FetchTypeKeys.ERROR,
+    error,
+  };
+}
+
+function start(): FetchSurveyStartAction {
+  return {
+    type: TypeKeys.FETCH,
+    fetchType: FetchTypeKeys.START,
+  };
+}
+
+const fetch: FetchActionCreators<TypeKeys.FETCH, Survey> = {
+  receive,
+  error,
+  start,
+};
+
+export { fetch }
+
 export type ActionTypes =
   | SetSurveyAction
   | SetSurveyResponsesAction
+  | FetchSurveyReceiveAction
+  | FetchSurveyErrorAction
+  | FetchSurveyStartAction

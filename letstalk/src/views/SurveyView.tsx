@@ -1,41 +1,21 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import {Picker, ScrollView, ScrollViewComponent, StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, View} from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
-  NavigationActions
 } from 'react-navigation';
-import { FormValidationMessage } from 'react-native-elements';
-import Immutable from 'immutable';
 
 import { RootState } from '../redux';
-import { State } from '../redux/onboarding/reducer';
 import {
   Survey,
   SurveyResponses,
 } from '../models';
-import {
-  setOnboardingStatusAction,
-  SetOnboardingStatusAction,
-} from '../redux/onboarding/actions';
 import Loading from './Loading';
 import {
-  ActionButton,
-  Emoji,
-  FormP,
-  FormProps,
   Header,
-  InfoText,
-  LabeledFormInput,
-  ModalPicker,
-  Rating,
 } from '../components';
-import profileService, {
-  PersonalityVector,
-  UserVectorPreferenceType,
-} from '../services/profile-service';
 import {fetchSurvey, State as SurveyState} from '../redux/survey/reducer';
 import {
   ActionTypes as SurveyActionTypes,
@@ -43,15 +23,7 @@ import {
   setSurveyResponsesAction,
   setSurveyStateAction
 } from '../redux/survey/actions';
-import {
-  getCohortId,
-  programOptions,
-  sequenceOptions,
-  gradYearOptions,
-  ValueLabel,
-} from '../models/cohort';
 import { AnalyticsHelper } from '../services';
-import Colors from '../services/colors';
 import {headerStyle, headerTintColor, headerTitleStyle} from "./TopHeader";
 import {SurveyQuestion} from "../models/survey";
 
@@ -93,20 +65,16 @@ class SurveyView extends Component<Props> {
     await this.props.fetchSurvey();
   }
 
-  async onSkipRemaining() {
+  onSkipRemaining = async () => {
     // TODO show confirmation modal that says how to complete the survey
-  }
+  };
 
-  async onSubmit() {
-    try {
-      return
-      // TODO
-    } catch(e) {
-      throw new SubmissionError({_error: e.errorMsg});
-    }
-  }
+  onSubmit = async () => {
+    // TODO
+  };
 
-  renderQuestion(question: SurveyQuestion) {
+  renderQuestion = (question: SurveyQuestion) => {
+    const { responses } = this.props.survey;
     const response = !responses ? null : responses.get(question.key);
     return (
       <View key={question.key}>
@@ -115,26 +83,25 @@ class SurveyView extends Component<Props> {
     );
   };
 
-  renderBody() {
+  renderBody = () => {
     const survey = this.props.survey;
     if (!survey) {
       return <Header>TODO hol up fam</Header>
     }
     const { questions, responses } = survey;
     return (
-      <ViewPager
-      >
-        {questions.map(renderQuestion)}
+      <ViewPager>
+        {questions.map(this.renderQuestion)}
       </ViewPager>
     );
-  }
+  };
 
   render() {
     const {
       state,
       errorMsg,
       errorType,
-    } = this.props.cohorts.fetchState;
+    } = this.props.fetchState;
     return (
       <Loading
         state={state}

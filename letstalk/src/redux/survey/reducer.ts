@@ -1,24 +1,31 @@
 import {
-  ActionTypes, setSurvey,
+  ActionTypes,
   TypeKeys,
+  fetch
 } from './actions';
 import {Survey} from "../../models/survey";
 import {ActionCreator, Dispatch} from "react-redux";
 import {ThunkAction} from "redux-thunk";
 import surveyService from "../../services/survey";
+import {FetchState, fetchStateReducer, getDataOrCur, initialFetchState} from "../actions";
 
 export interface State {
   readonly survey?: Survey
+  readonly fetchState: FetchState;
 }
 
-const initialState: State = { };
+const initialState: State = {
+  fetchState: initialFetchState,
+};
+
 
 export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
-    case TypeKeys.SET_SURVEY:
+    case TypeKeys.FETCH:
       return {
         ...state,
-        survey: action.survey,
+        fetchState: fetchStateReducer(action),
+        survey: getDataOrCur(action, state.survey),
       };
     case TypeKeys.SET_SURVEY_RESPONSES:
       return {
@@ -40,8 +47,7 @@ const fetchSurvey: ActionCreator<
   return async (dispatch: Dispatch<State>) => {
     await dispatch(fetch.start());
     try {
-      const survey = await surveyService.getSurvey();
-      await dispatch(setSurvey(survey));
+      const data = await surveyService.getSurvey();
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e));
