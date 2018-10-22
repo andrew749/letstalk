@@ -1,10 +1,10 @@
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
-import {SURVEY_RESPONSES_ROUTE, SURVEY_ROUTE} from "./constants";
-import {Survey, SurveyResponses} from "../models/survey";
+import { SURVEY_ROUTE } from "./constants";
+import {Survey} from "../models/survey";
 
 export interface SurveyService {
-  postSurveyResponses(responses: SurveyResponses): Promise<Object>;
+  postSurveyResponses(surveyWithResponses: Survey): Promise<Object>;
 }
 
 export class RemoteSurveyService implements SurveyService {
@@ -21,9 +21,9 @@ export class RemoteSurveyService implements SurveyService {
     return await this.requestor.post(SURVEY_ROUTE, responses, sessionToken);
   }
 
-  async postSurveyResponses(responses: SurveyResponses): Promise<Object> {
+  async postSurveyResponses(surveyWithResponses: Survey): Promise<Object> {
     const sessionToken = await auth.getSessionToken();
-    return await this.requestor.post(SURVEY_RESPONSES_ROUTE, responses, sessionToken);
+    return await this.requestor.post(SURVEY_ROUTE, surveyWithResponses, sessionToken);
   }
 }
 

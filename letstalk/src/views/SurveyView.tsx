@@ -70,6 +70,7 @@ class SurveyView extends Component<Props> {
   };
 
   onSubmit = async () => {
+    const { responses } = this.props.survey;
     // TODO
   };
 
