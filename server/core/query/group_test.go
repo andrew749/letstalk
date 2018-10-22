@@ -66,5 +66,4 @@ func TestCreateUserGroupsMissingUsers(t *testing.T) {
 		TestName: "Test get users by group id fails when some users don't exist",
 	}
 	test.RunTestWithDb(thisTest)
-
 }
