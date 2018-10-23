@@ -50,6 +50,7 @@ import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
 import RequestsView from './views/RequestsView';
 import UpdatePersonalView from './views/UpdatePersonalView';
+import SurveyView from './views/SurveyView';
 
 import NotificationService, { RawNotification } from './services/notification-service';
 import navService from './services/navigation-service';
@@ -245,7 +246,10 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     navigationOptions: {
       header: null
     }
-  }
+  },
+  SurveyView: {
+    screen: SurveyView,
+  },
 }, {
   initialRouteName,
 }, );

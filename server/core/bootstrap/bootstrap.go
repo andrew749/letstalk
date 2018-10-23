@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"github.com/romana/rlog"
 	"letstalk/server/core/api"
 	"letstalk/server/core/connection"
 	"letstalk/server/core/ctx"
@@ -9,7 +8,8 @@ import (
 	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"letstalk/server/core/survey"
+
+	"github.com/romana/rlog"
 )
 
 func convertUserToRelationshipDataModel(

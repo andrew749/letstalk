@@ -18,7 +18,7 @@ export class RemoteSurveyService implements SurveyService {
 
   async getSurvey(): Promise<Survey> {
     const sessionToken = await auth.getSessionToken();
-    return await this.requestor.post(SURVEY_ROUTE, responses, sessionToken);
+    return await this.requestor.get(SURVEY_ROUTE, sessionToken);
   }
 
   async postSurveyResponses(surveyWithResponses: Survey): Promise<Object> {

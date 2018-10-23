@@ -11,13 +11,7 @@ import { APIError } from '../../services/requests';
 
 export enum TypeKeys {
   FETCH = 'SURVEY/FETCH',
-  SET_SURVEY = 'SURVEY/SET_SURVEY',
   SET_SURVEY_RESPONSES = 'SURVEY/SET_SURVEY_RESPONSES',
-}
-
-export interface SetSurveyAction extends Action {
-  readonly type: TypeKeys.SET_SURVEY;
-  readonly survey: Survey;
 }
 
 export interface SetSurveyResponsesAction extends Action {
@@ -29,7 +23,7 @@ type FetchSurveyReceiveAction = FetchReceiveAction<TypeKeys.FETCH, Survey>;
 type FetchSurveyErrorAction = FetchErrorAction<TypeKeys.FETCH>;
 type FetchSurveyStartAction = FetchStartAction<TypeKeys.FETCH>;
 
-export function setSurveyResponses(
+export function setSurveyResponsesAction(
   responses: SurveyResponses
 ): SetSurveyResponsesAction {
   return {
@@ -70,7 +64,6 @@ const fetch: FetchActionCreators<TypeKeys.FETCH, Survey> = {
 export { fetch }
 
 export type ActionTypes =
-  | SetSurveyAction
   | SetSurveyResponsesAction
   | FetchSurveyReceiveAction
   | FetchSurveyErrorAction

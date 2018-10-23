@@ -330,6 +330,18 @@ class ProfileView extends Component<Props, State> {
               <Text style={styles.sectionHeader}>Account Actions</Text>
               <View style={{ alignItems: 'center' }}>
                 <ActionButton
+                  /* TODO aklen: remove this */
+                  backgroundColor={Colors.HIVE_PRIMARY}
+                  buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
+                  textStyle={[styles.changePassButtonText, styles.buttonText]}
+                  loading={false}
+                  title={'TEMP show survey'}
+                  onPress={() => {
+                    this.props.navigation.navigate({ routeName: 'SurveyView' });
+                  }
+                  }
+                />
+                <ActionButton
                   backgroundColor={Colors.WHITE}
                   buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
                   textStyle={[styles.changePassButtonText, styles.buttonText]}

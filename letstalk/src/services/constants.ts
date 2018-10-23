@@ -45,4 +45,3 @@ export const SEND_EMAIL_VERIFICATION_ROUTE    = '/v1/send_email_verification';
 export const CONNECTION_ROUTE                 = '/v1/connection';
 export const CONNECTION_ACCEPT_ROUTE          = '/v1/connection/accept';
 export const SURVEY_ROUTE                     = '/v1/survey';
-export const SURVEY_RESPONSES_ROUTE           = '${SURVEY_ROUTE}/responses';
