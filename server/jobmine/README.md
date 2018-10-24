@@ -17,3 +17,15 @@ to an instantiation of a job.
 
 A good example is how one would schedule a notification campaign.
 A JobSpec with TaskSpec would define the specific code to get run for the notification. The campaign might have shared metadata that all tasks want to access (i.e. the job metadata). Each job is composed of tasks that must run (i.e. trying to send a notification to a specific user).
+
+## IMPORTANT
+Currently this job running system is designed under the assumption of a single
+worker job. If this is not honored, then it is possible for things to get run more than once.
+
+There are a few things that need to change to support more worker, notably:
+- make the job watchers only take some jobs, not all the jobs
+- once a job watcher gets a job, dont allow other nodes to get this job (maybe use zk for orchestration)
+- symmetric issues for tasks
+
+This will be fixed in a future update, but needs some sort of locking
+to actually solve and therefore will be punted. Sorry.
