@@ -6,3 +6,6 @@
 
 # Task Runner
 0 0 * * * docker run -it letstalk_env go run /var/app/letstalk/server/jobs/task_runner/main.go
+
+# JobStatusWatcher
+0 0 * * * docker run -it letstalk_env go run /var/app/letstalk/server/jobs/job_status_updater/main.go
