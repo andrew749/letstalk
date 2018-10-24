@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
 
 	"letstalk/server/core/errs"
@@ -11,6 +10,7 @@ import (
 	"letstalk/server/utility"
 
 	"github.com/namsral/flag"
+	"github.com/romana/rlog"
 )
 
 var (
@@ -64,9 +64,9 @@ func main() {
 	}
 
 	if len(missingEmails) > 0 {
-		fmt.Printf("Couldn't find the following users:\n")
+		rlog.Errorf("Couldn't find the following users:\n")
 		for _, email := range missingEmails {
-			fmt.Printf("%s\n", email)
+			rlog.Errorf("%s\n", email)
 		}
 		os.Exit(1)
 	}

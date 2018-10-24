@@ -14,11 +14,11 @@ import (
 func TestGetUserByGroupId(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := createUser(db, 2)
+			user2, err := createTestUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := createUser(db, 3)
+			user3, err := createTestUser(db, 3)
 			assert.NoError(t, err)
 			_, err = data.CreateUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")
 			assert.NoError(t, err)
@@ -47,7 +47,7 @@ func TestGetUserByGroupId(t *testing.T) {
 func TestCreateUserGroupsMissingUsers(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
 			err = CreateUserGroups(

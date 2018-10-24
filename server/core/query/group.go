@@ -8,6 +8,7 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 func GetUsersByGroupId(db *gorm.DB, groupId data.TGroupID) ([]data.User, errs.Error) {
@@ -45,6 +46,7 @@ func CreateUserGroups(
 			}
 			err := db.Where(userGroup).FirstOrCreate(userGroup).Error
 			if err != nil {
+				rlog.Errorf("Failed on user %d: %v\n", userId, err)
 				return err
 			}
 		}
