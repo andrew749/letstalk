@@ -88,3 +88,10 @@ Run the following command on ec2 server.
 ```
 ./prod.sh
 ```
+
+# Dockerfile Architecture
+There are 2 docker files: one base which contains the build environment needed
+to build the application and one to build a the actual application image.
+
+- `Dockerfile.env`: All dependencies needed to build the application
+- `Dockerfile`: Default used to build image 
