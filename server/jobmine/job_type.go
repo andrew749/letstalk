@@ -7,5 +7,5 @@ type JobType string
 
 // Custom DB actions
 
-func (u *JobType) Scan(value interface{}) error { *u = JobType(value.(string)); return nil }
+func (u *JobType) Scan(value interface{}) error { *u = JobType(value.([]byte)); return nil }
 func (u JobType) Value() (driver.Value, error)  { return string(u), nil }

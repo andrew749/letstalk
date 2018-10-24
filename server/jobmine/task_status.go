@@ -14,5 +14,5 @@ const (
 
 // Custom DB actions
 
-func (u *Status) Scan(value interface{}) error { *u = Status(value.(string)); return nil }
+func (u *Status) Scan(value interface{}) error { *u = Status(value.([]byte)); return nil }
 func (u Status) Value() (driver.Value, error)  { return string(u), nil }

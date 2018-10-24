@@ -14,7 +14,7 @@ type Metadata map[string]interface{}
 // Unmarshall map from json
 func (u *Metadata) Scan(value interface{}) error {
 	var tmp map[string]interface{}
-	err := json.Unmarshal([]byte(value.(string)), &tmp)
+	err := json.Unmarshal(value.([]byte), &tmp)
 	*u = tmp
 	return err
 }
