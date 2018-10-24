@@ -22,8 +22,8 @@ var TestJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Infof("Some success message")
 		},
 	},
-	GetTasksToCreate: func(db *gorm.DB, jobRecord jobmine.JobRecord) ([]*jobmine.TaskMetadata, error) {
-		res := make([]*jobmine.TaskMetadata, 0)
+	GetTasksToCreate: func(db *gorm.DB, jobRecord jobmine.JobRecord) ([]*jobmine.Metadata, error) {
+		res := make([]*jobmine.Metadata, 0)
 		// Do some work
 		return res, nil
 	},
