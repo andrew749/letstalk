@@ -31,7 +31,7 @@ var TestJobSpec jobmine.JobSpec = jobmine.JobSpec{
 
 // CreateTestJob Creates a test job record
 func CreateTestJob(db *gorm.DB, runId string, metadata jobmine.Metadata) error {
-	if err := db.Model(&jobmine.JobRecord{
+	if err := db.Create(&jobmine.JobRecord{
 		JobType:  TestJob,
 		RunId:    runId,
 		Metadata: metadata,
