@@ -32,7 +32,7 @@ type JobRecord struct {
 	// When to start this job running. Allows us to run jobs "definitely after" a certain time.
 	// This coupled with a frequent cron schedule makes it possible to get a bare bones job
 	// scheduling system
-	StartTime time.Time
+	StartTime time.Time `gorm:"" sql:"DEFAULT:current_timestamp"`
 }
 
 // SetJobStatus Sets the status for a job
