@@ -16,6 +16,7 @@ var (
 )
 
 func main() {
+	rlog.Debugf("Starting script")
 	db, err := utility.GetDB()
 	if err != nil {
 		rlog.Errorf("Unable to get db: %+v", err)
