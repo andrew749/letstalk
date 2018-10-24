@@ -26,7 +26,7 @@ type TaskRecord struct {
 	Status Status
 
 	// Metadata associated with this specific task.
-	Metadata Metadata
+	Metadata Metadata `gorm:"type:text"`
 
 	// Store blob error message
 	ErrorData string `gorm:"type:text"`
