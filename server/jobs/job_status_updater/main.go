@@ -2,7 +2,6 @@ package main
 
 import (
 	"letstalk/server/jobmine"
-	"letstalk/server/jobmine_jobs"
 	"letstalk/server/utility"
 
 	"github.com/romana/rlog"
@@ -15,7 +14,7 @@ func main() {
 		panic(err)
 	}
 
-	err = jobmine.JobStateWatcher(jobmine_jobs.Jobs, db)
+	err = jobmine.JobStateWatcher(db)
 	if err != nil {
 		rlog.Errorf("JobStateWatcher  ran into exception: %+v", err)
 		panic(err)
