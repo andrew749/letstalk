@@ -14,7 +14,7 @@ type JobRecord struct {
 	gorm.Model
 
 	// The current status of the job
-	Status Status
+	Status Status `gorm:"not_null"`
 
 	// JobName Human readable identifier for the type of job.
 	// Used to determine which spec this job is running.

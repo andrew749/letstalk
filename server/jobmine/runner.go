@@ -191,6 +191,9 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 func JobStateWatcher(db *gorm.DB) error {
 	var jobRecords []JobRecord
 	err := db.Where("status = ?", Running).Find(&jobRecords).Error
+	if err != nil {
+		return err
+	}
 
 	// go over all running jobs
 	for _, job := range jobRecords {
@@ -203,7 +206,9 @@ func JobStateWatcher(db *gorm.DB) error {
 		var allComplete = true
 		// go over all tasks for this job
 		for _, task := range taskRecords {
+			rlog.Debugf("Processing Task:\n\trunId=[%s]\n\ttaskId=[%d]\n", task.ID, task.RunId)
 			if task.Status != Success {
+				rlog.Debugf("Found Incomplete Task:\n\trunId=[%s]\n\ttaskId=[%d]\n", task.ID, task.RunId)
 				allComplete = false
 			}
 			if task.Status == Failed {
@@ -215,6 +220,7 @@ func JobStateWatcher(db *gorm.DB) error {
 
 		// if a task failed, then this job failed
 		if hasFailed {
+			rlog.Debugf("Updating Job To failed:\n\tjobId=[%d]\n\trunId=[%s]", job.ID, job.RunId)
 			err := job.SetJobStatus(db, Failed)
 			if err != nil {
 				rlog.Warnf("Unable to update status for job %d", job.ID)
@@ -223,6 +229,7 @@ func JobStateWatcher(db *gorm.DB) error {
 
 		// if all tasks are complete, then this job is done successfully
 		if allComplete {
+			rlog.Debugf("Updating Job To Success:\n\tjobId=[%d]\n\trunId=[%s]", job.ID, job.RunId)
 			err := job.SetJobStatus(db, Success)
 			if err != nil {
 				rlog.Errorf("Unable to update job status: %+v", err)

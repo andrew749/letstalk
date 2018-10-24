@@ -23,7 +23,7 @@ type TaskRecord struct {
 	JobType JobType
 
 	// Running status of this task.
-	Status Status
+	Status Status `gorm:"not_null"`
 
 	// Metadata associated with this specific task.
 	Metadata Metadata `gorm:"type:text"`
@@ -41,17 +41,21 @@ func GetTasksForJobId(db *gorm.DB, jobId uint) ([]*TaskRecord, error) {
 
 // RecordSuccess Mark the task as having completed successfully.
 func (r *TaskRecord) RecordSuccess(db *gorm.DB) error {
-	return db.Where(r).Update("status = ?", Success).Error
+	r.Status = Success
+	return db.Save(r).Error
 }
 
 // RecordRunning Mark the task as having started.
 func (r *TaskRecord) RecordRunning(db *gorm.DB) error {
-	return db.Where(r).Update("status = ?", Running).Error
+	r.Status = Running
+	return db.Save(r).Error
 }
 
 // RecordError Mark the task as having failed.
 func (r *TaskRecord) RecordError(db *gorm.DB, err error) error {
-	return db.Where(r).Update("status = ?", Failed).Update("error_data = ?", fmt.Sprintf("%+v", err)).Error
+	r.Status = Failed
+	r.ErrorData = fmt.Sprintf("%+v", err)
+	return db.Save(r).Error
 }
 
 // GetJobRecordForTask Find a the job record associated with a task.
