@@ -25,8 +25,8 @@ export class PhotoServiceImpl implements PhotoService {
     // the action
     let cameraPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL as any);
     if (cameraPermission.status !== 'granted') {
-      const onPress = () => Linking.openURL('app-settings:');
       if (Platform.OS === 'ios') {
+        const onPress = () => Linking.openURL('app-settings:');
         // iOS doesn't show dialog a second time, so refer users to app settings to change config.
         Alert.alert(
           'Camera Roll Permissions',
