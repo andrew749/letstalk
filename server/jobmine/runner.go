@@ -159,6 +159,7 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	var tasks []TaskRecord
 	if err := db.
 		Where("status = ?", Created).
+		Preload("Job").
 		Find(&tasks).
 		Error; err != nil {
 		return err

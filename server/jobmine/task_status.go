@@ -7,9 +7,9 @@ type Status string
 
 const (
 	Created Status = "CREATED"
-	Running        = "RUNNING"
-	Success        = "SUCCESS"
-	Failed         = "FAILED"
+	Running Status = "RUNNING"
+	Success Status = "SUCCESS"
+	Failed  Status = "FAILED"
 )
 
 // Custom DB actions

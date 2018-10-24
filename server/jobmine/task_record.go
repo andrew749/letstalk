@@ -61,6 +61,6 @@ func (r *TaskRecord) RecordError(db *gorm.DB, err error) error {
 // GetJobRecordForTask Find a the job record associated with a task.
 func (r *TaskRecord) GetJobRecordForTask(db *gorm.DB) (JobRecord, error) {
 	var jobRecord JobRecord
-	err := db.Where(&JobRecord{JobType: r.JobType}).First(&jobRecord).Error
+	err := db.First(&jobRecord, r.JobId).Error
 	return jobRecord, err
 }
