@@ -64,7 +64,12 @@ func GetNotificationContentPage(ctx *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewInternalError(err.Error())
 	}
-	ctx.GinContext.HTML(http.StatusOK, notificationPage.TemplateLink, &d)
+
+	ctx.GinContext.HTML(
+		http.StatusOK,
+		notificationPage.TemplateLink,
+		map[string]interface{}{"WebpageTitle": d["title"], "Data": d},
+	)
 
 	return nil
 }

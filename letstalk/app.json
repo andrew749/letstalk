@@ -25,6 +25,9 @@
     "androidStatusBar": {
       "backgroundColor": "#FFB52A"
     },
+    "notification": {
+      "icon": "./src/img/notification_icon.png"
+    },
     "packagerOpts": {
       "sourceExts": [
         "ts",

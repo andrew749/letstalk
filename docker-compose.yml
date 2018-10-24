@@ -23,6 +23,12 @@ services:
       - "3000"
     networks:
       - lb_net
+    depends_on:
+      - env
+  env:
+    build:
+      context: .
+      dockerfile: Dockerfile.env
 
 networks:
   lb_net:

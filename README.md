@@ -73,6 +73,14 @@ Build a docker container and launch the container. Note this will rebuild the se
 NOTE: because of a bug you might have to run `dep ensure` ON YOUR LOCAL MACHINE
 since in development mode, the downloaded dependencies will get clobbered.
 
+If you are working with frontend code, you also need to start a separate process
+to build the javascript assets so they can be served. You can do this by going to
+`server/web` and running:
+
+```
+yarn dev
+```
+
 ## Infrastructure
 
 ## Build and startup server on ec2
@@ -80,3 +88,10 @@ Run the following command on ec2 server.
 ```
 ./prod.sh
 ```
+
+# Dockerfile Architecture
+There are 2 docker files: one base which contains the build environment needed
+to build the application and one to build a the actual application image.
+
+- `Dockerfile.env`: All dependencies needed to build the application
+- `Dockerfile`: Default used to build image 
