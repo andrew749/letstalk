@@ -13,6 +13,7 @@ var TestJobSpec jobmine.JobSpec = jobmine.JobSpec{
 	JobType: TestJob,
 	TaskSpec: jobmine.TaskSpec{
 		Execute: func(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord) (interface{}, error) {
+			rlog.Infof("Got data from taskRecord %s", taskRecord.Metadata["key"])
 			return nil, nil
 		},
 		OnError: func(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
@@ -24,6 +25,8 @@ var TestJobSpec jobmine.JobSpec = jobmine.JobSpec{
 	},
 	GetTasksToCreate: func(db *gorm.DB, jobRecord jobmine.JobRecord) ([]*jobmine.Metadata, error) {
 		res := make([]*jobmine.Metadata, 0)
+		data := jobmine.Metadata(map[string]interface{}{"key": "HELLO"})
+		res = append(res, &data)
 		// Do some work
 		return res, nil
 	},
@@ -35,6 +38,7 @@ func CreateTestJob(db *gorm.DB, runId string, metadata jobmine.Metadata) error {
 		JobType:  TestJob,
 		RunId:    runId,
 		Metadata: metadata,
+		Status:   jobmine.Created,
 	}).Error; err != nil {
 		return err
 	}
