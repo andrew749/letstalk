@@ -12,5 +12,8 @@ Jobs each represent a logical operation that should be performed en masse.
 A task is an execution of a job with specific metadata that is customized for the execution.
 Jobs also contain metadata that is given to all tasks which are instantiation of the job.
 
+Specs define the code to get run and Records contain configuration and metadata specific
+to an instantiation of a job.
+
 A good example is how one would schedule a notification campaign.
 A JobSpec with TaskSpec would define the specific code to get run for the notification. The campaign might have shared metadata that all tasks want to access (i.e. the job metadata). Each job is composed of tasks that must run (i.e. trying to send a notification to a specific user).

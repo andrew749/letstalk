@@ -7,14 +7,21 @@ import (
 	"github.com/romana/rlog"
 )
 
+// RunTask Runs a task record
+// syncChannel is used to synchronize with the calling process since these are to be run in goroutines (no return code)
+// taskRecord The actual task to run
 func RunTask(db *gorm.DB, syncChannel chan TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) {
 	tx := db.Begin()
+
+	// find the code to run
 	taskSpec, err := specStore.GetTaskSpecForJobType(taskRecord.JobType)
 	if err != nil {
 		rlog.Errorf("Unable to find task spec for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
 		return
 	}
+
+	// get the job metadata
 	jobRecord, err := taskRecord.GetJobRecordForTask(db)
 	if err != nil {
 		rlog.Errorf("Unable to get jobRecord for jobType=[%s]: %+v", taskRecord.JobType, err)
@@ -22,22 +29,38 @@ func RunTask(db *gorm.DB, syncChannel chan TaskRecord, specStore JobSpecStore, t
 		return
 	}
 
-	taskRecord.RecordRunning(tx)
+	// Start running this job.
+	// note the use of db rather than tx since we want all people to see this update
+	taskRecord.RecordRunning(db)
+
+	// Actually run the code
 	res, err := taskSpec.Execute(tx, jobRecord, taskRecord)
+
+	// React to return value of code.
 	if err != nil {
-		rlog.Errorf("Task Failed:\n")
+		rlog.Errorf("Task %d Failed: %+v\n", taskRecord.ID, err)
 		tx.Rollback()
+
+		// run failure callback
 		taskSpec.OnError(tx, jobRecord, taskRecord, err)
+
 		// write error status to job
-		taskRecord.RecordError(tx, err)
+		// note the use of db rather than tx since we want all people to see this update
+		taskRecord.RecordError(db, err)
 
 		// tell the runner that we're done
 		syncChannel <- taskRecord
+
+		// prevent bugs in case somebody writes code after the if statement
 		return
 	} else {
 		// write success status to job
 		taskSpec.OnSuccess(tx, jobRecord, taskRecord, res)
-		taskRecord.RecordSuccess(tx)
+
+		// write success status to job
+		// note the use of db rather than tx since we want all people to see this update
+		taskRecord.RecordSuccess(db)
+
 		err = tx.Commit().Error
 		if err != nil {
 			rlog.Criticalf("Failed to commit changes to job.")
@@ -45,12 +68,17 @@ func RunTask(db *gorm.DB, syncChannel chan TaskRecord, specStore JobSpecStore, t
 
 		// tell the runner that we're done
 		syncChannel <- taskRecord
+
+		// prevent bugs in case somebody writes code after the if statement
 		return
 	}
 }
 
+// RunJob Creates task records for the job.
 func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	tx := db.Begin()
+
+	// get specs for job so we can get logic to create tasks
 	rlog.Debugf("Fetching spec for jobType=[%s]", job.JobType)
 	spec, err := specStore.GetJobSpecForJobtype(job.JobType)
 	if err != nil {
@@ -67,6 +95,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 		return err
 	}
 
+	// create each of the tasks
 	for _, taskMetadata := range tasksMetadata {
 		if err := tx.Create(&TaskRecord{
 			JobId:    job.ID,
@@ -81,10 +110,16 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 		rlog.Infof("Successfully created task for jobId=[%d] jobType=[%s] runId=[%s] with metadata=[%+v]", job.ID, job.JobType, job.RunId, taskMetadata)
 	}
 
+	// update the job to running status
+	if err := job.SetJobStatus(tx, Running); err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return tx.Commit().Error
 }
 
-// Runner Finds Jobs that havent been executed yet and schedule them
+// JobRunner Finds Jobs that havent been executed yet and schedule them
 // (by creating db records)
 func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	var jobs []JobRecord
@@ -119,6 +154,7 @@ func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	return nil
 }
 
+// TaskRunner Finds tasks that havent started yet and schedule them.
 func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	var tasks []TaskRecord
 	if err := db.
@@ -148,4 +184,50 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	rlog.Infof("Finished running %d tasks", numTasks)
 
 	return nil
+}
+
+// JobStateWatcher Watches the state of the job records and sees if a job is done, updating state
+// To be run on a cron schedule
+func JobStateWatcher(db *gorm.DB) error {
+	var jobRecords []JobRecord
+	err := db.Where("status = ?", Running).Find(&jobRecords).Error
+
+	// go over all running jobs
+	for _, job := range jobRecords {
+		taskRecords, err := GetTasksForJobId(db, job.ID)
+		if err != nil {
+			rlog.Warnf("Could not get tasks for jobId %d", job.ID)
+			continue
+		}
+		var hasFailed = false
+		var allComplete = true
+		// go over all tasks for this job
+		for _, task := range taskRecords {
+			if task.Status != Success {
+				allComplete = false
+			}
+			if task.Status == Failed {
+				hasFailed = true
+				allComplete = false
+				break
+			}
+		}
+
+		// if a task failed, then this job failed
+		if hasFailed {
+			err := job.SetJobStatus(db, Failed)
+			if err != nil {
+				rlog.Warnf("Unable to update status for job %d", job.ID)
+			}
+		}
+
+		// if all tasks are complete, then this job is done successfully
+		if allComplete {
+			err := job.SetJobStatus(db, Success)
+			if err != nil {
+				rlog.Errorf("Unable to update job status: %+v", err)
+			}
+		}
+	}
+	return err
 }

@@ -14,7 +14,8 @@ func main() {
 		rlog.Errorf("Unable to get database: %+v", err)
 		panic(err)
 	}
-	// create new
+
+	// create new task runner
 	err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
 	if err != nil {
 		rlog.Errorf("Task runner ran into exception: %+v", err)
