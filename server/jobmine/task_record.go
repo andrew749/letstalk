@@ -13,8 +13,8 @@ type TaskRecord struct {
 	gorm.Model
 
 	// JobId The actual job this task is part of.
-	Job   JobRecord `gorm:"primary_key;foreignkey:JobId;association_foreignkey:ID"`
-	JobId uint
+	Job   JobRecord `gorm:"foreignkey:JobId;association_foreignkey:ID"`
+	JobId uint      `gorm:"primary_key;auto_increment:false"`
 
 	// DENORMALIZATION to make it easier to look for these things in the db.
 	RunId string
