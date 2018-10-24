@@ -2,7 +2,7 @@ package jobmine
 
 import "database/sql/driver"
 
-// TaskStatus Status of a particular job
+// TaskStatus Status of a particular job/task
 type Status string
 
 const (
@@ -13,5 +13,6 @@ const (
 )
 
 // Custom DB actions
+
 func (u *Status) Scan(value interface{}) error { *u = Status(value.(string)); return nil }
 func (u Status) Value() (driver.Value, error)  { return string(u), nil }
