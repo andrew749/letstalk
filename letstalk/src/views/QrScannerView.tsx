@@ -2,17 +2,19 @@ import React, { Component } from 'react';
 import {
   Dimensions,
   LayoutAnimation,
+  Linking,
+  Platform,
   Text,
   View,
   StatusBar,
   StyleSheet,
 } from 'react-native';
-import {BarCodeScanner, Permissions} from 'expo';
+import { BarCodeScanner, Permissions } from 'expo';
 import { ToastActionsCreators } from 'react-native-redux-toast';
 import { errorToast, infoToast } from '../redux/toast';
-import {NavigationActions, NavigationScreenProp, NavigationStackAction} from "react-navigation";
-import {ActionCreator, connect, Dispatch} from "react-redux";
-import {RootState} from "../redux/index";
+import { NavigationActions, NavigationScreenProp, NavigationStackAction } from "react-navigation";
+import { ActionCreator, connect, Dispatch } from "react-redux";
+import { RootState } from "../redux/index";
 import meetingService from "../services/meeting";
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
@@ -22,6 +24,7 @@ import {
   State as BootstrapState,
   fetchBootstrap,
 } from '../redux/bootstrap/reducer';
+import { Button } from '../components';
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
@@ -50,15 +53,12 @@ class QrScannerView extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    this.load = this.load.bind(this);
+
+    this.requestCameraPermission = this.requestCameraPermission.bind(this);
   }
 
   async componentDidMount() {
     AnalyticsHelper.getInstance().recordPage(this.QR_SCANNER_VIEW_IDENTIFIER);
-    await this.load();
-  }
-
-  private async load() {
     await this.requestCameraPermission();
   }
 
@@ -86,14 +86,22 @@ class QrScannerView extends Component<Props> {
     }
   };
 
+  private renderCameraPermissionMissing() {
+    const onPress = async () => {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      }
+      await this.requestCameraPermission()
+    }
+    return <Button buttonStyle={{width: 250}} onPress={onPress} title="Allow camera permissions" />;
+  }
+
   render() {
     return (
       <View style={styles.container}>
 
         {!this.state.hasCameraPermission
-          ? <Text style={{color: '#fff'}}>
-            Camera permission required.
-          </Text>
+          ? this.renderCameraPermissionMissing()
           : React.createElement(BarCodeScanner, {
             onBarCodeRead: this.handleBarCodeRead,
             // @ts-ignore bug where style isn't detected in BarCodeScannerProps
