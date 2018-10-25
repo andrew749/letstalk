@@ -2,7 +2,10 @@ import Immutable from 'immutable';
 import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import {Dimensions, ScrollView, StyleSheet, TouchableOpacity, TouchableOpacityComponent, View} from 'react-native';
+import {
+  BackHandler, Dimensions, StyleSheet, TouchableOpacity,
+  View
+} from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -10,9 +13,6 @@ import {
 import { RootState } from '../redux';
 import { SubmissionError } from 'redux-form'
 import Loading from './Loading';
-import {
-  Header,
-} from '../components';
 import {fetchSurvey, State as SurveyState} from '../redux/survey/reducer';
 import {
   ActionTypes as SurveyActionTypes,
@@ -56,17 +56,33 @@ class SurveyView extends Component<Props> {
 
   async componentDidMount() {
     AnalyticsHelper.getInstance().recordPage(this.SURVEY_VIEW_IDENTIFIER);
-    await this.load();
+    this.load();
   }
 
   private async load() {
     await this.props.fetchSurvey();
   }
 
-  private async onSkipRemaining () {
-    // TODO show confirmation modal that says how to complete the survey
-    this.onSubmit();
-  };
+  // Skip current question.
+  private async onSkip () {
+    const { questions } = this.props.survey;
+    const currentQuestion = this.currentQuestion();
+    if (currentQuestion < questions.size - 1) {
+      this.setCurrentQuestion(currentQuestion + 1);
+    }
+  }
+
+  private currentQuestion () : number {
+    return this.props.navigation.getParam('currentQuestion', 0);
+  }
+
+  private setCurrentQuestion (index : number) {
+    const currentQuestion = this.currentQuestion();
+    if (index === currentQuestion) {
+      return;
+    }
+    this.props.navigation.push("SurveyView", {currentQuestion: index});
+  }
 
   private async onSubmit () {
     const { survey } = this.props;
@@ -78,17 +94,25 @@ class SurveyView extends Component<Props> {
       console.error("error submitting responses", e);
       throw new SubmissionError({_error: e.errorMsg});
     }
-  };
+  }
 
-  updateResponse = async (questionKey : string, optionKey : string) => {
-    let { responses } = this.props.survey;
+  // Submit having not answered all questions.
+  private async onSkipRemaining () {
+  }
+
+  private async updateResponse (questionKey : string, optionKey : string) {
+    let { questions, responses } = this.props.survey;
     responses = !responses
       ? Immutable.Map({[questionKey]: optionKey})
       : responses.set(questionKey, optionKey);
-    await this.props.setSurveyResponsesAction(responses);
-  };
+    this.props.setSurveyResponsesAction(responses);
+    const currentQuestion = this.currentQuestion();
+    if (currentQuestion < questions.size - 1) {
+      setTimeout(() => this.setCurrentQuestion(currentQuestion + 1), 200);
+    }
+  }
 
-  renderQuestion = (question: SurveyQuestion) => {
+  private renderQuestion (question: SurveyQuestion) {
     const { responses } = this.props.survey;
     const response = !responses ? null : responses.get(question.key);
     const { options } = question;
@@ -112,23 +136,33 @@ class SurveyView extends Component<Props> {
           })}
       </View>
     );
-  };
+  }
 
-  renderBody = () => {
-    const survey = this.props.survey;
+  private renderBody () {
+    const { survey } = this.props;
     if (!survey) {
       return <View/>;
     }
+    const currentQuestion = this.currentQuestion() || 0;
     const { questions, responses } = survey;
     const all_answered = responses && questions.every((question : SurveyQuestion) => responses.has(question.key));
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems:'center'}}>
-          {questions.map(this.renderQuestion)}
-        </ScrollView>
+        <View style={styles.contentContainer}>
+          {this.renderQuestion(questions.get(currentQuestion))}
+        </View>
         <View style={[styles.footer]}>
-          { all_answered
-            ? (<ActionButton
+          { currentQuestion < questions.size - 1
+          ? (<ActionButton
+              backgroundColor={Colors.WHITE}
+              buttonStyle={[styles.actionButton, styles.skipButton]}
+              textStyle={[styles.buttonText, styles.skipButtonText]}
+              loading={false}
+              title={'Skip Question'}
+              onPress={() => this.onSkip()}
+            />)
+          : all_answered
+              ? (<ActionButton
                 backgroundColor={Colors.HIVE_PRIMARY}
                 buttonStyle={[styles.actionButton, styles.submitButton]}
                 textStyle={[styles.buttonText, styles.submitButtonText]}
@@ -136,15 +170,15 @@ class SurveyView extends Component<Props> {
                 title={'Submit Responses'}
                 onPress={() => this.onSubmit()}
               />)
-            : (<ActionButton
+              : (<ActionButton
                 backgroundColor={Colors.WHITE}
                 buttonStyle={[styles.actionButton, styles.skipButton]}
                 textStyle={[styles.buttonText, styles.skipButtonText]}
                 loading={false}
-                title={'Skip Remaining'}
+                title={'Submit Skipped Questions'}
                 onPress={() => this.onSkipRemaining()}
               />)
-          }
+        }
         </View>
       </View>
     );
@@ -184,8 +218,7 @@ const styles = StyleSheet.create({
     color: Colors.HIVE_LIGHT_FONT,
   },
   questionCard: {
-    alignItems: 'center',
-    width: '90%',
+    width: SCREEN_WIDTH - 80,
     paddingBottom:20,
   },
   actionButton: {
@@ -217,14 +250,14 @@ const styles = StyleSheet.create({
   },
   container: {
     display:'flex',
+    flex: 1,
+    flexDirection: 'column',
     paddingTop: 10,
     paddingBottom: 10,
     backgroundColor: Colors.WHITE,
     minHeight: '100%',
   },
-  scrollView: {
-    flex: 1,
-    flexDirection: 'column',
+  contentContainer: {
     paddingTop: 20,
     paddingBottom: 20,
     alignSelf: 'center',
@@ -232,8 +265,6 @@ const styles = StyleSheet.create({
   footer: {
     alignSelf: 'center',
     alignItems: 'center',
-    flex: 1,
-    flexDirection: 'column',
   },
 });
 

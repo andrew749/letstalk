@@ -19,20 +19,30 @@ const initialState: State = {
   fetchState: initialFetchState,
 };
 
-
 export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
     case TypeKeys.FETCH:
       const survey = getDataOrCur(action, state.survey);
-      const responses = survey && survey.responses;
-      return {
-        ...state,
-        fetchState: fetchStateReducer(action),
-        survey: {
-          ...survey,
-          responses : responses ? Immutable.Map(responses) : null
-        }
-      };
+      if (!survey) {
+        return {
+          ...state,
+          fetchState: fetchStateReducer(action),
+          survey,
+        };
+      } else {
+        const responses = state.survey
+          ? state.survey.responses
+          : survey.responses ? Immutable.Map(survey.responses) : null;
+        return {
+          ...state,
+          fetchState: fetchStateReducer(action),
+          survey: {
+            ...survey,
+            responses,
+            questions : Immutable.List(survey.questions),
+          }
+        };
+      }
     case TypeKeys.SET_SURVEY_RESPONSES:
       return {
         ...state,
