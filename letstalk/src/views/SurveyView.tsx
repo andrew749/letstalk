@@ -172,7 +172,7 @@ class SurveyView extends Component<Props> {
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   surveyOption: {
-    width: SCREEN_WIDTH - 120,
+    width: '90%',
     marginTop: 10,
     padding: 10
   },
