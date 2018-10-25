@@ -52,17 +52,18 @@ func PostSurveyResponses(c *ctx.Context) errs.Error {
 }
 
 func saveSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup, version int, responses data.SurveyResponses) errs.Error {
-	newSurvey := data.UserSurvey{
-		UserId: userId,
-		Group: group,
-		Version: version,
-		Responses: responses,
-	}
+	var newSurvey *data.UserSurvey
 	if oldSurvey, err := query.GetUserSurvey(db, userId, group); err != nil {
 		return errs.NewDbError(err)
 	} else if oldSurvey != nil {
-		newSurvey.ID = oldSurvey.ID
+		newSurvey = oldSurvey
+	} else {
+		newSurvey = &data.UserSurvey{}
 	}
+	newSurvey.UserId = userId
+	newSurvey.Group = group
+	newSurvey.Version = version
+	newSurvey.Responses = responses
 	if err := db.Save(&newSurvey).Error; err != nil {
 		return errs.NewInternalError("Error saving survey responses: %v", err)
 	}

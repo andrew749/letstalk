@@ -1,3 +1,4 @@
+import Immutable from 'immutable'
 import {
   ActionTypes,
   TypeKeys,
@@ -22,10 +23,15 @@ const initialState: State = {
 export function reducer(state: State = initialState, action: ActionTypes): State {
   switch (action.type) {
     case TypeKeys.FETCH:
+      const survey = getDataOrCur(action, state.survey);
+      const responses = survey && survey.responses;
       return {
         ...state,
         fetchState: fetchStateReducer(action),
-        survey: getDataOrCur(action, state.survey),
+        survey: {
+          ...survey,
+          responses : responses ? Immutable.Map(responses) : null
+        }
       };
     case TypeKeys.SET_SURVEY_RESPONSES:
       return {
