@@ -39,6 +39,21 @@ func PositionUserSearchController(c *ctx.Context) errs.Error {
 	return nil
 }
 
+func GroupUserSearchController(c *ctx.Context) errs.Error {
+	var req api.GroupUserSearchRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	res, err := query.SearchUsersByGroup(c.Db, req, c.SessionData.UserId)
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	c.Result = res
+	return nil
+}
+
 func CohortUserSearchController(c *ctx.Context) errs.Error {
 	var req api.CohortUserSearchRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {
