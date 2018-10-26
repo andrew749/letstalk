@@ -34,6 +34,7 @@ import {
   searchByMyCohort,
   searchByPosition,
   searchBySimpleTrait,
+  searchByGroup,
   State as UserSearchState,
 } from '../redux/user-search/reducer';
 import { humanReadableCohort } from '../models/cohort';
@@ -62,6 +63,8 @@ interface DispatchActions {
   searchByPosition:
     ActionCreator<ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
   searchBySimpleTrait:
+    ActionCreator<ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
+  searchByGroup:
     ActionCreator<ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -124,6 +127,9 @@ class ExploreView extends Component<Props, State> {
       case QueryTypes.SEARCH_SIMPLE_TRAIT:
         await this.props.searchBySimpleTrait(currentQuery.simpleTraitId, DEFAULT_SEARCH_SIZE);
         break;
+      case QueryTypes.SEARCH_GROUP:
+        await this.props.searchByGroup(currentQuery.groupId, DEFAULT_SEARCH_SIZE);
+        break;
       default:
         const _: never = currentQuery;
     }
@@ -184,6 +190,16 @@ class ExploreView extends Component<Props, State> {
           </Text>
         );
         break;
+      case QueryTypes.SEARCH_GROUP:
+        const { groupName } = currentQuery;
+        header = (
+          <Text>
+            <Text>{'Users in the group "'}</Text>
+            <Text style={styles.boldText}>{ groupName }</Text>
+            <Text>{'"'}</Text>
+          </Text>
+        );
+        break;
       default:
         const _: never = currentQuery;
     }
@@ -233,6 +249,11 @@ class ExploreView extends Component<Props, State> {
           intentType = IntentTypes.SEARCH;
           const { simpleTraitName } = currentQuery;
           searchedTrait = simpleTraitName;
+          break;
+        case QueryTypes.SEARCH_GROUP:
+          intentType = IntentTypes.SEARCH;
+          const { groupName } = currentQuery;
+          searchedTrait = groupName;
           break;
         default:
           const _: never = currentQuery;
@@ -348,6 +369,7 @@ export default connect(
     searchByCohort,
     searchByMyCohort,
     searchByPosition,
+    searchByGroup,
     searchBySimpleTrait,
   })(ExploreView);
 

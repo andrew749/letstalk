@@ -11,6 +11,7 @@ import {
   searchByCohort,
   searchByPosition,
   searchBySimpleTrait,
+  searchByGroup,
   setQuery,
 } from '../redux/user-search/reducer';
 import {
@@ -40,6 +41,8 @@ interface DispatchActions {
   searchByPosition: ActionCreator<
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
   searchBySimpleTrait: ActionCreator<
+    ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
+  searchByGroup: ActionCreator<
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
   setQuery: ActionCreator<
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
@@ -89,6 +92,13 @@ class AllFilterableModals extends Component<Props> {
           type: QueryTypes.SEARCH_SIMPLE_TRAIT,
         });
         this.props.searchBySimpleTrait(trait.simpleTraitId, DEFAULT_SEARCH_SIZE);
+        break;
+      case MultiTraitTypes.GROUP:
+        await this.props.setQuery({
+          ...trait,
+          type: QueryTypes.SEARCH_GROUP,
+        });
+        this.props.searchBySimpleTrait(trait.groupId, DEFAULT_SEARCH_SIZE);
         break;
       default:
         const _: never = trait;
@@ -143,5 +153,6 @@ export default connect(({ searchBar }: RootState) => {
   searchByCohort,
   searchByPosition,
   searchBySimpleTrait,
+  searchByGroup,
   setQuery,
 })(AllFilterableModals);

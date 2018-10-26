@@ -1,11 +1,13 @@
 import { CohortV2 } from './cohort';
 import { Position } from './position';
-import { SimpleTrait } from './simple-trait';
+import { SimpleTraitDenormalized } from './simple-trait';
+import { Group } from './group';
 
 export enum MultiTraitTypes {
   COHORT       = 'COHORT',
   POSITION     = 'POSITION',
   SIMPLE_TRAIT = 'SIMPLE_TRAIT',
+  GROUP        = 'GROUP',
 }
 
 
@@ -21,11 +23,16 @@ interface PositionMultiTrait extends Position, BaseMultiTrait {
   readonly traitType: MultiTraitTypes.POSITION;
 }
 
-interface SimpleTraitMultiTrait extends SimpleTrait, BaseMultiTrait {
+interface SimpleTraitMultiTrait extends SimpleTraitDenormalized, BaseMultiTrait {
   readonly traitType: MultiTraitTypes.SIMPLE_TRAIT;
+}
+
+interface GroupMultiTrait extends Group, BaseMultiTrait {
+  readonly traitType: MultiTraitTypes.GROUP;
 }
 
 export type MultiTrait =
   | CohortMultiTrait
   | PositionMultiTrait
   | SimpleTraitMultiTrait
+  | GroupMultiTrait

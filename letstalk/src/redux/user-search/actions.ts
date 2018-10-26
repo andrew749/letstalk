@@ -11,7 +11,8 @@ import {
 import { APIError } from '../../services/requests';
 import { CohortV2 } from '../../models/cohort';
 import { Position } from '../../models/position';
-import { SimpleTrait } from '../../models/simple-trait';
+import { Group } from '../../models/group';
+import { SimpleTraitDenormalized } from '../../models/simple-trait';
 
 export enum TypeKeys {
   FETCH = 'CREDENTIALS/FETCH',
@@ -22,6 +23,7 @@ export enum QueryTypes {
   SEARCH_COHORT = "SEARCH_COHORT",
   SEARCH_POSITION = "SEARCH_POSITION",
   SEARCH_SIMPLE_TRAIT = "SEARCH_SIMPLE_TRAIT",
+  SEARCH_GROUP = "SEARCH_GROUP",
   YOUR_COHORT = "YOUR_COHORT",
 }
 
@@ -33,8 +35,12 @@ interface SearchPositionQuery extends Position {
   type: QueryTypes.SEARCH_POSITION;
 };
 
-interface SearchSimpleTraitQuery extends SimpleTrait {
+interface SearchSimpleTraitQuery extends SimpleTraitDenormalized {
   type: QueryTypes.SEARCH_SIMPLE_TRAIT;
+};
+
+interface SearchGroupQuery extends Group {
+  type: QueryTypes.SEARCH_GROUP;
 };
 
 interface YourCohortRecommendation {
@@ -45,6 +51,7 @@ export type Query =
   | SearchCohortQuery
   | SearchPositionQuery
   | SearchSimpleTraitQuery
+  | SearchGroupQuery
   | YourCohortRecommendation
 
 type UserSearchReceiveAction = FetchReceiveAction<TypeKeys.FETCH, UserSearchResponse>;
