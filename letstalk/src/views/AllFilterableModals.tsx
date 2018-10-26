@@ -98,7 +98,7 @@ class AllFilterableModals extends Component<Props> {
           ...trait,
           type: QueryTypes.SEARCH_GROUP,
         });
-        this.props.searchBySimpleTrait(trait.groupId, DEFAULT_SEARCH_SIZE);
+        this.props.searchByGroup(trait.groupId, DEFAULT_SEARCH_SIZE);
         break;
       default:
         const _: never = trait;
