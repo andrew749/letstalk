@@ -36,6 +36,11 @@ func main() {
 	}
 	defer db.Close()
 
+	es, err := utility.GetES()
+	if err != nil {
+		panic(err)
+	}
+
 	f, err := os.Open(*inFile)
 	if err != nil {
 		panic(err)
@@ -71,7 +76,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := query.CreateUserGroups(db, userIds, groupId, *groupName); err != nil {
+	if err := query.CreateUserGroups(db, es, userIds, groupId, *groupName); err != nil {
 		panic(err)
 	}
 }

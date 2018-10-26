@@ -8,6 +8,7 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/olivere/elastic"
 	"github.com/romana/rlog"
 )
 
@@ -26,6 +27,7 @@ func GetUsersByGroupId(db *gorm.DB, groupId data.TGroupID) ([]data.User, errs.Er
 
 func CreateUserGroups(
 	db *gorm.DB,
+	es *elastic.Client,
 	userIds []data.TUserID,
 	groupId data.TGroupID,
 	groupName string,
@@ -37,6 +39,7 @@ func CreateUserGroups(
 	if len(missingUserIds) != 0 {
 		return errs.NewRequestError(fmt.Sprintf("Missing users: %v", missingUserIds))
 	}
+	var userGroupToIndex *data.UserGroup = nil
 	dbErr := ctx.WithinTx(db, func(db *gorm.DB) error {
 		for _, userId := range userIds {
 			userGroup := &data.UserGroup{
@@ -49,11 +52,17 @@ func CreateUserGroups(
 				rlog.Errorf("Failed on user %d: %v\n", userId, err)
 				return err
 			}
+			userGroupToIndex = userGroup
 		}
 		return nil
 	})
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
+	}
+	if userGroupToIndex != nil {
+		// Doesn't crash the program but will print errors to stdout. If this fails, you should
+		// run the multi_trait_backfill_es
+		indexGroupMultiTrait(es, userGroupToIndex)
 	}
 	return nil
 }
