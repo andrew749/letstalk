@@ -1,0 +1,57 @@
+{
+  "title": "Guess Who",
+  "message": "Fill in your bio!",
+  "body": "Who are you? The world needs to know! What's your favorite spot on campus? Do you have an awkward orientation moment that still haunts you today? What is the one thing that'll keep you sane on a deserted island? Your bio tells people you're human!",
+  "link": "hive://UpdatePersonnal",
+  "cta": "Tell us about you!",
+  "quotes": [
+    {
+      "body": "A big part of being a well-adjusted person is accepting that you can't be good at everything.",
+      "author": "Kelly Williams Brown"
+    },
+    {
+      "body": "A successful person is one who can lay a firm foundation with the bricks others have thrown at them.",
+      "author": "David Brinkley"
+    },
+    {
+      "body": "Be the attitude you want to be around.",
+      "author": "Tim DeTellis"
+    },
+    {
+      "body": "Believe that life is worth living and your belief will help create the fact.",
+      "author": "William James"
+    },
+    {
+      "body": "Choose to be optimistic, it feels better.",
+      "author": "Dalai Lama"
+    },
+    {
+      "body": "Even if happiness forgets you a little bit, never completely forget about it.",
+      "author": "Jacques Prevert"
+    },
+    {
+      "body": "In three words I can sum up everything I've learned about life. It goes on.",
+      "author": "Robert Frost"
+    },
+    {
+      "body": "It doesn't matter how slow you go, as long as you don't stop.",
+      "author": "Confucius"
+    },
+    {
+      "body": "Success is the sum of small efforts, repeated day-in and day-out.",
+      "author": "Robert Collier"
+    },
+    {
+      "body": "The meaning of life is to find your gift. The purpose of life is to give it away.",
+      "author": "Anonymous"
+    },
+    {
+      "body": "You are today where your thoughts have brought you; you will be tomorrow where your thoughts take you.",
+      "author": "James Allen"
+    },
+    {
+      "body": "You've got to get up every morning with determination if you're going to go to bed with satisfaction.",
+      "author": "George Lorimer"
+    }
+  ]
+}

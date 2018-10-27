@@ -1,0 +1,98 @@
+@media screen {
+  @font-face {
+    font-family: 'Source Sans Pro';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Source Sans Pro Regular'), local('SourceSansPro-Regular'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format('woff');
+  }
+  @font-face {
+    font-family: 'Source Sans Pro';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Source Sans Pro Bold'), local('SourceSansPro-Bold'), url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format('woff');
+  }
+}
+.content {
+  font-family: 'Source Sans Pro';
+}
+
+.notification-background {
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background-color: #e9ecef;
+}
+
+.notification-container {
+  border: 1px solid #D4DADF;
+  background-color: #ffffff;
+  margin: 10px;
+}
+
+.content {
+  text-align: left;
+  margin: 15px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.quote {
+  font-weight: 300;
+  color: #777777;
+}
+
+.author {
+  text-align: right;
+  color: #a7a7a7;
+}
+
+.message {
+  margin-top: 10px;
+}
+
+/**
+ * Avoid browser level font resizing.
+ * 1. Windows Mobile
+ * 2. iOS / OSX
+ */
+body, a {
+  -ms-text-size-adjust: 100%; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+
+a {
+  color: #1a82e2;
+}
+/**
+ * Remove blue links for iOS devices.
+ */
+a[x-apple-data-detectors] {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+/**
+ * Fix centering issues in Android 4.4.
+ */
+div[style*="margin: 16px 0;"] {
+  margin: 0 !important;
+}
+
+.cta {
+  background: #ffbe43;
+  border: 1px solid #D4DADF;
+  border-radius: 4px;
+  padding: 8px 25px;
+  margin: 25px;
+  color: #ffffff;
+  display: block;
+  text-align: center;
+}
