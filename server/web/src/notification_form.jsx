@@ -13,16 +13,21 @@ class NotificationForm extends React.Component {
 
     this.state = {
       notification:{
-        title: "",
-        message: "",
-        template: "sample_template.html",
-        group: "",
-        thumbnail: "",
-        data: {title:"Hello World", body:"Body", thumbnail:"https://www.dike.lib.ia.us/images/sample-1.jpg/image"},
-        deeplink: "",
+        title: "Title",
+        message: "Message",
+        templatePath: "sample_template.html",
+        groupId: "1",
+        runId: "Notification Campaign Run #1",
+        templateMetadata: {
+          title:"Hello World",
+          body:"Body",
+          thumbnail:"https://www.dike.lib.ia.us/images/sample-1.jpg/image"
+        }
       },
       sessionId: cookies.get('sessionId')
     }
+
+    props.onUpdateData(this.state.notification);
 
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeJsonBox = this.handleChangeJsonBox.bind(this);
@@ -31,11 +36,18 @@ class NotificationForm extends React.Component {
 
   validateForm() {
     const notification = this.state.notification;
-    return notification.title.length > 0 &&
+    return (
+      notification.title &&
+      notification.message &&
+      notification.templatePath &&
+      notification.groupId &&
+      notification.runId
+    ) &&
+    notification.title.length > 0 &&
     notification.message.length > 0 &&
-    notification.template.length > 0 &&
-    notification.group.length > 0 &&
-    notification.deeplink.length > 0;
+    notification.templatePath.length > 0 &&
+    notification.groupId.length > 0 &&
+    notification.runId.length > 0;
   }
 
   handleChange(event) {
@@ -50,7 +62,7 @@ class NotificationForm extends React.Component {
 
   handleChangeJsonBox(data) {
     this.setState(function (state, props){
-      state.notification.data = data.jsObject;
+      state.notification.templateMetadata = data.jsObject;
       this.props.onUpdateData(state.notification);
       return state;
     });
@@ -60,23 +72,24 @@ class NotificationForm extends React.Component {
     const {cookies} = this.props;
     event.preventDefault();
     // send to api server
-    const notifiction = this.state.notification;
+    const notification = this.state.notification;
     fetch(`${serverUrl}/admin/campaign`, {
       method: 'POST',
       body: JSON.stringify({
         title: notification.title,
         message: notification.message,
-        template: notification.template,
-        group: notification.group,
-        thumbnail: notification.thumbnail,
-        data: notification.data,
-        deeplink: notification.deeplink
+        groupId: notification.groupId,
+        runId: notification.runId,
+        templatePath: notification.templatePath,
+        templateMetadata: notification.templateMetadata
       })
     })
     .then(response => response.json())
     .then((data) => {
       // handle success response
+      console.log("Successfully started campaign")
     }).catch(err => {
+      console.warn("Failed to send campaign")
     });
 
   }
@@ -98,54 +111,47 @@ class NotificationForm extends React.Component {
             <ControlLabel>Title</ControlLabel>
             <FormControl
               autoFocus
-              value={this.state.title}
+              value={this.state.notification.title}
               onChange={this.handleChange}
             />
           </FormGroup>
           <FormGroup controlId="message" bsSize="large">
             <ControlLabel>Message</ControlLabel>
             <FormControl
-              value={this.state.message}
+              value={this.state.notification.message}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="template" bsSize="large">
+          <FormGroup controlId="templatePath" bsSize="large">
             <ControlLabel>Template</ControlLabel>
             <FormControl
-              value={this.state.template}
+              value={this.state.notification.templatePath}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="group" bsSize="large">
-            <ControlLabel>Group</ControlLabel>
+          <FormGroup controlId="groupId" bsSize="large">
+            <ControlLabel>Group ID</ControlLabel>
             <FormControl
-              value={this.state.group}
+              value={this.state.notification.groupId}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="thumbnail" bsSize="large">
-            <ControlLabel>Thumbnail</ControlLabel>
+          <FormGroup controlId="runId" bsSize="large">
+            <ControlLabel>Run ID</ControlLabel>
             <FormControl
-              value={this.state.thumbnail}
+              value={this.state.notification.runId}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="data" bsSize="large">
+          <FormGroup controlId="templateMetadata" bsSize="large">
             <ControlLabel>Data</ControlLabel>
             <JSONInput
               id='notification-content-editor'
-              placeholder={{title:"Hello World", body:"Body", thumbnail:"https://www.dike.lib.ia.us/images/sample-1.jpg/image"}}
               locale={ locale }
               onChange={this.handleChangeJsonBox}
-              value={this.state.data}
+              placeholder={this.state.notification.templateMetadata}
+              value={this.state.notification.templateMetadata}
               height='200px'
-            />
-          </FormGroup>
-          <FormGroup controlId="deeplink" bsSize="large">
-            <ControlLabel>Deeplink</ControlLabel>
-            <FormControl
-              value={this.state.deeplink}
-              onChange={this.handleChange}
             />
           </FormGroup>
           <Button

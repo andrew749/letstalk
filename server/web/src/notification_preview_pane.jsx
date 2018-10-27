@@ -2,6 +2,9 @@ import {withCookies} from 'react-cookie';
 import React from 'react';
 import {serverUrl} from './config.js';
 
+const PREVIEW_PANE_WIDTH = "412";
+const PREVIEW_PANE_HEIGHT = "732";
+
 class NotificationPreviewPane extends React.Component {
   constructor(props) {
     super(props);
@@ -9,13 +12,13 @@ class NotificationPreviewPane extends React.Component {
       htmlContent:  null
     }
   }
-  fetchContent(sessionId, template, data) {
-    fetch(`${serverUrl}/echo_notification`, {
+  fetchContent(sessionId, templatePath, templateMetadata) {
+    fetch(`${serverUrl}/v1/echo_notification`, {
       method: 'POST',
       headers: {'sessionId': sessionId},
       body: JSON.stringify({
-        templateLink: template,
-        data: data
+        templateLink: templatePath,
+        data: templateMetadata
       })
     })
     .then((response) => response.text())
@@ -25,21 +28,26 @@ class NotificationPreviewPane extends React.Component {
         htmlContent: data
       });
     }).catch(err => {
-      console.log(err);
+      console.warn(err);
     });
   }
 
   componentDidUpdate(prevProps) {
-    console.log("updateing")
-    if (this.props.template !== prevProps.template || this.props.data !== prevProps.data) {
-      console.log("can update")
-      const {template, data, sessionId} = this.props;
-      this.fetchContent(sessionId, template, data);
+    if (this.props.templatePath !== prevProps.templatePath || this.props.templateMetadata !== prevProps.templateMetadata) {
+      const {templatePath, templateMetadata, sessionId} = this.props;
+      this.fetchContent(sessionId, templatePath, templateMetadata);
     }
   }
 
   render() {
-    return <iframe className="notification-render-preview"srcDoc={this.state.htmlContent}></iframe>;
+    return (
+      <iframe
+        width={PREVIEW_PANE_WIDTH}
+        height={PREVIEW_PANE_HEIGHT}
+        className="notification-render-preview"
+        srcDoc={this.state.htmlContent}>
+      </iframe>
+    );
   }
 }
 

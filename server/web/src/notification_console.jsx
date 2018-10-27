@@ -28,8 +28,8 @@ class NotificationConsole extends React.Component {
           onUpdateData={this.onUpdateData}/>
         <NotificationPreviewPane
           sessionId={cookies.get('sessionId')}
-          template={this.state.notificationState.template}
-          data={this.state.notificationState.data}/>
+          templatePath={this.state.notificationState.templatePath}
+          templateMetadata={this.state.notificationState.templateMetadata}/>
       </div>
     );
   }
