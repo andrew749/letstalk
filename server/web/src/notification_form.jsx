@@ -5,6 +5,8 @@ import JSONInput from 'react-json-editor-ajrm';
 import { Button, FormGroup, FormControl, ControlLabel, Alert } from "react-bootstrap";
 import {serverUrl} from './config.js'
 
+const FORM_ELEMENT_SIZE = 'small';
+
 class NotificationForm extends React.Component {
   constructor(props) {
     super(props);
@@ -86,12 +88,17 @@ class NotificationForm extends React.Component {
     })
     .then(response => response.json())
     .then((data) => {
+      if (data.Error) {
+        throw new Error(data.Error.message)
+      }
       // handle success response
-      console.log("Successfully started campaign")
+      console.log(data);
+      this.setState({submitState: "SUCCESS"});
+      console.log("Successfully started campaign");
     }).catch(err => {
-      console.warn("Failed to send campaign")
+      this.setState({submitState: "ERROR", err: err.message});
+      console.warn("Failed to send campaign");
     });
-
   }
 
   render() {
@@ -107,7 +114,7 @@ class NotificationForm extends React.Component {
       <div className="notification-form">
         <h2>Notification Management Console</h2>
         <form onSubmit={this.onSubmit}>
-          <FormGroup controlId="title" bsSize="large">
+          <FormGroup controlId="title" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Title</ControlLabel>
             <FormControl
               autoFocus
@@ -115,35 +122,35 @@ class NotificationForm extends React.Component {
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="message" bsSize="large">
+          <FormGroup controlId="message" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Message</ControlLabel>
             <FormControl
               value={this.state.notification.message}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="templatePath" bsSize="large">
+          <FormGroup controlId="templatePath" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Template</ControlLabel>
             <FormControl
               value={this.state.notification.templatePath}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="groupId" bsSize="large">
+          <FormGroup controlId="groupId" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Group ID</ControlLabel>
             <FormControl
               value={this.state.notification.groupId}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="runId" bsSize="large">
+          <FormGroup controlId="runId" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Run ID</ControlLabel>
             <FormControl
               value={this.state.notification.runId}
               onChange={this.handleChange}
             />
           </FormGroup>
-          <FormGroup controlId="templateMetadata" bsSize="large">
+          <FormGroup controlId="templateMetadata" bsSize={FORM_ELEMENT_SIZE}>
             <ControlLabel>Data</ControlLabel>
             <JSONInput
               id='notification-content-editor'
@@ -151,7 +158,7 @@ class NotificationForm extends React.Component {
               onChange={this.handleChangeJsonBox}
               placeholder={this.state.notification.templateMetadata}
               value={this.state.notification.templateMetadata}
-              height='200px'
+              height='100px'
             />
           </FormGroup>
           <Button
