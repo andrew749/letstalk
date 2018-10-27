@@ -5,7 +5,8 @@ module.exports = {
   entry: {
     index: path.resolve(__dirname, 'src', 'index.jsx'),
     sample_template: path.resolve(__dirname, 'src', 'sample_template.jsx'),
-    notification_console: path.resolve(__dirname, 'src', 'notification_console.jsx')
+    notification_console: path.resolve(__dirname, 'src', 'notification_console.jsx'),
+    explore_notification: path.resolve(__dirname, 'src', 'explore_notification.jsx')
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -58,6 +59,12 @@ module.exports = {
       filename: "../notification_console.html",
       title: "Notification Console",
       chunks: ['notification_console']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../explore_notification.html",
+      title: "Explore",
+      chunks: ['explore_notification']
     })
   ]
 };
