@@ -2,8 +2,8 @@ import {withCookies} from 'react-cookie';
 import React from 'react';
 import {serverUrl} from './config.js';
 
-const PREVIEW_PANE_WIDTH = "412";
-const PREVIEW_PANE_HEIGHT = "732";
+const PREVIEW_PANE_WIDTH = "320";
+const PREVIEW_PANE_HEIGHT = "480";
 
 class NotificationPreviewPane extends React.Component {
   constructor(props) {

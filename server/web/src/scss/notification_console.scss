@@ -1,9 +1,11 @@
 .notification-render-preview {
-  flex-basis: 50%;
+  flex-grow: 0;
+  margin: 20px;
 }
 
 .notification-form {
   flex-basis: 50%;
+  flex-grow: 1;
 }
 
 .notification-console-container {
