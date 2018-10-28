@@ -1,7 +1,6 @@
 package query
 
 import (
-	"fmt"
 	"testing"
 
 	"letstalk/server/core/api"
@@ -11,45 +10,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
-
-func createUser(db *gorm.DB, num int) (*data.User, error) {
-	cohort := &data.Cohort{
-		ProgramId:   "ARTS",
-		ProgramName: "Arts",
-		GradYear:    2018 + uint(num),
-		IsCoop:      false,
-	}
-	err := db.Save(cohort).Error
-	if err != nil {
-		return nil, err
-	}
-
-	birthdate := "1996-11-07"
-	user, err := data.CreateUser(
-		db,
-		fmt.Sprintf("john.doe%d@gmail.com", num),
-		fmt.Sprintf("John%d", num),
-		fmt.Sprintf("Doe%d", num),
-		data.GENDER_MALE,
-		&birthdate,
-		data.USER_ROLE_DEFAULT,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	userCohort := &data.UserCohort{
-		UserId:   user.UserId,
-		CohortId: cohort.CohortId,
-	}
-	err = db.Save(userCohort).Error
-	if err != nil {
-		return nil, err
-	}
-	userCohort.Cohort = cohort
-	user.Cohort = userCohort
-	return user, nil
-}
 
 func assertUserSearchResultEqual(t *testing.T, res api.UserSearchResult, user *data.User) {
 	assert.Equal(t, user.UserId, res.UserId)
@@ -73,13 +33,13 @@ func TestSearchUsersByCohort(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
-			_, err = createUser(db, 2)
+			_, err = createTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createUser(db, 3)
+			myUser, err := createTestUser(db, 3)
 			assert.NoError(t, err)
 
 			myUser.Cohort = user1.Cohort
@@ -110,7 +70,7 @@ func TestSearchUsersByCohortLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createUser(db, i+1)
+				user, err := createTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userTrait := data.UserCohort{
@@ -141,13 +101,13 @@ func TestSearchUsersByPosition(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createUser(db, 2)
+			user2, err := createTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createUser(db, 3)
+			myUser, err := createTestUser(db, 3)
 			assert.NoError(t, err)
 
 			userPosition1 := data.UserPosition{
@@ -204,7 +164,7 @@ func TestSearchUsersByPositionLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createUser(db, i+1)
+				user, err := createTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userPosition := data.UserPosition{
@@ -237,13 +197,13 @@ func TestSearchUsersBySimpleTrait(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createUser(db, 2)
+			user2, err := createTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createUser(db, 3)
+			myUser, err := createTestUser(db, 3)
 			assert.NoError(t, err)
 
 			userTrait1 := data.UserSimpleTrait{
@@ -294,10 +254,10 @@ func TestSearchUsersBySimpleTraitAnon(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createUser(db, 1)
+			user1, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createUser(db, 2)
+			user2, err := createTestUser(db, 2)
 			assert.NoError(t, err)
 
 			userTrait1 := data.UserSimpleTrait{
@@ -337,7 +297,7 @@ func TestSearchUsersBySimpleTraitLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createUser(db, i+1)
+				user, err := createTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userTrait := data.UserSimpleTrait{

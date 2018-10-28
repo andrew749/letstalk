@@ -417,6 +417,24 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
+			ID: "Add run id field to notification",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&Notification{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add user_groups table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&UserGroup{}).Error
+      },
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Add surveys table",
 			Migrate: func(tx *gorm.DB) error {
 				tx.AutoMigrate(&UserSurvey{})

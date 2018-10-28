@@ -10,6 +10,30 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Returns missing users out of the given list
+func MissingUsers(db *gorm.DB, userIds []data.TUserID) ([]data.TUserID, errs.Error) {
+	users := make([]data.User, len(userIds))
+	for i, userId := range userIds {
+		users[i] = data.User{UserId: userId}
+	}
+	var foundUsers []data.User
+	err := db.Where(&users).Find(&foundUsers).Error
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	existingUserIds := make(map[data.TUserID]interface{})
+	for _, user := range foundUsers {
+		existingUserIds[user.UserId] = nil
+	}
+	missingUserIds := make([]data.TUserID, 0)
+	for _, userId := range userIds {
+		if _, ok := existingUserIds[userId]; !ok {
+			missingUserIds = append(missingUserIds, userId)
+		}
+	}
+	return missingUserIds, nil
+}
+
 func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 	var user data.User
 	if db.Where(&data.User{UserId: userId}).First(&user).RecordNotFound() {
@@ -102,6 +126,10 @@ func NukeUser(
 			return err
 		}
 		err = db.Where(&data.UserCohort{UserId: userId}).Delete(&data.UserCohort{}).Error
+		if err != nil {
+			return err
+		}
+		err = db.Where(&data.UserGroup{UserId: userId}).Delete(&data.UserGroup{}).Error
 		if err != nil {
 			return err
 		}

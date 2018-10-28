@@ -69,8 +69,17 @@ func Register(
 	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
 
 	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("web/dist/*.html")
+	router.Static("/assets", "web/dist/assets/")
+
+	// Html login page
+	router.OPTIONS("/login_page")
+	router.GET("/login_page", hw.wrapHandlerHTML(user.RenderLoginPage, false))
 
 	v1 := router.Group("/v1")
+
+	// additional asset routes
+	v1.Static("/assets", "web/dist/assets/")
 
 	// create a new user
 	v1.OPTIONS("/signup")
@@ -275,7 +284,6 @@ func Register(
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")
-
 	autocompleteV1.OPTIONS("/simple_trait")
 	autocompleteV1.POST(
 		"/simple_trait",
@@ -412,6 +420,11 @@ func convertError(e errs.Error) query.Error {
 
 func getSessionData(g *gin.Context, sessionManager *sessions.ISessionManagerBase) (*sessions.SessionData, errs.Error) {
 	sessionId := g.GetHeader("sessionId")
+
+	// if no session id, try checking Cookie
+	if sessionId == "" {
+		sessionId, _ = g.Cookie("sessionId")
+	}
 
 	// check that the user provided a session id
 	if sessionId == "" {

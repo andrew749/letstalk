@@ -1,7 +1,8 @@
-import {ImagePicker, FileSystem, Permissions} from 'expo';
-import requestor, {Requestor} from './requests';
-import auth, {Auth} from './auth';
-import {PROFILE_PIC_UPLOAD_ROUTE} from './constants';
+import { Alert, Linking, Platform } from 'react-native';
+import { ImagePicker, FileSystem, Permissions } from 'expo';
+import requestor, { Requestor } from './requests';
+import auth, { Auth } from './auth';
+import { PROFILE_PIC_UPLOAD_ROUTE } from './constants';
 
 interface PhotoService {
   uploadProfilePhoto(uri: string): void;
@@ -22,7 +23,23 @@ export class PhotoServiceImpl implements PhotoService {
   async getPhotoFromPicker(): Promise<PhotoResult> {
     // Display the camera to the user and wait for them to take a photo or to cancel
     // the action
-    const cameraPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL as any);
+    let cameraPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL as any);
+    if (cameraPermission.status !== 'granted') {
+      if (Platform.OS === 'ios') {
+        const onPress = () => Linking.openURL('app-settings:');
+        // iOS doesn't show dialog a second time, so refer users to app settings to change config.
+        Alert.alert(
+          'Camera Roll Permissions',
+          'Open app settings to enable camera roll permissions',
+          [
+            {text: 'Cancel', onPress: () => null, style: 'cancel'},
+            {text: 'Open Settings', onPress: onPress, style: 'default'},
+          ],
+        );
+        cameraPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL as any);
+      }
+      if (cameraPermission.status !== 'granted') return;
+    }
 
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
