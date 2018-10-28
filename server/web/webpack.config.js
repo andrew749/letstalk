@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
   entry: {
     index: path.resolve(__dirname, 'src', 'index.jsx'),
-    sample_template: path.resolve(__dirname, 'src', 'sample_template.jsx')
+    sample_template: path.resolve(__dirname, 'src', 'sample_template.jsx'),
+    notification_console: path.resolve(__dirname, 'src', 'notification_console.jsx')
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -16,7 +17,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx/,
+        test: /\.jsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         options: {
@@ -52,5 +53,11 @@ module.exports = {
       title: "{{.WebpageTitle}}",
       chunks: ['sample_template']
     }),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../notification_console.html",
+      title: "Notification Console",
+      chunks: ['notification_console']
+    })
   ]
 };
