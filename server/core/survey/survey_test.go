@@ -18,7 +18,7 @@ func TestSaveSurvey(t *testing.T) {
 			Test: func(db *gorm.DB) {
 				c := ctx.NewContext(nil, db, nil, nil, nil)
 				userOne := user.CreateUserForTest(t, c.Db)
-				getResponses, err := GetSurveyResponses(db, userOne.UserId, Generic_v1.Group)
+				getResponses, err := getSurveyResponses(db, userOne.UserId, Generic_v1.Group)
 				// Assert no responses initially.
 				assert.Nil(t, getResponses)
 				assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestSaveSurvey(t *testing.T) {
 				}
 				err = saveSurveyResponses(db, userOne.UserId, Generic_v1.Group, Generic_v1.Version, responses)
 				assert.NoError(t, err)
-				getResponses, err = GetSurveyResponses(db, userOne.UserId, Generic_v1.Group)
+				getResponses, err = getSurveyResponses(db, userOne.UserId, Generic_v1.Group)
 				// Assert no responses initially.
 				assert.NoError(t, err)
 				assert.NotNil(t, getResponses)
