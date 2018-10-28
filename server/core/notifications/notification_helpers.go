@@ -21,12 +21,13 @@ func CreateAndSendNotification(
 	recipient data.TUserID,
 	class data.NotifType,
 	thumbnail *string,
-	metadata map[string]string,
+	metadata map[string]interface{},
 	link string,
+	runId *string, // optional run id to identify batch where notification was sent
 ) error {
 	currentTime := time.Now()
 	var err error
-	notification, err := CreateNotification(db, recipient, class, title, message, thumbnail, currentTime, metadata, link)
+	notification, err := CreateNotification(db, recipient, class, title, message, thumbnail, currentTime, metadata, link, nil)
 	if err != nil {
 		return err
 	}
@@ -61,8 +62,9 @@ func CreateNotification(
 	message string,
 	thumbnail *string,
 	createdAt time.Time,
-	dataMap map[string]string,
+	dataMap map[string]interface{},
 	link string,
+	runId *string,
 ) (*data.Notification, errs.Error) {
 	notifData, err := json.Marshal(dataMap)
 	if err != nil {
@@ -79,6 +81,7 @@ func CreateNotification(
 		ThumbnailLink: thumbnail,
 		Timestamp:     createdAt,
 		Link:          &link,
+		RunId:         runId,
 	}
 
 	if err := db.Create(dataNotif).Error; err != nil {

@@ -88,7 +88,7 @@ func SendAdhocNotification(c *ctx.Context) errs.Error {
 		templatePath   = req.TemplatePath
 		templateParams = req.TemplateParams
 	)
-	params := make(map[string]string)
+	params := make(map[string]interface{})
 	err := json.Unmarshal([]byte(templateParams), &params)
 	if err != nil {
 		return errs.NewRequestError(err.Error())
@@ -111,6 +111,7 @@ func SendAdhocNotification(c *ctx.Context) errs.Error {
 		thumbnail,
 		templatePath,
 		params,
+		nil,
 	); err != nil {
 		return errs.NewInternalError(err.Error())
 	}

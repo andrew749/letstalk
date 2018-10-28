@@ -429,7 +429,16 @@ func migrateDB(db *gorm.DB) {
 			ID: "Add user_groups table",
 			Migrate: func(tx *gorm.DB) error {
 				return tx.AutoMigrate(&UserGroup{}).Error
-      },
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add campaigns",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(NotificationCampaign{}).Error
+			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
 			},

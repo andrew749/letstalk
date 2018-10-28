@@ -12,7 +12,7 @@ import (
 
 // CreateAdHocNotification Creates an adhoc notification as well as a
 // page to render when users click though on the notification.
-func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]string) error {
+func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]interface{}, runId *string) error {
 	creationTime := time.Now()
 	var err error
 	tx := db.Begin()
@@ -23,7 +23,7 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	// TODO: fix this hack later since we want to keep a consistent interface
 	// to create a notification but don't know the notification id until
 	// the notification is saved to db
-	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams, linking.GetNotificationViewUrl())
+	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams, linking.GetNotificationViewUrl(), runId)
 	if err != nil {
 		tx.Rollback()
 		return err
