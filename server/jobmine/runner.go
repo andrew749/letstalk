@@ -83,6 +83,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	spec, err := specStore.GetJobSpecForJobtype(job.JobType)
 	if err != nil {
 		tx.Rollback()
+		job.SetJobStatus(db, Failed)
 		rlog.Errorf("Unable to get spec for jobType=[%s]: %+v", job.JobType, err)
 		return err
 	}
@@ -91,6 +92,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	tasksMetadata, err := spec.GetTasksToCreate(tx, job)
 	if err != nil {
 		tx.Rollback()
+		job.SetJobStatus(db, Failed)
 		rlog.Errorf("Unable to get tasks metadata: %+v", err)
 		return err
 	}
@@ -104,6 +106,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 			Metadata: *taskMetadata,
 		}).Error; err != nil {
 			tx.Rollback()
+			job.SetJobStatus(db, Failed)
 			rlog.Errorf("Unable to create task with metadata %+v", taskMetadata)
 			return err
 		}
@@ -113,6 +116,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	// update the job to running status
 	if err := job.SetJobStatus(tx, Running); err != nil {
 		tx.Rollback()
+		job.SetJobStatus(db, Failed)
 		return err
 	}
 
