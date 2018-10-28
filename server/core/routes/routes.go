@@ -68,8 +68,21 @@ func Register(
 	router.GET("/testAuth", hw.wrapHandler(GetTestAuth, true))
 
 	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("web/dist/*.html")
+	router.Static("/assets", "web/dist/assets/")
+
+	// Html login page
+	router.OPTIONS("/login_page")
+	router.GET("/login_page", hw.wrapHandlerHTML(user.RenderLoginPage, false))
+
+	// Render a page to make it easy to send notification campaigns
+	router.OPTIONS("/notification_console")
+	router.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
 
 	v1 := router.Group("/v1")
+
+	// additional asset routes
+	v1.Static("/assets", "web/dist/assets/")
 
 	// create a new user
 	v1.OPTIONS("/signup")
@@ -245,6 +258,9 @@ func Register(
 	v1.OPTIONS("/notification_page")
 	v1.GET("/notification_page", hw.wrapHandlerHTML(notifications.GetNotificationContentPage, true))
 
+	v1.OPTIONS("/echo_notification")
+	v1.POST("/echo_notification", hw.wrapHandlerHTML(notifications.EchoNotificationPage, true))
+
 	// User Simple Traits
 	v1.OPTIONS("/user_simple_trait")
 	v1.POST("/user_simple_trait", hw.wrapHandler(controller.AddUserSimpleTraitByIdController, true))
@@ -269,7 +285,6 @@ func Register(
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")
-
 	autocompleteV1.OPTIONS("/simple_trait")
 	autocompleteV1.POST(
 		"/simple_trait",
@@ -321,6 +336,12 @@ func Register(
 
 	admin.OPTIONS("/adhoc_notification")
 	admin.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
+
+	admin.OPTIONS("/campaign")
+	admin.POST("/campaign", hw.wrapHandler(controller.NotificationCampaignController, false))
+
+	admin.OPTIONS("/nuke_user")
+	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
 	return router
 }
@@ -403,6 +424,11 @@ func convertError(e errs.Error) query.Error {
 
 func getSessionData(g *gin.Context, sessionManager *sessions.ISessionManagerBase) (*sessions.SessionData, errs.Error) {
 	sessionId := g.GetHeader("sessionId")
+
+	// if no session id, try checking Cookie
+	if sessionId == "" {
+		sessionId, _ = g.Cookie("sessionId")
+	}
 
 	// check that the user provided a session id
 	if sessionId == "" {

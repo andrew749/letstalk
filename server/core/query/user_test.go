@@ -11,7 +11,7 @@ import (
 func TestSearchUserFallback(t *testing.T) {
 	test.RunTestWithDb(test.Test{
 		Test: func(db *gorm.DB) {
-			user, err := createUser(db, 1)
+			user, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
 			watEmail := "test@uwaterloo.ca"

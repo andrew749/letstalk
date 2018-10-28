@@ -3,6 +3,7 @@ package notifications
 import (
 	"encoding/json"
 	"errors"
+	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -64,7 +65,40 @@ func GetNotificationContentPage(ctx *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewInternalError(err.Error())
 	}
-	ctx.GinContext.HTML(http.StatusOK, notificationPage.TemplateLink, &d)
 
+	ctx.GinContext.HTML(
+		http.StatusOK,
+		notificationPage.TemplateLink,
+		map[string]interface{}{"WebpageTitle": d["title"], "Data": d},
+	)
+
+	return nil
+}
+
+func createTestUser() data.User {
+	birthdate := "Oct 7 1996"
+	return data.User{
+		UserId:    1,
+		FirstName: "Andrew",
+		LastName:  "Codispoti",
+		Email:     "thegripper@gmail.com",
+		Secret:    "somesecret",
+		Gender:    data.GENDER_MALE,
+		Birthdate: &birthdate,
+	}
+}
+
+func EchoNotificationPage(ctx *ctx.Context) errs.Error {
+	var notificationReq api.NotificationEchoRequest
+	if err := ctx.GinContext.BindJSON(&notificationReq); err != nil {
+		return errs.NewRequestError("Unable to bind json %s", err)
+	}
+
+	notificationReq.Data["user"] = createTestUser()
+	ctx.GinContext.HTML(
+		http.StatusOK,
+		notificationReq.TemplateLink,
+		map[string]interface{}{"Data": notificationReq.Data},
+	)
 	return nil
 }

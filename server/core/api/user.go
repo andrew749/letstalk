@@ -17,6 +17,13 @@ type UserPersonalInfo struct {
 	ProfilePic *string `json:"profilePic"`
 }
 
+type NukeUserRequest struct {
+	UserId    data.TUserID `json:"userId" binding:"required"`
+	FirstName string       `json:"firstName" binding:"required"`
+	LastName  string       `json:"lastName" binding:"required"`
+	Email     string       `json:"email" binding:"required"`
+}
+
 type UserAdditionalData struct {
 	MentorshipPreference *int    `json:"mentorshipPreference"`
 	Bio                  *string `json:"bio"`

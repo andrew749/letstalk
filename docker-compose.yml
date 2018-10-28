@@ -23,6 +23,14 @@ services:
       - "3000"
     networks:
       - lb_net
+    depends_on:
+      - env
+  env:
+    build:
+      context: .
+      dockerfile: Dockerfile.env
+    volumes:
+      - ./server:/go/src/letstalk/server
 
 networks:
   lb_net:

@@ -119,9 +119,10 @@ func main() {
 				MENTOR_MESSAGE,
 				nil,
 				"first_month_notification_mentor.html",
-				map[string]string{
+				map[string]interface{}{
 					"name": mentee.FirstName,
 				},
+				nil,
 			)
 
 			// create notification for mentee
@@ -132,9 +133,10 @@ func main() {
 				MENTEE_MESSAGE,
 				nil,
 				"first_month_notification_mentee.html",
-				map[string]string{
+				map[string]interface{}{
 					"name": mentor.FirstName,
 				},
+				nil,
 			)
 			// in reality, either both of these should fail or neither since we're
 			// just putting in an sqs queue.

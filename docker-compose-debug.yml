@@ -1,5 +1,8 @@
 version: '3'
 services:
+  env:
+    networks:
+      - db_net
   webapp:
     build: .
     ports:
@@ -9,6 +12,7 @@ services:
     depends_on:
       - db
       - elasticsearch
+      - env
     networks:
       - db_net
   db:
@@ -34,6 +38,7 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+      - xpack.security.enabled=false
     restart: always
     ulimits:
       memlock:
