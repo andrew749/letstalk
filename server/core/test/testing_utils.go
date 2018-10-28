@@ -1,82 +1,41 @@
 package test
 
 import (
-	"fmt"
+	"letstalk/server/core/test_light"
 	"letstalk/server/data"
-	"os"
 
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/romana/rlog"
 )
 
-type Test struct {
-	Test     func(db *gorm.DB)
-	TestName string
-}
+// Heavyweight version of testing utilities that provisions the hive environment
 
-// DB flags
-var (
-	databasePrefix = uuid.New().String()
-	dbPath         = fmt.Sprintf("/tmp/%s.db", databasePrefix)
-)
+type Test test_light.Test
 
-func createFileIfNotExists(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
+func provisionDatabase(db *gorm.DB) error {
+	data.CreateDB(db)
+	// TODO(acod): refactor database spinup to return error instead of panicing
 	return nil
 }
 
-func GetSqliteDB() (*gorm.DB, error) {
-	if err := createFileIfNotExists(dbPath); err != nil {
-		return nil, err
-	}
-	db, err := gorm.Open("sqlite3", dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	provisionDatabase(db)
-
-	return db, err
+func convertHeavyTestToLightTest(test Test) test_light.Test {
+	return test_light.Test(test)
 }
 
-func provisionDatabase(db *gorm.DB) {
-	data.CreateDB(db)
-}
-
-func TearDownLocalDatabase() {
-	os.Remove(dbPath)
+func convertHeavyTestSliceToLightTestSlice(tests []Test) []test_light.Test {
+	res := make([]test_light.Test, 0)
+	for _, test := range tests {
+		res = append(res, convertHeavyTestToLightTest(test))
+	}
+	return res
 }
 
 // RunTestsWithDb: Run the following tests and fail if any fail.
 func RunTestsWithDb(tests []Test) {
-	var db *gorm.DB
-	var err error
-	TearDownLocalDatabase()
-	if db, err = GetSqliteDB(); err != nil {
-		rlog.Errorf("Failed to provision db %s", err.Error())
-		panic(err)
-	}
-	rlog.Info("Provisioned DB")
-	defer db.Close()
-
-	for _, test := range tests {
-		runTestWithDb(db, test)
-	}
-
-	TearDownLocalDatabase()
+	test_light.RunTestsWithDb(provisionDatabase, convertHeavyTestSliceToLightTestSlice(tests))
 }
 
 func RunTestWithDb(test Test) {
 	tests := []Test{test}
 	RunTestsWithDb(tests)
-}
-
-func runTestWithDb(db *gorm.DB, test Test) {
-	test.Test(db)
 }
