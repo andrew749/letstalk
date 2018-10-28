@@ -31,6 +31,7 @@ func NotificationCampaignController(ctx *ctx.Context) errs.Error {
 	if err := notifications.SendNotificationCampaign(db, notificationCampaignReq); err != nil {
 		return errs.NewInternalError(err.Error())
 	}
+	ctx.Result = "Ok"
 
 	return nil
 }
