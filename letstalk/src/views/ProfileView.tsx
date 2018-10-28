@@ -67,6 +67,8 @@ import {
   UserSimpleTraits,
   styles,
 } from './profile-components/ProfileComponents';
+import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
+import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -110,6 +112,7 @@ const EditFormWithReduxBuilder = (initialValues: PhotoResult) => {
 
 interface DispatchActions {
   fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   removePosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   removeSimpleTrait: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -283,6 +286,11 @@ class ProfileView extends Component<Props, State> {
     )
   }
 
+  private async onShowSurvey () {
+    this.props.fetchSurvey();
+    this.props.navigation.navigate('SurveyView', {}, NavigationActions.navigate({ routeName: 'NestedSurveyView' }));
+  }
+
   private renderBody() {
     let profilePic;
     if (this.props.profile) {
@@ -336,10 +344,7 @@ class ProfileView extends Component<Props, State> {
                   textStyle={[styles.changePassButtonText, styles.buttonText]}
                   loading={false}
                   title={'TEMP show survey'}
-                  onPress={() => {
-                    this.props.navigation.navigate({ routeName: 'SurveyView' });
-                  }
-                  }
+                  onPress={() => this.onShowSurvey()}
                 />
                 <ActionButton
                   backgroundColor={Colors.WHITE}
@@ -393,5 +398,5 @@ class ProfileView extends Component<Props, State> {
 
 export default connect(
   ({ profile }: RootState) => profile,
-  { fetchProfile, removePosition, removeSimpleTrait, infoToast, errorToast },
+  { fetchProfile, fetchSurvey, removePosition, removeSimpleTrait, infoToast, errorToast },
 )(ProfileView);

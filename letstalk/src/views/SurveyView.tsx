@@ -3,12 +3,13 @@ import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
-  BackHandler, Dimensions, StyleSheet, TouchableOpacity,
+  BackHandler, Dimensions, Platform, StyleSheet, TouchableOpacity,
   View
 } from 'react-native';
 import {
+  HeaderBackButton,
   NavigationScreenProp,
-  NavigationStackAction,
+  NavigationStackAction, StackNavigator,
 } from 'react-navigation';
 import { RootState } from '../redux';
 import { SubmissionError } from 'redux-form'
@@ -32,11 +33,16 @@ interface DispatchActions {
   setSurveyResponsesAction(surveyResponses: SurveyResponses): SetSurveyResponsesAction;
 }
 
-interface Props extends SurveyState, DispatchActions {
-  navigation: NavigationScreenProp<void, NavigationStackAction>;
+interface NavigationParams {
+  currentQuestion: number;
 }
 
-class SurveyView extends Component<Props> {
+interface NestedProps extends SurveyState, DispatchActions {
+  navigation: NavigationScreenProp<void, NavigationStackAction & NavigationParams>;
+  screenProps : { rootNavigation: NavigationScreenProp<void, NavigationStackAction> };
+}
+
+class NestedSurveyViewComponent extends Component<NestedProps> {
   SURVEY_VIEW_IDENTIFIER = "SurveyView";
 
   static navigationOptions = {
@@ -44,9 +50,9 @@ class SurveyView extends Component<Props> {
     headerStyle, 
     headerTitleStyle, 
     headerTintColor 
-  }
+  };
 
-  constructor(props: Props) {
+  constructor(props: NestedProps) {
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
@@ -56,32 +62,22 @@ class SurveyView extends Component<Props> {
 
   async componentDidMount() {
     AnalyticsHelper.getInstance().recordPage(this.SURVEY_VIEW_IDENTIFIER);
-    this.load();
   }
 
-  private async load() {
-    await this.props.fetchSurvey();
+  async load () {
   }
 
-  // Skip current question.
-  private async onSkip () {
-    const { questions } = this.props.survey;
-    const currentQuestion = this.currentQuestion();
-    if (currentQuestion < questions.size - 1) {
-      this.setCurrentQuestion(currentQuestion + 1);
-    }
-  }
-
-  private currentQuestion () : number {
+  private currentQuestion () {
     return this.props.navigation.getParam('currentQuestion', 0);
   }
 
-  private setCurrentQuestion (index : number) {
-    const currentQuestion = this.currentQuestion();
-    if (index === currentQuestion) {
+  private navigateNextQuestion () {
+    const { questions } = this.props.survey;
+    const nextQuestion = this.currentQuestion() + 1;
+    if (nextQuestion >= questions.size) {
       return;
     }
-    this.props.navigation.push("SurveyView", {currentQuestion: index});
+    this.props.navigation.push("NestedSurveyView", {currentQuestion: nextQuestion});
   }
 
   private async onSubmit () {
@@ -89,7 +85,7 @@ class SurveyView extends Component<Props> {
     try {
       await surveyService.postSurveyResponses(survey);
       await this.props.fetchSurvey();
-      await this.props.navigation.goBack();
+      await this.props.screenProps.rootNavigation.pop();
     } catch(e) {
       console.error("error submitting responses", e);
       throw new SubmissionError({_error: e.errorMsg});
@@ -98,18 +94,16 @@ class SurveyView extends Component<Props> {
 
   // Submit having not answered all questions.
   private async onSkipRemaining () {
+    this.onSubmit();
   }
 
   private async updateResponse (questionKey : string, optionKey : string) {
-    let { questions, responses } = this.props.survey;
+    let { responses } = this.props.survey;
     responses = !responses
       ? Immutable.Map({[questionKey]: optionKey})
       : responses.set(questionKey, optionKey);
     this.props.setSurveyResponsesAction(responses);
-    const currentQuestion = this.currentQuestion();
-    if (currentQuestion < questions.size - 1) {
-      setTimeout(() => this.setCurrentQuestion(currentQuestion + 1), 200);
-    }
+    setTimeout(() => this.navigateNextQuestion(), 200);
   }
 
   private renderQuestion (question: SurveyQuestion) {
@@ -143,7 +137,7 @@ class SurveyView extends Component<Props> {
     if (!survey) {
       return <View/>;
     }
-    const currentQuestion = this.currentQuestion() || 0;
+    const currentQuestion = this.currentQuestion();
     const { questions, responses } = survey;
     const all_answered = responses && questions.every((question : SurveyQuestion) => responses.has(question.key));
     return (
@@ -159,7 +153,7 @@ class SurveyView extends Component<Props> {
               textStyle={[styles.buttonText, styles.skipButtonText]}
               loading={false}
               title={'Skip Question'}
-              onPress={() => this.onSkip()}
+              onPress={() => this.navigateNextQuestion()}
             />)
           : all_answered
               ? (<ActionButton
@@ -268,5 +262,42 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect(({ survey } : RootState) => survey,
-  { fetchSurvey, setSurveyResponsesAction,  })(SurveyView);
+const NestedSurveyView = connect(({ survey } : RootState) => survey,
+  { fetchSurvey, setSurveyResponsesAction, })(NestedSurveyViewComponent);
+
+const createSurveyNavigation = (rootNavigation: NavigationScreenProp<void, NavigationStackAction>) => StackNavigator({
+  NestedSurveyView: {
+    screen: NestedSurveyView,
+    path: 'NestedSurveyView'
+  }},
+  {
+    // Override back button to allow returning to parent view.
+    navigationOptions: ({ navigation }) => {
+      const { headerTitle, headerTitleStyle, headerTintColor } = NestedSurveyViewComponent.navigationOptions;
+      return {
+        headerLeft: (
+          <HeaderBackButton
+            titleStyle={headerTitleStyle}
+            tintColor={headerTintColor}
+            title={headerTitle}
+            onPress={() => navigation.goBack(null) || rootNavigation.goBack(null)}
+          />
+        ),
+      }
+    }
+  },
+);
+
+interface Props extends DispatchActions {
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+}
+
+export default class SurveyView extends Component<Props> {
+  render () {
+    const SurveyNavigator = createSurveyNavigation(this.props.navigation);
+    const prefix = Platform.OS == 'android' ? 'hive://hive/survey/' : 'hive://survey/';
+    return (
+      <SurveyNavigator uriPrefix={prefix} screenProps={{ rootNavigation: this.props.navigation }}/>
+    )
+  }
+}
