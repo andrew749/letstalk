@@ -38,7 +38,7 @@ func CreateTestJob(db *gorm.DB, runId string, metadata jobmine.Metadata) error {
 		JobType:  TestJob,
 		RunId:    runId,
 		Metadata: metadata,
-		Status:   jobmine.Created,
+		Status:   jobmine.STATUS_CREATED,
 	}).Error; err != nil {
 		return err
 	}
