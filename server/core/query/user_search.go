@@ -84,6 +84,26 @@ func SearchUsersByCohort(
 	return buildUserSearchResponse(false, users), nil
 }
 
+func SearchUsersByGroup(
+	db *gorm.DB,
+	req api.GroupUserSearchRequest,
+	userId data.TUserID,
+) (*api.UserSearchResponse, errs.Error) {
+	var userGroups []data.UserGroup
+
+	query := db.Where(&data.UserGroup{GroupId: req.GroupId}).Not(&data.UserGroup{UserId: userId})
+	if err := searchUsersCommon(query, req.Size, nil).Find(&userGroups).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	users := make([]data.User, len(userGroups))
+	for i, userGroup := range userGroups {
+		users[i] = *userGroup.User
+	}
+
+	return buildUserSearchResponse(false, users), nil
+}
+
 func SearchUsersBySimpleTrait(
 	db *gorm.DB,
 	req api.SimpleTraitUserSearchRequest,

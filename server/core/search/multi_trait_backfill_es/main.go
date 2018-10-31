@@ -32,6 +32,7 @@ func main() {
 		userCohorts      []data.UserCohort
 		userSimpleTraits []data.UserSimpleTrait
 		userPositions    []data.UserPosition
+		userGroups       []data.UserGroup
 	)
 
 	err = db.Preload("Cohort").Find(&userCohorts).Error
@@ -61,6 +62,16 @@ func main() {
 
 	for _, pos := range userPositions {
 		id, multiTrait := search.NewMultiTraitFromUserPosition(&pos)
+		multiTraits[id] = multiTrait
+	}
+
+	err = db.Find(&userGroups).Error
+	if err != nil {
+		panic(err)
+	}
+
+	for _, group := range userGroups {
+		id, multiTrait := search.NewMultiTraitFromUserGroup(&group)
 		multiTraits[id] = multiTrait
 	}
 

@@ -7,6 +7,7 @@ import {
   USER_SEARCH_COHORT_ROUTE,
   USER_SEARCH_MY_COHORT_ROUTE,
   USER_SEARCH_POSITION_ROUTE,
+  USER_SEARCH_GROUP_ROUTE,
   USER_SEARCH_SIMPLE_TRAIT_ROUTE,
 } from './constants';
 
@@ -32,10 +33,15 @@ interface SimpleTraitUserSearchRequest extends BaseUserSearchRequest {
   readonly simpleTraitId: number;
 }
 
+interface GroupUserSearchRequest extends BaseUserSearchRequest {
+  readonly groupId: number;
+}
+
 type UserSearchRequest =
   | CohortUserSearchRequest
   | MyCohortUserSearchRequest
   | PositionUserSearchRequest
+  | GroupUserSearchRequest
   | SimpleTraitUserSearchRequest
 
 class UserSearchService {
@@ -70,6 +76,10 @@ class UserSearchService {
 
   async searchBySimpleTrait(req: SimpleTraitUserSearchRequest): Promise<UserSearchResponse> {
     return this.doUserSearch(USER_SEARCH_SIMPLE_TRAIT_ROUTE, req);
+  }
+
+  async searchByGroup(req: GroupUserSearchRequest): Promise<UserSearchResponse> {
+    return this.doUserSearch(USER_SEARCH_GROUP_ROUTE, req);
   }
 }
 

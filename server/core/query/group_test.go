@@ -27,6 +27,7 @@ func TestGetUserByGroupId(t *testing.T) {
 
 			err = CreateUserGroups(
 				db,
+				nil,
 				[]data.TUserID{user1.UserId, user2.UserId},
 				"WICS",
 				"Women in Computer Science",
@@ -52,6 +53,7 @@ func TestCreateUserGroupsMissingUsers(t *testing.T) {
 
 			err = CreateUserGroups(
 				db,
+				nil,
 				[]data.TUserID{user1.UserId, user1.UserId + 1},
 				"WICS",
 				"Women in Computer Science",

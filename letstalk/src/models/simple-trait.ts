@@ -21,13 +21,14 @@ export {
   SIMPLE_TRAIT_TYPE_UNDETERMINED,
 };
 
-export interface SimpleTrait {
+// Used in other entities such as UserSimpleTrait and SimpleTraitMultiTrait
+export interface SimpleTraitDenormalized {
   readonly simpleTraitId: number;
   readonly simpleTraitName: string;
   readonly simpleTraitType: SimpleTraitType;
   readonly simpleTraitIsSensitive: boolean;
 }
 
-export interface UserSimpleTrait extends SimpleTrait {
+export interface UserSimpleTrait extends SimpleTraitDenormalized {
   readonly id: number;
 }

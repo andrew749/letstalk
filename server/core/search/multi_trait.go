@@ -21,6 +21,7 @@ const (
 	MULTI_TRAIT_TYPE_COHORT       MultiTraitType = "COHORT"
 	MULTI_TRAIT_TYPE_POSITION     MultiTraitType = "POSITION"
 	MULTI_TRAIT_TYPE_SIMPLE_TRAIT MultiTraitType = "SIMPLE_TRAIT"
+	MULTI_TRAIT_TYPE_GROUP        MultiTraitType = "GROUP"
 )
 
 type MultiTrait struct {
@@ -56,6 +57,12 @@ type SimpleTraitMultiTrait struct {
 	MultiTrait
 }
 
+type GroupMultiTrait struct {
+	GroupId   data.TGroupID `json:"groupId"`
+	GroupName string        `json:"groupName"`
+	MultiTrait
+}
+
 func (c *ClientWithContext) indexMultiTrait(id string, trait interface{}) error {
 	if !isMultiTrait(trait) {
 		return errors.WithStack(errors.New(fmt.Sprintf("Invalid type of trait %T", trait)))
@@ -85,6 +92,11 @@ func (c *ClientWithContext) IndexPositionMultiTrait(userPosition *data.UserPosit
 
 func (c *ClientWithContext) IndexSimpleTraitMultiTrait(userSimpleTrait *data.UserSimpleTrait) error {
 	id, trait := NewMultiTraitFromUserSimpleTrait(userSimpleTrait)
+	return c.indexMultiTrait(id, trait)
+}
+
+func (c *ClientWithContext) IndexGroupMultiTrait(userGroup *data.UserGroup) error {
+	id, trait := NewMultiTraitFromUserGroup(userGroup)
 	return c.indexMultiTrait(id, trait)
 }
 
@@ -149,6 +161,20 @@ func NewMultiTraitFromUserSimpleTrait(trait *data.UserSimpleTrait) (string, *Sim
 	return id, traitMultiTrait
 }
 
+// Returns id for the document and the GroupMultiTrait struct
+func NewMultiTraitFromUserGroup(trait *data.UserGroup) (string, *GroupMultiTrait) {
+	id := fmt.Sprintf("%s-%d", MULTI_TRAIT_TYPE_GROUP, trait.GroupId)
+	groupMultiTrait := &GroupMultiTrait{
+		GroupId:   trait.GroupId,
+		GroupName: trait.GroupName,
+		MultiTrait: MultiTrait{
+			TraitName: trait.GroupName,
+			TraitType: MULTI_TRAIT_TYPE_GROUP,
+		},
+	}
+	return id, groupMultiTrait
+}
+
 func parseMultiTraitHit(hit *elastic.SearchHit) (interface{}, error) {
 	var (
 		fieldMap     map[string]interface{}
@@ -190,6 +216,13 @@ func parseMultiTraitHit(hit *elastic.SearchHit) (interface{}, error) {
 			return nil, err
 		}
 		res = &cohort
+	case MULTI_TRAIT_TYPE_GROUP:
+		var group GroupMultiTrait
+		err = json.Unmarshal(*hit.Source, &group)
+		if err != nil {
+			return nil, err
+		}
+		res = &group
 	default:
 		return nil, errors.New("Trait type is not a string")
 	}
@@ -230,7 +263,8 @@ func isMultiTrait(obj interface{}) bool {
 	_, ok1 := obj.(*CohortMultiTrait)
 	_, ok2 := obj.(*PositionMultiTrait)
 	_, ok3 := obj.(*SimpleTraitMultiTrait)
-	return ok1 || ok2 || ok3
+	_, ok4 := obj.(*GroupMultiTrait)
+	return ok1 || ok2 || ok3 || ok4
 }
 
 // For use in backfill jobs

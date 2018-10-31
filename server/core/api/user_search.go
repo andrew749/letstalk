@@ -24,6 +24,11 @@ type PositionUserSearchRequest struct {
 	OrganizationId data.TOrganizationID `json:"organizationId" binding:"required"`
 }
 
+type GroupUserSearchRequest struct {
+	CommonUserSearchRequest
+	GroupId data.TGroupID `json:"groupId" binding:"required"`
+}
+
 type UserSearchResult struct {
 	UserId     data.TUserID  `json:"userId"`
 	FirstName  string        `json:"firstName"`

@@ -13,6 +13,7 @@ const Colors = {
   DARK_GRAY: "#404040",
   GREEN: 'green',
   RED: 'red',
+  GROUP_GREEN: '#0B6623',
 };
 
 export default Colors;

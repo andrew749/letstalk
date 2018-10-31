@@ -160,6 +160,11 @@ class UserSearchAutocompleteModal extends Component<Props, State> {
         color = Colors.HIVE_ACCENT;
         tpe = 'Position';
         break;
+      case MultiTraitTypes.GROUP:
+        icon = 'group-work';
+        color = Colors.GROUP_GREEN;
+        tpe = 'Group';
+        break;
     }
 
     const onPress = () => this.props.onSelect(trait);
