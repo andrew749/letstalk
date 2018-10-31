@@ -28,9 +28,9 @@ func RequestToMatchNotification(
 	name string,
 ) error {
 	var (
-		extraData map[string]string = map[string]string{"side": string(side), "requestId": string(requestId)}
-		title     string            = "You got a match!"
-		message   string            = fmt.Sprintf("You got matched for \"%s\"", name)
+		extraData map[string]interface{} = map[string]interface{}{"side": string(side), "requestId": string(requestId)}
+		title     string                 = "You got a match!"
+		message   string                 = fmt.Sprintf("You got matched for \"%s\"", name)
 	)
 	return CreateAndSendNotification(
 		db,
@@ -41,12 +41,13 @@ func RequestToMatchNotification(
 		nil,
 		extraData,
 		linking.GetMatchProfileUrl(matchUserId),
+		nil,
 	)
 }
 
 func newMatchNotification(db *gorm.DB, recipient data.TUserID, matchId data.TUserID, title string, message string) error {
 	link := linking.GetMatchProfileUrl(matchId)
-	extraData := map[string]string {"matchUserId": strconv.Itoa(int(matchId))}
+	extraData := map[string]interface{}{"matchUserId": strconv.Itoa(int(matchId))}
 	return CreateAndSendNotification(
 		db,
 		title,
@@ -56,6 +57,7 @@ func newMatchNotification(db *gorm.DB, recipient data.TUserID, matchId data.TUse
 		nil,
 		extraData,
 		link,
+		nil,
 	)
 }
 
@@ -84,7 +86,8 @@ func MatchVerifiedNotification(db *gorm.DB, recipient data.TUserID, userName str
 		recipient,
 		data.NOTIF_TYPE_MATCH_VERIFIED,
 		nil,
-		map[string]string{},
+		map[string]interface{}{},
 		link,
+		nil,
 	)
 }

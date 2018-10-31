@@ -76,6 +76,10 @@ func Register(
 	router.OPTIONS("/login_page")
 	router.GET("/login_page", hw.wrapHandlerHTML(user.RenderLoginPage, false))
 
+	// Render a page to make it easy to send notification campaigns
+	router.OPTIONS("/notification_console")
+	router.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
+
 	v1 := router.Group("/v1")
 
 	// additional asset routes
@@ -255,6 +259,9 @@ func Register(
 	v1.OPTIONS("/notification_page")
 	v1.GET("/notification_page", hw.wrapHandlerHTML(notifications.GetNotificationContentPage, true))
 
+	v1.OPTIONS("/echo_notification")
+	v1.POST("/echo_notification", hw.wrapHandlerHTML(notifications.EchoNotificationPage, true))
+
 	// User Simple Traits
 	v1.OPTIONS("/user_simple_trait")
 	v1.POST("/user_simple_trait", hw.wrapHandler(controller.AddUserSimpleTraitByIdController, true))
@@ -335,6 +342,9 @@ func Register(
 
 	admin.OPTIONS("/adhoc_notification")
 	admin.POST("/adhoc_notification", hw.wrapHandler(controller.SendAdhocNotification, false))
+
+	admin.OPTIONS("/campaign")
+	admin.POST("/campaign", hw.wrapHandler(controller.NotificationCampaignController, false))
 
 	admin.OPTIONS("/nuke_user")
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))

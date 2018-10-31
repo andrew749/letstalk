@@ -26,13 +26,14 @@ func NotificationApiToData(notification api.Notification) (*data.Notification, e
 		Timestamp:     notification.Timestamp,
 		Data:          notifData,
 		Link:          notification.Link,
+		RunId:         notification.RunId,
 	}
 
 	return dataNotif, nil
 }
 
 func NotificationDataToApi(notification data.Notification) (*api.Notification, error) {
-	dataMap := make(map[string]string)
+	dataMap := make(map[string]interface{})
 
 	err := json.Unmarshal(notification.Data, &dataMap)
 	if err != nil {
