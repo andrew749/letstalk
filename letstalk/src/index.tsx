@@ -249,9 +249,6 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   },
   SurveyView: {
     screen: SurveyView,
-    navigationOptions: {
-      header: null
-    }
   },
 }, {
   initialRouteName,

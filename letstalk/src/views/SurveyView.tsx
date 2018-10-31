@@ -35,7 +35,6 @@ interface NavigationParams {
 
 interface NestedProps extends SurveyState, DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction & NavigationParams>;
-  screenProps : { rootNavigation: NavigationScreenProp<void, NavigationStackAction> };
 }
 
 class NestedSurveyViewComponent extends Component<NestedProps> {
@@ -43,9 +42,9 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
 
   static navigationOptions = {
     headerTitle: 'Matching Survey',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   };
 
   constructor(props: NestedProps) {
@@ -73,7 +72,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     if (nextQuestion >= questions.size) {
       return;
     }
-    this.props.navigation.push("NestedSurveyView", {currentQuestion: nextQuestion});
+    this.props.navigation.push("SurveyView", {currentQuestion: nextQuestion});
   }
 
   private async onSubmit () {
@@ -81,7 +80,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     try {
       await surveyService.postSurveyResponses(survey);
       await this.props.fetchSurvey();
-      await this.props.screenProps.rootNavigation.pop();
+      await this.props.navigation.pop(this.props.survey.questions.size);
     } catch(e) {
       console.error("error submitting responses", e);
       throw new SubmissionError({_error: e.errorMsg});
@@ -264,27 +263,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const NestedSurveyView = connect(({ survey } : RootState) => survey,
+const SurveyView = connect(({ survey } : RootState) => survey,
   { fetchSurvey, setSurveyResponsesAction, })(NestedSurveyViewComponent);
 
-const createSurveyNavigation = (rootNavigation: NavigationScreenProp<void, NavigationStackAction>) => StackNavigator({
-  NestedSurveyView: {
-    screen: NestedSurveyView,
-    path: 'NestedSurveyView',
-    headerBackTitle: 'Back',
-  }},
-);
-
-interface Props extends DispatchActions {
-  navigation: NavigationScreenProp<void, NavigationStackAction>;
-}
-
-export default class SurveyView extends Component<Props> {
-  render () {
-    const SurveyNavigator = createSurveyNavigation(this.props.navigation);
-    const prefix = Platform.OS == 'android' ? 'hive://hive/survey/' : 'hive://survey/';
-    return (
-      <SurveyNavigator uriPrefix={prefix} screenProps={{ rootNavigation: this.props.navigation }}/>
-    )
-  }
-}
+export default SurveyView;
