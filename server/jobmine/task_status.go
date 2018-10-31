@@ -6,10 +6,10 @@ import "database/sql/driver"
 type Status string
 
 const (
-	Created Status = "CREATED"
-	Running Status = "RUNNING"
-	Success Status = "SUCCESS"
-	Failed  Status = "FAILED"
+	STATUS_CREATED Status = "CREATED"
+	STATUS_RUNNING Status = "RUNNING"
+	STATUS_SUCCESS Status = "SUCCESS"
+	STATUS_FAILED  Status = "FAILED"
 )
 
 // Custom DB actions

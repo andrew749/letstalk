@@ -11,7 +11,7 @@ type JobSpecStore struct {
 }
 
 // GetJobSpecForJobtype Finds a job spec given a job type, using a job spec store.
-func (s *JobSpecStore) GetJobSpecForJobtype(jobType JobType) (*JobSpec, error) {
+func (s *JobSpecStore) GetJobSpecForJobType(jobType JobType) (*JobSpec, error) {
 	val, ok := s.JobSpecs[jobType]
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Unable to find JobSpec job type %s", string(jobType)))
@@ -21,9 +21,9 @@ func (s *JobSpecStore) GetJobSpecForJobtype(jobType JobType) (*JobSpec, error) {
 
 // GetTaskSpecForJobType Finds a task spec given a job type, using a job spec store.
 func (s *JobSpecStore) GetTaskSpecForJobType(jobType JobType) (*TaskSpec, error) {
-	val, ok := s.JobSpecs[jobType]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("Unable to find TaskSpec for job type %s", string(jobType)))
+	val, err := s.GetJobSpecForJobType(jobType)
+	if err != nil {
+		return nil, err
 	}
 
 	return &val.TaskSpec, nil

@@ -10,22 +10,26 @@ import (
 // RunTask Runs a task record
 // syncChannel is used to synchronize with the calling process since these are to be run in goroutines (no return code)
 // taskRecord The actual task to run
-func RunTask(db *gorm.DB, syncChannel chan TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) {
+func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) {
 	tx := db.Begin()
 
 	// find the code to run
 	taskSpec, err := specStore.GetTaskSpecForJobType(taskRecord.JobType)
 	if err != nil {
+		tx.Rollback()
 		rlog.Errorf("Unable to find task spec for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
+		taskRecord.RecordError(db, err)
 		return
 	}
 
 	// get the job metadata
 	jobRecord, err := taskRecord.GetJobRecordForTask(db)
 	if err != nil {
+		tx.Rollback()
 		rlog.Errorf("Unable to get jobRecord for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
+		taskRecord.RecordError(db, err)
 		return
 	}
 
@@ -80,10 +84,10 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 
 	// get specs for job so we can get logic to create tasks
 	rlog.Debugf("Fetching spec for jobType=[%s]", job.JobType)
-	spec, err := specStore.GetJobSpecForJobtype(job.JobType)
+	spec, err := specStore.GetJobSpecForJobType(job.JobType)
 	if err != nil {
 		tx.Rollback()
-		job.SetJobStatus(db, Failed)
+		job.SetJobStatus(db, STATUS_FAILED)
 		rlog.Errorf("Unable to get spec for jobType=[%s]: %+v", job.JobType, err)
 		return err
 	}
@@ -92,7 +96,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	tasksMetadata, err := spec.GetTasksToCreate(tx, job)
 	if err != nil {
 		tx.Rollback()
-		job.SetJobStatus(db, Failed)
+		job.SetJobStatus(db, STATUS_FAILED)
 		rlog.Errorf("Unable to get tasks metadata: %+v", err)
 		return err
 	}
@@ -102,11 +106,11 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 		if err := tx.Create(&TaskRecord{
 			JobId:    job.ID,
 			JobType:  job.JobType,
-			Status:   Created,
+			Status:   STATUS_CREATED,
 			Metadata: *taskMetadata,
 		}).Error; err != nil {
 			tx.Rollback()
-			job.SetJobStatus(db, Failed)
+			job.SetJobStatus(db, STATUS_FAILED)
 			rlog.Errorf("Unable to create task with metadata %+v", taskMetadata)
 			return err
 		}
@@ -114,9 +118,9 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	}
 
 	// update the job to running status
-	if err := job.SetJobStatus(tx, Running); err != nil {
+	if err := job.SetJobStatus(tx, STATUS_RUNNING); err != nil {
 		tx.Rollback()
-		job.SetJobStatus(db, Failed)
+		job.SetJobStatus(db, STATUS_FAILED)
 		return err
 	}
 
@@ -130,7 +134,7 @@ func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 
 	// find all job records that are created but not started running
 	if err := db.
-		Where("status = ?", Created).
+		Where("status = ?", STATUS_CREATED).
 		Where("start_time < ?", time.Now()).
 		Find(&jobs).
 		Error; err != nil {
@@ -162,7 +166,7 @@ func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 	var tasks []TaskRecord
 	if err := db.
-		Where("status = ?", Created).
+		Where("status = ?", STATUS_CREATED).
 		Preload("Job").
 		Find(&tasks).
 		Error; err != nil {
@@ -195,7 +199,7 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 // To be run on a cron schedule
 func JobStateWatcher(db *gorm.DB) error {
 	var jobRecords []JobRecord
-	err := db.Where("status = ?", Running).Find(&jobRecords).Error
+	err := db.Where("status = ?", STATUS_RUNNING).Find(&jobRecords).Error
 	if err != nil {
 		return err
 	}
@@ -212,11 +216,11 @@ func JobStateWatcher(db *gorm.DB) error {
 		// go over all tasks for this job
 		for _, task := range taskRecords {
 			rlog.Debugf("Processing Task:\n\trunId=[%s]\n\ttaskId=[%d]\n", task.ID, task.RunId)
-			if task.Status != Success {
+			if task.Status != STATUS_SUCCESS {
 				rlog.Debugf("Found Incomplete Task:\n\trunId=[%s]\n\ttaskId=[%d]\n", task.ID, task.RunId)
 				allComplete = false
 			}
-			if task.Status == Failed {
+			if task.Status == STATUS_FAILED {
 				hasFailed = true
 				allComplete = false
 				break
@@ -226,7 +230,7 @@ func JobStateWatcher(db *gorm.DB) error {
 		// if a task failed, then this job failed
 		if hasFailed {
 			rlog.Debugf("Updating Job To failed:\n\tjobId=[%d]\n\trunId=[%s]", job.ID, job.RunId)
-			err := job.SetJobStatus(db, Failed)
+			err := job.SetJobStatus(db, STATUS_FAILED)
 			if err != nil {
 				rlog.Warnf("Unable to update status for job %d", job.ID)
 			}
@@ -235,7 +239,7 @@ func JobStateWatcher(db *gorm.DB) error {
 		// if all tasks are complete, then this job is done successfully
 		if allComplete {
 			rlog.Debugf("Updating Job To Success:\n\tjobId=[%d]\n\trunId=[%s]", job.ID, job.RunId)
-			err := job.SetJobStatus(db, Success)
+			err := job.SetJobStatus(db, STATUS_SUCCESS)
 			if err != nil {
 				rlog.Errorf("Unable to update job status: %+v", err)
 			}

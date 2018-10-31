@@ -36,7 +36,7 @@ func TestJobIntegration(t *testing.T) {
 				const testRunId = "Test Run 1"
 				now := time.Now()
 				job := JobRecord{
-					Status:  Created,
+					Status:  STATUS_CREATED,
 					JobType: testJobType,
 					RunId:   testRunId,
 					Metadata: Metadata(map[string]interface{}{
@@ -52,7 +52,7 @@ func TestJobIntegration(t *testing.T) {
 				err = db.Where("run_id = ?", testRunId).Find(&queryJob).Error
 				assert.NoError(t, err)
 				assert.NotZero(t, queryJob.ID)
-				assert.Equal(t, Created, queryJob.Status)
+				assert.Equal(t, STATUS_CREATED, queryJob.Status)
 				rlog.Info("Created job")
 
 				// define a test job
@@ -62,7 +62,7 @@ func TestJobIntegration(t *testing.T) {
 							JobType: testJobType,
 							TaskSpec: TaskSpec{
 								Execute: func(db *gorm.DB, jobRecord JobRecord, taskRecord TaskRecord) (interface{}, error) {
-									assert.Equal(t, jobRecord.Status, Running)
+									assert.Equal(t, jobRecord.Status, STATUS_RUNNING)
 									assert.Equal(t, jobRecord.JobType, testJobType)
 									assert.Equal(t, jobRecord.RunId, testRunId)
 									assert.Equal(t, jobRecord.Metadata["job_key1"], "job_value1")
@@ -72,7 +72,7 @@ func TestJobIntegration(t *testing.T) {
 									jobRecord.UpdatedAt = now
 									taskRecord.Job.UpdatedAt = now
 									assert.Equal(t, jobRecord, taskRecord.Job)
-									assert.Equal(t, taskRecord.Status, Running)
+									assert.Equal(t, taskRecord.Status, STATUS_RUNNING)
 									assert.Equal(t, taskRecord.Metadata["task_key1"], "task_value1")
 									return "result_task1", nil
 								},
@@ -108,13 +108,13 @@ func TestJobIntegration(t *testing.T) {
 				// check the state of all jobs
 				err = db.Where("run_id = ?", queryJob.RunId).First(&queryJob).Error
 				assert.NoError(t, err)
-				assert.Equal(t, queryJob.Status, Success)
+				assert.Equal(t, queryJob.Status, STATUS_SUCCESS)
 
 				// check the state of tasks
 				var queryTask TaskRecord
 				err = db.Where(&TaskRecord{JobId: job.ID}).First(&queryTask).Error
 				assert.NoError(t, err)
-				assert.Equal(t, Success, queryTask.Status)
+				assert.Equal(t, STATUS_SUCCESS, queryTask.Status)
 
 				// DONE
 			},

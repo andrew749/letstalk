@@ -22,7 +22,7 @@ type JobRecord struct {
 
 	// RunId Human readable unique identifier for the instantiation of this job.
 	// e.g. notifications_1996-10-07
-	RunId string `gorm:"primary_key"`
+	RunId string `gorm:"unique"`
 
 	// Metadata that is part of this job that is accessible to each task running.
 	// Allows us to configure and customize each specific job run.

@@ -41,19 +41,19 @@ func GetTasksForJobId(db *gorm.DB, jobId uint) ([]*TaskRecord, error) {
 
 // RecordSuccess Mark the task as having completed successfully.
 func (r *TaskRecord) RecordSuccess(db *gorm.DB) error {
-	r.Status = Success
+	r.Status = STATUS_SUCCESS
 	return db.Save(r).Error
 }
 
 // RecordRunning Mark the task as having started.
 func (r *TaskRecord) RecordRunning(db *gorm.DB) error {
-	r.Status = Running
+	r.Status = STATUS_RUNNING
 	return db.Save(r).Error
 }
 
 // RecordError Mark the task as having failed.
 func (r *TaskRecord) RecordError(db *gorm.DB, err error) error {
-	r.Status = Failed
+	r.Status = STATUS_FAILED
 	r.ErrorData = fmt.Sprintf("%+v", err)
 	return db.Save(r).Error
 }
