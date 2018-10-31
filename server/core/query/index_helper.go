@@ -39,6 +39,16 @@ func indexSimpleTraitMultiTrait(es *elastic.Client, trait *data.UserSimpleTrait)
 	)
 }
 
+func indexGroupMultiTrait(es *elastic.Client, group *data.UserGroup) {
+	withEsBackgroundContext(
+		es,
+		fmt.Sprintf("indexing group multi trait %s", group.GroupName),
+		func(c *search.ClientWithContext) error {
+			return c.IndexGroupMultiTrait(group)
+		},
+	)
+}
+
 func indexCohortMultiTrait(es *elastic.Client, cohort *data.UserCohort) {
 	if cohort.Cohort == nil {
 		rlog.Warn(

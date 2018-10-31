@@ -105,6 +105,19 @@ const searchBySimpleTrait: ActionCreator<
   };
 }
 
+const searchByGroup: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (groupId: number, size: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    dispatch(fetch.start());
+    try {
+      const data = await userSearchService.searchByGroup({ groupId, size });
+      return dispatch(fetch.receive(data));
+    } catch(e) {
+      return dispatch(fetch.error(e));
+    }
+  };
+}
+
 const setQuery: ActionCreator<
   ThunkAction<Promise<ActionTypes>, State, void>> = (query: Query) => {
   return async (dispatch: Dispatch<State>) => {
@@ -117,5 +130,6 @@ export {
   searchByMyCohort,
   searchByPosition,
   searchBySimpleTrait,
+  searchByGroup,
   setQuery,
 };

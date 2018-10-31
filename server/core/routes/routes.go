@@ -330,6 +330,9 @@ func Register(
 	userSearchV1.OPTIONS("/position")
 	userSearchV1.POST("/position", hw.wrapHandler(controller.PositionUserSearchController, true))
 
+	userSearchV1.OPTIONS("/group")
+	userSearchV1.POST("/group", hw.wrapHandler(controller.GroupUserSearchController, true))
+
 	// Admin route group.
 	admin := router.Group("/admin")
 	admin.Use(adminAuthMiddleware(hw.db, hw.sm))

@@ -323,3 +323,94 @@ func TestSearchUsersBySimpleTraitLimit(t *testing.T) {
 	}
 	test.RunTestWithDb(thisTest)
 }
+
+func TestSearchUsersByGroup(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+
+			user1, err := createTestUser(db, 1)
+			assert.NoError(t, err)
+
+			user2, err := createTestUser(db, 2)
+			assert.NoError(t, err)
+
+			myUser, err := createTestUser(db, 3)
+			assert.NoError(t, err)
+
+			userTrait1 := data.UserGroup{
+				UserId:    user1.UserId,
+				GroupId:   data.TGroupID(69),
+				GroupName: "Some name",
+			}
+			err = db.Save(&userTrait1).Error
+			assert.NoError(t, err)
+
+			userTrait1.Id = 0
+			err = db.Save(&userTrait1).Error
+			assert.NoError(t, err)
+
+			userTrait2 := data.UserGroup{
+				UserId:  user2.UserId,
+				GroupId: data.TGroupID(70),
+			}
+			err = db.Save(&userTrait2).Error
+			assert.NoError(t, err)
+
+			myUserTrait := data.UserGroup{
+				UserId:  myUser.UserId,
+				GroupId: data.TGroupID(69),
+			}
+			err = db.Save(&myUserTrait).Error
+			assert.NoError(t, err)
+
+			req := api.GroupUserSearchRequest{
+				GroupId:                 data.TGroupID(69),
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
+			}
+			res, err := SearchUsersByGroup(db, req, myUser.UserId)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 1, res.NumResults)
+			assert.Equal(t, 1, len(res.Results))
+
+			assertUserSearchResultEqual(t, res.Results[0], user1)
+		},
+		TestName: "Test correct results when searching for users by group",
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestSearchUsersByGroupLimit(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+			numUsers := 10
+			users := make([]data.User, numUsers)
+			for i := 0; i < numUsers; i = i + 1 {
+				user, err := createTestUser(db, i+1)
+				assert.NoError(t, err)
+				users[i] = *user
+				userTrait := data.UserGroup{
+					UserId:    user.UserId,
+					GroupId:   data.TGroupID(69),
+					GroupName: "Some name",
+				}
+				err = db.Save(&userTrait).Error
+				assert.NoError(t, err)
+			}
+
+			req := api.GroupUserSearchRequest{
+				GroupId:                 data.TGroupID(69),
+				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 5},
+			}
+			res, err := SearchUsersByGroup(db, req, 69)
+			assert.NoError(t, err)
+			assert.Equal(t, false, res.IsAnonymous)
+			assert.Equal(t, 5, res.NumResults)
+			assert.Equal(t, 5, len(res.Results))
+		},
+		TestName: "Test truncating of results when searching for users by group",
+	}
+	test.RunTestWithDb(thisTest)
+}
