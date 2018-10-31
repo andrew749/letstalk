@@ -2,12 +2,8 @@ import Immutable from 'immutable';
 import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
+import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
-  BackHandler, Dimensions, Platform, StyleSheet, TouchableOpacity,
-  View
-} from 'react-native';
-import {
-  HeaderBackButton,
   NavigationScreenProp,
   NavigationStackAction, StackNavigator,
 } from 'react-navigation';
@@ -94,7 +90,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
 
   // Submit having not answered all questions.
   private async onSkipRemaining () {
-    this.onSubmit();
+    await this.onSubmit();
   }
 
   private async updateResponse (questionKey : string, optionKey : string) {
@@ -274,24 +270,9 @@ const NestedSurveyView = connect(({ survey } : RootState) => survey,
 const createSurveyNavigation = (rootNavigation: NavigationScreenProp<void, NavigationStackAction>) => StackNavigator({
   NestedSurveyView: {
     screen: NestedSurveyView,
-    path: 'NestedSurveyView'
+    path: 'NestedSurveyView',
+    headerBackTitle: 'Back',
   }},
-  {
-    // Override back button to allow returning to parent view.
-    navigationOptions: ({ navigation }) => {
-      const { headerTitle, headerTitleStyle, headerTintColor } = NestedSurveyViewComponent.navigationOptions;
-      return {
-        headerLeft: (
-          <HeaderBackButton
-            titleStyle={headerTitleStyle}
-            tintColor={headerTintColor}
-            title={headerTitle}
-            onPress={() => navigation.goBack(null) || rootNavigation.goBack(null)}
-          />
-        ),
-      }
-    }
-  },
 );
 
 interface Props extends DispatchActions {
