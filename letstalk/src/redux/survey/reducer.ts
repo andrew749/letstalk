@@ -30,9 +30,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
           survey,
         };
       } else {
-        const responses = state.survey
-          ? state.survey.responses
-          : survey.responses ? Immutable.Map(survey.responses) : null;
+        const responses = survey.responses ? Immutable.Map(survey.responses) : null;
         return {
           ...state,
           fetchState: fetchStateReducer(action),

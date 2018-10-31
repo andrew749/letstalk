@@ -22,7 +22,7 @@ import {
 } from '../redux/survey/actions';
 import { AnalyticsHelper } from '../services';
 import {headerStyle, headerTintColor, headerTitleStyle} from "./TopHeader";
-import {SurveyQuestion, SurveyResponses} from "../models/survey";
+import {SurveyOption, SurveyQuestion, SurveyResponses} from "../models/survey";
 import {Text} from "react-native-elements";
 import Colors from "../services/colors";
 import ActionButton from "../components/ActionButton";
@@ -106,6 +106,18 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     setTimeout(() => this.navigateNextQuestion(), 200);
   }
 
+  private renderSurveyOption (question: SurveyQuestion, option: SurveyOption, isSelected: boolean) {
+    return (
+      <TouchableOpacity
+        key={option.key}
+        style={[styles.surveyOption, isSelected && styles.surveyOptionSelected ]}
+        onPress={() => this.updateResponse(question.key, option.key)}>
+        <Text style={[styles.surveyOptionText, isSelected && styles.surveyOptionSelectedText]}>
+          {option.text}
+        </Text>
+      </TouchableOpacity>)
+  }
+
   private renderQuestion (question: SurveyQuestion) {
     const { responses } = this.props.survey;
     const response = !responses ? null : responses.get(question.key);
@@ -113,21 +125,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     return (
       <View key={question.key} style={styles.questionCard}>
         <Text style={styles.surveyQuestionText}>{question.prompt}</Text>
-        { options.map(option => {
-          const isSelected = response === option.key;
-          let { backgroundColor, textColor } = isSelected
-            ? { backgroundColor: Colors.HIVE_PRIMARY, textColor: Colors.HIVE_MAIN_FONT }
-            : { backgroundColor: Colors.HIVE_BG, textColor: Colors.HIVE_SUBDUED }
-          return (
-            <TouchableOpacity
-              key={option.key}
-              style={[styles.surveyOption, {backgroundColor}]}
-              onPress={() => this.updateResponse(question.key, option.key)}>
-            <Text style={[styles.surveyOptionText, {color: textColor}]}>
-              {option.text}
-            </Text>
-          </TouchableOpacity>)
-          })}
+        { options.map(option => this.renderSurveyOption(question, option, response === option.key)) }
       </View>
     );
   }
@@ -202,10 +200,18 @@ const styles = StyleSheet.create({
   surveyOption: {
     width: '90%',
     marginTop: 10,
-    padding: 10
+    padding: 10,
+    backgroundColor: Colors.HIVE_BG,
   },
   surveyOptionText: {
+    color: Colors.HIVE_SUBDUED,
     fontSize: 18,
+  },
+  surveyOptionSelected: {
+    backgroundColor: Colors.HIVE_PRIMARY,
+  },
+  surveyOptionSelectedText: {
+    color: Colors.HIVE_MAIN_FONT
   },
   surveyQuestionText: {
     fontSize: 24,

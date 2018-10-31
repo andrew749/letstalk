@@ -4,7 +4,6 @@ import { Cohort } from './cohort';
 import { UserPersonalInfo } from './user';
 import { OnboardingStatus } from './onboarding';
 import { Connection } from './connection';
-import { Survey } from './survey';
 
 export interface Relationship {
   readonly userId: number;
