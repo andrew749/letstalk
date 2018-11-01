@@ -286,8 +286,9 @@ func Register(
 
 	// User surveys
 	v1.OPTIONS("/survey")
-	v1.GET("/survey", hw.wrapHandler(survey.GetSurvey, true /* auth required */))
 	v1.POST("/survey", hw.wrapHandler(survey.PostSurveyResponses, true /* auth required */))
+	v1.OPTIONS("/survey/:group")
+	v1.GET("/survey/:group", hw.wrapHandler(survey.GetSurvey, true /* auth required */))
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")

@@ -12,17 +12,27 @@ import (
 
 // GetSurvey gets the most up-to-date survey and responses for the auth user.
 func GetSurvey(c *ctx.Context) errs.Error {
+	group := c.GinContext.Param("group")
 	// Fetch user's survey information
-	if responses, err := getSurveyResponses(c.Db, c.SessionData.UserId, Generic_v1.Group); err != nil {
+	if userSurvey, err := getSurvey(c.Db, c.SessionData.UserId, data.SurveyGroup(group)); err != nil {
 		return err
 	} else {
-		userSurvey := Generic_v1
-		if responses != nil {
-			userSurvey.Responses = responses
-		}
-		c.Result = &userSurvey
+		c.Result = userSurvey
 		return nil
 	}
+}
+
+func getSurvey(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*api.Survey, errs.Error) {
+	userSurvey := getSurveyDefinitionByGroup(group)
+	if userSurvey == nil {
+		return nil, errs.NewNotFoundError("no survey for user group '%v'", group)
+	}
+	if responses, err := getSurveyResponses(db, userId, group); err != nil {
+		return nil, err
+	} else if responses != nil {
+		userSurvey.Responses = responses
+	}
+	return userSurvey, nil
 }
 
 func getSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*data.SurveyResponses, errs.Error) {
@@ -35,7 +45,7 @@ func getSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup
 	}
 }
 
-//PostSurveyResponses saves a response to an onboarding survey.
+// PostSurveyResponses saves a response to an onboarding survey.
 func PostSurveyResponses(c *ctx.Context) errs.Error {
 	var input api.Survey
 	if err := c.GinContext.BindJSON(&input); err != nil {
