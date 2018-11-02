@@ -79,7 +79,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const { survey } = this.props;
     try {
       await surveyService.postSurveyResponses(survey);
-      await this.props.fetchSurvey();
+      await this.props.fetchSurvey(survey.group);
       await this.props.navigation.pop(this.props.survey.questions.size);
     } catch(e) {
       console.error("error submitting responses", e);

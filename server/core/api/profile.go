@@ -11,6 +11,11 @@ const (
 	RELATIONSHIP_TYPE_CONNECTED      RelationshipType = "CONNECTED"
 )
 
+type UserGroupSurvey struct {
+	UserGroup UserGroup `json:"userGroup"`
+	Survey    Survey    `json:"survey"`
+}
+
 type ProfileResponse struct {
 	UserAdditionalData
 	UserPersonalInfo
@@ -18,6 +23,7 @@ type ProfileResponse struct {
 	Cohort
 	UserPositions    []UserPosition    `json:"userPositions"`
 	UserSimpleTraits []UserSimpleTrait `json:"userSimpleTraits"`
+	UserGroupSurveys []UserGroupSurvey `json:"userGroupSurveys"`
 }
 
 type MatchProfileResponse struct {

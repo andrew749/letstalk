@@ -7,7 +7,7 @@ import {
 import {Survey} from "../../models/survey";
 import {ActionCreator, Dispatch} from "react-redux";
 import {ThunkAction} from "redux-thunk";
-import surveyService, {GROUP_GENERIC} from "../../services/survey";
+import surveyService from "../../services/survey";
 import {FetchState, fetchStateReducer, getDataOrCur, initialFetchState} from "../actions";
 
 export interface State {
@@ -57,11 +57,11 @@ export function reducer(state: State = initialState, action: ActionTypes): State
 }
 
 const fetchSurvey: ActionCreator<
-  ThunkAction<Promise<ActionTypes>, State, void>> = () => {
+  ThunkAction<Promise<ActionTypes>, State, void>> = (group: string) => {
   return async (dispatch: Dispatch<State>) => {
     await dispatch(fetch.start());
     try {
-      const data = await surveyService.getSurvey(GROUP_GENERIC);
+      const data = await surveyService.getSurvey(group);
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e));

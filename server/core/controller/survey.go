@@ -1,10 +1,11 @@
-package survey
+package controller
 
 import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
+	"letstalk/server/core/survey"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -22,8 +23,12 @@ func GetSurvey(c *ctx.Context) errs.Error {
 	}
 }
 
-func getSurvey(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*api.Survey, errs.Error) {
-	userSurvey := getSurveyDefinitionByGroup(group)
+func getSurvey(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+) (*api.Survey, errs.Error) {
+	userSurvey := survey.GetSurveyDefinitionByGroup(group)
 	if userSurvey == nil {
 		return nil, errs.NewNotFoundError("no survey for user group '%v'", group)
 	}
@@ -35,7 +40,11 @@ func getSurvey(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*api.S
 	return userSurvey, nil
 }
 
-func getSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup) (*data.SurveyResponses, errs.Error) {
+func getSurveyResponses(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+) (*data.SurveyResponses, errs.Error) {
 	if userSurvey, err := query.GetUserSurvey(db, userId, group); err != nil {
 		return nil, errs.NewDbError(err)
 	} else if userSurvey == nil {
@@ -54,14 +63,24 @@ func PostSurveyResponses(c *ctx.Context) errs.Error {
 	if input.Responses == nil {
 		return errs.NewRequestError("Expected non-nil survey responses")
 	}
-	if err := saveSurveyResponses(c.Db, c.SessionData.UserId, input.Group, input.Version, *input.Responses); err != nil {
+	if err := saveSurveyResponses(
+		c.Db, c.SessionData.UserId,
+		input.Group, input.Version,
+		*input.Responses,
+	); err != nil {
 		return err
 	}
 	c.Result = "Ok"
 	return nil
 }
 
-func saveSurveyResponses(db *gorm.DB, userId data.TUserID, group data.SurveyGroup, version int, responses data.SurveyResponses) errs.Error {
+func saveSurveyResponses(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+	version int,
+	responses data.SurveyResponses,
+) errs.Error {
 	var newSurvey *data.UserSurvey
 	if oldSurvey, err := query.GetUserSurvey(db, userId, group); err != nil {
 		return errs.NewDbError(err)

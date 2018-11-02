@@ -69,6 +69,7 @@ import {
 } from './profile-components/ProfileComponents';
 import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
+import { GROUP_GENERIC } from '../services/survey';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -287,7 +288,7 @@ class ProfileView extends Component<Props, State> {
   }
 
   private async onShowSurvey () {
-    this.props.fetchSurvey();
+    this.props.fetchSurvey(GROUP_GENERIC);
     this.props.navigation.navigate('SurveyView', {}, NavigationActions.navigate({ routeName: 'NestedSurveyView' }));
   }
 

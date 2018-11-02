@@ -66,3 +66,12 @@ func CreateUserGroups(
 	}
 	return nil
 }
+
+func GetUserGroups(db *gorm.DB, userId data.TUserID) ([]data.UserGroup, errs.Error) {
+	var userGroups []data.UserGroup
+	err := db.Where(&data.UserGroup{UserId: userId}).Find(&userGroups).Error
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	return userGroups, nil
+}
