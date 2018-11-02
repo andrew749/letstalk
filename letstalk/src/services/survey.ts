@@ -7,6 +7,8 @@ export interface SurveyService {
   postSurveyResponses(surveyWithResponses: Survey): Promise<Object>;
 }
 
+export const GROUP_GENERIC = "generic";
+
 export class RemoteSurveyService implements SurveyService {
   private requestor: Requestor;
   private auth: Auth;
@@ -16,9 +18,10 @@ export class RemoteSurveyService implements SurveyService {
     this.auth = auth;
   }
 
-  async getSurvey(): Promise<Survey> {
+  async getSurvey(group: string): Promise<Survey> {
     const sessionToken = await auth.getSessionToken();
-    return await this.requestor.get(SURVEY_ROUTE, sessionToken);
+    const surveyGroupRoute = `${SURVEY_ROUTE}/${group}`;
+    return await this.requestor.get(surveyGroupRoute, sessionToken);
   }
 
   async postSurveyResponses(surveyWithResponses: Survey): Promise<Object> {

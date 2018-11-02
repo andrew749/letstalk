@@ -7,7 +7,7 @@ import {
 import {Survey} from "../../models/survey";
 import {ActionCreator, Dispatch} from "react-redux";
 import {ThunkAction} from "redux-thunk";
-import surveyService from "../../services/survey";
+import surveyService, {GROUP_GENERIC} from "../../services/survey";
 import {FetchState, fetchStateReducer, getDataOrCur, initialFetchState} from "../actions";
 
 export interface State {
@@ -61,7 +61,7 @@ const fetchSurvey: ActionCreator<
   return async (dispatch: Dispatch<State>) => {
     await dispatch(fetch.start());
     try {
-      const data = await surveyService.getSurvey();
+      const data = await surveyService.getSurvey(GROUP_GENERIC);
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e));
