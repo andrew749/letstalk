@@ -16,12 +16,14 @@ import {
   positionRemove,
   simpleTraitAdd,
   simpleTraitRemove,
+  surveySet,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import profileService from '../../services/profile-service';
 import requestToMatchService from '../../services/request-to-match-service';
 import { AddUserPositionRequest } from '../../services/request-to-match-service';
+import { Survey } from '../../models/survey';
 import { UserPosition } from '../../models/position';
 import { UserSimpleTrait } from '../../models/simple-trait';
 
@@ -75,6 +77,21 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...state.profile,
         userSimpleTraits: state.profile.userSimpleTraits.filter(trait => {
           return trait.id !== action.id;
+        }).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.SURVEY_SET:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userGroupSurveys: state.profile.userGroupSurveys.map(groupSurvey => {
+          return {
+            ...groupSurvey,
+            survey: groupSurvey.survey.group === action.survey.group ? action.survey :
+              groupSurvey.survey,
+          };
         }).toList(),
       }
       return {
@@ -141,6 +158,13 @@ const removeSimpleTrait: ActionCreator<
   };
 }
 
+const setSurvey: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (survey: Survey) => {
+  return async (dispatch: Dispatch<State>) => {
+    return dispatch(surveySet(survey));
+  };
+}
+
 export {
   fetchProfile,
   addPosition,
@@ -148,4 +172,5 @@ export {
   addSimpleTraitById,
   addSimpleTraitByName,
   removeSimpleTrait,
+  setSurvey,
 };

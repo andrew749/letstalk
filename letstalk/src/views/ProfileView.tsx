@@ -63,6 +63,7 @@ import { UserSimpleTrait } from '../models/simple-trait';
 import {
   CohortInfo,
   PersonalInfo,
+  UserGroupSurveys,
   UserPositions,
   UserSimpleTraits,
   styles,
@@ -287,11 +288,6 @@ class ProfileView extends Component<Props, State> {
     )
   }
 
-  private async onShowSurvey () {
-    this.props.fetchSurvey(GROUP_GENERIC);
-    this.props.navigation.navigate('SurveyView', {}, NavigationActions.navigate({ routeName: 'NestedSurveyView' }));
-  }
-
   private renderBody() {
     let profilePic;
     if (this.props.profile) {
@@ -335,18 +331,14 @@ class ProfileView extends Component<Props, State> {
               removeSimpleTrait={this.props.removeSimpleTrait}
               errorToast={this.props.errorToast}
             />
+            <UserGroupSurveys
+              userGroupSurveys={this.props.profile.userGroupSurveys}
+              navigation={this.props.navigation}
+              fetchSurvey={this.props.fetchSurvey}
+            />
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Account Actions</Text>
               <View style={{ alignItems: 'center' }}>
-                <ActionButton
-                  /* TODO aklen: remove this */
-                  backgroundColor={Colors.HIVE_PRIMARY}
-                  buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
-                  textStyle={[styles.changePassButtonText, styles.buttonText]}
-                  loading={false}
-                  title={'TEMP show survey'}
-                  onPress={() => this.onShowSurvey()}
-                />
                 <ActionButton
                   backgroundColor={Colors.WHITE}
                   buttonStyle={[styles.changePassButton, styles.profileActionButton,]}

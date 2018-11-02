@@ -55,9 +55,9 @@ func GetUserGroupSurveys(db *gorm.DB, userId data.TUserID) ([]api.UserGroupSurve
 		userSurveysByGroup[userSurvey.Group] = userSurvey
 	}
 
-	for _, userGroupSurvey := range userGroupSurveys {
+	for i, userGroupSurvey := range userGroupSurveys {
 		if userSurvey, ok := userSurveysByGroup[userGroupSurvey.Survey.Group]; ok {
-			userGroupSurvey.Survey.Responses = &userSurvey.Responses
+			userGroupSurveys[i].Survey.Responses = &userSurvey.Responses
 		}
 	}
 

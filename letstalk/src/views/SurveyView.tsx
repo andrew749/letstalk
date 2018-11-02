@@ -23,9 +23,16 @@ import {Text} from "react-native-elements";
 import Colors from "../services/colors";
 import ActionButton from "../components/ActionButton";
 import surveyService from "../services/survey";
+import {
+  State as ProfileState,
+  fetchProfile,
+  setSurvey
+} from '../redux/profile/reducer';
+import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
 
 interface DispatchActions {
   fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
+  setSurvey: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   setSurveyResponsesAction(surveyResponses: SurveyResponses): SetSurveyResponsesAction;
 }
 
@@ -80,6 +87,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     try {
       await surveyService.postSurveyResponses(survey);
       await this.props.fetchSurvey(survey.group);
+      await this.props.setSurvey(survey);
       await this.props.navigation.pop(this.props.survey.questions.size);
     } catch(e) {
       console.error("error submitting responses", e);
@@ -264,6 +272,6 @@ const styles = StyleSheet.create({
 });
 
 const SurveyView = connect(({ survey } : RootState) => survey,
-  { fetchSurvey, setSurveyResponsesAction, })(NestedSurveyViewComponent);
+  { fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
 
 export default SurveyView;

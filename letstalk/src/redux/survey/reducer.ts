@@ -37,7 +37,7 @@ export function reducer(state: State = initialState, action: ActionTypes): State
           survey: {
             ...survey,
             responses,
-            questions : Immutable.List(survey.questions),
+            questions: Immutable.List(survey.questions),
           }
         };
       }
