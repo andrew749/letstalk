@@ -283,6 +283,14 @@ func Register(
 		hw.wrapHandler(controller.RemoveUserPositionController, true),
 	)
 
+	// User Groupd
+	v1.OPTIONS("/user_group")
+	v1.POST("/user_group", hw.wrapHandler(controller.AddUserGroupController, true))
+	v1.DELETE(
+		"/user_group",
+		hw.wrapHandler(controller.RemoveUserGroupController, true),
+	)
+
 	// User surveys
 	v1.OPTIONS("/survey")
 	v1.POST("/survey", hw.wrapHandler(controller.PostSurveyResponses, true /* auth required */))
