@@ -12,12 +12,14 @@ import {
   CREDENTIAL_REQUEST_ROUTE,
   CREDENTIAL_REQUESTS_ROUTE,
   REMOVE_RTM_MATCHES_ROUTE,
+  USER_GROUP,
   USER_SIMPLE_TRAIT_ROUTE,
   USER_SIMPLE_TRAIT_BY_NAME_ROUTE,
   USER_POSITION,
 } from './constants';
 import { UserPosition } from '../models/position';
 import { UserSimpleTrait } from '../models/simple-trait';
+import { UserGroupSurvey } from '../models/profile';
 import { Connection } from '../models/connection';
 
 type GetAllCredentialsResponse = Array<Credential>;
@@ -39,8 +41,13 @@ export interface AddUserPositionRequest {
   startDate: string;
   endDate?: string;
 }
+export interface AddUserGroupRequest {
+  groupId: number;
+  groupName: number;
+}
 interface RemoveUserPositionRequest { userPositionId: number }
 interface RemoveUserSimpleTraitRequest { userSimpleTraitId: number }
+interface RemoveUserGroupRequest { userGroupId: number }
 
 interface RemoveCredentialRequest { credentialId: number }
 interface RemoveCredentialRequestRequest { credentialId: number }
@@ -140,6 +147,26 @@ export class RemoteRequestToMatchService {
     const sessionToken = await auth.getSessionToken();
     const req: RemoveUserPositionRequest = { userPositionId: id };
     await this.requestor.delete(USER_POSITION, req, sessionToken);
+  }
+
+  async addUserGroup(req: AddUserGroupRequest): Promise<UserGroupSurvey> {
+    const sessionToken = await auth.getSessionToken();
+    const res: UserGroupSurvey = await this.requestor.post(USER_GROUP, req, sessionToken);
+
+    return {
+      ...res,
+      survey: {
+        ...res.survey,
+        responses: res.survey.responses && Immutable.Map(res.survey.responses),
+        questions: Immutable.List(res.survey.questions),
+      },
+    };
+  }
+
+  async removeUserGroup(id: number): Promise<void> {
+    const sessionToken = await auth.getSessionToken();
+    const req: RemoveUserGroupRequest = { userGroupId: id };
+    await this.requestor.delete(USER_GROUP, req, sessionToken);
   }
 
   async requestConnection(connection: Connection): Promise<Connection> {
