@@ -102,12 +102,12 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	}
 
 	// create each of the tasks
-	for _, taskMetadata := range tasksMetadata {
+	for _, taskMetadata := range *tasksMetadata {
 		if err := tx.Create(&TaskRecord{
 			JobId:    job.ID,
 			JobType:  job.JobType,
 			Status:   STATUS_CREATED,
-			Metadata: *taskMetadata,
+			Metadata: taskMetadata,
 		}).Error; err != nil {
 			tx.Rollback()
 			job.SetJobStatus(db, STATUS_FAILED)

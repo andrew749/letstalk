@@ -6,7 +6,7 @@ import (
 
 // GetTasksToCreate Function that creates db records for the instances of a job
 // that should get run.
-type GetTasksToCreate func(db *gorm.DB, jobRecord JobRecord) ([]*Metadata, error)
+type GetTasksToCreate func(db *gorm.DB, jobRecord JobRecord) (*[]Metadata, error)
 
 // JobSpec A definition of a job, essentially saying what code should get run.
 // This also defines a function, `Populate` which is responsible for creating
