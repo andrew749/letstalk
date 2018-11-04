@@ -283,7 +283,7 @@ func Register(
 		hw.wrapHandler(controller.RemoveUserPositionController, true),
 	)
 
-	// User Groupd
+	// User Group
 	v1.OPTIONS("/user_group")
 	v1.POST("/user_group", hw.wrapHandler(controller.AddUserGroupController, true))
 	v1.DELETE(
