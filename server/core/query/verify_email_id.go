@@ -6,15 +6,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"letstalk/server/core/utility/uw_email"
 )
 
 // First parameter should be a db transaction.
-func GenerateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, emailAddr string) (*data.VerifyEmailId, error) {
+func GenerateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, uwEmail uw_email.UwEmail) (*data.VerifyEmailId, error) {
 	var id = uuid.New()
 	verifyEmailData := data.VerifyEmailId{
 		Id:             id.String(),
 		UserId:         userId,
-		Email:          emailAddr,
+		Email:          uwEmail.ToStringNormalized(),
 		IsActive:       true,
 		IsUsed:         false,
 		ExpirationDate: time.Now().AddDate(0, 0, 1), // Verification email valid for 24 hours.
