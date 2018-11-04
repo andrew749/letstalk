@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"gopkg.in/gormigrate.v1"
+	"letstalk/server/core/utility/uw_email"
 )
 
 func isSQLite(db *gorm.DB) bool {
@@ -438,6 +439,36 @@ func migrateDB(db *gorm.DB) {
 			ID: "Add campaigns",
 			Migrate: func(tx *gorm.DB) error {
 				return tx.AutoMigrate(NotificationCampaign{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Backfill normalized @edu.uwaterloo.ca addresses",
+			Migrate: func(tx *gorm.DB) error {
+				rows, err := tx.Model(&VerifyEmailId{}).Rows()
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+
+				for rows.Next() {
+					verifyEmailId := VerifyEmailId{}
+					if err := db.ScanRows(rows, &verifyEmailId); err != nil {
+						return err
+					}
+					if !uw_email.Validate(verifyEmailId.Email) {
+						rlog.Errorf("Could not normalize unexpected non-uw email '%s'", verifyEmailId.Email)
+						continue
+					}
+					uwEmail := uw_email.OfString(verifyEmailId.Email)
+					verifyEmailId.Email = uwEmail.ToStringNormalized()
+					if err := db.Model(&VerifyEmailId{}).Update(&verifyEmailId).Error; err != nil {
+						return err
+					}
+				}
+				return nil
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil

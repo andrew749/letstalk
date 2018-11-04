@@ -6,16 +6,15 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
 	"letstalk/server/core/utility"
+	"letstalk/server/core/utility/uw_email"
 	"letstalk/server/data"
 	"letstalk/server/email"
 
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"letstalk/server/core/utility/uw_email"
 )
 
 func SendEmailVerificationController(c *ctx.Context) errs.Error {
