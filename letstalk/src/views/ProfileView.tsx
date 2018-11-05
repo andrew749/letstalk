@@ -317,9 +317,9 @@ class ProfileView extends Component<Props, State> {
               allowEditing={true}
             />
             <Button
-              buttonStyle={styles.moreAboutYou}
+              buttonStyle={[styles.profileActionButton, styles.moreAboutYou]}
               onPress={showGenericSurvey}
-              title="More About You"
+              title="Edit Matching Responses"
             />
             <CohortInfo
               programId={this.props.profile.programId}

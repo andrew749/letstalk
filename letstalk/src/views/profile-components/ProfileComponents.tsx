@@ -649,7 +649,6 @@ export const styles = StyleSheet.create({
     color: Colors.HIVE_PRIMARY
   },
   moreAboutYou: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginTop: 20
   },
 });

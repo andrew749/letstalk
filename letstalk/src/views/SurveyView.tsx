@@ -131,7 +131,9 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const { options } = question;
     return (
       <View key={question.key} style={styles.questionCard}>
-        <Text style={styles.surveyQuestionText}>{question.prompt}</Text>
+        <View style={styles.questionPromptContainer}>
+          <Text style={styles.surveyQuestionText}>{question.prompt}</Text>
+        </View>
         { options.map(option => this.renderSurveyOption(question, option, response === option.key)) }
       </View>
     );
@@ -145,6 +147,8 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const currentQuestion = this.currentQuestion();
     const { questions, responses } = survey;
     const all_answered = responses && questions.every((question : SurveyQuestion) => responses.has(question.key));
+    const quesNum = questions.size;
+    const ansNum = responses.size;
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>
@@ -174,7 +178,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
                 buttonStyle={[styles.actionButton, styles.skipButton]}
                 textStyle={[styles.buttonText, styles.skipButtonText]}
                 loading={false}
-                title={'Submit Skipped Questions'}
+                title={'Submit ' + ansNum + '/' + quesNum + ' Responses'}
                 onPress={() => this.onSkipRemaining()}
               />)
         }
@@ -208,25 +212,34 @@ const styles = StyleSheet.create({
     width: '90%',
     marginTop: 10,
     padding: 10,
-    backgroundColor: Colors.HIVE_BG,
+    backgroundColor: 'white',
+    borderColor: Colors.HIVE_PRIMARY,
+    borderWidth: .7,
+    borderRadius: 4
   },
   surveyOptionText: {
     color: Colors.HIVE_SUBDUED,
-    fontSize: 18,
+    fontSize: 15,
   },
   surveyOptionSelected: {
     backgroundColor: Colors.HIVE_PRIMARY,
   },
   surveyOptionSelectedText: {
-    color: Colors.HIVE_MAIN_FONT
+    color: 'white'
   },
   surveyQuestionText: {
-    fontSize: 24,
-    color: Colors.HIVE_LIGHT_FONT,
+    fontSize: 18,
+    color: 'white',
   },
   questionCard: {
     width: SCREEN_WIDTH - 80,
-    paddingBottom:20,
+    alignItems: 'center',
+  },
+  questionPromptContainer: {
+    backgroundColor: Colors.HIVE_PRIMARY,
+    borderRadius: 4,
+    padding: 18,
+    marginBottom: 20
   },
   actionButton: {
     width: SCREEN_WIDTH - 80,
