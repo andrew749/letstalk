@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
@@ -154,7 +154,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const quesNum = questions.size;
     const ansNum = responses ? responses.size : 0;
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.contentContainer}>
           {this.renderQuestion(questions.get(currentQuestion))}
         </View>
@@ -187,7 +187,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
               />)
         }
         </View>
-      </View>
+      </ScrollView>
     );
   };
 
@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
   actionButton: {
     width: SCREEN_WIDTH - 80,
     marginTop: 10,
+    marginBottom: 30,
     padding: 8,
     minHeight: 44,
   },

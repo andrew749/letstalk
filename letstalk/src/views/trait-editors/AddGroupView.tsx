@@ -45,6 +45,7 @@ import {
   addGroup,
 } from '../../redux/profile/reducer';
 import { groupNamesByGroupId } from '../../models/group';
+import console = require('console');
 
 interface AddGroupFormData {
   groupId: string;
@@ -61,7 +62,7 @@ const AddGroupForm: SFC<FormProps<{}>> = props => {
   } = props;
 
   const groupItems = groupNamesByGroupId.mapEntries(([value, label]) => {
-    return [null, <Picker.Item key={value} label={label} value={value}/>];
+    return [value, <Picker.Item key={value} label={label} value={value}/>];
   }).toList().toJS();
 
   return (
@@ -75,7 +76,7 @@ const AddGroupForm: SFC<FormProps<{}>> = props => {
         component={ModalPicker}
         validate={required}
       >
-        { groupItems }
+        {groupItems}
       </Field>
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
