@@ -447,6 +447,18 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
+			ID: "Create jobmine",
+			Migrate: func(tx *gorm.DB) error {
+				if err := tx.AutoMigrate(JobRecord{}).Error; err != nil {
+					return err
+				}
+				return tx.AutoMigrate(TaskRecord{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Backfill normalized @edu.uwaterloo.ca addresses",
 			Migrate: func(tx *gorm.DB) error {
 				rows, err := tx.Model(&VerifyEmailId{}).Rows()
