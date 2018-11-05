@@ -61,7 +61,7 @@ const AddGroupForm: SFC<FormProps<{}>> = props => {
   } = props;
 
   const groupItems = groupNamesByGroupId.mapEntries(([value, label]) => {
-    return [null, <Picker.Item key={value} label={label} value={value}/>];
+    return [value, <Picker.Item key={value} label={label} value={value}/>];
   }).toList().toJS();
 
   return (
