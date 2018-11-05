@@ -252,5 +252,6 @@ const styles = StyleSheet.create({
     color: Colors.HIVE_SUBDUED,
     fontSize: 14,
     paddingLeft: 20,
+    paddingRight: 20,
   },
 });
