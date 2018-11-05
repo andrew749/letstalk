@@ -18,7 +18,7 @@ type JobRecord struct {
 
 	// JobName Human readable identifier for the type of job.
 	// Used to determine which spec this job is running.
-	JobType JobType `gorm:"primary_key"`
+	JobType JobType `gorm:"primary_key;size:190"`
 
 	// RunId Human readable unique identifier for the instantiation of this job.
 	// e.g. notifications_1996-10-07

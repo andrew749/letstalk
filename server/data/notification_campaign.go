@@ -8,7 +8,7 @@ import (
 
 type NotificationCampaign struct {
 	gorm.Model
-	RunId         string  `gorm:"primary_key"`
+	RunId         string  `gorm:"primary_key;size:190"`
 	FailedUserIds *string `gorm:"text"`
 }
 
