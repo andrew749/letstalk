@@ -45,6 +45,7 @@ import EditProfileSelectorView from './views/EditProfileSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
+import AddGroupView from './views/trait-editors/AddGroupView';
 import QrCodeView from './views/QrCodeView';
 import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
@@ -171,6 +172,9 @@ const createTabView = () => TabNavigator({
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
   AddPosition: {
     screen: AddPositionView
+  },
+  AddGroup: {
+    screen: AddGroupView
   },
   AddSimpleTrait: {
     screen: AddSimpleTraitView

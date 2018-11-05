@@ -47,10 +47,11 @@ import { RootState } from '../redux';
 import {
   State as ProfileState,
   fetchProfile,
+  removeGroup,
   removePosition,
   removeSimpleTrait,
 } from '../redux/profile/reducer';
-import { ActionTypes } from '../redux/profile/actions';
+import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
 import { AnalyticsHelper } from '../services/analytics';
 import {
   FormP, FormProps, ProfileAvatarEditableFormElement } from '../components';
@@ -63,12 +64,14 @@ import { UserSimpleTrait } from '../models/simple-trait';
 import {
   CohortInfo,
   PersonalInfo,
+  UserGroupSurveys,
   UserPositions,
   UserSimpleTraits,
   styles,
 } from './profile-components/ProfileComponents';
 import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
+import { GROUP_GENERIC } from '../services/survey';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -111,10 +114,11 @@ const EditFormWithReduxBuilder = (initialValues: PhotoResult) => {
 }
 
 interface DispatchActions {
-  fetchProfile: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  fetchProfile: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
-  removePosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
-  removeSimpleTrait: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removePosition: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
+  removeSimpleTrait: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
+  removeGroup: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
@@ -286,11 +290,6 @@ class ProfileView extends Component<Props, State> {
     )
   }
 
-  private async onShowSurvey () {
-    this.props.fetchSurvey();
-    this.props.navigation.navigate('SurveyView', {}, NavigationActions.navigate({ routeName: 'NestedSurveyView' }));
-  }
-
   private renderBody() {
     let profilePic;
     if (this.props.profile) {
@@ -334,18 +333,16 @@ class ProfileView extends Component<Props, State> {
               removeSimpleTrait={this.props.removeSimpleTrait}
               errorToast={this.props.errorToast}
             />
+            <UserGroupSurveys
+              userGroupSurveys={this.props.profile.userGroupSurveys}
+              navigation={this.props.navigation}
+              fetchSurvey={this.props.fetchSurvey}
+              removeGroup={this.props.removeGroup}
+              allowEditing={true}
+            />
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Account Actions</Text>
               <View style={{ alignItems: 'center' }}>
-                <ActionButton
-                  /* TODO aklen: remove this */
-                  backgroundColor={Colors.HIVE_PRIMARY}
-                  buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
-                  textStyle={[styles.changePassButtonText, styles.buttonText]}
-                  loading={false}
-                  title={'TEMP show survey'}
-                  onPress={() => this.onShowSurvey()}
-                />
                 <ActionButton
                   backgroundColor={Colors.WHITE}
                   buttonStyle={[styles.changePassButton, styles.profileActionButton,]}
@@ -398,5 +395,13 @@ class ProfileView extends Component<Props, State> {
 
 export default connect(
   ({ profile }: RootState) => profile,
-  { fetchProfile, fetchSurvey, removePosition, removeSimpleTrait, infoToast, errorToast },
+  {
+    fetchProfile,
+    fetchSurvey,
+    removeGroup,
+    removePosition,
+    removeSimpleTrait,
+    infoToast,
+    errorToast,
+  },
 )(ProfileView);

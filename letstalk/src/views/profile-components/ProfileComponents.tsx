@@ -26,11 +26,14 @@ import { programById, sequenceById } from '../../models/cohort';
 import { Button, Header } from '../../components';
 import { UserPosition } from '../../models/position';
 import { UserSimpleTrait } from '../../models/simple-trait';
+import { UserGroupSurvey } from '../../models/profile';
 import Colors from '../../services/colors';
-import { ActionTypes } from '../../redux/profile/actions';
-import { State as ProfileState } from '../../redux/profile/reducer';
 import { RootState } from '../../redux';
 import { genderIdToString, GenderId } from '../../models/user';
+import { State as SurveyState } from '../../redux/survey/reducer';
+import { ActionTypes as SurveyActionTypes } from '../../redux/survey/actions';
+import { State as ProfileState } from '../../redux/profile/reducer';
+import { ActionTypes as ProfileActionTypes } from '../../redux/profile/actions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -168,12 +171,127 @@ function renderShowLessMore(isShown: boolean, show: () => void, hide: () => void
   }
 }
 
+interface UserGroupSurveysProps {
+  userGroupSurveys: Immutable.List<UserGroupSurvey>;
+  navigation: NavigationScreenProp<void, NavigationStackAction>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
+  removeGroup: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
+  errorToast?(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
+  allowEditing?: boolean; // default false
+}
+
+interface UserGroupSurveysState {
+  showAll: boolean,
+}
+
+export class UserGroupSurveys extends Component<UserGroupSurveysProps, UserGroupSurveysState> {
+  constructor(props: UserGroupSurveysProps) {
+    super(props);
+
+    this.state = { showAll: false }
+    this.renderGroupSurvey = this.renderGroupSurvey.bind(this);
+  }
+
+  private renderGroupSurvey(groupSurvey: UserGroupSurvey) {
+    const { allowEditing } = this.props;
+
+    const numQuestions = groupSurvey.survey.questions.size;
+    const numAnswers = groupSurvey.survey.responses ? groupSurvey.survey.responses.size : 0;
+
+    const color = numQuestions === numAnswers ? Colors.HIVE_ACCENT : Colors.HIVE_ERROR;
+    const onEditPress = () => {
+      this.props.fetchSurvey(groupSurvey.survey.group);
+      this.props.navigation.navigate('SurveyView', {});
+    }
+
+    const onRemoveAccept = async () => {
+      try {
+        await this.props.removeGroup(groupSurvey.userGroup.id);
+      } catch (e) {
+        await this.props.errorToast(e.errorMsg);
+      }
+    }
+
+    const onRemovePress = () => {
+      Alert.alert(
+        'Leave Group',
+        `Are you sure you want to leave the ${groupSurvey.userGroup.groupName} group`,
+        [
+          {text: 'Cancel', onPress: () => null, style: 'cancel'},
+          {text: 'Leave', onPress: onRemoveAccept, style: 'destructive'},
+        ],
+      );
+    }
+
+    const padRight = allowEditing ? 50 : 25;
+    const extraStyle = { paddingRight: padRight };
+    const editSurveyRight = allowEditing ? 25 : 0;
+    const editSurveyExtraStyle = { right: editSurveyRight };
+    return (
+      <View
+        key={ groupSurvey.survey.group }
+        style={[styles.pillContainer, { backgroundColor: color, borderColor: color }, extraStyle]}
+      >
+        <Text style={styles.pillText}>
+          <Text style={styles.boldText}>{ groupSurvey.userGroup.groupName }</Text>
+          <Text>{ `\n${numAnswers} out of ${numQuestions} questions completed` }</Text>
+        </Text>
+        <TouchableOpacity style={[styles.editSurvey, editSurveyExtraStyle]} onPress={onEditPress}>
+          <MaterialIcons name="edit" size={18} color={Colors.WHITE} />
+        </TouchableOpacity>
+        {!!allowEditing && <TouchableOpacity style={styles.traitDelete} onPress={onRemovePress}>
+          <MaterialIcons color={Colors.WHITE} name="close" size={18} />
+        </TouchableOpacity>}
+      </View>
+    );
+  }
+
+  render() {
+    let { userGroupSurveys, allowEditing } = this.props;
+    const { showAll } = this.state;
+
+    const addGroup = () => this.props.navigation.navigate('AddGroup');
+    let bottomAction: ReactNode = null;
+    if (userGroupSurveys.isEmpty()) {
+      bottomAction = [
+        <Text key={'text'} style={styles.noTraitText}>
+          { 'No group surveys for you to complete' }
+        </Text>,
+      ];
+    } else if (userGroupSurveys.size > MAX_NUMBER_POSITIONS_SHOWN) {
+      bottomAction = renderShowLessMore(showAll,
+        () => this.setState({ showAll: true }),
+        () => this.setState({ showAll: false }));
+    }
+
+    if (!showAll) {
+      userGroupSurveys = userGroupSurveys.take(MAX_NUMBER_POSITIONS_SHOWN).toList();
+    }
+    const surveyItems = userGroupSurveys.map(this.renderGroupSurvey).toJS();
+
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionHeader}>Group Surveys</Text>
+        <View style={styles.pillsOuterContainer}>
+          { surveyItems }
+        </View>
+        <View style={styles.traitBottomActionContainer}>
+          { bottomAction }
+        </View>
+        {!!allowEditing && <TouchableOpacity onPress={addGroup} style={styles.addTraitButton}>
+          <MaterialIcons name="add-circle" size={32} color={Colors.HIVE_PRIMARY} />
+        </TouchableOpacity>}
+      </View>
+    );
+  }
+}
+
 interface UserPositionsProps {
   userPositions: Immutable.List<UserPosition>;
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   allowEditing?: boolean; // default false
   // Below are required when allowEditing is true
-  removePosition?: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removePosition?: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   errorToast?(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
@@ -283,7 +401,7 @@ interface UserSimpleTraitsProps {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   allowEditing?: boolean; // default false
   // Below are required when allowEditing is true
-  removeSimpleTrait?: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
+  removeSimpleTrait?: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   errorToast?(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
@@ -520,8 +638,14 @@ export const styles = StyleSheet.create({
     top: 0,
     right: 0
   },
+  editSurvey: {
+    position: 'absolute',
+    padding: 5,
+    top: 0,
+    right: 25
+  },
   value: {
     fontSize: 16,
     color: Colors.HIVE_PRIMARY
-  }
+  },
 });

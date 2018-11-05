@@ -175,6 +175,16 @@ export class RemoteProfileService implements ProfileService {
       ...response,
       userPositions: Immutable.List(response.userPositions),
       userSimpleTraits: Immutable.List(response.userSimpleTraits),
+      userGroupSurveys: Immutable.List(response.userGroupSurveys).map(groupSurvey => {
+        return {
+          ...groupSurvey,
+          survey: {
+            ...groupSurvey.survey,
+            responses: groupSurvey.survey.responses && Immutable.Map(groupSurvey.survey.responses),
+            questions: Immutable.List(groupSurvey.survey.questions),
+          },
+        };
+      }).toList(),
     };
   }
 
