@@ -17,13 +17,13 @@ type TaskRecord struct {
 	JobId uint      `gorm:"primary_key;auto_increment:false"`
 
 	// DENORMALIZATION to make it easier to look for these things in the db.
-	RunId string
+	RunId string `gorm:"size:190"`
 
 	// DENORMALIZATION to make it easier to debug this by looking at the db.
-	JobType JobType
+	JobType JobType `gorm:"size:190"`
 
 	// Running status of this task.
-	Status Status `gorm:"not_null"`
+	Status Status `gorm:"not_null;size:50"`
 
 	// Metadata associated with this specific task.
 	Metadata Metadata `gorm:"type:text"`
