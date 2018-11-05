@@ -140,14 +140,14 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
         {gradYearItems}
       </Field>
       <Field
-        label="Mentorship Preference"
+        label="Your Preferred Role"
         name="mentorshipPreference"
         component={ModalPicker}
         validate={required}
       >
         <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
         <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
-        <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
+        <Picker.Item key="none" label="I don't know yet" value={MENTORSHIP_PREFERENCE_NONE}/>
       </Field>
       <Header>Additional Info</Header>
       <Field

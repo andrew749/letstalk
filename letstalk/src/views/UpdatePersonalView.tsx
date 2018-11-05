@@ -189,7 +189,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
             Mentorship Preference
           </Text>}
           <Field
-            label="Mentorship Preference"
+            label="Your Preferred Role"
             name="mentorshipPreference"
             component={ModalPicker}
             validate={required}
@@ -197,7 +197,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
           >
             <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
             <Picker.Item key="mentee" label="Mentee" value={MENTORSHIP_PREFERENCE_MENTOR}/>
-            <Picker.Item key="none" label="Neither" value={MENTORSHIP_PREFERENCE_NONE}/>
+            <Picker.Item key="none" label="I don't know yet" value={MENTORSHIP_PREFERENCE_NONE}/>
           </Field>
           <Header>Additional Info</Header>
           <Text style={[styles.hint, styles.adjustMargin]}>Optional info to let others know you better</Text>
