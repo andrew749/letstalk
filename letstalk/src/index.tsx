@@ -171,13 +171,16 @@ const createTabView = () => TabNavigator({
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
   AddPosition: {
-    screen: AddPositionView
+    screen: AddPositionView,
+    path: 'AddPosition',
   },
   AddGroup: {
-    screen: AddGroupView
+    screen: AddGroupView,
+    path: 'AddGroup',
   },
   AddSimpleTrait: {
-    screen: AddSimpleTraitView
+    screen: AddSimpleTraitView,
+    path: 'AddSimpleTrait',
   },
   BlankDoNotUse: {
     screen: View
@@ -240,7 +243,8 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     navigationOptions: {}
   },
   UpdatePersonal: {
-    screen: UpdatePersonalView
+    screen: UpdatePersonalView,
+    path: 'UpdatePersonal',
   },
   VerifyEmail: {
     screen: VerifyEmailView
