@@ -5,6 +5,8 @@ services:
       - SECRETS_PATH=secrets.json
       - PROD=true
       - PORT=3000
+    depends_on:
+      - env
   lb:
     restart: always
     ports:
