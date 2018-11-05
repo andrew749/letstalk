@@ -7,10 +7,13 @@ import (
 
 var allSurveysByGroup = map[data.SurveyGroup]api.Survey{
 	Generic_v1.Group: Generic_v1,
+	Wics_v1.Group: Wics_v1,
+	Se_soc_v1.Group: Se_soc_v1,
 }
 
 var allSurveysByGroupId = map[data.TGroupID]api.Survey{
-	"WICS": Generic_v1,
+	"WICS": Wics_v1,
+	"SE_SOC": Se_soc_v1,
 }
 
 func GetSurveyDefinitionByGroup(group data.SurveyGroup) *api.Survey {

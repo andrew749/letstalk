@@ -7,7 +7,7 @@ export interface SurveyService {
   postSurveyResponses(surveyWithResponses: Survey): Promise<Object>;
 }
 
-export const GROUP_GENERIC = "generic";
+export const GROUP_GENERIC = "GENERIC";
 
 export class RemoteSurveyService implements SurveyService {
   private requestor: Requestor;
