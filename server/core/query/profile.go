@@ -78,13 +78,14 @@ func GetProfile(
 	db *gorm.DB,
 	userId data.TUserID,
 	includeContactInfo bool,
+	includeSurveys bool,
 ) (*api.ProfileResponse, errs.Error) {
-	user, err := GetUserProfileById(db, userId, includeContactInfo)
-	if err != nil {
+	user, dbErr := GetUserProfileById(db, userId, includeContactInfo)
+	if dbErr != nil {
 		return nil, errs.NewRequestError("Unable to get user data.")
 	}
-	userCohort, err := GetUserCohort(db, userId)
-	if err != nil {
+	userCohort, dbErr := GetUserCohort(db, userId)
+	if dbErr != nil {
 		// TODO: Should probably check what the errors here are. Right now assume that cohort does not
 		// exist
 	}
@@ -163,6 +164,14 @@ func GetProfile(
 		userModel.Cohort.SequenceId = sequenceId
 	}
 
+	if includeSurveys {
+		var err errs.Error
+		userModel.UserGroupSurveys, err = GetUserGroupSurveys(db, userId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &userModel, nil
 }
 
@@ -195,7 +204,7 @@ func GetMatchProfile(
 	}
 
 	// Only include the contact info if the users are already connected
-	profile, err := GetProfile(db, matchUserId, includeContactInfo(relationshipType))
+	profile, err := GetProfile(db, matchUserId, includeContactInfo(relationshipType), false)
 	if err != nil {
 		return nil, err
 	}

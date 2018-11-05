@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql/driver"
-	"github.com/jinzhu/gorm"
 )
 
 type (
@@ -21,22 +20,4 @@ type UserGroup struct {
 	Times
 
 	User *User `gorm:"foreignkey:UserId;association_foreignkey:UserId"`
-}
-
-func CreateUserGroup(
-	db *gorm.DB,
-	userId TUserID,
-	groupId TGroupID,
-	groupName string,
-) (*UserGroup, error) {
-	userGroup := &UserGroup{
-		UserId:    userId,
-		GroupId:   groupId,
-		GroupName: groupName,
-	}
-	err := db.Create(userGroup).Error
-	if err != nil {
-		return nil, err
-	}
-	return userGroup, nil
 }
