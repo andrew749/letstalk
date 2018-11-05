@@ -148,7 +148,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const { questions, responses } = survey;
     const all_answered = responses && questions.every((question : SurveyQuestion) => responses.has(question.key));
     const quesNum = questions.size;
-    const ansNum = responses.size;
+    const ansNum = responses ? responses.size : 0;
     return (
       <View style={styles.container}>
         <View style={styles.contentContainer}>

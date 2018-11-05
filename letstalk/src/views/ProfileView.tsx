@@ -319,7 +319,7 @@ class ProfileView extends Component<Props, State> {
             <Button
               buttonStyle={[styles.profileActionButton, styles.moreAboutYou]}
               onPress={showGenericSurvey}
-              title="Edit Matching Responses"
+              title="Edit Questionnaire Responses"
             />
             <CohortInfo
               programId={this.props.profile.programId}
