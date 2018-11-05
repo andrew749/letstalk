@@ -11,6 +11,7 @@ import {
 } from 'react-navigation';
 import { RootState } from '../redux';
 import { SubmissionError } from 'redux-form'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Loading from './Loading';
 import {fetchSurvey, State as SurveyState} from '../redux/survey/reducer';
 import {
@@ -154,7 +155,10 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     const quesNum = questions.size;
     const ansNum = responses ? responses.size : 0;
     return (
-      <View style={styles.container}>
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps="always"
+        style={styles.container}
+      >
         <View style={styles.contentContainer}>
           {this.renderQuestion(questions.get(currentQuestion))}
         </View>
@@ -187,7 +191,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
               />)
         }
         </View>
-      </View>
+      </KeyboardAwareScrollView>
     );
   };
 
@@ -248,6 +252,7 @@ const styles = StyleSheet.create({
   actionButton: {
     width: SCREEN_WIDTH - 80,
     marginTop: 10,
+    marginBottom: 30,
     padding: 8,
     minHeight: 44,
   },
