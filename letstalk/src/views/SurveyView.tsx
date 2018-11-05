@@ -86,16 +86,20 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
 
   private async onSubmit () {
     const { survey } = this.props;
-    try {
-      await surveyService.postSurveyResponses(survey);
-      await this.props.fetchSurvey(survey.group);
-      if (survey.group !== GROUP_GENERIC) {
-        await this.props.setSurvey(survey);
-      }
+    if (!survey.responses) {
       await this.props.navigation.pop(survey.questions.size);
-    } catch(e) {
-      console.error("error submitting responses", e);
-      throw new SubmissionError({_error: e.errorMsg});
+    } else {
+      try {
+        await surveyService.postSurveyResponses(survey);
+        await this.props.fetchSurvey(survey.group);
+        if (survey.group !== GROUP_GENERIC) {
+          await this.props.setSurvey(survey);
+        }
+        await this.props.navigation.pop(survey.questions.size);
+      } catch(e) {
+        console.error("error submitting responses", e);
+        throw new SubmissionError({_error: e.errorMsg});
+      }
     }
   }
 

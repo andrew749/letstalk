@@ -11,6 +11,7 @@ export interface UserGroup extends Group {
 
 const groupNamesByGroupId: Immutable.Map<string, string> = Immutable.Map([
   ['WICS', 'Women in Computer Science'],
+  ['SE_SOC', 'SE Society']
 ]);
 
 export { groupNamesByGroupId };
