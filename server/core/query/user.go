@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/jinzhu/gorm"
+	"letstalk/server/core/utility/uw_email"
 )
 
 // Returns missing users out of the given list
@@ -47,15 +48,20 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	var err error
 	if db.Where(&data.User{Email: email}).First(&user).RecordNotFound() {
 		// fallback to looking for uwaterloo email
-		var verifyEmailId data.VerifyEmailId
-		if db.Where(&data.VerifyEmailId{Email: email}).First(&verifyEmailId).RecordNotFound() {
-			return nil, errs.NewNotFoundError("Unable to find user")
+		if uw_email.Validate(email) {
+			var verifyEmailId data.VerifyEmailId
+			uwEmail := uw_email.FromString(email)
+			if verifyEmailId, err := GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
+				return nil, errs.NewDbError(err)
+			} else if verifyEmailId == nil {
+				return nil, errs.NewNotFoundError("Unable to find user")
+			}
+			var userTemp *data.User
+			if userTemp, err = GetUserById(db, verifyEmailId.UserId); err != nil {
+				return nil, errs.NewNotFoundError("Unable to find user")
+			}
+			user = *userTemp
 		}
-		var userTemp *data.User
-		if userTemp, err = GetUserById(db, verifyEmailId.UserId); err != nil {
-			return nil, errs.NewNotFoundError("Unable to find user")
-		}
-		user = *userTemp
 	}
 	return &user, nil
 }

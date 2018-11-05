@@ -6,18 +6,16 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
 	"letstalk/server/core/utility"
+	"letstalk/server/core/utility/uw_email"
 	"letstalk/server/data"
 	"letstalk/server/email"
 
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
-
-var uwEmailRegex = regexp.MustCompile("(?i)^[A-Z0-9._%+-]+@(edu\\.)?uwaterloo\\.ca$")
 
 func SendEmailVerificationController(c *ctx.Context) errs.Error {
 	var req *api.SendAccountVerificationEmailRequest
@@ -33,9 +31,10 @@ func SendEmailVerificationController(c *ctx.Context) errs.Error {
 
 // Transactionally generates a new VerifyEmailId and sends a link in an email to the user.
 func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAccountVerificationEmailRequest) errs.Error {
-	if !uwEmailRegex.MatchString(req.Email) {
+	if !uw_email.Validate(req.Email) {
 		return errs.NewRequestError("Expected valid @edu.uwaterloo.ca or @uwaterloo.ca email address")
 	}
+	uwEmail := uw_email.FromString(req.Email)
 	user, _ := query.GetUserById(c.Db, c.SessionData.UserId)
 
 	if user.IsEmailVerified {
@@ -45,10 +44,10 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		var verifyEmailId *data.VerifyEmailId
 		var err error
-		if verifyEmailId, err = query.GenerateNewVerifyEmailId(tx, user.UserId, req.Email); err != nil {
+		if verifyEmailId, err = query.GenerateNewVerifyEmailId(tx, user.UserId, uwEmail); err != nil {
 			return err
 		}
-		if err = sendAccountVerifyEmail(verifyEmailId, user, req.Email); err != nil {
+		if err = sendAccountVerifyEmail(verifyEmailId, user, uwEmail); err != nil {
 			return err
 		}
 		return nil
@@ -59,7 +58,7 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 	return nil
 }
 
-func sendAccountVerifyEmail(requestId *data.VerifyEmailId, user *data.User, emailAddr string) error {
+func sendAccountVerifyEmail(requestId *data.VerifyEmailId, user *data.User, uwEmail uw_email.UwEmail) error {
 	verifyEmailLink := fmt.Sprintf(
 		"%s/verify_email.html?requestId=%s",
 		utility.BaseUrl,
@@ -67,7 +66,7 @@ func sendAccountVerifyEmail(requestId *data.VerifyEmailId, user *data.User, emai
 	)
 
 	// send email to user with link to verify email address
-	to := mail.NewEmail(user.FirstName, emailAddr)
+	to := mail.NewEmail(user.FirstName, uwEmail.ToStringNormalized())
 	if err := email.SendAccountVerifyEmail(to, verifyEmailLink); err != nil {
 		return err
 	}

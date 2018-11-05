@@ -1,7 +1,10 @@
 package data
 
 import (
+	"letstalk/server/core/utility/uw_email"
+
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"github.com/romana/rlog"
 	"gopkg.in/gormigrate.v1"
 )
@@ -469,6 +472,35 @@ func migrateDB(db *gorm.DB) {
 			ID: "Add run_id to notifications table",
 			Migrate: func(tx *gorm.DB) error {
 				return tx.AutoMigrate(Notification{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Backfill normalized @edu.uwaterloo.ca addresses",
+			Migrate: func(tx *gorm.DB) error {
+				rows, err := tx.Model(&VerifyEmailId{}).Rows()
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+
+				for rows.Next() {
+					verifyEmailId := VerifyEmailId{}
+					if err := db.ScanRows(rows, &verifyEmailId); err != nil {
+						return err
+					}
+					if !uw_email.Validate(verifyEmailId.Email) {
+						return errors.Errorf("Could not normalize unexpected non-uw email '%s'", verifyEmailId.Email)
+					}
+					uwEmail := uw_email.FromString(verifyEmailId.Email)
+					verifyEmailId.Email = uwEmail.ToStringNormalized()
+					if err := db.Save(&verifyEmailId).Error; err != nil {
+						return err
+					}
+				}
+				return nil
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
