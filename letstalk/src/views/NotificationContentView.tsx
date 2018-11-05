@@ -1,7 +1,7 @@
 import {WebView} from 'react-native';
 import React from 'react';
 import {Notification} from '../models/notification';
-import { NavigationScreenProp, NavigationStackAction } from 'react-navigation';
+import { NavigationScreenProp, NavigationStackAction, NavigationScreenDetails } from 'react-navigation';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { View, Text } from 'react-native';
 import {BASE_URL, NOTIFICATION_PAGE_ROUTE} from '../services/constants';
@@ -18,11 +18,15 @@ interface State {
 }
 
 class NotificationContentView extends React.Component<Props, State> {
-    static navigationOptions = () => ({
-      headerStyle, 
-      headerTitleStyle, 
-      headerTintColor 
-    })
+    static navigationOptions = ({navigation}: NavigationScreenDetails<void>) => {
+      const {state} = navigation;
+      return {
+        title: `${state.params.title || "Notification"}`,
+        headerStyle,
+        headerTitleStyle,
+        headerTintColor
+      }
+    };
     private notificationId: number;
     private sessionId: string;
 
@@ -30,6 +34,12 @@ class NotificationContentView extends React.Component<Props, State> {
       super(props);
       //@ts-ignore
       this.notificationId = (this.props.notification && this.props.notification.notificationId) || this.props.navigation.getParam("notificationId", undefined);
+      //@ts-ignore
+      const passedTitle = this.props.notification && this.props.notification.title;
+      if (passedTitle) {
+        //@ts-ignore
+        this.props.navigation.setParams({"title": passedTitle});
+      }
       this.state = {sessionId: undefined}
     }
     async componentDidMount() {
