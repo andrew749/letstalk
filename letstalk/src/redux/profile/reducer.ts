@@ -16,12 +16,19 @@ import {
   positionRemove,
   simpleTraitAdd,
   simpleTraitRemove,
+  groupAdd,
+  groupRemove,
+  surveySet,
   ActionTypes,
   TypeKeys,
 } from './actions';
 import profileService from '../../services/profile-service';
 import requestToMatchService from '../../services/request-to-match-service';
-import { AddUserPositionRequest } from '../../services/request-to-match-service';
+import {
+  AddUserPositionRequest,
+  AddUserGroupRequest,
+} from '../../services/request-to-match-service';
+import { Survey } from '../../models/survey';
 import { UserPosition } from '../../models/position';
 import { UserSimpleTrait } from '../../models/simple-trait';
 
@@ -75,6 +82,41 @@ export function reducer(state: State = initialState, action: ActionTypes): State
         ...state.profile,
         userSimpleTraits: state.profile.userSimpleTraits.filter(trait => {
           return trait.id !== action.id;
+        }).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.GROUP_ADD:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userGroupSurveys: state.profile.userGroupSurveys.push(action.userGroupSurvey),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.GROUP_REMOVE:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userGroupSurveys: state.profile.userGroupSurveys.filter(groupSurvey => {
+          return groupSurvey.userGroup.id !== action.id;
+        }).toList(),
+      }
+      return {
+        ...state,
+        profile,
+      }
+    case TypeKeys.SURVEY_SET:
+      profile = state.profile === null ? null : {
+        ...state.profile,
+        userGroupSurveys: state.profile.userGroupSurveys.map(groupSurvey => {
+          return {
+            ...groupSurvey,
+            survey: groupSurvey.survey.group === action.survey.group ? action.survey :
+              groupSurvey.survey,
+          };
         }).toList(),
       }
       return {
@@ -141,11 +183,37 @@ const removeSimpleTrait: ActionCreator<
   };
 }
 
+const addGroup: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (req: AddUserGroupRequest) => {
+  return async (dispatch: Dispatch<State>) => {
+    const userGroupSurvey = await requestToMatchService.addUserGroup(req);
+    return dispatch(groupAdd(userGroupSurvey));
+  };
+}
+
+const removeGroup: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (id: number) => {
+  return async (dispatch: Dispatch<State>) => {
+    await requestToMatchService.removeUserGroup(id);
+    return dispatch(groupRemove(id));
+  };
+}
+
+const setSurvey: ActionCreator<
+  ThunkAction<Promise<ActionTypes>, State, void>> = (survey: Survey) => {
+  return async (dispatch: Dispatch<State>) => {
+    return dispatch(surveySet(survey));
+  };
+}
+
 export {
   fetchProfile,
   addPosition,
   removePosition,
   addSimpleTraitById,
   addSimpleTraitByName,
+  addGroup,
+  removeGroup,
   removeSimpleTrait,
+  setSurvey,
 };

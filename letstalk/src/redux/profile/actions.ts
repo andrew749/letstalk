@@ -9,6 +9,8 @@ import {
   FetchActionCreators,
 } from '../actions';
 import { APIError } from '../../services/requests';
+import { Survey } from '../../models/survey';
+import { UserGroupSurvey } from '../../models/profile';
 import { UserPosition } from '../../models/position';
 import { UserSimpleTrait } from '../../models/simple-trait';
 
@@ -18,6 +20,9 @@ export enum TypeKeys {
   POSITION_REMOVE = 'PROFILE/POSITIVE_REMOVE',
   SIMPLE_TRAIT_ADD = 'PROFILE/SIMPLE_TRAIT_ADD',
   SIMPLE_TRAIT_REMOVE = 'PROFILE/SIMPLE_TRAIT_REMOVE',
+  GROUP_ADD = 'PROFILE/GROUP_ADD',
+  GROUP_REMOVE = 'PROFILE/GROUP_REMOVE',
+  SURVEY_SET = 'PROFILE/SURVEY_SET',
 }
 
 type ProfileReceiveAction = FetchReceiveAction<TypeKeys.FETCH, ProfileData>;
@@ -42,6 +47,26 @@ export interface SimpleTraitAddAction extends Action {
 export interface SimpleTraitRemoveAction extends Action {
   readonly type: TypeKeys.SIMPLE_TRAIT_REMOVE;
   readonly id: number;
+}
+
+export interface GroupAddAction extends Action {
+  readonly type: TypeKeys.GROUP_ADD;
+  readonly userGroupSurvey: UserGroupSurvey;
+}
+
+export interface GroupRemoveAction extends Action {
+  readonly type: TypeKeys.GROUP_REMOVE;
+  readonly id: number;
+}
+
+export interface PositionRemoveAction extends Action {
+  readonly type: TypeKeys.POSITION_REMOVE;
+  readonly id: number;
+}
+
+export interface SurveySetAction extends Action {
+  readonly type: TypeKeys.SURVEY_SET;
+  readonly survey: Survey;
 }
 
 function receive(data: ProfileData): ProfileReceiveAction {
@@ -83,6 +108,18 @@ export function simpleTraitRemove(id: number): SimpleTraitRemoveAction {
   return { type: TypeKeys.SIMPLE_TRAIT_REMOVE, id };
 }
 
+export function groupAdd(userGroupSurvey: UserGroupSurvey): GroupAddAction {
+  return { type: TypeKeys.GROUP_ADD, userGroupSurvey };
+}
+
+export function groupRemove(id: number): GroupRemoveAction {
+  return { type: TypeKeys.GROUP_REMOVE, id };
+}
+
+export function surveySet(survey: Survey): SurveySetAction {
+  return { type: TypeKeys.SURVEY_SET, survey };
+}
+
 const fetch: FetchActionCreators<TypeKeys.FETCH, ProfileData> = {
   receive,
   error,
@@ -99,3 +136,6 @@ export type ActionTypes =
   | PositionRemoveAction
   | SimpleTraitAddAction
   | SimpleTraitRemoveAction
+  | GroupAddAction
+  | GroupRemoveAction
+  | SurveySetAction

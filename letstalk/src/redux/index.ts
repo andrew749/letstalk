@@ -10,6 +10,7 @@ import { reducer as notifications, State as NotificationsState } from './notific
 import { reducer as profile, State as ProfileState } from './profile/reducer';
 import { reducer as userSearch, State as UserSearchState } from './user-search/reducer';
 import { reducer as searchBar, State as SearchBarState } from './search-bar/reducer';
+import { reducer as survey, State as SurveyState } from './survey/reducer';
 
 export interface RootState {
   bootstrap: BootstrapState;
@@ -21,6 +22,7 @@ export interface RootState {
   profile: ProfileState;
   searchBar: SearchBarState;
   userSearch: UserSearchState;
+  survey: SurveyState;
 };
 
 const reducers = {
@@ -34,6 +36,7 @@ const reducers = {
   profile,
   searchBar,
   userSearch,
+  survey,
 };
 
 const appReducer: Reducer<RootState> = combineReducers<RootState>(reducers);

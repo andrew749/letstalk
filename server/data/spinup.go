@@ -447,12 +447,31 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
+			ID: "Add surveys table",
+			Migrate: func(tx *gorm.DB) error {
+				tx.AutoMigrate(&UserSurvey{})
+				return tx.Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Create jobmine",
 			Migrate: func(tx *gorm.DB) error {
 				if err := tx.AutoMigrate(JobRecord{}).Error; err != nil {
 					return err
 				}
 				return tx.AutoMigrate(TaskRecord{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add run_id to notifications table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil

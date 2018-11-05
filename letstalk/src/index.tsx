@@ -45,11 +45,13 @@ import EditProfileSelectorView from './views/EditProfileSelectorView';
 import ChangeCohortView from './views/trait-editors/ChangeCohortView';
 import AddSimpleTraitView from './views/trait-editors/AddSimpleTraitView';
 import AddPositionView from './views/trait-editors/AddPositionView';
+import AddGroupView from './views/trait-editors/AddGroupView';
 import QrCodeView from './views/QrCodeView';
 import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
 import RequestsView from './views/RequestsView';
 import UpdatePersonalView from './views/UpdatePersonalView';
+import SurveyView from './views/SurveyView';
 
 import NotificationService, { RawNotification } from './services/notification-service';
 import navService from './services/navigation-service';
@@ -171,6 +173,9 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
   AddPosition: {
     screen: AddPositionView
   },
+  AddGroup: {
+    screen: AddGroupView
+  },
   AddSimpleTrait: {
     screen: AddSimpleTraitView
   },
@@ -245,7 +250,10 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     navigationOptions: {
       header: null
     }
-  }
+  },
+  SurveyView: {
+    screen: SurveyView,
+  },
 }, {
   initialRouteName,
 }, );

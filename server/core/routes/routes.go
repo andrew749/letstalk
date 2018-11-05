@@ -283,6 +283,20 @@ func Register(
 		hw.wrapHandler(controller.RemoveUserPositionController, true),
 	)
 
+	// User Group
+	v1.OPTIONS("/user_group")
+	v1.POST("/user_group", hw.wrapHandler(controller.AddUserGroupController, true))
+	v1.DELETE(
+		"/user_group",
+		hw.wrapHandler(controller.RemoveUserGroupController, true),
+	)
+
+	// User surveys
+	v1.OPTIONS("/survey")
+	v1.POST("/survey", hw.wrapHandler(controller.PostSurveyResponses, true /* auth required */))
+	v1.OPTIONS("/survey/:group")
+	v1.GET("/survey/:group", hw.wrapHandler(controller.GetSurvey, true /* auth required */))
+
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")
 	autocompleteV1.OPTIONS("/simple_trait")
