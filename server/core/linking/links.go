@@ -13,6 +13,10 @@ const (
 	NOTIFICATION_VIEW_URL = "NotificationView"
 	ADHOC_URL             = "NotificationContent?notificationId=%d"
 	QR_CODE_URL           = "QrCode"
+	ADD_POSITION_URL      = "AddPosition"
+	ADD_GROUP_URL         = "AddGroup"
+	ADD_SIMPLE_TRAIT_URL  = "AddSimpleTrait"
+	UPDATE_PERSONAL_URL   = "UpdatePersonal"
 )
 
 func wrapWithUrlBase(url string) string {
@@ -21,6 +25,22 @@ func wrapWithUrlBase(url string) string {
 
 func GetQrScannerUrl() string {
 	return wrapWithUrlBase(QR_SCANNER_URL)
+}
+
+func GetAddPositionUrl() string {
+	return wrapWithUrlBase(ADD_POSITION_URL)
+}
+
+func GetAddGroupUrl() string {
+	return wrapWithUrlBase(ADD_GROUP_URL)
+}
+
+func GetAddSimpleTraitUrl() string {
+	return wrapWithUrlBase(ADD_SIMPLE_TRAIT_URL)
+}
+
+func GetUpdatePersonalUrl() string {
+	return wrapWithUrlBase(UPDATE_PERSONAL_URL)
 }
 
 func GetMatchProfileUrl(userId data.TUserID) string {

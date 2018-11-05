@@ -26,6 +26,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import profileService from '../services/profile-service';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
+import { combineFetchStates } from '../redux/actions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -272,6 +273,10 @@ class ProfileEditView extends Component<Props> {
   }
 
   private async load() {
+    if (!this.props.profile) {
+      // Don't await on purpose
+      this.props.fetchProfile();
+    }
     await this.props.fetchCohorts();
   }
 
@@ -342,7 +347,7 @@ class ProfileEditView extends Component<Props> {
       state,
       errorMsg,
       errorType,
-    } = this.props.cohorts.fetchState;
+    } = combineFetchStates(this.props.fetchState, this.props.cohorts.fetchState);
     return (
       <Loading
         state={state}
@@ -356,7 +361,7 @@ class ProfileEditView extends Component<Props> {
   }
 }
 
-export default connect(({profile, cohorts}: RootState) => {
+export default connect(({ profile, cohorts }: RootState) => {
   return { ...profile, cohorts }
 }, { fetchProfile, fetchCohorts })(ProfileEditView);
 
