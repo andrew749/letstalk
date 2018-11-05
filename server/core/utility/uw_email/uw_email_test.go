@@ -36,7 +36,7 @@ func TestNormalize(t *testing.T) {
 		{ raw: "Foo@edu.uwaterloo.ca", normalized: "foo@edu.uwaterloo.ca" },
 	}
 	for _, test := range tests {
-		uwEmail := OfString(test.raw)
+		uwEmail := FromString(test.raw)
 		assert.Equal(t, test.normalized, uwEmail.ToStringNormalized())
 		assert.Equal(t, test.raw, uwEmail.ToStringRaw())
 	}

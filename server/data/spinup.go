@@ -1,10 +1,12 @@
 package data
 
 import (
+	"letstalk/server/core/utility/uw_email"
+
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"github.com/romana/rlog"
 	"gopkg.in/gormigrate.v1"
-	"letstalk/server/core/utility/uw_email"
 )
 
 func isSQLite(db *gorm.DB) bool {
@@ -459,12 +461,11 @@ func migrateDB(db *gorm.DB) {
 						return err
 					}
 					if !uw_email.Validate(verifyEmailId.Email) {
-						rlog.Errorf("Could not normalize unexpected non-uw email '%s'", verifyEmailId.Email)
-						continue
+						return errors.Errorf("Could not normalize unexpected non-uw email '%s'", verifyEmailId.Email)
 					}
-					uwEmail := uw_email.OfString(verifyEmailId.Email)
+					uwEmail := uw_email.FromString(verifyEmailId.Email)
 					verifyEmailId.Email = uwEmail.ToStringNormalized()
-					if err := db.Model(&VerifyEmailId{}).Update(&verifyEmailId).Error; err != nil {
+					if err := db.Save(&verifyEmailId).Error; err != nil {
 						return err
 					}
 				}

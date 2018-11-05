@@ -34,7 +34,7 @@ func handleSendAccountVerificationEmailRequest(c *ctx.Context, req *api.SendAcco
 	if !uw_email.Validate(req.Email) {
 		return errs.NewRequestError("Expected valid @edu.uwaterloo.ca or @uwaterloo.ca email address")
 	}
-	uwEmail := uw_email.OfString(req.Email)
+	uwEmail := uw_email.FromString(req.Email)
 	user, _ := query.GetUserById(c.Db, c.SessionData.UserId)
 
 	if user.IsEmailVerified {

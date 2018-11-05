@@ -6,6 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
+	"letstalk/server/core/utility/uw_email"
 )
 
 func TestSearchUserFallback(t *testing.T) {
@@ -14,11 +15,11 @@ func TestSearchUserFallback(t *testing.T) {
 			user, err := createTestUser(db, 1)
 			assert.NoError(t, err)
 
-			watEmail := "test@uwaterloo.ca"
+			watEmail := uw_email.FromString("test@uwaterloo.ca")
 			_, err = GenerateNewVerifyEmailId(db, 1, watEmail)
 			assert.NoError(t, err)
 
-			user2, err := GetUserByEmail(db, watEmail)
+			user2, err := GetUserByEmail(db, watEmail.ToStringRaw())
 			assert.NoError(t, err)
 			assert.Equal(t, user.FirstName, user2.FirstName)
 			assert.Equal(t, user.Email, user2.Email)

@@ -13,9 +13,11 @@ type UwEmail struct {
 
 var uwEmailRegex = regexp.MustCompile("(?i)^[A-Z0-9._%+-]+@(edu\\.)?uwaterloo\\.ca$")
 
+// Validate checks if the given email string is a valid UW email.
 func Validate(email string) bool { return uwEmailRegex.MatchString(email) }
 
-func OfString(raw string) UwEmail {
+// FromString creates a UwEmail from a raw email address string.
+func FromString(raw string) UwEmail {
 	if !Validate(raw) {
 		return UwEmail{}
 	}
@@ -24,10 +26,12 @@ func OfString(raw string) UwEmail {
 	return UwEmail{raw, normalized}
 }
 
+// ToStringNormalized returns a UW email normalized to a lower-case "@edu.uwaterloo.ca" address.
 func (email *UwEmail) ToStringNormalized() string {
 	return email.normalized
 }
 
+// ToStringRaw returns the raw email string that was used to create this UwEmail.
 func (email *UwEmail) ToStringRaw() string {
 	return email.raw
 }
