@@ -5,7 +5,9 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/data"
 
+	raven "github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 func NotificationApiToData(notification api.Notification) (*data.Notification, error) {
@@ -57,13 +59,15 @@ func NotificationDataToApi(notification data.Notification) (*api.Notification, e
 }
 
 func NotificationsDataToApi(dataNotifs []data.Notification) ([]api.Notification, error) {
-	apiNotifs := make([]api.Notification, len(dataNotifs))
-	for i, dataNotif := range dataNotifs {
+	apiNotifs := make([]api.Notification, 0, len(dataNotifs))
+	for _, dataNotif := range dataNotifs {
 		apiNotif, err := NotificationDataToApi(dataNotif)
 		if err != nil {
-			return nil, err
+			rlog.Errorf("Unable to deserialize notification: %+v", err)
+			raven.CaptureError(err, nil)
+			continue
 		}
-		apiNotifs[i] = *apiNotif
+		apiNotifs = append(apiNotifs, *apiNotif)
 	}
 
 	return apiNotifs, nil
