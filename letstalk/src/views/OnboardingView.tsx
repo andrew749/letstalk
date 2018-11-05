@@ -51,8 +51,10 @@ import profileService, {
   PersonalityVector,
   UserVectorPreferenceType,
 } from '../services/profile-service';
+import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
+import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 import {
@@ -71,6 +73,7 @@ import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { AnalyticsHelper } from '../services';
 import Colors from '../services/colors';
 import { required } from '../validators';
+import { GROUP_GENERIC } from '../services/survey';
 
 interface CohortFormData {
   programId: string,
@@ -264,6 +267,7 @@ const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<Personalit
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setOnboardingStatusAction(onboardingStatus: OnboardingStatus): SetOnboardingStatusAction;
 }
 
@@ -277,9 +281,9 @@ class OnboardingView extends Component<Props> {
 
   static navigationOptions = {
     headerTitle: 'Onboarding',
-    headerStyle, 
-    headerTitleStyle, 
-    headerTintColor 
+    headerStyle,
+    headerTitleStyle,
+    headerTintColor
   }
 
   constructor(props: Props) {
@@ -310,11 +314,13 @@ class OnboardingView extends Component<Props> {
         hometown,
       });
       this.props.setOnboardingStatusAction(onboardingStatus);
+      this.props.fetchSurvey(GROUP_GENERIC);
       await this.props.fetchBootstrap();
-      this.props.navigation.dispatch(NavigationActions.reset({
+      await this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
+      await this.props.navigation.navigate('SurveyView', {});
     } catch(e) {
       throw new SubmissionError({_error: e.errorMsg});
     }
@@ -385,15 +391,15 @@ class OnboardingView extends Component<Props> {
         return (
           <ScrollView>
             <Header>Nice work, you're done!</Header>
-            <ActionButton 
+            <ActionButton
               backgroundColor={Colors.HIVE_PRIMARY}
               onPress={() => {
                 this.props.navigation.dispatch(NavigationActions.reset({
                   index: 0,
                   actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
                 }));
-              }} 
-              title="Enter Hive" 
+              }}
+              title="Enter Hive"
             />
           </ScrollView>
         );
@@ -442,4 +448,4 @@ const styles = StyleSheet.create({
 
 export default connect(({ onboarding, cohorts }: RootState) => {
   return { ...onboarding, cohorts }
-}, { fetchBootstrap, fetchCohorts, setOnboardingStatusAction })(OnboardingView);
+}, { fetchBootstrap, fetchCohorts, fetchSurvey, setOnboardingStatusAction })(OnboardingView);
