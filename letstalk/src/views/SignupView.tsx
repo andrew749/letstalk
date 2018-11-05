@@ -121,7 +121,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={[required, phoneNumber]}
       />
-      <Text style={styles.formTipText}>Your contact info will be displayed on your profile to your matches.</Text>
+      <Text style={styles.formTipText}>Your primary email and phone number will be displayed on your profile to your matches.</Text>
       <Field
         label="Password"
         name="password"
