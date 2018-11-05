@@ -7,7 +7,7 @@ import {
   NavigationActions
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
-import { FormValidationMessage, FormInputProps, FormInput } from 'react-native-elements';
+import {FormValidationMessage, FormInputProps, FormInput, Text} from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { GenderId } from '../models/user';
 
@@ -121,6 +121,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={[required, phoneNumber]}
       />
+      <Text style={styles.formTipText}>Your primary email and phone number will be displayed on your profile to your matches.</Text>
       <Field
         label="Password"
         name="password"
@@ -246,5 +247,11 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginBottom: 100,
+  },
+  formTipText: {
+    color: Colors.HIVE_SUBDUED,
+    fontSize: 14,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
 });
