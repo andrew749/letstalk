@@ -1,12 +1,13 @@
 package query
 
 import (
-	"letstalk/server/core/test"
 	"testing"
+
+	"letstalk/server/core/test"
+	"letstalk/server/core/utility/uw_email"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"letstalk/server/core/utility/uw_email"
 )
 
 func TestSearchUserFallback(t *testing.T) {

@@ -34,3 +34,16 @@ func GenerateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, uwEmail uw_email
 	}
 	return &verifyEmailData, nil
 }
+
+// GetVerifyEmailIdByUwEmail queries the verify_email_ids table by uw email.
+func GetVerifyEmailIdByUwEmail(db *gorm.DB, uwEmail uw_email.UwEmail) (*data.VerifyEmailId, error) {
+	verifyEmailId := data.VerifyEmailId{}
+	result := db.Where(&data.VerifyEmailId{Email: uwEmail.ToStringNormalized()}).First(&verifyEmailId)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RecordNotFound() {
+		return nil, nil
+	}
+	return &verifyEmailId, nil
+}

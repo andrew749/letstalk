@@ -16,7 +16,7 @@ var uwEmailRegex = regexp.MustCompile("(?i)^[A-Z0-9._%+-]+@(edu\\.)?uwaterloo\\.
 // Validate checks if the given email string is a valid UW email.
 func Validate(email string) bool { return uwEmailRegex.MatchString(email) }
 
-// FromString creates a UwEmail from a raw email address string.
+// FromString must be used to create a UwEmail from a raw email address string.
 func FromString(raw string) UwEmail {
 	if !Validate(raw) {
 		return UwEmail{}
