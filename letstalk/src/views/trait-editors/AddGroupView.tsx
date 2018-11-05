@@ -45,7 +45,6 @@ import {
   addGroup,
 } from '../../redux/profile/reducer';
 import { groupNamesByGroupId } from '../../models/group';
-import console = require('console');
 
 interface AddGroupFormData {
   groupId: string;
