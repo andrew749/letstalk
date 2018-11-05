@@ -5,7 +5,9 @@ import { ThunkAction } from 'redux-thunk';
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   NavigationScreenProp,
-  NavigationStackAction, StackNavigator,
+  NavigationStackAction,
+  StackNavigator,
+  NavigationActions
 } from 'react-navigation';
 import { RootState } from '../redux';
 import { SubmissionError } from 'redux-form'
@@ -22,7 +24,7 @@ import {SurveyOption, SurveyQuestion, SurveyResponses} from "../models/survey";
 import {Text} from "react-native-elements";
 import Colors from "../services/colors";
 import ActionButton from "../components/ActionButton";
-import surveyService from "../services/survey";
+import surveyService, { GROUP_GENERIC } from "../services/survey";
 import {
   State as ProfileState,
   fetchProfile,
@@ -48,7 +50,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
   SURVEY_VIEW_IDENTIFIER = "SurveyView";
 
   static navigationOptions = {
-    headerTitle: 'Matching Survey',
+    headerTitle: 'Questionnaire',
     headerStyle,
     headerTitleStyle,
     headerTintColor
@@ -87,8 +89,10 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
     try {
       await surveyService.postSurveyResponses(survey);
       await this.props.fetchSurvey(survey.group);
-      await this.props.setSurvey(survey);
-      await this.props.navigation.pop(this.props.survey.questions.size);
+      if (survey.group !== GROUP_GENERIC) {
+        await this.props.setSurvey(survey);
+      }
+      await this.props.navigation.pop(survey.questions.size);
     } catch(e) {
       console.error("error submitting responses", e);
       throw new SubmissionError({_error: e.errorMsg});

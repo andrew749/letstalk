@@ -648,4 +648,8 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.HIVE_PRIMARY
   },
+  moreAboutYou: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
 });

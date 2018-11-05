@@ -300,6 +300,11 @@ class ProfileView extends Component<Props, State> {
       data: null,
     });
 
+    const showGenericSurvey = () => {
+      this.props.fetchSurvey(GROUP_GENERIC);
+      this.props.navigation.navigate('SurveyView', {});
+    }
+
     return (
       <View>
         <ScrollView contentContainerStyle={styles.container}>
@@ -310,6 +315,11 @@ class ProfileView extends Component<Props, State> {
               navigation={this.props.navigation}
               allowQrCode={true}
               allowEditing={true}
+            />
+            <Button
+              buttonStyle={styles.moreAboutYou}
+              onPress={showGenericSurvey}
+              title="More About You"
             />
             <CohortInfo
               programId={this.props.profile.programId}
