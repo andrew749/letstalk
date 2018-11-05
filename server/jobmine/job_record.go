@@ -14,7 +14,7 @@ type JobRecord struct {
 	gorm.Model
 
 	// The current status of the job
-	Status Status `gorm:"not_null"`
+	Status Status `gorm:"not_null;size:50"`
 
 	// JobName Human readable identifier for the type of job.
 	// Used to determine which spec this job is running.
@@ -22,7 +22,7 @@ type JobRecord struct {
 
 	// RunId Human readable unique identifier for the instantiation of this job.
 	// e.g. notifications_1996-10-07
-	RunId string `gorm:"unique"`
+	RunId string `gorm:"unique;size:190"`
 
 	// Metadata that is part of this job that is accessible to each task running.
 	// Allows us to configure and customize each specific job run.
