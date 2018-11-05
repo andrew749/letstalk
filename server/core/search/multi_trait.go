@@ -163,7 +163,7 @@ func NewMultiTraitFromUserSimpleTrait(trait *data.UserSimpleTrait) (string, *Sim
 
 // Returns id for the document and the GroupMultiTrait struct
 func NewMultiTraitFromUserGroup(trait *data.UserGroup) (string, *GroupMultiTrait) {
-	id := fmt.Sprintf("%s-%d", MULTI_TRAIT_TYPE_GROUP, trait.GroupId)
+	id := fmt.Sprintf("%s-%s", MULTI_TRAIT_TYPE_GROUP, trait.GroupId)
 	groupMultiTrait := &GroupMultiTrait{
 		GroupId:   trait.GroupId,
 		GroupName: trait.GroupName,

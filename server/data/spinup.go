@@ -465,6 +465,15 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add run_id to notifications table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(Notification{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
