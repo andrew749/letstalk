@@ -18,7 +18,7 @@
     },
     "android": {
       "icon": "./src/img/logo_android.png",
-      "versionCode": 11,
+      "versionCode": 12,
       "package": "org.hiveapp.hive",
       "googleServicesFile": "./google-services.json"
     },
