@@ -105,7 +105,7 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 			// for each notification response, add the receipt
 			// none of these should fail since we have a successful response from expo
 			for i, response := range res.Data {
-				rlog.Debug("Processing response: %v", response)
+				rlog.Debugf("Processing response: %+v", response)
 				temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
 				if err != nil {
 					tx.Rollback()

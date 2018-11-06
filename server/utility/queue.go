@@ -38,7 +38,7 @@ func (s SQSMock) QueueProcessor() {
 			for _, handler := range handlers {
 				rlog.Info("Sending message to handler")
 				if err := handler(messageToSQSEvent(m.payload.(*string))); err != nil {
-					rlog.Error("Error processing event: %v", err)
+					rlog.Errorf("Error processing event: %+v", err)
 					// requeue message
 					m.retry -= 1
 					if m.retry >= 0 {
