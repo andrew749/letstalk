@@ -7,16 +7,6 @@ var Se_soc_v1 api.Survey = api.Survey{
 	Version: 1,
 	Questions: []api.SurveyQuestion{
 		{
-			Key:    "free_time",
-			Prompt: "You have some free time, what would you most likely be doing?",
-			Options: []api.SurveyOption{
-				{Key: "reading", Text: "Some reading, listening to music or watching a movie"},
-				{Key: "artistic", Text: "Playing music, drawing or painting"},
-				{Key: "lowkey", Text: "Playing games, grabbing dinner with friends or playing some sport"},
-				{Key: "party", Text: "Going clubbing or to a music festival"},
-			},
-		},
-		{
 			Key:    "interests",
 			Prompt: "If you had to pick one, which area interests you the most currently?",
 			Options: []api.SurveyOption{
