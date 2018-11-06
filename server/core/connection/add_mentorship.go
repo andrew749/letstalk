@@ -14,6 +14,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"fmt"
 )
 
 /**
@@ -43,11 +44,15 @@ func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	if request.MentorEmail == request.MenteeEmail {
 		return errs.NewRequestError("mentor and mentee user must be different")
 	}
+	var noSuchMentorErr, noSuchMenteeErr string
 	if mentor, err = query.GetUserByEmail(db, request.MentorEmail); err != nil || mentor == nil {
-		return errs.NewRequestError("no such user %s", request.MentorEmail)
+		noSuchMentorErr = fmt.Sprintf("no such user %s", request.MentorEmail)
 	}
 	if mentee, err = query.GetUserByEmail(db, request.MenteeEmail); err != nil || mentee == nil {
-		return errs.NewRequestError("no such user %s", request.MenteeEmail)
+		noSuchMenteeErr = fmt.Sprintf("no such user %s", request.MenteeEmail)
+	}
+	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
+		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
 	if conn, err := query.GetConnectionDetailsUndirected(db, mentor.UserId, mentee.UserId); err != nil {
 		return errs.NewDbError(err)

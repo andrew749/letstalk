@@ -46,22 +46,27 @@ func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	var user data.User
 	var err error
-	if db.Where(&data.User{Email: email}).First(&user).RecordNotFound() {
-		// fallback to looking for uwaterloo email
-		if uw_email.Validate(email) {
-			var verifyEmailId data.VerifyEmailId
-			uwEmail := uw_email.FromString(email)
-			if verifyEmailId, err := GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
-				return nil, errs.NewDbError(err)
-			} else if verifyEmailId == nil {
-				return nil, errs.NewNotFoundError("Unable to find user")
-			}
-			var userTemp *data.User
-			if userTemp, err = GetUserById(db, verifyEmailId.UserId); err != nil {
-				return nil, errs.NewNotFoundError("Unable to find user")
-			}
-			user = *userTemp
+	result := db.Where(&data.User{Email: email}).First(&user)
+	if result.RecordNotFound() {
+		// Fallback to looking for uwaterloo email
+		if !uw_email.Validate(email) {
+			return nil, nil
 		}
+		var verifyEmailId *data.VerifyEmailId
+		uwEmail := uw_email.FromString(email)
+		if verifyEmailId, err = GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
+			return nil, errs.NewDbError(err)
+		} else if verifyEmailId == nil {
+			return nil, nil
+		}
+		if user, err := GetUserById(db, verifyEmailId.UserId); err != nil {
+			return nil, errs.NewInternalError("Failed to get user: %v", err)
+		} else {
+			return user, nil
+		}
+	}
+	if result.Error != nil {
+		return nil, errs.NewDbError(result.Error)
 	}
 	return &user, nil
 }
