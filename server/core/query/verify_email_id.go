@@ -39,11 +39,11 @@ func GenerateNewVerifyEmailId(tx *gorm.DB, userId data.TUserID, uwEmail uw_email
 func GetVerifyEmailIdByUwEmail(db *gorm.DB, uwEmail uw_email.UwEmail) (*data.VerifyEmailId, error) {
 	verifyEmailId := data.VerifyEmailId{}
 	result := db.Where(&data.VerifyEmailId{Email: uwEmail.ToStringNormalized()}).First(&verifyEmailId)
-	if result.Error != nil {
-		return nil, result.Error
-	}
 	if result.RecordNotFound() {
 		return nil, nil
+	}
+	if result.Error != nil {
+		return nil, result.Error
 	}
 	return &verifyEmailId, nil
 }

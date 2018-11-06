@@ -47,28 +47,28 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	var user data.User
 	var err error
 	result := db.Where(&data.User{Email: email}).First(&user)
+	if result.RecordNotFound() {
+		// Fallback to looking for uwaterloo email
+		if !uw_email.Validate(email) {
+			return nil, nil
+		}
+		var verifyEmailId *data.VerifyEmailId
+		uwEmail := uw_email.FromString(email)
+		if verifyEmailId, err = GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
+			return nil, errs.NewDbError(err)
+		} else if verifyEmailId == nil {
+			return nil, nil
+		}
+		if user, err := GetUserById(db, verifyEmailId.UserId); err != nil {
+			return nil, errs.NewInternalError("Failed to get user: %v", err)
+		} else {
+			return user, nil
+		}
+	}
 	if result.Error != nil {
 		return nil, errs.NewDbError(result.Error)
 	}
-	if !result.RecordNotFound() {
-		return &user, nil
-	}
-	// Fallback to looking for uwaterloo email
-	if !uw_email.Validate(email) {
-		return nil, nil
-	}
-	var verifyEmailId *data.VerifyEmailId
-	uwEmail := uw_email.FromString(email)
-	if verifyEmailId, err = GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
-		return nil, errs.NewDbError(err)
-	} else if verifyEmailId == nil {
-		return nil, nil
-	}
-	if user, err := GetUserById(db, verifyEmailId.UserId); err != nil {
-		return nil, errs.NewInternalError("Failed to get user: %v", err)
-	} else {
-		return user, nil
-	}
+	return &user, nil
 }
 
 func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
