@@ -76,7 +76,7 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 				message = ""
 				break
 			}
-			if err := notifications.CreateAdHocNotification(db, userId, title, message, nil, templatePath, map[string]interface{}{}, &jobRecord.RunId); err != nil {
+			if err := notifications.CreateAdHocNotificationNoTransaction(db, userId, title, message, nil, templatePath, map[string]interface{}{}, &jobRecord.RunId); err != nil {
 				rlog.Errorf("Unable to create notification for user %d because %+v", userId, err)
 				return nil, err
 			}

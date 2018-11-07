@@ -12,10 +12,38 @@ import (
 
 // CreateAdHocNotification Creates an adhoc notification as well as a
 // page to render when users click though on the notification.
-func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, message string, thumbnail *string, templatePath string, templateParams map[string]interface{}, runId *string) error {
-	creationTime := time.Now()
-	var err error
+// This function is transactional
+func CreateAdHocNotification(
+	db *gorm.DB,
+	recipient data.TUserID,
+	title string,
+	message string,
+	thumbnail *string,
+	templatePath string,
+	templateParams map[string]interface{},
+	runId *string,
+) error {
 	tx := db.Begin()
+	if err := CreateAdHocNotificationNoTransaction(tx, recipient, title, message, thumbnail, templatePath, templateParams, runId); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+func CreateAdHocNotificationNoTransaction(
+	tx *gorm.DB,
+	recipient data.TUserID,
+	title string,
+	message string,
+	thumbnail *string,
+	templatePath string,
+	templateParams map[string]interface{},
+	runId *string,
+) error {
+	var err error
+	creationTime := time.Now()
 	// note that this cant use the helper create and send notification since we
 	// probably want all data written to our db before being sent to aws
 
@@ -25,20 +53,17 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	// the notification is saved to db
 	notification, err := CreateNotification(tx, recipient, data.NOTIF_TYPE_ADHOC, title, message, thumbnail, creationTime, templateParams, linking.GetNotificationViewUrl(), runId)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	link := linking.GetAdhocLink(notification.ID)
 	notification.Link = &link
 	if err = tx.Save(notification).Error; err != nil {
-		tx.Rollback()
 		return err
 	}
 	// ENDHACK:
 
 	dataString, err := json.Marshal(templateParams)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	page := data.NotificationPage{
@@ -49,16 +74,14 @@ func CreateAdHocNotification(db *gorm.DB, recipient data.TUserID, title string, 
 	}
 
 	if err = tx.Save(&page).Error; err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	// push to sqs
 	err = notification_queue.PushNotificationToQueue(*notification)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
-	return tx.Commit().Error
+	return nil
 }
