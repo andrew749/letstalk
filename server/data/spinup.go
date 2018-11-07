@@ -506,6 +506,31 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add other alum cohort 2005 - 2019",
+			Migrate: func(tx *gorm.DB) error {
+				sequenceName := "Other"
+				sequenceId := "OTHER"
+				for gradYear := uint(2005); gradYear <= uint(2019); gradYear++ {
+					cohort := &Cohort{
+						ProgramId:    "ALUM",
+						ProgramName:  "Alum",
+						GradYear:     gradYear,
+						IsCoop:       false,
+						SequenceName: &sequenceName,
+						SequenceId:   &sequenceId,
+					}
+					err := db.Save(cohort).Error
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
