@@ -169,6 +169,8 @@ func main() {
 			} else {
 				fmt.Println(" ok!")
 			}
+		} else {
+			fmt.Println()
 		}
 	}
 }
