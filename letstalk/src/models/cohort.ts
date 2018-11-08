@@ -96,6 +96,7 @@ const PROGRAMS: Immutable.Map<string, string> = Immutable.Map({
   'THERAPEUTIC_RECREATION': 'Therapeutic Recreation',
   'TOURISM_DEVELOPMENT': 'Tourism Development',
   'OTHER': 'Other',
+  'ALUM': 'Alum',
 });
 
 export function programById(programId: string): string {
@@ -164,7 +165,7 @@ export function sequenceOptions(
     row => row.sequenceId
   ).toSet().map(
     sequenceId => ({ value: sequenceId, label: SEQUENCES.get(sequenceId) })
-  ).toList();
+  ).sortBy(sequence => sequence.label).toList();
 }
 
 export function gradYearOptions(
@@ -177,7 +178,7 @@ export function gradYearOptions(
   ).toSet().map(gradYear => {
     const gradYearStr = String(gradYear);
     return { value: gradYear, label: gradYearStr };
-  }).toList();
+  }).sortBy(gradYear => gradYear.value).toList();
 }
 
 export function getCohortId(
