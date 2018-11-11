@@ -7,12 +7,12 @@ import (
 
 var allSurveysByGroup = map[data.SurveyGroup]api.Survey{
 	Generic_v1.Group: Generic_v1,
-	Wics_v1.Group: Wics_v1,
-	Se_soc_v1.Group: Se_soc_v1,
+	Wics_v1.Group:    Wics_v1,
+	Se_soc_v1.Group:  Se_soc_v1,
 }
 
 var allSurveysByGroupId = map[data.TGroupID]api.Survey{
-	"WICS": Wics_v1,
+	"WICS":   Wics_v1,
 	"SE_SOC": Se_soc_v1,
 }
 
@@ -30,4 +30,12 @@ func GetSurveyDefinitionByGroupId(groupId data.TGroupID) *api.Survey {
 	} else {
 		return nil
 	}
+}
+
+func GetAllSurveyDefinitions() []api.Survey {
+	surveys := make([]api.Survey, 0)
+	for _, sur := range allSurveysByGroup {
+		surveys = append(surveys, sur)
+	}
+	return surveys
 }

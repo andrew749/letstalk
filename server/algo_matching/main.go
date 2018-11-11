@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
 
 	"letstalk/server/core/api"
+	"letstalk/server/core/query"
 	"letstalk/server/core/survey"
 	"letstalk/server/data"
 	"letstalk/server/utility"
@@ -14,83 +17,110 @@ import (
 )
 
 var (
-	outFile        = flag.String("out", "", "Output csv file with matchings")
-	surveyGroupStr = flag.String("survey_group", "", "Survey group to do matchings based on")
-	surveyVersion  = flag.Int("survey_version", -1, "Version of survey")
+	emailsFilename = flag.String("emails_file", "", "File containing emails sperated by newlines")
 	mentorGradYear = flag.Int("mentor_grad_year", -1, "Youngest graduating class for mentor")
 )
 
-func getUserSurveys(
-	db *gorm.DB,
-	surveyGroup data.SurveyGroup,
-	surveyVersion int,
-) ([]data.UserSurvey, error) {
-	var userSurveys []data.UserSurvey
-	if err := db.Where(
-		&data.UserSurvey{Group: surveyGroup, Version: surveyVersion},
-	).Preload("User.Cohort.Cohort").Find(&userSurveys).Error; err != nil {
+const (
+	MAX_MENTEES_PER_MENTOR = 2
+	EMAIL_FIELD            = "email"
+)
+
+func getEmailsFromFile(emailsFilename string) ([]string, error) {
+	emailsFile, err := os.Open(emailsFilename)
+	if err != nil {
 		return nil, err
 	}
-	return userSurveys, nil
+	defer emailsFile.Close()
+	emails := make([]string, 0)
+	scanner := bufio.NewScanner(emailsFile)
+	for scanner.Scan() {
+		emails = append(emails, scanner.Text())
+	}
+	err = scanner.Err()
+	if err != nil {
+		return nil, err
+	}
+	return emails, nil
+}
+
+func getUsers(db *gorm.DB, emails []string) ([]data.User, error) {
+	users := make([]data.User, 0)
+	for _, email := range emails {
+		user, err := query.GetUserByEmail(db, email)
+		if err != nil {
+			return nil, err
+		} else if user == nil {
+			fmt.Printf("user_missing,%s\n", email)
+		} else {
+			if err = db.Model(user).Preload(
+				"Cohort.Cohort",
+			).Preload(
+				"UserSurveys",
+			).Find(user).Error; err != nil {
+				return nil, err
+			}
+			users = append(users, *user)
+		}
+	}
+	return users, nil
 }
 
 // Also removes duplicates and users without cohorts
 // Returns (mentor surveys, mentee surveys)
-func separateMentorMentees(
-	userSurveys []data.UserSurvey,
-	mentorGradYear uint,
-) ([]data.UserSurvey, []data.UserSurvey) {
-	userSurveysById := make(map[data.TUserID]data.UserSurvey)
-	for _, userSurvey := range userSurveys {
-		if userSurvey.User != nil &&
-			userSurvey.User.Cohort != nil &&
-			userSurvey.User.Cohort.Cohort != nil {
-			userSurveysById[userSurvey.UserId] = userSurvey
+func separateMentorMentees(users []data.User, mentorGradYear uint) ([]data.User, []data.User) {
+	usersById := make(map[data.TUserID]data.User)
+	for _, user := range users {
+		if user.Cohort != nil && user.Cohort.Cohort != nil {
+			usersById[user.UserId] = user
 		}
 	}
-	mentorUserSurveys := make([]data.UserSurvey, 0)
-	menteeUserSurveys := make([]data.UserSurvey, 0)
-	for _, userSurvey := range userSurveysById {
-		if userSurvey.User.Cohort.Cohort.GradYear <= mentorGradYear {
-			mentorUserSurveys = append(mentorUserSurveys, userSurvey)
+	mentorUsers := make([]data.User, 0)
+	menteeUsers := make([]data.User, 0)
+	for _, userSurvey := range usersById {
+		if userSurvey.Cohort.Cohort.GradYear <= mentorGradYear {
+			mentorUsers = append(mentorUsers, userSurvey)
 		} else {
-			menteeUserSurveys = append(menteeUserSurveys, userSurvey)
+			menteeUsers = append(menteeUsers, userSurvey)
 		}
 	}
-	return mentorUserSurveys, menteeUserSurveys
+	return mentorUsers, menteeUsers
 }
 
-type withGenericSurvey struct {
-	data.UserSurvey
-	genericSurvey *data.UserSurvey
+type versionedSurveyGroup struct {
+	group   data.SurveyGroup
+	version int
 }
 
-func getGenericSurveys(
-	db *gorm.DB,
-	genericSurvey api.Survey,
-	userSurveys []data.UserSurvey,
-) ([]withGenericSurvey, error) {
-	withGeneric := make([]withGenericSurvey, len(userSurveys))
-	for i, userSurvey := range userSurveys {
-		genericUserSurvey := &data.UserSurvey{}
-		res := db.Where(&data.UserSurvey{
-			UserId:  userSurvey.UserId,
-			Group:   genericSurvey.Group,
-			Version: genericSurvey.Version,
-		}).Find(genericUserSurvey)
-		if res.RecordNotFound() {
-			genericUserSurvey = nil
-		} else if res.Error != nil {
-			return nil, res.Error
+type userWithSurveys struct {
+	user    data.User
+	surveys map[versionedSurveyGroup]data.UserSurvey
+}
+
+// Groups user surveys by survey group and version (only for currently supported surveys)
+func groupUserSurveys(users []data.User, surveys []api.Survey) []userWithSurveys {
+	withSurveys := make([]userWithSurveys, len(users))
+
+	for i, user := range users {
+		withSurveys[i] = userWithSurveys{
+			user:    user,
+			surveys: make(map[versionedSurveyGroup]data.UserSurvey),
 		}
-		withGeneric[i] = withGenericSurvey{userSurvey, genericUserSurvey}
+
+		for _, sur := range surveys {
+			for _, userSurvey := range user.UserSurveys {
+				if userSurvey.Group == sur.Group && userSurvey.Version == sur.Version {
+					withSurveys[i].surveys[versionedSurveyGroup{sur.Group, sur.Version}] = userSurvey
+				}
+			}
+		}
 	}
-	return withGeneric, nil
+	return withSurveys
 }
 
 type surveyAlgoMatch struct {
-	mentorSurvey    withGenericSurvey
-	menteeSurvey    withGenericSurvey
+	mentor          data.User
+	mentee          data.User
 	matchingAnswers uint
 }
 
@@ -109,8 +139,6 @@ func (a byMatchingAnswers) Less(i, j int) bool {
 	return a[i].matchingAnswers > a[j].matchingAnswers
 }
 
-const MAX_MENTEES_PER_MENTOR = 2
-
 func numMatches(
 	theSurvey api.Survey,
 	userSurveyOne data.UserSurvey,
@@ -128,49 +156,49 @@ func numMatches(
 }
 
 func computeMatches(
-	theSurvey api.Survey,
-	genericSurvey api.Survey,
-	mentorUserSurveys []withGenericSurvey,
-	menteeUserSurveys []withGenericSurvey,
+	surveys []api.Survey,
+	mentors []userWithSurveys,
+	mentees []userWithSurveys,
 ) []surveyAlgoMatch {
 	allMatches := make([]surveyAlgoMatch, 0)
-	for _, mentorSurvey := range mentorUserSurveys {
-		for _, menteeSurvey := range menteeUserSurveys {
-			matchingAnswers := numMatches(theSurvey, mentorSurvey.UserSurvey, menteeSurvey.UserSurvey)
-			if mentorSurvey.genericSurvey != nil && menteeSurvey.genericSurvey != nil {
-				matchingAnswers += numMatches(
-					genericSurvey,
-					*mentorSurvey.genericSurvey,
-					*menteeSurvey.genericSurvey,
-				)
+	for _, mentor := range mentors {
+		for _, mentee := range mentees {
+			matchingAnswers := uint(0)
+			for _, sur := range surveys {
+				surveyKey := versionedSurveyGroup{sur.Group, sur.Version}
+				survey1, ok1 := mentor.surveys[surveyKey]
+				survey2, ok2 := mentee.surveys[surveyKey]
+				if ok1 && ok2 {
+					matchingAnswers += numMatches(sur, survey1, survey2)
+				}
 			}
-			allMatches = append(allMatches, surveyAlgoMatch{mentorSurvey, menteeSurvey, matchingAnswers})
+			allMatches = append(allMatches, surveyAlgoMatch{mentor.user, mentee.user, matchingAnswers})
 		}
 	}
 	sort.Sort(byMatchingAnswers(allMatches))
 
 	hasMatch := make(map[data.TUserID]interface{})
 	menteeCount := make(map[data.TUserID]uint)
-	for _, mentorSurvey := range mentorUserSurveys {
-		menteeCount[mentorSurvey.UserId] = 0
+	for _, mentor := range mentors {
+		menteeCount[mentor.user.UserId] = 0
 	}
 
 	matches := make([]surveyAlgoMatch, 0)
 	for _, match := range allMatches {
-		if len(hasMatch) == len(menteeUserSurveys) {
+		if len(hasMatch) == len(mentees) {
 			// All mentees already have a mentor so we are done
 			break
 		}
-		if _, ok := hasMatch[match.menteeSurvey.UserId]; ok {
+		if _, ok := hasMatch[match.mentee.UserId]; ok {
 			// Mentee already matched so we continue
 			continue
 		}
-		if count := menteeCount[match.mentorSurvey.UserId]; count >= MAX_MENTEES_PER_MENTOR {
+		if count := menteeCount[match.mentor.UserId]; count >= MAX_MENTEES_PER_MENTOR {
 			// Mentor already has MAX_MENTEES_PER_MENTOR mentees so don't assign another one
 			continue
 		}
-		menteeCount[match.mentorSurvey.UserId]++
-		hasMatch[match.menteeSurvey.UserId] = nil
+		menteeCount[match.mentor.UserId]++
+		hasMatch[match.mentee.UserId] = nil
 		matches = append(matches, match)
 	}
 
@@ -180,25 +208,13 @@ func computeMatches(
 func main() {
 	flag.Parse()
 
-	if surveyGroupStr == nil || *surveyGroupStr == "" {
-		panic("Must provide -survey_group")
-	}
 	if mentorGradYear == nil || *mentorGradYear < 0 {
 		panic("Must provide -mentor_grad_year")
 	}
-	if surveyVersion == nil || *surveyVersion < 0 {
-		panic("Must provide -survey_version")
-	}
-	surveyGroup := data.SurveyGroup(*surveyGroupStr)
-	theSurvey := survey.GetSurveyDefinitionByGroup(surveyGroup)
-	if theSurvey == nil {
-		panic(fmt.Sprintf("Cannot find survey %s", surveyGroup))
-	} else if theSurvey.Version != *surveyVersion {
-		panic(fmt.Sprintf("Invalid survey version %d. Expected %d", *surveyVersion, theSurvey.Version))
-	}
-	genericSurvey := survey.GetSurveyDefinitionByGroup("GENERIC")
-	if genericSurvey == nil {
-		panic("Must have a GENERIC survey")
+
+	emails, err := getEmailsFromFile(*emailsFilename)
+	if err != nil {
+		panic(err)
 	}
 
 	db, err := utility.GetDB()
@@ -207,40 +223,29 @@ func main() {
 	}
 	defer db.Close()
 
-	userSurveys, err := getUserSurveys(db, surveyGroup, *surveyVersion)
+	surveys := survey.GetAllSurveyDefinitions()
+	users, err := getUsers(db, emails)
 	if err != nil {
 		panic(err)
 	}
+	mentors, mentees := separateMentorMentees(users, uint(*mentorGradYear))
+	fmt.Printf("Num mentors: %d\n", len(mentors))
+	fmt.Printf("Num mentees: %d\n", len(mentees))
 
-	mentorUserSurveys, menteeUserSurveys := separateMentorMentees(userSurveys, uint(*mentorGradYear))
-	fmt.Printf("Num mentors: %d\n", len(mentorUserSurveys))
-	fmt.Printf("Num mentees: %d\n", len(menteeUserSurveys))
+	mentorsWithSurveys := groupUserSurveys(mentors, surveys)
+	menteesWithSurveys := groupUserSurveys(mentees, surveys)
 
-	mentorUserSurveysWithGeneric, err := getGenericSurveys(db, *genericSurvey, mentorUserSurveys)
-	if err != nil {
-		panic(err)
-	}
-	menteeUserSurveysWithGeneric, err := getGenericSurveys(db, *genericSurvey, menteeUserSurveys)
-	if err != nil {
-		panic(err)
-	}
-
-	matches := computeMatches(
-		*theSurvey,
-		*genericSurvey,
-		mentorUserSurveysWithGeneric,
-		menteeUserSurveysWithGeneric,
-	)
+	matches := computeMatches(surveys, mentorsWithSurveys, menteesWithSurveys)
 	fmt.Println("mentor_first_name,mentor_last_name,mentor_email,mentee_first_name," +
 		"mentee_last_name,mentee_email,num_matches")
 	for _, match := range matches {
 		fmt.Printf("%s,%s,%s,%s,%s,%s,%d\n",
-			match.mentorSurvey.User.FirstName,
-			match.mentorSurvey.User.LastName,
-			match.mentorSurvey.User.Email,
-			match.menteeSurvey.User.FirstName,
-			match.menteeSurvey.User.LastName,
-			match.menteeSurvey.User.Email,
+			match.mentor.FirstName,
+			match.mentor.LastName,
+			match.mentor.Email,
+			match.mentee.FirstName,
+			match.mentee.LastName,
+			match.mentee.Email,
 			match.matchingAnswers,
 		)
 	}
