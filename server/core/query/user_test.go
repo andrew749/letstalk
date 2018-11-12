@@ -13,9 +13,8 @@ import (
 func TestSearchUserFallback(t *testing.T) {
 	test.RunTestsWithDb([]test.Test{
 		{
-			TestName: "Test searching for user fallback",
 			Test: func(db *gorm.DB) {
-				user, err := createTestUser(db, 1)
+				user, err := CreateTestUser(db, 1)
 				assert.NoError(t, err)
 
 				watEmail := uw_email.FromString("test@uwaterloo.ca")
@@ -31,7 +30,7 @@ func TestSearchUserFallback(t *testing.T) {
 		{
 			TestName: "Test return nil on bad email",
 			Test: func(db *gorm.DB) {
-				_, err := createTestUser(db, 2)
+				_, err := CreateTestUser(db, 2)
 				assert.NoError(t, err)
 
 				badEmail := "invalid_email@uwaterloo.ca"

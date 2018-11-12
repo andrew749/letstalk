@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func createTestUser(db *gorm.DB, num int) (*data.User, error) {
+func CreateTestUser(db *gorm.DB, num int) (*data.User, error) {
 	cohort := &data.Cohort{
 		ProgramId:   "ARTS",
 		ProgramName: "Arts",

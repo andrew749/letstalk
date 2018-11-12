@@ -14,11 +14,11 @@ import (
 func TestGetUserByGroupId(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := createTestUser(db, 3)
+			user3, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 			_, err = AddUserGroup(
 				db,
@@ -58,9 +58,9 @@ func TestGetUserByGroupId(t *testing.T) {
 func TestUserGroups(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
 			_, err = AddUserGroup(
 				db,
@@ -93,7 +93,7 @@ func TestUserGroups(t *testing.T) {
 func TestCreateUserGroupsMissingUsers(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
 			err = CreateUserGroups(
@@ -118,7 +118,7 @@ func TestCreateUserGroupsMissingUsers(t *testing.T) {
 func TestAddUserGroup(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
 			userGroup, err := AddUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")
@@ -143,7 +143,7 @@ func TestAddUserGroup(t *testing.T) {
 func TestRemoveUserGroup(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
 			userGroup, err := AddUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")

@@ -1,7 +1,9 @@
 package remind_onboard_job
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
@@ -40,6 +42,69 @@ func packageTaskRecordMetadata(userId data.TUserID, reminderType ReminderType) m
 	}
 }
 
+// map to the path of a data to use for each type of generic notification.
+var notificationDefinitionMapping = map[ReminderType]string{
+	REMINDER_TYPE_TRAIT:    "trait_notification.json",
+	REMINDER_TYPE_POSITION: "position_notification.json",
+	REMINDER_TYPE_BIO:      "bio_notification.json",
+	REMINDER_TYPE_GROUP:    "group_notification",
+}
+
+var notificationDefinitions map[ReminderType]quoteNotificationSpec
+var definitionsLoaded bool = false
+
+// load notification definition and marshall into spec
+func loadQuoteNotificationDefinition(notificationDefinitionPath string) (*quoteNotificationSpec, error) {
+	var notificationSpec quoteNotificationSpec
+
+	// open file for reading
+	notificationSpecData, err := ioutil.ReadFile(notificationDefinitionPath)
+	if err != nil {
+		rlog.Errorf("Unable to read notification definition: %+v", err)
+		return nil, err
+	}
+
+	// put data into struct
+	if err := json.Unmarshal(notificationSpecData, &notificationSpec); err != nil {
+		rlog.Errorf("Unable to unmarshall notification definition: %+v", err)
+		return nil, err
+	}
+
+	return &notificationSpec, nil
+}
+
+// helper to load all notification definitions into a map so that this is cached
+func loadDefinitions() {
+	if definitionsLoaded {
+		return
+	}
+
+	for reminderType, path := range notificationDefinitionMapping {
+		definition, err := loadQuoteNotificationDefinition(path)
+		if err != nil {
+			panic(err)
+		}
+		notificationDefinitions[reminderType] = *definition
+	}
+	definitionsLoaded = true
+}
+
+type quoteNotificationSpec struct {
+	Title        string      `json:"title" binding:"required"`
+	Message      string      `json:"message" binding:"required"`
+	Body         string      `json:"body" binding:"required"`
+	Link         string      `json:"link" binding:"required"`
+	CallToAction string      `json:"cta" binding:"required"`
+	Quotes       []quoteSpec `json:"quotes" binding:"required"`
+}
+
+type quoteSpec struct {
+	Body   string `json:"body" binding:"required"`
+	Author string `json:"author" binding:"required"`
+}
+
+// ReminderJobSpec The actual reminder job that defines the operations to perform
+// when scheduled
 var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 	JobType: RemindOnboardJob,
 	TaskSpec: jobmine.TaskSpec{
@@ -49,33 +114,27 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			// send messages
 			userId, notificationType := parseTaskRecordMetadata(taskRecord)
 			var (
-				templatePath string
+				templatePath string = "notification_with_quote.html"
 				title        string
 				message      string
 			)
 
+			// get generic message for each notification.
+			title = notificationDefinitions[REMINDER_TYPE_TRAIT].Title
+			message = notificationDefinitions[REMINDER_TYPE_TRAIT].Message
+			// special logic for each type of notification
 			switch notificationType {
 			case REMINDER_TYPE_TRAIT:
-				templatePath = ""
-				title = ""
-				message = ""
 				break
 			case REMINDER_TYPE_BIO:
-				templatePath = ""
-				title = ""
-				message = ""
 				break
 			case REMINDER_TYPE_POSITION:
-				templatePath = ""
-				title = ""
-				message = ""
 				break
 			case REMINDER_TYPE_GROUP:
-				templatePath = ""
-				title = ""
-				message = ""
 				break
 			}
+
+			// Actually create the notification to send
 			if err := notifications.CreateAdHocNotificationNoTransaction(db, userId, title, message, nil, templatePath, map[string]interface{}{}, &jobRecord.RunId); err != nil {
 				rlog.Errorf("Unable to create notification for user %d because %+v", userId, err)
 				return nil, err
@@ -103,50 +162,63 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			return nil, err
 		}
 		rlog.Debugf("Got %d users without traits %v", len(*usersWithoutTraits), *usersWithoutTraits)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutTraits, seenUsers, seenUsersSet)
 		metadata := createReminderNotificationPayloadMetadataForUsers(
 			*usersWithoutTraits,
+			seenUsersSet,
 			REMINDER_TYPE_TRAIT,
 		)
+		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutTraits, seenUsers, seenUsersSet)
 
 		// find all users who haven't filled in bio
-		usersWithoutBio, err := usersWithoutBio(db, seenUsers)
+		usersWithoutBio, err := usersWithoutBio(db)
 		if err != nil {
 			rlog.Errorf("Unable to get users without bio: %+v", err)
 			return nil, err
 		}
 		rlog.Debugf("Got %d users without bio %v", len(*usersWithoutBio), *usersWithoutBio)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutBio, seenUsers, seenUsersSet)
 		metadata = append(
 			metadata,
-			createReminderNotificationPayloadMetadataForUsers(*usersWithoutBio, REMINDER_TYPE_BIO)...,
+			createReminderNotificationPayloadMetadataForUsers(
+				*usersWithoutBio,
+				seenUsersSet,
+				REMINDER_TYPE_BIO,
+			)...,
 		)
+		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutBio, seenUsers, seenUsersSet)
 
 		// find all users who havent put in a position
-		usersWithoutPosition, err := usersWithoutPosition(db, seenUsers)
+		usersWithoutPosition, err := usersWithoutPosition(db)
 		if err != nil {
 			rlog.Errorf("Unable to get users without position: %+v", err)
 			return nil, err
 		}
 		rlog.Debugf("Got %d users without position %v", len(*usersWithoutPosition), *usersWithoutPosition)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutPosition, seenUsers, seenUsersSet)
 		metadata = append(
 			metadata,
-			createReminderNotificationPayloadMetadataForUsers(*usersWithoutPosition, REMINDER_TYPE_POSITION)...,
+			createReminderNotificationPayloadMetadataForUsers(
+				*usersWithoutPosition,
+				seenUsersSet,
+				REMINDER_TYPE_POSITION,
+			)...,
 		)
+		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutPosition, seenUsers, seenUsersSet)
 
 		// find all users who haven't put in group
-		usersWithoutGroup, err := usersWithoutGroup(db, seenUsers)
+		usersWithoutGroup, err := usersWithoutGroup(db)
 		if err != nil {
 			rlog.Errorf("Unable to get users without group: %+v", err)
 			return nil, err
 		}
 		rlog.Debugf("Got %d users without group %v", len(*usersWithoutGroup), *usersWithoutGroup)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutGroup, seenUsers, seenUsersSet)
 		metadata = append(
 			metadata,
-			createReminderNotificationPayloadMetadataForUsers(*usersWithoutGroup, REMINDER_TYPE_GROUP)...,
+			createReminderNotificationPayloadMetadataForUsers(
+				*usersWithoutGroup,
+				seenUsersSet,
+				REMINDER_TYPE_GROUP,
+			)...,
 		)
+		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutGroup, seenUsers, seenUsersSet)
 
 		// convert map to slice
 		res := make([]jobmine.Metadata, 0, len(metadata))
@@ -171,10 +243,14 @@ func mergeMarkSeen(users []data.TUserID, seenList []data.TUserID, seenSet map[da
 
 func createReminderNotificationPayloadMetadataForUsers(
 	users []data.TUserID,
+	seenUsersSet map[data.TUserID]bool,
 	reminderType ReminderType,
 ) []jobmine.Metadata {
 	res := make([]jobmine.Metadata, 0, len(users))
 	for _, user := range users {
+		if _, ok := seenUsersSet[user]; ok {
+			continue
+		}
 		res = append(res, jobmine.Metadata(packageTaskRecordMetadata(user, reminderType)))
 	}
 	return res
@@ -184,50 +260,48 @@ func usersWithoutTraits(db *gorm.DB) (*[]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
-		Pluck("user_id", &temp).
 		Joins("left join user_simple_traits as traits on traits.user_id = users.user_id").
-		Having("traits.id = NULL").
+		Where("traits.id is NULL").
+		Pluck("users.user_id", &temp).
 		Error; err != nil {
 		return nil, err
 	}
 	return &temp, nil
 }
 
-func usersWithoutBio(db *gorm.DB, seenSoFar []data.TUserID) (*[]data.TUserID, error) {
-	var temp []data.TUserID
-	if err := db.
-		Model(data.UserAdditionalData{}).
-		Pluck("user_id", &temp).
-		Where("bio=NULL").
-		Where("user_id not in (?)", seenSoFar).
-		Error; err != nil {
-		return nil, err
-	}
-	return &temp, nil
-}
-
-func usersWithoutPosition(db *gorm.DB, seenSoFar []data.TUserID) (*[]data.TUserID, error) {
+func usersWithoutBio(db *gorm.DB) (*[]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
-		Pluck("user_id", &temp).
-		Where("user_id not in (?)", seenSoFar).
+		Joins("left join user_additional_data as additional_data on additional_data.user_id = users.user_id").
+		Where("bio is NULL").
+		Pluck("users.user_id", &temp).
+		Error; err != nil {
+		return nil, err
+	}
+	return &temp, nil
+}
+
+func usersWithoutPosition(db *gorm.DB) (*[]data.TUserID, error) {
+	var temp []data.TUserID
+	if err := db.
+		Model(&data.User{}).
 		Joins("left join user_positions as positions on positions.user_id = users.user_id").
-		Having("positions.id is NULL").
+		Where("positions.id is NULL").
+		Pluck("users.user_id", &temp).
 		Error; err != nil {
 		return nil, err
 	}
 	return &temp, nil
 }
 
-func usersWithoutGroup(db *gorm.DB, seenSoFar []data.TUserID) (*[]data.TUserID, error) {
+func usersWithoutGroup(db *gorm.DB) (*[]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
-		Pluck("user_id", &temp).
-		Where("user_id not in (?)", seenSoFar).
 		Joins("left join user_groups as groups on groups.user_id = users.user_id").
-		Having("groups.id is NULL").
+		Where("groups.id is NULL").
+		Pluck("users.user_id", &temp).
 		Error; err != nil {
 		return nil, err
 	}
