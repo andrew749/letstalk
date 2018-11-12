@@ -252,6 +252,9 @@ func Register(
 	v1.OPTIONS("/notifications")
 	v1.GET("/notifications", hw.wrapHandler(controller.GetNotifications, true))
 
+	v1.OPTIONS("/notification")
+	v1.GET("/notification/:notificationId", hw.wrapHandler(controller.GetNotification, true))
+
 	v1.OPTIONS("/notifications/update_state")
 	v1.POST("/notifications/update_state", hw.wrapHandler(controller.UpdateNotificationState, true))
 
