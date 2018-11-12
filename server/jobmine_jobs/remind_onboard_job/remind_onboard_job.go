@@ -230,6 +230,8 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 	},
 }
 
+// add newly added users to list and map of seen users
+// essentially upsert a map and array
 func mergeMarkSeen(users []data.TUserID, seenList []data.TUserID, seenSet map[data.TUserID]bool) ([]data.TUserID, map[data.TUserID]bool) {
 	for _, user := range users {
 		// if this user has yet to be seen add them to the set and list
