@@ -236,6 +236,8 @@ func mergeMarkSeen(users []data.TUserID, seenList []data.TUserID, seenSet map[da
 		if _, ok := seenSet[user]; !ok {
 			seenSet[user] = true
 			seenList = append(seenList, user)
+		} else {
+			rlog.Debugf("User %d already seen. Not creating notification", user)
 		}
 	}
 	return seenList, seenSet
