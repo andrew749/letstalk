@@ -47,7 +47,7 @@ var notificationDefinitionMapping = map[ReminderType]string{
 	REMINDER_TYPE_TRAIT:    "trait_notification.json",
 	REMINDER_TYPE_POSITION: "position_notification.json",
 	REMINDER_TYPE_BIO:      "bio_notification.json",
-	REMINDER_TYPE_GROUP:    "group_notification",
+	REMINDER_TYPE_GROUP:    "group_notification.json",
 }
 
 var notificationDefinitions map[ReminderType]quoteNotificationSpec
