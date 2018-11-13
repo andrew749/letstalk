@@ -1,11 +1,12 @@
 package query
 
 import (
+	"errors"
+	"fmt"
+
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
-
-	"errors"
 
 	"github.com/jinzhu/gorm"
 	"letstalk/server/core/utility/uw_email"
@@ -41,6 +42,28 @@ func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
 		return nil, errs.NewNotFoundError("Unable to find user")
 	}
 	return &user, nil
+}
+
+func GetUsersWithCohortAndSurveysByEmail(db *gorm.DB, emails []string) ([]data.User, error) {
+	users := make([]data.User, 0)
+	for _, email := range emails {
+		user, err := GetUserByEmail(db, email)
+		if err != nil {
+			return nil, err
+		} else if user == nil {
+			fmt.Printf("user_missing,%s\n", email)
+		} else {
+			if err = db.Model(user).Preload(
+				"Cohort.Cohort",
+			).Preload(
+				"UserSurveys",
+			).Find(user).Error; err != nil {
+				return nil, err
+			}
+			users = append(users, *user)
+		}
+	}
+	return users, nil
 }
 
 func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
