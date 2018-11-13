@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 
 	"letstalk/server/core/api"
@@ -12,8 +10,8 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/utility"
 
-	"github.com/jinzhu/gorm"
 	"github.com/namsral/flag"
+	"github.com/romana/rlog"
 )
 
 var (
@@ -25,46 +23,6 @@ const (
 	MAX_MENTEES_PER_MENTOR = 2
 	EMAIL_FIELD            = "email"
 )
-
-func getEmailsFromFile(emailsFilename string) ([]string, error) {
-	emailsFile, err := os.Open(emailsFilename)
-	if err != nil {
-		return nil, err
-	}
-	defer emailsFile.Close()
-	emails := make([]string, 0)
-	scanner := bufio.NewScanner(emailsFile)
-	for scanner.Scan() {
-		emails = append(emails, scanner.Text())
-	}
-	err = scanner.Err()
-	if err != nil {
-		return nil, err
-	}
-	return emails, nil
-}
-
-func getUsers(db *gorm.DB, emails []string) ([]data.User, error) {
-	users := make([]data.User, 0)
-	for _, email := range emails {
-		user, err := query.GetUserByEmail(db, email)
-		if err != nil {
-			return nil, err
-		} else if user == nil {
-			fmt.Printf("user_missing,%s\n", email)
-		} else {
-			if err = db.Model(user).Preload(
-				"Cohort.Cohort",
-			).Preload(
-				"UserSurveys",
-			).Find(user).Error; err != nil {
-				return nil, err
-			}
-			users = append(users, *user)
-		}
-	}
-	return users, nil
-}
 
 // Also removes duplicates and users without cohorts
 // Returns (mentor surveys, mentee surveys)
@@ -139,7 +97,7 @@ func (a byMatchingAnswers) Less(i, j int) bool {
 	return a[i].matchingAnswers > a[j].matchingAnswers
 }
 
-func numMatches(
+func numMatchingSurveyResponse(
 	theSurvey api.Survey,
 	userSurveyOne data.UserSurvey,
 	userSurveyTwo data.UserSurvey,
@@ -161,6 +119,7 @@ func computeMatches(
 	mentees []userWithSurveys,
 ) []surveyAlgoMatch {
 	allMatches := make([]surveyAlgoMatch, 0)
+	// Generate all pairwise matchings of mentors and mentees - calculate overlapping answers
 	for _, mentor := range mentors {
 		for _, mentee := range mentees {
 			matchingAnswers := uint(0)
@@ -169,7 +128,7 @@ func computeMatches(
 				survey1, ok1 := mentor.surveys[surveyKey]
 				survey2, ok2 := mentee.surveys[surveyKey]
 				if ok1 && ok2 {
-					matchingAnswers += numMatches(sur, survey1, survey2)
+					matchingAnswers += numMatchingSurveyResponse(sur, survey1, survey2)
 				}
 			}
 			allMatches = append(allMatches, surveyAlgoMatch{mentor.user, mentee.user, matchingAnswers})
@@ -187,21 +146,35 @@ func computeMatches(
 	for _, match := range allMatches {
 		if len(hasMatch) == len(mentees) {
 			// All mentees already have a mentor so we are done
+			rlog.Debugf("Found all %d matches, breaking...", len(hasMatch))
 			break
 		}
 		if _, ok := hasMatch[match.mentee.UserId]; ok {
 			// Mentee already matched so we continue
+			rlog.Debugf("Mentee %d already has a match, continuing...", match.mentee.UserId)
 			continue
 		}
 		if count := menteeCount[match.mentor.UserId]; count >= MAX_MENTEES_PER_MENTOR {
 			// Mentor already has MAX_MENTEES_PER_MENTOR mentees so don't assign another one
+			rlog.Debugf(
+				"Mentor %d already has %d matches, continuing...",
+				match.mentor.UserId,
+				MAX_MENTEES_PER_MENTOR,
+			)
 			continue
 		}
+		rlog.Debugf(
+			"Adding match: mentor: %d, mentee: %d, count: %d",
+			match.mentor.UserId,
+			match.mentee.UserId,
+			match.matchingAnswers,
+		)
 		menteeCount[match.mentor.UserId]++
 		hasMatch[match.mentee.UserId] = nil
 		matches = append(matches, match)
 	}
 
+	rlog.Debugf("Found %d matches", len(matches))
 	return matches
 }
 
@@ -212,7 +185,7 @@ func main() {
 		panic("Must provide -mentor_grad_year")
 	}
 
-	emails, err := getEmailsFromFile(*emailsFilename)
+	emails, err := utility.GetEmailsFromFile(*emailsFilename)
 	if err != nil {
 		panic(err)
 	}
@@ -224,13 +197,13 @@ func main() {
 	defer db.Close()
 
 	surveys := survey.GetAllSurveyDefinitions()
-	users, err := getUsers(db, emails)
+	users, err := query.GetUsersWithCohortAndSurveysByEmail(db, emails)
 	if err != nil {
 		panic(err)
 	}
 	mentors, mentees := separateMentorMentees(users, uint(*mentorGradYear))
-	fmt.Printf("Num mentors: %d\n", len(mentors))
-	fmt.Printf("Num mentees: %d\n", len(mentees))
+	rlog.Debugf("Num mentors: %d", len(mentors))
+	rlog.Debugf("Num mentees: %d", len(mentees))
 
 	mentorsWithSurveys := groupUserSurveys(mentors, surveys)
 	menteesWithSurveys := groupUserSurveys(mentees, surveys)
