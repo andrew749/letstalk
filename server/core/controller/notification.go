@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"letstalk/server/core/api"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	notification_helper "letstalk/server/core/notifications"
@@ -71,6 +72,26 @@ func UpdateNotificationState(c *ctx.Context) errs.Error {
 		return err
 	}
 
+	return nil
+}
+
+func GetNotification(c *ctx.Context) errs.Error {
+	notificationId := c.GinContext.Param("notificationId")
+	var notification data.Notification
+	db := c.Db
+	if err := db.First(&notification, notificationId).Error; err != nil {
+		return errs.NewRequestError("Error getting notification: %+v", err)
+	}
+
+	if notification.UserId != c.SessionData.UserId {
+		return errs.NewUnauthorizedError("You are not allowed to view this notification.")
+	}
+
+	res, err := converters.NotificationDataToApi(notification)
+	if err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+	c.Result = res
 	return nil
 }
 

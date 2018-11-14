@@ -25,6 +25,7 @@ import {
   MATCH_PROFILE_ROUTE,
   ME_ROUTE,
   NOTIFICATIONS_ROUTE,
+  NOTIFICATION_ROUTE,
   NOTIFICATIONS_UPDATE_STATE_ROUTE,
   SIGNUP_ROUTE,
   USER_VECTOR_ROUTE,
@@ -81,6 +82,7 @@ interface OnboardingUpdateResponse {
 
 interface NotificationRes {
   notificationId: number;
+  title: string;
   userId: number;
   type: string;
   state: string;
@@ -88,6 +90,7 @@ interface NotificationRes {
   message: string;
   thumbnail: string;
   timestamp: string;
+  link: string;
 }
 
 interface UpdateNotificationStateRequest {
@@ -220,6 +223,18 @@ export class RemoteProfileService implements ProfileService {
         timestamp: new Date(notifRes.timestamp),
       } as Notification;
     }));
+  }
+
+  async getNotificationForId(notificationId: number): Promise<Notification> {
+    const sessionToken = await this.auth.getSessionToken();
+    let request = `${NOTIFICATION_ROUTE}/${notificationId}`;
+
+    const response: NotificationRes =
+      await this.requestor.get(request, sessionToken);
+    return {
+      ...response,
+      timestamp: new Date(response.timestamp),
+    } as Notification;
   }
 
   async updateNotificationState(
