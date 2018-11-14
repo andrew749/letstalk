@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"os"
 
-	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/utility"
@@ -58,11 +57,9 @@ func main() {
 	for _, record := range records {
 		user, err := query.GetUserByEmail(db, record[0])
 		if err != nil {
-			if _, ok := err.(*errs.NotFoundError); ok {
-				missingEmails = append(missingEmails, record[0])
-			} else {
-				panic(err)
-			}
+			panic(err)
+		} else if user == nil {
+			missingEmails = append(missingEmails, record[0])
 		} else {
 			userIds = append(userIds, user.UserId)
 		}
