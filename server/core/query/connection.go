@@ -66,3 +66,20 @@ func GetAllConnections(db *gorm.DB, userId data.TUserID) ([]data.Connection, err
 	}
 	return connections, nil
 }
+
+const (
+	leftJoinStr = "LEFT JOIN mentorships ON mentorships.connection_id = connections.connection_id"
+	whereStr    = "mentorships.connection_id IS NOT NULL"
+)
+
+func GetAllMentorshipConnections(db *gorm.DB) ([]data.Connection, error) {
+	var connections []data.Connection
+	if err := db.Model(&data.Connection{}).Joins(leftJoinStr).Where(
+		whereStr,
+	).Preload(
+		"Mentorship",
+	).Preload("UserOne").Preload("UserTwo").Find(&connections).Error; err != nil {
+		return nil, err
+	}
+	return connections, nil
+}
