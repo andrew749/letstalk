@@ -26,8 +26,8 @@ func TestDataSearching(t *testing.T) {
 				assert.NoError(t, err)
 				users, err := usersWithoutTraits(db)
 				assert.NoError(t, err)
-				assert.NotContains(t, *users, user.UserId)
-				assert.Contains(t, *users, user2.UserId)
+				assert.NotContains(t, users, user.UserId)
+				assert.Contains(t, users, user2.UserId)
 			},
 			TestName: "Test find users who don't have any traits",
 		},
@@ -49,8 +49,8 @@ func TestDataSearching(t *testing.T) {
 				users, err := usersWithoutBio(db)
 				assert.NoError(t, err)
 
-				assert.NotContains(t, *users, user.UserId)
-				assert.Contains(t, *users, user2.UserId)
+				assert.NotContains(t, users, user.UserId)
+				assert.Contains(t, users, user2.UserId)
 			},
 			TestName: "Test find users who don't have a bio",
 		},
@@ -71,8 +71,8 @@ func TestDataSearching(t *testing.T) {
 				users, err := usersWithoutPosition(db)
 				assert.NoError(t, err)
 
-				assert.NotContains(t, *users, user.UserId)
-				assert.Contains(t, *users, user2.UserId)
+				assert.NotContains(t, users, user.UserId)
+				assert.Contains(t, users, user2.UserId)
 			},
 			TestName: "Test find users who don't have a position",
 		},
@@ -92,8 +92,8 @@ func TestDataSearching(t *testing.T) {
 				users, err := usersWithoutGroup(db)
 				assert.NoError(t, err)
 
-				assert.NotContains(t, *users, user.UserId)
-				assert.Contains(t, *users, user2.UserId)
+				assert.NotContains(t, users, user.UserId)
+				assert.Contains(t, users, user2.UserId)
 			},
 			TestName: "Test find users who don't have a group",
 		},

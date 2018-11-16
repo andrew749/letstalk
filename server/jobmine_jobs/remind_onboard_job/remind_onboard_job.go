@@ -11,7 +11,7 @@ import (
 	"github.com/romana/rlog"
 )
 
-const RemindOnboardJob jobmine.JobType = "RemindOnboardJob"
+const REMIND_ONBOARD_JOB jobmine.JobType = "RemindOnboardJob"
 
 type ReminderType string
 
@@ -104,7 +104,7 @@ type quoteSpec struct {
 // ReminderJobSpec The actual reminder job that defines the operations to perform
 // when scheduled
 var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
-	JobType: RemindOnboardJob,
+	JobType: REMIND_ONBOARD_JOB,
 	TaskSpec: jobmine.TaskSpec{
 		Execute: func(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord) (interface{}, error) {
 			rlog.Infof("Running Task with id %s", taskRecord.ID)
@@ -148,7 +148,7 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Infof("Successfully sent message of type=%s to user with id=%d", notificationType, userId)
 		},
 	},
-	GetTasksToCreate: func(db *gorm.DB, jobRecord jobmine.JobRecord) (*[]jobmine.Metadata, error) {
+	GetTasksToCreate: func(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
 		// keep track of which users we have sent to so far
 		seenUsersSet := make(map[data.TUserID]bool)
 		seenUsers := make([]data.TUserID, 0)
@@ -159,13 +159,13 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Errorf("Unable to get users without traits: %+v", err)
 			return nil, err
 		}
-		rlog.Debugf("Got %d users without traits %v", len(*usersWithoutTraits), *usersWithoutTraits)
+		rlog.Debugf("Got %d users without traits %v", len(usersWithoutTraits), usersWithoutTraits)
 		metadata := createReminderNotificationPayloadMetadataForUsers(
-			*usersWithoutTraits,
+			usersWithoutTraits,
 			seenUsersSet,
 			REMINDER_TYPE_TRAIT,
 		)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutTraits, seenUsers, seenUsersSet)
+		seenUsers, seenUsersSet = mergeMarkSeen(usersWithoutTraits, seenUsers, seenUsersSet)
 
 		// find all users who haven't filled in bio
 		usersWithoutBio, err := usersWithoutBio(db)
@@ -173,16 +173,16 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Errorf("Unable to get users without bio: %+v", err)
 			return nil, err
 		}
-		rlog.Debugf("Got %d users without bio %v", len(*usersWithoutBio), *usersWithoutBio)
+		rlog.Debugf("Got %d users without bio %v", len(usersWithoutBio), usersWithoutBio)
 		metadata = append(
 			metadata,
 			createReminderNotificationPayloadMetadataForUsers(
-				*usersWithoutBio,
+				usersWithoutBio,
 				seenUsersSet,
 				REMINDER_TYPE_BIO,
 			)...,
 		)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutBio, seenUsers, seenUsersSet)
+		seenUsers, seenUsersSet = mergeMarkSeen(usersWithoutBio, seenUsers, seenUsersSet)
 
 		// find all users who havent put in a position
 		usersWithoutPosition, err := usersWithoutPosition(db)
@@ -190,16 +190,16 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Errorf("Unable to get users without position: %+v", err)
 			return nil, err
 		}
-		rlog.Debugf("Got %d users without position %v", len(*usersWithoutPosition), *usersWithoutPosition)
+		rlog.Debugf("Got %d users without position %v", len(usersWithoutPosition), usersWithoutPosition)
 		metadata = append(
 			metadata,
 			createReminderNotificationPayloadMetadataForUsers(
-				*usersWithoutPosition,
+				usersWithoutPosition,
 				seenUsersSet,
 				REMINDER_TYPE_POSITION,
 			)...,
 		)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutPosition, seenUsers, seenUsersSet)
+		seenUsers, seenUsersSet = mergeMarkSeen(usersWithoutPosition, seenUsers, seenUsersSet)
 
 		// find all users who haven't put in group
 		usersWithoutGroup, err := usersWithoutGroup(db)
@@ -207,16 +207,16 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			rlog.Errorf("Unable to get users without group: %+v", err)
 			return nil, err
 		}
-		rlog.Debugf("Got %d users without group %v", len(*usersWithoutGroup), *usersWithoutGroup)
+		rlog.Debugf("Got %d users without group %v", len(usersWithoutGroup), usersWithoutGroup)
 		metadata = append(
 			metadata,
 			createReminderNotificationPayloadMetadataForUsers(
-				*usersWithoutGroup,
+				usersWithoutGroup,
 				seenUsersSet,
 				REMINDER_TYPE_GROUP,
 			)...,
 		)
-		seenUsers, seenUsersSet = mergeMarkSeen(*usersWithoutGroup, seenUsers, seenUsersSet)
+		seenUsers, seenUsersSet = mergeMarkSeen(usersWithoutGroup, seenUsers, seenUsersSet)
 
 		// convert map to slice
 		res := make([]jobmine.Metadata, 0, len(metadata))
@@ -224,7 +224,7 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			res = append(res, metadata)
 		}
 		rlog.Debugf("Got %d total updates: %+v", len(res), res)
-		return &res, nil
+		return res, nil
 	},
 }
 
@@ -258,7 +258,7 @@ func createReminderNotificationPayloadMetadataForUsers(
 	return res
 }
 
-func usersWithoutTraits(db *gorm.DB) (*[]data.TUserID, error) {
+func usersWithoutTraits(db *gorm.DB) ([]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
@@ -268,10 +268,10 @@ func usersWithoutTraits(db *gorm.DB) (*[]data.TUserID, error) {
 		Error; err != nil {
 		return nil, err
 	}
-	return &temp, nil
+	return temp, nil
 }
 
-func usersWithoutBio(db *gorm.DB) (*[]data.TUserID, error) {
+func usersWithoutBio(db *gorm.DB) ([]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
@@ -281,10 +281,10 @@ func usersWithoutBio(db *gorm.DB) (*[]data.TUserID, error) {
 		Error; err != nil {
 		return nil, err
 	}
-	return &temp, nil
+	return temp, nil
 }
 
-func usersWithoutPosition(db *gorm.DB) (*[]data.TUserID, error) {
+func usersWithoutPosition(db *gorm.DB) ([]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
@@ -294,10 +294,10 @@ func usersWithoutPosition(db *gorm.DB) (*[]data.TUserID, error) {
 		Error; err != nil {
 		return nil, err
 	}
-	return &temp, nil
+	return temp, nil
 }
 
-func usersWithoutGroup(db *gorm.DB) (*[]data.TUserID, error) {
+func usersWithoutGroup(db *gorm.DB) ([]data.TUserID, error) {
 	var temp []data.TUserID
 	if err := db.
 		Model(&data.User{}).
@@ -307,13 +307,13 @@ func usersWithoutGroup(db *gorm.DB) (*[]data.TUserID, error) {
 		Error; err != nil {
 		return nil, err
 	}
-	return &temp, nil
+	return temp, nil
 }
 
 // CreateReminderJob Creates a reminder job record to get run at some point.
 func CreateReminderJob(db *gorm.DB, runId string) error {
 	if err := db.Create(&jobmine.JobRecord{
-		JobType:  RemindOnboardJob,
+		JobType:  REMIND_ONBOARD_JOB,
 		RunId:    runId,
 		Metadata: map[string]interface{}{},
 		Status:   jobmine.STATUS_CREATED,
