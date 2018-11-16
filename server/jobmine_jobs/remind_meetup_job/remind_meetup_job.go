@@ -63,6 +63,8 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) (*[]jobmine.Meta
 		return nil, err
 	}
 
+	// TODO(wojtek): Filter out connections that have already received this notification
+
 	metadata := make([]jobmine.Metadata, len(connections)*2)
 	for _, connection := range connections {
 		if connection.Mentorship == nil || connection.UserOne == nil || connection.UserTwo == nil {
