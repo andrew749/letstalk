@@ -22,4 +22,10 @@ type JobSpec struct {
 
 	// Populate Create task records to be executed at some point in the future
 	GetTasksToCreate GetTasksToCreate
+
+	// whether or not this job's tasks can be run in parallel
+	IsParallel bool
+
+	// number of times to retry performing a task for this job before giving up
+	NumRetries int
 }
