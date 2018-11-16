@@ -2,12 +2,10 @@ package remind_onboard_job
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
@@ -313,8 +311,7 @@ func usersWithoutGroup(db *gorm.DB) (*[]data.TUserID, error) {
 }
 
 // CreateReminderJob Creates a reminder job record to get run at some point.
-func CreateReminderJob(db *gorm.DB) error {
-	runId := fmt.Sprintf("Reminder Job %s", time.Now().Local())
+func CreateReminderJob(db *gorm.DB, runId string) error {
 	if err := db.Create(&jobmine.JobRecord{
 		JobType:  RemindOnboardJob,
 		RunId:    runId,
