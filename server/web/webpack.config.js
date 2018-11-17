@@ -8,6 +8,7 @@ module.exports = {
     notification_console: path.resolve(__dirname, 'src', 'notification_console.jsx'),
     explore_notification: path.resolve(__dirname, 'src', 'explore_notification.jsx'),
     notification_with_quote: path.resolve(__dirname, 'src', 'notification_with_quote.jsx'),
+    remind_meetup_notification: path.resolve(__dirname, 'src', 'notification_with_quote.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -72,6 +73,12 @@ module.exports = {
       filename: "../notification_with_quote.html",
       title: "Notification",
       chunks: ['notification_with_quote']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../remind_meetup_notification.html",
+      title: "Reminder to Meet Up",
+      chunks: ['remind_meetup_notification']
     })
   ]
 };
