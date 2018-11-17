@@ -83,11 +83,11 @@ func TestJobIntegration(t *testing.T) {
 									assert.Equal(t, res.(string), "result_task1")
 								},
 							},
-							GetTasksToCreate: func(db *gorm.DB, jobRecord JobRecord) (*[]Metadata, error) {
+							GetTasksToCreate: func(db *gorm.DB, jobRecord JobRecord) ([]Metadata, error) {
 								metadata := Metadata(map[string]interface{}{
 									"task_key1": "task_value1",
 								})
-								return &[]Metadata{metadata}, nil
+								return []Metadata{metadata}, nil
 							},
 						},
 					},
