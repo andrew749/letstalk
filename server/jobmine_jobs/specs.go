@@ -11,7 +11,7 @@ import (
 // stored in the database to the actual code that should get executed.
 var Jobs = jobmine.JobSpecStore{
 	JobSpecs: map[jobmine.JobType]jobmine.JobSpec{
-		test_job.TestJob:                    test_job.TestJobSpec,
-		remind_onboard_job.RemindOnboardJob: remind_onboard_job.ReminderJobSpec,
+		test_job.TestJob:                      test_job.TestJobSpec,
+		remind_onboard_job.REMIND_ONBOARD_JOB: remind_onboard_job.ReminderJobSpec,
 	},
 }
