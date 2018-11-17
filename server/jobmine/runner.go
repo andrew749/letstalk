@@ -10,7 +10,7 @@ import (
 // RunTask Runs a task record
 // syncChannel is used to synchronize with the calling process since these are to be run in goroutines (no return code)
 // taskRecord The actual task to run
-func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) {
+func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) error {
 	tx := db.Begin()
 
 	// find the code to run
@@ -20,7 +20,7 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 		rlog.Errorf("Unable to find task spec for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
 		taskRecord.RecordError(db, err)
-		return
+		return err
 	}
 
 	// get the job metadata
@@ -30,7 +30,7 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 		rlog.Errorf("Unable to get jobRecord for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
 		taskRecord.RecordError(db, err)
-		return
+		return err
 	}
 
 	// Start running this job.
@@ -56,7 +56,7 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 		syncChannel <- taskRecord
 
 		// prevent bugs in case somebody writes code after the if statement
-		return
+		return err
 	} else {
 		// write success status to job
 		taskSpec.OnSuccess(tx, jobRecord, taskRecord, res)
@@ -73,8 +73,7 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 		// tell the runner that we're done
 		syncChannel <- taskRecord
 
-		// prevent bugs in case somebody writes code after the if statement
-		return
+		return nil
 	}
 }
 
@@ -173,13 +172,15 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 		return err
 	}
 
-	syncChannel := make(chan TaskRecord)
-
 	numTasks := len(tasks)
+	// TODO(acod): change to a smaller number so we dont waste memory on larger number of tasks
+	syncChannel := make(chan TaskRecord, numTasks)
 
 	for _, task := range tasks {
 		rlog.Infof("Running task %d: %#v", task.ID, task)
-		go RunTask(db, syncChannel, jobSpecStore, task)
+		// TODO(acod): Make these run in goroutines, need some retry logic since the transactions will
+		// fail due to deadlocking issues.
+		RunTask(db, syncChannel, jobSpecStore, task)
 	}
 
 	// wait for all tasks to finished, otherwise block
