@@ -73,7 +73,6 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 		// tell the runner that we're done
 		syncChannel <- taskRecord
 
-		// prevent bugs in case somebody writes code after the if statement
 		return nil
 	}
 }
@@ -179,7 +178,9 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 
 	for _, task := range tasks {
 		rlog.Infof("Running task %d: %#v", task.ID, task)
-		go RunTask(db, syncChannel, jobSpecStore, task)
+		// TODO(acod): Make these run in goroutines, need some retry logic since the transactions will
+		// fail due to deadlocking issues.
+		RunTask(db, syncChannel, jobSpecStore, task)
 	}
 
 	// wait for all tasks to finished, otherwise block
