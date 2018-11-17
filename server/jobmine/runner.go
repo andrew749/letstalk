@@ -172,9 +172,9 @@ func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB) error {
 		return err
 	}
 
-	syncChannel := make(chan TaskRecord)
-
 	numTasks := len(tasks)
+	// TODO(acod): change to a smaller number so we dont waste memory on larger number of tasks
+	syncChannel := make(chan TaskRecord, numTasks)
 
 	for _, task := range tasks {
 		rlog.Infof("Running task %d: %#v", task.ID, task)
