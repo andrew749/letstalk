@@ -3,6 +3,7 @@ package remind_onboard_job
 import (
 	"encoding/json"
 	"io/ioutil"
+	"letstalk/server/core/errs"
 	"letstalk/server/core/notifications"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
@@ -42,33 +43,40 @@ func packageTaskRecordMetadata(userId data.TUserID, reminderType ReminderType) m
 
 // map to the path of a data to use for each type of generic notification.
 var notificationDefinitionMapping = map[ReminderType]string{
-	REMINDER_TYPE_TRAIT:    "trait_notification.json",
-	REMINDER_TYPE_POSITION: "position_notification.json",
-	REMINDER_TYPE_BIO:      "bio_notification.json",
-	REMINDER_TYPE_GROUP:    "group_notification.json",
+	REMINDER_TYPE_TRAIT:    "web/src/trait_notification.json",
+	REMINDER_TYPE_POSITION: "web/src/position_notification.json",
+	REMINDER_TYPE_BIO:      "web/src/bio_notification.json",
+	REMINDER_TYPE_GROUP:    "web/src/group_notification.json",
 }
 
 var notificationDefinitions map[ReminderType]quoteNotificationSpec
+var notificationDefinitionsRaw map[ReminderType]map[string]interface{}
 var definitionsLoaded bool = false
 
 // load notification definition and marshall into spec
-func loadQuoteNotificationDefinition(notificationDefinitionPath string) (*quoteNotificationSpec, error) {
+func loadQuoteNotificationDefinition(notificationDefinitionPath string) (*quoteNotificationSpec, map[string]interface{}, error) {
 	var notificationSpec quoteNotificationSpec
+	var mapping map[string]interface{}
 
 	// open file for reading
 	notificationSpecData, err := ioutil.ReadFile(notificationDefinitionPath)
 	if err != nil {
 		rlog.Errorf("Unable to read notification definition: %+v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	// put data into struct
 	if err := json.Unmarshal(notificationSpecData, &notificationSpec); err != nil {
 		rlog.Errorf("Unable to unmarshall notification definition: %+v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &notificationSpec, nil
+	if err := json.Unmarshal(notificationSpecData, &mapping); err != nil {
+		rlog.Errorf("Unable to unmarshall notification definition: %+v", err)
+		return nil, nil, err
+	}
+
+	return &notificationSpec, mapping, nil
 }
 
 // helper to load all notification definitions into a map so that this is cached
@@ -76,13 +84,18 @@ func loadDefinitions() {
 	if definitionsLoaded {
 		return
 	}
+	if notificationDefinitions == nil {
+		notificationDefinitions = make(map[ReminderType]quoteNotificationSpec)
+		notificationDefinitionsRaw = make(map[ReminderType]map[string]interface{})
+	}
 
 	for reminderType, path := range notificationDefinitionMapping {
-		definition, err := loadQuoteNotificationDefinition(path)
+		definition, mapping, err := loadQuoteNotificationDefinition(path)
 		if err != nil {
 			panic(err)
 		}
 		notificationDefinitions[reminderType] = *definition
+		notificationDefinitionsRaw[reminderType] = mapping
 	}
 	definitionsLoaded = true
 }
@@ -115,11 +128,17 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 				templatePath string = "notification_with_quote.html"
 				title        string
 				message      string
+				notifSpec    quoteNotificationSpec
+				ok           bool
 			)
 
+			loadDefinitions()
 			// get generic message for each notification.
-			title = notificationDefinitions[REMINDER_TYPE_TRAIT].Title
-			message = notificationDefinitions[REMINDER_TYPE_TRAIT].Message
+			if notifSpec, ok = notificationDefinitions[notificationType]; !ok {
+				return nil, errs.NewInternalError("Unable to load notification spec")
+			}
+			title = notifSpec.Title
+			message = notifSpec.Message
 			// special logic for each type of notification
 			switch notificationType {
 			case REMINDER_TYPE_TRAIT:
@@ -133,7 +152,7 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 			}
 
 			// Actually create the notification to send
-			if err := notifications.CreateAdHocNotificationNoTransaction(db, userId, title, message, nil, templatePath, map[string]interface{}{}, &jobRecord.RunId); err != nil {
+			if err := notifications.CreateAdHocNotificationNoTransaction(db, userId, title, message, nil, templatePath, notificationDefinitionsRaw[notificationType], &jobRecord.RunId); err != nil {
 				rlog.Errorf("Unable to create notification for user %d because %+v", userId, err)
 				return nil, err
 			}
