@@ -6,6 +6,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"net/http"
 	"strconv"
@@ -62,6 +63,12 @@ func GetNotificationContentPage(ctx *ctx.Context) errs.Error {
 
 	var d map[string]interface{}
 	err = json.Unmarshal(notificationPage.Attributes, &d)
+	if err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+
+	// inject user data
+	d["user"], err = query.GetUserById(db, notificationPage.UserId)
 	if err != nil {
 		return errs.NewInternalError(err.Error())
 	}
