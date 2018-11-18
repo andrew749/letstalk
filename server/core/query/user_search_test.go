@@ -33,13 +33,13 @@ func TestSearchUsersByCohort(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
-			_, err = createTestUser(db, 2)
+			_, err = CreateTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createTestUser(db, 3)
+			myUser, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			myUser.Cohort = user1.Cohort
@@ -70,7 +70,7 @@ func TestSearchUsersByCohortLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createTestUser(db, i+1)
+				user, err := CreateTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userTrait := data.UserCohort{
@@ -101,13 +101,13 @@ func TestSearchUsersByPosition(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createTestUser(db, 3)
+			myUser, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			userPosition1 := data.UserPosition{
@@ -164,7 +164,7 @@ func TestSearchUsersByPositionLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createTestUser(db, i+1)
+				user, err := CreateTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userPosition := data.UserPosition{
@@ -197,13 +197,13 @@ func TestSearchUsersBySimpleTrait(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createTestUser(db, 3)
+			myUser, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			userTrait1 := data.UserSimpleTrait{
@@ -254,10 +254,10 @@ func TestSearchUsersBySimpleTraitAnon(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
 
 			userTrait1 := data.UserSimpleTrait{
@@ -297,7 +297,7 @@ func TestSearchUsersBySimpleTraitLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createTestUser(db, i+1)
+				user, err := CreateTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userTrait := data.UserSimpleTrait{
@@ -329,13 +329,13 @@ func TestSearchUsersByGroup(t *testing.T) {
 		Test: func(db *gorm.DB) {
 			var err error
 
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
 
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
 
-			myUser, err := createTestUser(db, 3)
+			myUser, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			userTrait1 := data.UserGroup{
@@ -388,7 +388,7 @@ func TestSearchUsersByGroupLimit(t *testing.T) {
 			numUsers := 10
 			users := make([]data.User, numUsers)
 			for i := 0; i < numUsers; i = i + 1 {
-				user, err := createTestUser(db, i+1)
+				user, err := CreateTestUser(db, i+1)
 				assert.NoError(t, err)
 				users[i] = *user
 				userTrait := data.UserGroup{
