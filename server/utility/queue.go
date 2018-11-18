@@ -32,15 +32,12 @@ func (s SQSMock) WaitForQueueDone() {
 }
 
 func (s SQSMock) CloseQueue() {
-	s.doneQueue <- true
 	close(s.eventQueue)
 }
 
 func (s SQSMock) QueueProcessor() {
 	for {
 		select {
-		case <-s.doneQueue:
-			return
 		case m, done := <-s.eventQueue:
 			var handlers []func(*events.SQSEvent) error
 			var ok bool
@@ -65,12 +62,13 @@ func (s SQSMock) QueueProcessor() {
 
 			// tell people that we are done.
 			if done {
-				s.doneQueue <- true
 				// exit goroutine
+				s.doneQueue <- true
 				return
 			}
 			break
 		}
+
 	}
 }
 
