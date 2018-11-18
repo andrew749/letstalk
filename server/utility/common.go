@@ -30,11 +30,14 @@ var (
 
 // Methods to run before a client is initialized
 func Bootstrap() {
+	if bootstrapRun {
+		return
+	}
+	bootstrapRun = true
 	flag.Parse()
 
 	// bootstrap secrets from local file
 	secrets.LoadSecrets(*secretsPath)
-	bootstrapRun = true
 	var err error
 
 	// Check if we are in a production environment and do special setup

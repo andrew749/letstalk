@@ -17,16 +17,31 @@ type queueMessage struct {
 type SQSMock struct {
 	listeners  map[string][]func(*events.SQSEvent) error
 	eventQueue chan queueMessage
+	doneQueue  chan bool
 }
 
 type SQSQueue interface {
 	SendMessage(input *sqs.SendMessageInput) (*sqs.SendMessageOutput, error)
 }
 
+// WaitForQueueDone Wait until a queue is done processing (has been closed)
+func (s SQSMock) WaitForQueueDone() {
+	// block on channel
+	<-s.doneQueue
+	s.doneQueue <- true
+}
+
+func (s SQSMock) CloseQueue() {
+	s.doneQueue <- true
+	close(s.eventQueue)
+}
+
 func (s SQSMock) QueueProcessor() {
 	for {
 		select {
-		case m := <-s.eventQueue:
+		case <-s.doneQueue:
+			return
+		case m, done := <-s.eventQueue:
 			var handlers []func(*events.SQSEvent) error
 			var ok bool
 			if handlers, ok = s.listeners[m.dest]; !ok {
@@ -46,6 +61,13 @@ func (s SQSMock) QueueProcessor() {
 						s.eventQueue <- m
 					}
 				}
+			}
+
+			// tell people that we are done.
+			if done {
+				s.doneQueue <- true
+				// exit goroutine
+				return
 			}
 			break
 		}
@@ -90,5 +112,6 @@ func CreateMockSQSClient() SQSMock {
 	return SQSMock{
 		listeners:  make(map[string][]func(*events.SQSEvent) error),
 		eventQueue: make(chan queueMessage, 10),
+		doneQueue:  make(chan bool, 1),
 	}
 }
