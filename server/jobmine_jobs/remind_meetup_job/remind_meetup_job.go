@@ -29,6 +29,11 @@ const (
 	ConnectionProfilePicMetadataKey = "connectionProfilePic"
 )
 
+const (
+	StartDateMetadataKey = "startDate"
+	EndDateMetadataKey   = "endDate"
+)
+
 func packageTaskRecordMetadata(
 	userId data.TUserID,
 	userType UserType,
@@ -57,8 +62,9 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 	}
 }
 
-func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) (*[]jobmine.Metadata, error) {
-	connections, err := query.GetAllMentorshipConnections(db)
+func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
+	jobRecord
+	connections, err := query.GetMentorshipConnectionsByDate(db)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +95,7 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) (*[]jobmine.Meta
 		))
 		metadata = append(metadata, metadata1, metadata2)
 	}
-	return &metadata, nil
+	return metadata, nil
 }
 
 var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{

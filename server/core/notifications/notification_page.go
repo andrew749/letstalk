@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
 func getNotificationTemplateForId(db *gorm.DB, id uint) (*data.NotificationPage, error) {
@@ -100,6 +101,8 @@ func EchoNotificationPage(ctx *ctx.Context) errs.Error {
 	if err := ctx.GinContext.BindJSON(&notificationReq); err != nil {
 		return errs.NewRequestError("Unable to bind json %s", err)
 	}
+
+	rlog.Infof("Loading template: %s", notificationReq.TemplateLink)
 
 	notificationReq.Data["user"] = createTestUser()
 	ctx.GinContext.HTML(

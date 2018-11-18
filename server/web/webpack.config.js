@@ -8,7 +8,7 @@ module.exports = {
     notification_console: path.resolve(__dirname, 'src', 'notification_console.jsx'),
     explore_notification: path.resolve(__dirname, 'src', 'explore_notification.jsx'),
     notification_with_quote: path.resolve(__dirname, 'src', 'notification_with_quote.jsx'),
-    remind_meetup_notification: path.resolve(__dirname, 'src', 'notification_with_quote.jsx'),
+    remind_meetup_notification: path.resolve(__dirname, 'src', 'remind_meetup_notification.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
