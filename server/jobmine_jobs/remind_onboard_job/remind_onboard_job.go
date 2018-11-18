@@ -24,20 +24,20 @@ const (
 )
 
 const (
-	ReminderTypeMetadataKey = "reminderType"
-	UserIdMetadataKey       = "userId"
+	REMINDER_TYPE_METADATA_KEY = "reminderType"
+	USER_ID_METADATA_KEY       = "userId"
 )
 
 // extract properties from map
 func parseTaskRecordMetadata(taskRecord jobmine.TaskRecord) (data.TUserID, ReminderType) {
-	return data.TUserID(taskRecord.Metadata[UserIdMetadataKey].(float64)), ReminderType(taskRecord.Metadata[ReminderTypeMetadataKey].(string))
+	return data.TUserID(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)), ReminderType(taskRecord.Metadata[REMINDER_TYPE_METADATA_KEY].(string))
 }
 
 // take properties and put into map
 func packageTaskRecordMetadata(userId data.TUserID, reminderType ReminderType) map[string]interface{} {
 	return map[string]interface{}{
-		UserIdMetadataKey:       userId,
-		ReminderTypeMetadataKey: reminderType,
+		USER_ID_METADATA_KEY:       userId,
+		REMINDER_TYPE_METADATA_KEY: reminderType,
 	}
 }
 
