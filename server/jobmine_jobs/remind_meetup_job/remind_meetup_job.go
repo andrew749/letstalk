@@ -3,15 +3,17 @@ package remind_meetup_job
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 )
 
-const RemindMeetupJob jobmine.JobType = "RemindMeetupJob"
+const REMIND_MEETUP_JOB jobmine.JobType = "RemindMeetupJob"
 
 type UserType string
 
@@ -21,17 +23,17 @@ const (
 )
 
 const (
-	UserTypeMetadataKey             = "userType"
-	UserIdMetadataKey               = "userId"
-	ConnectionUserIdMetadataKey     = "connectionUserId"
-	ConnectionFirstNameMetadataKey  = "connectionFirstName"
-	ConnectionLastNameMetadataKey   = "connectionLastName"
-	ConnectionProfilePicMetadataKey = "connectionProfilePic"
+	USER_TYPE_METADATA_KEY              = "userType"
+	USER_ID_METADATA_KEY                = "userId"
+	CONNECTION_USER_ID_METADATA_KEY     = "connectionUserId"
+	CONNECTION_FIRST_NAME_METADATA_KEY  = "connectionFirstName"
+	CONNECTION_LAST_NAME_METADATA_KEY   = "connectionLastName"
+	CONNECTION_PROFILE_PIC_METADATA_KEY = "connectionProfilePic"
 )
 
 const (
-	StartDateMetadataKey = "startDate"
-	EndDateMetadataKey   = "endDate"
+	START_TIME_METADATA_KEY = "startTime"
+	END_TIME_METADATA_KEY   = "endTime"
 )
 
 func packageTaskRecordMetadata(
@@ -43,16 +45,40 @@ func packageTaskRecordMetadata(
 	connectionProfilePic *string,
 ) map[string]interface{} {
 	return map[string]interface{}{
-		UserIdMetadataKey:               userId,
-		UserTypeMetadataKey:             userType,
-		ConnectionUserIdMetadataKey:     connectionUserId,
-		ConnectionFirstNameMetadataKey:  connectionFirstName,
-		ConnectionLastNameMetadataKey:   connectionLastName,
-		ConnectionProfilePicMetadataKey: connectionProfilePic,
+		USER_ID_METADATA_KEY:                userId,
+		USER_TYPE_METADATA_KEY:              userType,
+		CONNECTION_USER_ID_METADATA_KEY:     connectionUserId,
+		CONNECTION_FIRST_NAME_METADATA_KEY:  connectionFirstName,
+		CONNECTION_LAST_NAME_METADATA_KEY:   connectionLastName,
+		CONNECTION_PROFILE_PIC_METADATA_KEY: connectionProfilePic,
 	}
 }
 
-var reminderTaskSpec = jobmine.TaskSpec{}
+func parseUserInfo(taskRecord jobmine.TaskRecord) (data.TUserID, UserType) {
+	userId := taskRecord.Metadata[USER_ID_METADATA_KEY].(data.TUserID)
+	userType := taskRecord.Metadata[USER_TYPE_METADATA_KEY].(UserType)
+	return userId, userType
+}
+
+func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
+	userId, userType := parseUserInfo(taskRecord)
+	rlog.Infof("Unable to send message of type=%s to user with id=%d: %+v", userType, userId, err)
+}
+
+func onSuccess(
+	db *gorm.DB,
+	jobRecord jobmine.JobRecord,
+	taskRecord jobmine.TaskRecord,
+	res interface{},
+) {
+	userId, userType := parseUserInfo(taskRecord)
+	rlog.Infof("Successfully sent message of type=%s to user with id=%d", userType, userId)
+}
+
+var reminderTaskSpec = jobmine.TaskSpec{
+	OnError:   onError,
+	OnSuccess: onSuccess,
+}
 
 func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 	if userId == mentorUserId {
@@ -62,16 +88,34 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 	}
 }
 
+func getTime(jobRecord jobmine.JobRecord, key string) *time.Time {
+	if val, ok := jobRecord.Metadata[key]; ok {
+		if tme, ok := val.(time.Time); ok {
+			return &tme
+		}
+	}
+	return nil
+}
+
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	jobRecord
-	connections, err := query.GetMentorshipConnectionsByDate(db)
+	startTime := getTime(jobRecord, START_TIME_METADATA_KEY)
+	endTime := getTime(jobRecord, END_TIME_METADATA_KEY)
+
+	if startTime == nil {
+		rlog.Warn("No start time provided. Finding mentorships from beginning")
+	}
+	if endTime == nil {
+		rlog.Warn("No end time provided. Finding mentorships from beginning")
+	}
+
+	connections, err := query.GetMentorshipConnectionsByDate(db, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO(wojtek): Filter out connections that have already received this notification
 
-	metadata := make([]jobmine.Metadata, len(connections)*2)
+	metadata := make([]jobmine.Metadata, 0)
 	for _, connection := range connections {
 		if connection.Mentorship == nil || connection.UserOne == nil || connection.UserTwo == nil {
 			return nil, errors.New(fmt.Sprintf("Connection %d is missing data", connection.ConnectionId))
@@ -99,7 +143,28 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 }
 
 var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
-	JobType:          RemindMeetupJob,
+	JobType:          REMIND_MEETUP_JOB,
 	TaskSpec:         reminderTaskSpec,
 	GetTasksToCreate: getTasksToCreate,
+}
+
+// CreateReminderJob Creates a reminder job record to get run at some point.
+func CreateReminderJob(db *gorm.DB, runId string, startTime *time.Time, endTime *time.Time) error {
+	metadata := map[string]interface{}{}
+	if startTime != nil {
+		metadata[START_TIME_METADATA_KEY] = *startTime
+	}
+	if endTime != nil {
+		metadata[END_TIME_METADATA_KEY] = *endTime
+	}
+
+	if err := db.Create(&jobmine.JobRecord{
+		JobType:  REMIND_MEETUP_JOB,
+		RunId:    runId,
+		Metadata: metadata,
+		Status:   jobmine.STATUS_CREATED,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
 }

@@ -37,7 +37,7 @@ func TestGetMentorshipConnectionsByDate(t *testing.T) {
 				UserOneId: user2.UserId,
 				UserTwoId: user3.UserId,
 				Mentorship: &data.Mentorship{
-					MentorUserId: user1.UserId,
+					MentorUserId: user2.UserId,
 					CreatedAt:    now.AddDate(0, 0, 10),
 				},
 			}
@@ -106,8 +106,9 @@ func TestGetMentorshipConnectionsByDateNotSpecified(t *testing.T) {
 			assert.NoError(t, err)
 
 			connection2 := data.Connection{
-				UserOneId: user1.UserId,
-				UserTwoId: user3.UserId,
+				UserOneId:  user1.UserId,
+				UserTwoId:  user3.UserId,
+				Mentorship: nil,
 			}
 			err = db.Create(&connection2).Error
 			assert.NoError(t, err)
