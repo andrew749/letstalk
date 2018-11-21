@@ -14,11 +14,11 @@ import (
 func TestGetMentorshipConnectionsByDate(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := createTestUser(db, 3)
+			user3, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			now := time.Now()
@@ -87,11 +87,11 @@ func TestGetMentorshipConnectionsByDate(t *testing.T) {
 func TestGetMentorshipConnectionsByDateNotSpecified(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := createTestUser(db, 1)
+			user1, err := CreateTestUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := createTestUser(db, 2)
+			user2, err := CreateTestUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := createTestUser(db, 3)
+			user3, err := CreateTestUser(db, 3)
 			assert.NoError(t, err)
 
 			mentorship := data.Mentorship{

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
@@ -58,6 +59,31 @@ func parseUserInfo(taskRecord jobmine.TaskRecord) (data.TUserID, UserType) {
 	userId := taskRecord.Metadata[USER_ID_METADATA_KEY].(data.TUserID)
 	userType := taskRecord.Metadata[USER_TYPE_METADATA_KEY].(UserType)
 	return userId, userType
+}
+
+func execute(
+	db *gorm.DB,
+	jobRecord jobmine.JobRecord,
+	taskRecord jobmine.TaskRecord,
+) (interface{}, error) {
+	userId, _ := parseUserInfo(taskRecord)
+	templateParams := taskRecord.Metadata
+	connectionFirstName := templateParams[CONNECTION_FIRST_NAME_METADATA_KEY].(string)
+
+	err := notifications.CreateAdHocNotificationNoTransaction(
+		db,
+		userId,
+		"Reminder to Meet Up",
+		fmt.Sprintf("Meet up with %s!", connectionFirstName),
+		nil,
+		"remind_meetup_notification.html",
+		templateParams,
+		&jobRecord.RunId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return "Success", nil
 }
 
 func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
