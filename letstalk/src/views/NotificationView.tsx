@@ -65,7 +65,7 @@ type Row = "HEADER" | Notification | "LOAD_MORE" | "NO_MORE";
 const ICON_SIZE = 48;
 
 class NotificationView extends Component<Props, State> {
-  NOTIFICATIONS_VIEW_IDENTIFIER = "HomeView";
+  NOTIFICATIONS_VIEW_IDENTIFIER = "NotificationView";
 
   static navigationOptions = {
     headerTitle: 'Notifications',
