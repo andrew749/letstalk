@@ -1,6 +1,8 @@
 package query
 
 import (
+	"time"
+
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
@@ -63,6 +65,33 @@ func GetAllConnections(db *gorm.DB, userId data.TUserID) ([]data.Connection, err
 	}
 	if q.Error != nil {
 		return nil, q.Error
+	}
+	return connections, nil
+}
+
+const (
+	leftJoinStr = "LEFT JOIN mentorships ON mentorships.connection_id = connections.connection_id"
+	whereStr    = "mentorships.connection_id IS NOT NULL"
+)
+
+func GetMentorshipConnectionsByDate(
+	db *gorm.DB,
+	startDate *time.Time,
+	endDate *time.Time,
+) ([]data.Connection, error) {
+	var connections []data.Connection
+	query := db.Model(&data.Connection{}).Joins(leftJoinStr).Where(
+		whereStr,
+	).Preload("Mentorship").Preload("UserOne").Preload("UserTwo")
+	if startDate != nil {
+		query = query.Where("mentorships.created_at >= ?", *startDate)
+	}
+	if endDate != nil {
+		query = query.Where("mentorships.created_at <= ?", *endDate)
+	}
+
+	if err := query.Find(&connections).Error; err != nil {
+		return nil, err
 	}
 	return connections, nil
 }
