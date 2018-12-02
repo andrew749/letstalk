@@ -114,3 +114,13 @@ To tear down the load balancer and container gracefully run:
 cd /var/app/letstalk; ./bring_down.sh
 ```
 
+# Jobmine
+Jobmine is Hive's next-gen job scheduling system to run asynchronous computations on a schedule.
+Jobmine needs to have it's scheduler running every once in a while in order for certain parts of the application to work correctly (including certain notification campaigns).
+
+## Deploy schedulers
+The jobmine scheduler is a blocking script that will just poll the database on init and run any jobs that happened to be in a CREATED state (not yet run).
+This script can be manually invoked to get a job to run more quickly, though to ensure fewer bugs the script can be scheduled on a cron so that it
+can churn away in the background.
+
+There is a scheduler for running jobs (determine how many tasks to create) and one for running tasks (actually execute code). To deploy a new cronscript, simply copy the latest crontab to /etc/crontab.
