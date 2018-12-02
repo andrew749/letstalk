@@ -2,10 +2,10 @@
 0 0 * * * /var/app/letstalk/infra/backup_db.sh
 
 # Creates tasks to get run
-*/5 * * * * ./run_in_env.sh 'build/job_runner'
+*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/job_runner'
 
 # Run tasks
-*/5 * * * * ./run_in_env.sh 'build/task_runner'
+*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/task_runner'
 
 # JobStatusWatcher
-*/5 * * * * ./run_in_env.sh 'build/job_status_updater'
+*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/job_status_updater'
