@@ -36,6 +36,7 @@ func main() {
 			return nil
 		})
 		go helper.QueueProcessor()
+		helper.CloseQueue()
 		rlog.Debugf("Running queue")
 		helper.WaitForQueueDone()
 		rlog.Debugf("Queue done processing")
