@@ -1,11 +1,11 @@
 # m h  dom mon dow   command
 0 0 * * * /var/app/letstalk/infra/backup_db.sh
 
-# Task scheduling runner
-0 0 * * * docker run -it letstalk_env go run server/jobs/job_runner/main.go
+# Creates tasks to get run
+/5 * * * * ./run_in_env.sh 'build/job_runner'
 
-# Task Runner
-0 0 * * * docker run -it letstalk_env go run server/jobs/task_runner/main.go
+# Run tasks
+/5 * * * * ./run_in_env.sh 'build/task_runner'
 
 # JobStatusWatcher
-0 0 * * * docker run -it letstalk_env go run server/jobs/job_status_updater/main.go
+/5 * * * * ./run_in_env.sh 'build/job_status_updater'
