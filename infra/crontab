@@ -2,10 +2,10 @@
 0 0 * * * /var/app/letstalk/infra/backup_db.sh
 
 # Creates tasks to get run
-*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/job_runner'
+*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/job_runner' 1> "/var/log/job_runner_$(date '+%Y%m%dT%H%M%S').out" 2> "/var/log/job_runner_$(date '+%Y%m%dT%H%M%S').error"
 
 # Run tasks
-*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/task_runner'
+*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/task_runner' 1> "/var/log/task_runner_$(date '+%Y%m%dT%H%M%S').out" 2> "/var/log/task_runner_$(date '+%Y%m%dT%H%M%S').error"
 
 # JobStatusWatcher
-*/5 * * * * /var/app/letstalk/server/run_in_env.sh 'build/job_status_updater'
+*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/job_status_updater' 1> "/var/log/job_status_updater_$(date '+%Y%m%dT%H%M%S').out" 2> "/var/log/job_status_updater_$(date '+%Y%m%dT%H%M%S').error"
