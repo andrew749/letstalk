@@ -2,6 +2,7 @@ package jobmine_jobs
 
 import (
 	"letstalk/server/jobmine"
+	"letstalk/server/jobmine_jobs/remind_meetup_job"
 	"letstalk/server/jobmine_jobs/remind_onboard_job"
 	"letstalk/server/jobmine_jobs/test_job"
 )
@@ -13,5 +14,6 @@ var Jobs = jobmine.JobSpecStore{
 	JobSpecs: map[jobmine.JobType]jobmine.JobSpec{
 		test_job.TestJob:                      test_job.TestJobSpec,
 		remind_onboard_job.REMIND_ONBOARD_JOB: remind_onboard_job.ReminderJobSpec,
+		remind_meetup_job.REMIND_MEETUP_JOB:   remind_meetup_job.ReminderJobSpec,
 	},
 }
