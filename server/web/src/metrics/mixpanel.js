@@ -12,6 +12,7 @@ function identifyUser(userId) {
 function trackNotificationOpened(notificationName, properties) {
   const eventName = notificationName + '/' + NOTIF_OPENED_PREFIX;
   properties = properties || window.passedContext;
+  properties.referrer = document.referrer;
   mixpanel.track(eventName, properties);
 }
 
