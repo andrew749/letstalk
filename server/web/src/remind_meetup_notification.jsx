@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import getProperty from './context.jsx';
 import './scss/notification.scss';
+import { identifyUser, trackNotificationOpened, trackLinkClicked } from './metrics/mixpanel';
 
 function getIntro(connectionName, foodSuggestion) {
   return 'An important part of any great mentorship is in-person interaction! ' +
@@ -35,7 +36,17 @@ const menteeTopics = [
 const menteeOutro =
   'Chances are your mentor has been in your shoes, here\'s an opportunity to look into the future!';
 
+const NOTIFICATION_NAME = 'remind-meetup';
+
 class RemindMeetupNotification extends React.Component {
+
+  componentDidMount() {
+    const user = getProperty('user');
+    identifyUser(user.UserId);
+    trackNotificationOpened(NOTIFICATION_NAME);
+    trackLinkClicked(NOTIFICATION_NAME, '#cta', 'match-profile');
+  }
+
   render() {
     const userType = getProperty('userType');
     const connectionUserId = getProperty('connectionUserId');
@@ -66,12 +77,14 @@ class RemindMeetupNotification extends React.Component {
             <p className="title">Meet up with { connectionFirstName }</p>
             <p className="message">
               { getIntro(connectionName, foodSuggestion) }
-              <ul>
-                { topics.map(topic => <li>{ topic }</li>) }
-              </ul>
+            </p>
+            <ul>
+              { topics.map(topic => <li key={ topic }>{ topic }</li>) }
+            </ul>
+            <p>
               { outro }
             </p>
-            <a className="cta" href={link}>Contact them now!</a>
+            <a id="cta" className="cta" href={link}>Contact them now!</a>
           </div>
         </div>
     </div>
