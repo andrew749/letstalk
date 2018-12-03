@@ -9,18 +9,21 @@ function identifyUser(userId) {
   mixpanel.identify(userId);
 }
 
-function trackNotificationOpened(notificationName, properties) {
-  const eventName = notificationName + '/' + NOTIF_OPENED_PREFIX;
-  properties = properties || window.passedContext;
+function getProperties(extraProperties) {
+  let properties = window.passedContext;
+  properties = Object.assign(properties, extraProperties || {});
   properties.referrer = document.referrer;
-  mixpanel.track(eventName, properties);
+  return properties;
 }
 
-function trackLinkClicked(notificationName, linkAccessor, linkName, properties) {
+function trackNotificationOpened(notificationName, extraProperties) {
+  const eventName = notificationName + '/' + NOTIF_OPENED_PREFIX;
+  mixpanel.track(eventName, getProperties(extraProperties));
+}
+
+function trackLinkClicked(notificationName, linkAccessor, linkName, extraProperties) {
   const eventName = notificationName + '/' + LINK_CLICKED_PREFIX + '/' + linkName;
-  properties = properties || window.passedContext;
-  properties.referrer = document.referrer;
-  mixpanel.track_links(linkAccessor, eventName, properties);
+  mixpanel.track_links(linkAccessor, eventName, getProperties(extraProperties));
 }
 
 export { identifyUser, trackNotificationOpened, trackLinkClicked };

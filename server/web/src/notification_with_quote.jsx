@@ -9,20 +9,16 @@ const NOTIFICATION_NAME = 'notif-with-quote';
 class NotificationWithQuote extends React.Component {
   componentDidMount() {
     const user = getProperty('user');
-    const link = getProperty('link');
-    const cta = getProperty('cta');
     identifyUser(user.UserId);
 
-    const properties = {
+    const extraProperties = {
       userId: user.UserId,
       firstName: user.FirstName,
       lastName: user.LastName,
-      link: link,
-      cta: cta,
     };
 
-    trackNotificationOpened(NOTIFICATION_NAME, properties);
-    trackLinkClicked(NOTIFICATION_NAME, '#cta', 'cta', properties);
+    trackNotificationOpened(NOTIFICATION_NAME, extraProperties);
+    trackLinkClicked(NOTIFICATION_NAME, '#cta', 'cta', extraProperties);
   }
 
   render() {
