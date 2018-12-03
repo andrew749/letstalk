@@ -56,8 +56,8 @@ func packageTaskRecordMetadata(
 }
 
 func parseUserInfo(taskRecord jobmine.TaskRecord) (data.TUserID, UserType) {
-	userId := taskRecord.Metadata[USER_ID_METADATA_KEY].(data.TUserID)
-	userType := taskRecord.Metadata[USER_TYPE_METADATA_KEY].(UserType)
+	userId := data.TUserID(taskRecord.Metadata[USER_ID_METADATA_KEY].(uint))
+	userType := UserType(taskRecord.Metadata[USER_TYPE_METADATA_KEY].(string))
 	return userId, userType
 }
 
@@ -102,6 +102,7 @@ func onSuccess(
 }
 
 var reminderTaskSpec = jobmine.TaskSpec{
+	Execute:   execute,
 	OnError:   onError,
 	OnSuccess: onSuccess,
 }
