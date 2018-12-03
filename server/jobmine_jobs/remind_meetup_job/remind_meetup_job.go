@@ -56,7 +56,7 @@ func packageTaskRecordMetadata(
 }
 
 func parseUserInfo(taskRecord jobmine.TaskRecord) (data.TUserID, UserType) {
-	userId := data.TUserID(taskRecord.Metadata[USER_ID_METADATA_KEY].(uint))
+	userId := data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
 	userType := UserType(taskRecord.Metadata[USER_TYPE_METADATA_KEY].(string))
 	return userId, userType
 }
