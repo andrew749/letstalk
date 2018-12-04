@@ -43,7 +43,7 @@ class RemindMeetupNotification extends React.Component {
     const connectionLastName = getProperty('connectionLastName');
     const connectionName = connectionFirstName + ' ' + connectionLastName;
     const connectionProfilePic = getProperty('connectionProfilePic') || defaultProfilePic;
-    const link = 'hive://MatchProfile/' + connectionUserId;
+    const link = 'hive://MatchProfile?userId=' + connectionUserId;
 
     let foodSuggestion = '';
     let outro = '';
