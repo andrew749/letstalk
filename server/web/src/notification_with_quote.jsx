@@ -2,8 +2,25 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import getProperty from './context.jsx';
 import './scss/notification.scss';
+import { identifyUser, trackNotificationOpened, trackLinkClicked } from './metrics/mixpanel';
+
+const NOTIFICATION_NAME = 'notif-with-quote';
 
 class NotificationWithQuote extends React.Component {
+  componentDidMount() {
+    const user = getProperty('user');
+    identifyUser(user.UserId);
+
+    const extraProperties = {
+      userId: user.UserId,
+      firstName: user.FirstName,
+      lastName: user.LastName,
+    };
+
+    trackNotificationOpened(NOTIFICATION_NAME, extraProperties);
+    trackLinkClicked(NOTIFICATION_NAME, '#cta', 'cta', extraProperties);
+  }
+
   render() {
     const user = getProperty('user');
     const quotes = getProperty('quotes');
@@ -30,7 +47,7 @@ class NotificationWithQuote extends React.Component {
               {body}
             </p>
 
-            <a className="cta" href={link}>
+            <a id="cta" className="cta" href={link}>
               {cta}
             </a>
           </div>

@@ -115,18 +115,35 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 	}
 }
 
-func getTime(jobRecord jobmine.JobRecord, key string) *time.Time {
+const TIME_LAYOUT = "2006-01-02T15:04:05Z"
+
+func getTime(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
 	if val, ok := jobRecord.Metadata[key]; ok {
-		if tme, ok := val.(time.Time); ok {
-			return &tme
+		var (
+			timeStr string
+			ok      bool
+		)
+		if timeStr, ok = val.(string); !ok {
+			return nil, errors.New(fmt.Sprintf("%s must be a time string", key))
 		}
+		time, err := time.Parse(TIME_LAYOUT, timeStr)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	startTime := getTime(jobRecord, START_TIME_METADATA_KEY)
-	endTime := getTime(jobRecord, END_TIME_METADATA_KEY)
+	startTime, err := getTime(jobRecord, START_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := getTime(jobRecord, END_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
 
 	if startTime == nil {
 		rlog.Warn("No start time provided. Finding mentorships from beginning")
@@ -179,10 +196,10 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 func CreateReminderJob(db *gorm.DB, runId string, startTime *time.Time, endTime *time.Time) error {
 	metadata := map[string]interface{}{}
 	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = *startTime
+		metadata[START_TIME_METADATA_KEY] = startTime.Format(TIME_LAYOUT)
 	}
 	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = *endTime
+		metadata[END_TIME_METADATA_KEY] = endTime.Format(TIME_LAYOUT)
 	}
 
 	if err := db.Create(&jobmine.JobRecord{
