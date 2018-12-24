@@ -49,7 +49,7 @@ func main() {
 
 	defer db.Close()
 
-	var es *elastic.Client = nil
+	var es *elastic.Client
 
 	if *useElastic {
 		es, err = utility.GetES()
@@ -96,18 +96,21 @@ func main() {
 		raven.SetTagsContext(map[string]string{
 			"environment": "development",
 		})
-
-		// setup queue listeners for local delivery
-		sqs := utility.QueueHelper.(utility.SQSMock)
-		go sqs.QueueProcessor()
-		sqs.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) error {
-			if err := sqs_notification_processor.SendNotificationLambda(*event); err != nil {
-				rlog.Critical(err)
-				return err
-			}
-			return nil
-		})
 	}
+
+	// setup queue listeners for local delivery
+	sqs := utility.QueueHelper.(utility.SQSMock)
+	go sqs.QueueProcessor()
+	sqs.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) error {
+		if err := sqs_notification_processor.SendNotificationLambda(*event); err != nil {
+			rlog.Critical(err)
+			return err
+		}
+		return nil
+	})
+
+	// finish processing any messages before closing
+	defer sqs.WaitForQueueDone()
 
 	// Start server
 	rlog.Info("Serving on port ", *port)
