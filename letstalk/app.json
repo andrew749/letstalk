@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./src/img/logo.png",
       "bundleIdentifier": "org.hiveapp.hive",
-      "buildNumber": "13",
+      "buildNumber": "14",
       "infoPlist": {
         "NSCameraUsageDescription": "Hive uses the camera to scan QR codes and take profile pictures.",
         "NSPhotoLibraryUsageDescription": "Hive uses your photo library to select a profile picture."
@@ -20,7 +20,12 @@
       "icon": "./src/img/logo_android.png",
       "versionCode": 12,
       "package": "org.hiveapp.hive",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "androidStatusBar": {
       "backgroundColor": "#FFB52A"
