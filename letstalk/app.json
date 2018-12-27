@@ -20,7 +20,12 @@
       "icon": "./src/img/logo_android.png",
       "versionCode": 12,
       "package": "org.hiveapp.hive",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "androidStatusBar": {
       "backgroundColor": "#FFB52A"
