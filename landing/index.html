@@ -87,7 +87,10 @@
     <div class="intro-text">
       <h2>Welcome to Hive</h2>
       <p>We are a peer mentorship and networking community for the University of Waterloo</p>
-      <a href="#signup-modal" class="btn-get-started">Sign Up</a>
+      <div class="download-container">
+        <a href="https://itunes.apple.com/us/app/uw-hive/id1400424718?mt=8" class="apple-link app-store-link" style="overflow:hidden;background:url(https://linkmaker.itunes.apple.com/en-us/badge-lrg.svg?releaseDate=2018-09-28&kind=iossoftware&bubble=ios_apps) no-repeat;"></a>
+        <a href='https://play.google.com/store/apps/details?id=org.hiveapp.hive&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1' ><img class="google-link app-store-link" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
+      </div>
     </div>
 
     <div class="product-screens">
@@ -95,14 +98,6 @@
       <div class="product-screen-1 wow fadeInUp" data-wow-delay="0.4s" data-wow-duration="0.6s">
         <img src="img/logo.png" alt="">
       </div>
-
-      <!-- <div class="product-screen-2 wow fadeInUp" data-wow-delay="0.2s" data-wow-duration="0.6s">
-        <img src="img/product-screen-2.png" alt="">
-      </div>
-
-      <div class="product-screen-3 wow fadeInUp" data-wow-duration="0.6s">
-        <img src="img/product-screen-3.png" alt="">
-      </div> -->
 
     </div>
 
@@ -248,23 +243,6 @@
     </section><!-- #advanced-features -->
 
     <!--==========================
-      Call To Action Section
-    ============================-->
-    <section id="call-to-action">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-9 text-center text-lg-left">
-            <h3 class="cta-title">Sign Up Now!</h3>
-            <p class="cta-text"> We'd love to have you join our community and meet other diverse and talented people at the University of Waterloo. Hive makes it easy to connect and interact with peers. </p>
-          </div>
-          <div class="col-lg-3 cta-btn-container text-center">
-            <a class="cta-btn align-middle" href="#signup-modal">Sign Up</a>
-          </div>
-        </div>
-      </div>
-    </section><!-- #call-to-action -->
-
-    <!--==========================
       Contact Section
     ============================-->
     <section id="contact">
@@ -338,78 +316,6 @@
     </div>
   </footer><!-- #footer -->
 
-  <!-- Modal -->
-
-  <div id="signup-modal" class="modaloverlay">
-    <div class="signup-modal">
-      <a href="#close" class="close">&times;</a>
-      <form class="container" id="signupForm">
-        <div class="row">
-            <div class="col-12">
-              <img src="img/logo.png" alt="">
-              <h1>Join Hive!</h1>
-            </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-12 col-lg-6 mt-2 px-1">
-            <input autocomplete="given-name" name="firstName" type="text" class="form-control" placeholder="First Name" aria-label="First Name" required>
-          </div>
-          <div class="col-sm-12 col-lg-6 mt-2 px-1">
-            <input autocomplete="family-name" name="lastName" type="text" class="form-control" placeholder="Last Name" aria-label="Last Name" required>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-12 col-lg-9 mt-2 px-1">
-            <select onchange="formColor(this)" name="programName" class="form-control" aria-label="Program Name" required>
-                <option value="" disabled selected>Program Name</option>
-                <option>Architectural Engineering</option>
-                <option>Architecture</option>
-                <option>Biomedical Engineering</option>
-                <option>Chemical Engineering</option>
-                <option>Civil Engineering</option>
-                <option>Computer Engineering</option>
-                <option>Computer Science</option>
-                <option>Electrical Engineering</option>
-                <option>Environmental Engineering</option>
-                <option>Geological Engineering</option>
-                <option>Management Engineering</option>
-                <option>Math</option>
-                <option>Mechanical Engineering</option>
-                <option>Mechatronics Engineering</option>
-                <option>Nanotechnology Engineering</option>
-                <option>Software Engineering</option>
-                <option>Systems Design Engineering</option>
-                <option>Other</option>
-              </select>
-          </div>
-          <div class="col-sm-12 col-lg-3 mt-2 px-1">
-            <select type="number" onchange="formColor(this)" name="classYear" class="form-control" aria-label="Year" required>
-                <option value="" disabled selected>Year</option>
-                <option value=2017>2017</option>
-                <option>2018</option>
-                <option>2019</option>
-                <option>2020</option>
-                <option>2021</option>
-                <option>2022</option>
-                <option>2023</option>
-              </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12 mt-2 px-1">
-            <input autocomplete="email" name="emailAddress" type="email" class="form-control" placeholder="Email Address" aria-label="Email Address" required>
-          </div>
-        </div>
-        <div class="row mt-4">
-          <div class="col-12 my-auto px-1">
-            <button class="button" type="submit" id="signupBtn">Sign up</button>
-          </div>
-        </div>
-      </form>
-      <div id="messageContainer"></div>
-    </div>
-  </div>
-
   <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 
   <!-- JavaScript Libraries -->
@@ -424,8 +330,6 @@
 
   <!-- Contact Form JavaScript File -->
   <script src="js/contactform.js"></script>
-
-  <script src="js/form-submit.js"></script>
 
   <script type="text/javascript">
     function formColor(sel)
