@@ -135,9 +135,9 @@ export default class LoginView extends Component<Props> {
     headerTitle: 'Log in',
     headerRight: Platform.OS === 'ios' ? <ReactNativeButton title="Sign up"
       onPress={() => navigation.navigate('Signup')} /> : null,
-      headerStyle, 
-      headerTitleStyle, 
-      headerTintColor 
+      headerStyle,
+      headerTitleStyle,
+      headerTintColor
   })
 
   constructor(props: Props) {
@@ -163,7 +163,7 @@ export default class LoginView extends Component<Props> {
       if (await auth.loginWithFb(token)) {
         this.props.navigation.dispatch(NavigationActions.reset({
           index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+          actions: [NavigationActions.navigate({ routeName: 'SplashScreenView' })]
         }));
       }
     } catch(e) {
@@ -189,7 +189,7 @@ export default class LoginView extends Component<Props> {
       await auth.login(email, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+        actions: [NavigationActions.navigate({ routeName: 'SplashScreenView' })]
       }));
     } catch(e) {
       console.log("Unable to login: " + e)

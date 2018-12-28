@@ -83,7 +83,7 @@ class HomeView extends Component<Props, State> {
 
     this.state = { refreshing: false };
 
-    this.load = this.load.bind(this);
+    this.loadBootstrap = this.loadBootstrap.bind(this);
     this.renderHome = this.renderHome.bind(this);
     this.renderMatch = this.renderMatch.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
@@ -94,33 +94,45 @@ class HomeView extends Component<Props, State> {
       AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     });
 
-    this.load();
+    if (!!this.props.bootstrap) {
+      await this.loadBootstrap();
+    } else {
+      await this.maybeNavigateRequired(this.props);
+    }
+
     await TutorialService.launchTutorial(this.props.navigation);
   }
 
   async componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_created') {
-      // Email not yet verified, so take to email verification page
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
-      }));
-    } else if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_email_verified') {
-      // Account not yet setup, so take to onboarding page
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
-      }));
+    await this.maybeNavigateRequired(nextProps);
+  }
+
+  // Depending on the user's state, we may need to navigate to another view to get more info
+  private async maybeNavigateRequired(props: Props) {
+    if (!!props.bootstrap) {
+      if (props.bootstrap.state === 'account_created') {
+        // Email not yet verified, so take to email verification page
+        await this.props.navigation.dispatch(NavigationActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
+        }));
+      } else if (props.bootstrap.state === 'account_email_verified') {
+        // Account not yet setup, so take to onboarding page
+        await this.props.navigation.dispatch(NavigationActions.reset({
+          index: 0,
+          actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
+        }));
+      }
     }
   }
 
-  private async load() {
+  private async loadBootstrap() {
     await this.props.fetchBootstrap();
   }
 
   private async onRefresh() {
     this.setState({refreshing: true});
-    await this.load();
+    await this.loadBootstrap();
     this.setState({refreshing: false});
   }
 
@@ -410,7 +422,7 @@ class HomeView extends Component<Props, State> {
         return (
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for you to finish onboarding</Text>
-            <ActionButton onPress={() => this.load()} title="Check again" />
+            <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
           </View>
         );
       case 'account_setup':
@@ -418,7 +430,7 @@ class HomeView extends Component<Props, State> {
         return (
 
           <View style={styles.container}>
-            <ScrollView
+gj           <ScrollView
               refreshControl={
                 <RefreshControl
                   refreshing={this.state.refreshing}
@@ -429,7 +441,7 @@ class HomeView extends Component<Props, State> {
               <View style={styles.scrollContainer}>
                 <View style={styles.centeredContainer}>
                   <Text style={styles.headline}>Waiting for your mentorship match</Text>
-                  <ActionButton onPress={() => this.load()} title="Check again" />
+                  <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
                 </View>
                 { feedbackPrompt }
                 { requestsButton }
@@ -486,7 +498,7 @@ class HomeView extends Component<Props, State> {
           state={this.state.refreshing ? 'success' : state}
           errorMsg={errorMsg}
           errorType={errorType}
-          load={this.load}
+          load={this.loadBootstrap}
           renderBody={this.renderHome}
           navigation={this.props.navigation}
         />
