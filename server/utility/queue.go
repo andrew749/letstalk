@@ -38,7 +38,7 @@ func (s SQSMock) CloseQueue() {
 func (s SQSMock) QueueProcessor() {
 	for {
 		select {
-		case m, done := <-s.eventQueue:
+		case m, more := <-s.eventQueue:
 			var handlers []func(*events.SQSEvent) error
 			var ok bool
 			if handlers, ok = s.listeners[m.dest]; !ok {
@@ -61,15 +61,16 @@ func (s SQSMock) QueueProcessor() {
 			}
 
 			// tell people that we are done.
-			if done {
+			if !more {
 				// exit goroutine
+				rlog.Debug("Queue processor exiting.")
 				s.doneQueue <- true
 				return
 			}
 			break
 		}
-
 	}
+	rlog.Debug("Queue processor exiting.")
 }
 
 func (s SQSMock) SendMessage(input *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
