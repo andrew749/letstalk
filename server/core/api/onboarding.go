@@ -21,19 +21,9 @@ type OnboardingInfo struct {
 	UserAdditionalData *data.UserAdditionalData `json:"userAdditionalData"`
 }
 
-type OnboardingStatus struct {
-	State    OnboardingState `json:"state" binding:"required"`
-	UserType UserType        `json:"userType" binding:"required"`
-}
-
 type UpdateCohortRequest struct {
 	CohortId             data.TCohortID `json:"cohortId" binding:"required"`
 	MentorshipPreference *int           `json:"mentorshipPreference"`
 	Bio                  *string        `json:"bio"`
 	Hometown             *string        `json:"hometown"`
-}
-
-type OnboardingUpdateResponse struct {
-	Message          string            `json:"message" binding:"required"`
-	OnboardingStatus *OnboardingStatus `json:"onboardingStatus" binding:"required"`
 }

@@ -5,6 +5,7 @@ import (
 
 	"letstalk/server/core/test"
 	"letstalk/server/core/utility/uw_email"
+	"letstalk/server/test_helpers"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +15,7 @@ func TestSearchUserFallback(t *testing.T) {
 	test.RunTestsWithDb([]test.Test{
 		{
 			Test: func(db *gorm.DB) {
-				user, err := CreateTestUser(db, 1)
+				user, err := test_helpers.CreateTestSetupUser(db, 1)
 				assert.NoError(t, err)
 
 				watEmail := uw_email.FromString("test@uwaterloo.ca")
@@ -30,7 +31,7 @@ func TestSearchUserFallback(t *testing.T) {
 		{
 			TestName: "Test return nil on bad email",
 			Test: func(db *gorm.DB) {
-				_, err := CreateTestUser(db, 2)
+				_, err := test_helpers.CreateTestSetupUser(db, 2)
 				assert.NoError(t, err)
 
 				badEmail := "invalid_email@uwaterloo.ca"

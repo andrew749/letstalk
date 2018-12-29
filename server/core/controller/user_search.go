@@ -5,8 +5,6 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
-
-	"github.com/jinzhu/gorm"
 )
 
 func SimpleTraitUserSearchController(c *ctx.Context) errs.Error {
@@ -77,10 +75,9 @@ func MyCohortUserSearchController(c *ctx.Context) errs.Error {
 
 	cohort, err := query.GetUserCohortMappingById(c.Db, c.SessionData.UserId)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			return errs.NewRequestError("Set a cohort to see other users in your class")
-		}
 		return errs.NewDbError(err)
+	} else if cohort == nil {
+		return errs.NewRequestError("Set a cohort to see other users in your class")
 	}
 
 	cohortReq := api.CohortUserSearchRequest{

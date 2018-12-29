@@ -5,8 +5,8 @@ import (
 	"letstalk/server/core/connection"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
+	"letstalk/server/core/user_state"
 	"letstalk/server/data"
 
 	"github.com/romana/rlog"
@@ -72,7 +72,7 @@ func getDescriptionForRequestToMatch(requestMatching data.RequestMatching) *stri
  */
 func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	var (
-		err      error
+		err      errs.Error
 		response = api.BootstrapResponse{State: api.ACCOUNT_CREATED}
 		userId   = c.SessionData.UserId
 	)
@@ -89,29 +89,17 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		response.State = api.ACCOUNT_EMAIL_VERIFIED
 	}
 
-	onboardingInfo, err := onboarding.GetOnboardingInfo(c.Db, userId)
+	state, err := user_state.GetUserState(c.Db, userId)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
-	response.Cohort = onboardingInfo.UserCohort
-	response.OnboardingStatus = &api.OnboardingStatus{
-		onboardingInfo.State,
-		onboardingInfo.UserType,
-	}
-
-	if onboardingInfo.State != api.ONBOARDING_DONE {
-		// Onboarding not done. We don't need to get connections.
-		c.Result = response
-		return nil
-	} else {
-		response.State = api.ACCOUNT_SETUP
-	}
+	response.State = *state
 
 	// Fetch all user's connections.
 
-	connections, err := query.GetAllConnections(c.Db, userId)
-	if err != nil {
-		return errs.NewDbError(err)
+	connections, dbErr := query.GetAllConnections(c.Db, userId)
+	if dbErr != nil {
+		return errs.NewDbError(dbErr)
 	}
 
 	if len(connections) > 0 {
@@ -126,7 +114,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 	for _, conn := range connections {
 		connUserId := conn.UserOneId
 		connUser := conn.UserOne
-		if conn.UserOneId == user.UserId {
+		if conn.UserOneId == userId {
 			connUserId = conn.UserTwoId
 			connUser = conn.UserTwo
 		}
@@ -134,55 +122,46 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 			return errs.NewInternalError("Failed to load connection user data")
 		}
 		if conn.AcceptedAt == nil {
-			if conn.UserOneId == user.UserId {
+			connApi := api.ConnectionRequestWithName{
+				ConnectionRequest: connection.DataToApi(connUserId, conn),
+				FirstName:         connUser.FirstName,
+				LastName:          connUser.LastName,
+			}
+			if conn.UserOneId == userId {
 				// Auth user is the requestor.
-				connApi := api.ConnectionRequestWithName{
-					ConnectionRequest: connection.DataToApi(connUserId, conn),
-					FirstName: conn.UserTwo.FirstName,
-					LastName: conn.UserTwo.LastName,
-				}
 				rlog.Debug("adding outgoing request", connApi)
 				response.Connections.OutgoingRequests =
 					append(response.Connections.OutgoingRequests, &connApi)
 			} else {
 				// Auth user is the requestee.
-				connApi := api.ConnectionRequestWithName{
-					ConnectionRequest: connection.DataToApi(connUserId, conn),
-					FirstName: conn.UserOne.FirstName,
-					LastName: conn.UserOne.LastName,
-				}
 				rlog.Debug("adding incoming request", connApi)
 				response.Connections.IncomingRequests =
 					append(response.Connections.IncomingRequests, &connApi)
 			}
 		} else {
 			if conn.Mentorship != nil {
-				// Connection has been upgraded to a mentorship.
+				userType := api.USER_TYPE_MENTOR
+				if conn.Mentorship.MentorUserId == user.UserId {
+					userType = api.USER_TYPE_MENTEE
+				}
+
+				bc := api.BootstrapConnection{
+					Request: connection.DataToApi(connUserId, conn),
+					UserProfile: *convertUserToRelationshipDataModel(
+						*connUser,
+						data.MATCHING_STATE_UNKNOWN,
+						conn.Intent.SearchedTrait,
+						userType,
+					),
+				}
+
 				if conn.Mentorship.MentorUserId == user.UserId {
 					// Auth user is the mentor.
-					bc := api.BootstrapConnection{
-						Request: connection.DataToApi(connUserId, conn),
-						UserProfile: *convertUserToRelationshipDataModel(
-							*connUser,
-							data.MATCHING_STATE_UNKNOWN,
-							conn.Intent.SearchedTrait,
-							api.USER_TYPE_MENTEE,
-						),
-					}
 					rlog.Debug("adding mentee", bc)
 					response.Connections.Mentees =
 						append(response.Connections.Mentees, &bc)
 				} else {
 					// Auth user is the mentee.
-					bc := api.BootstrapConnection{
-						Request: connection.DataToApi(connUserId, conn),
-						UserProfile: *convertUserToRelationshipDataModel(
-							*connUser,
-							data.MATCHING_STATE_UNKNOWN,
-							conn.Intent.SearchedTrait,
-							api.USER_TYPE_MENTOR,
-						),
-					}
 					rlog.Debug("adding mentor", bc)
 					response.Connections.Mentors =
 						append(response.Connections.Mentors, &bc)

@@ -31,7 +31,10 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
+func handleRequestConnection(
+	c *ctx.Context,
+	request api.ConnectionRequest,
+) (*api.ConnectionRequest, errs.Error) {
 	// Assert users exist and are not equal.
 	authUser, _ := query.GetUserById(c.Db, c.SessionData.UserId)
 	if c.SessionData.UserId == request.UserId {
@@ -42,9 +45,9 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		return nil, errs.NewRequestError("Invalid user id")
 	}
 	// Assert request does not already exist.
-	existing, err := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, connUser.UserId)
-	if err != nil {
-		return nil, errs.NewDbError(err)
+	existing, dbErr := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, connUser.UserId)
+	if dbErr != nil {
+		return nil, errs.NewDbError(dbErr)
 	}
 	if existing != nil {
 		return nil, errs.NewRequestError("Connection already exists")
@@ -60,7 +63,7 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		SearchedTrait: request.SearchedTrait,
 		Message:       request.Message,
 	}
-	dbErr := c.WithinTx(func(tx *gorm.DB) error {
+	dbErr = c.WithinTx(func(tx *gorm.DB) error {
 		if err := tx.Create(&connection).Error; err != nil {
 			return err
 		}

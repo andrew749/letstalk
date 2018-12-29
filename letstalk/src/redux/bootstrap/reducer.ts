@@ -11,7 +11,6 @@ import {
 import {
   BootstrapData
 } from '../../models/bootstrap';
-import { setOnboardingStatusAction } from '../onboarding/actions';
 import {
   fetch,
   ActionTypes,
@@ -54,7 +53,6 @@ const fetchBootstrap: ActionCreator<
     await dispatch(fetch.start());
     try {
       const data = await profileService.bootstrap();
-      await dispatch(setOnboardingStatusAction(data.onboardingStatus));
       return dispatch(fetch.receive(data));
     } catch(e) {
       return dispatch(fetch.error(e));

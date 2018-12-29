@@ -1,7 +1,8 @@
 package query
 
 import (
-	"errors"
+	"fmt"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -15,16 +16,20 @@ import (
  * Try to see if there is school data associated with this account.
  * If there is no data, return nil
  */
-func GetUserCohort(db *gorm.DB, userId data.TUserID) (*data.Cohort, error) {
+func GetUserCohort(db *gorm.DB, userId data.TUserID) (*data.Cohort, errs.Error) {
 	cohortIdMapping, err := GetUserCohortMappingById(db, userId)
 
-	if err != nil {
+	// Either the user doesn't have a cohort or an error was thrown
+	if cohortIdMapping == nil {
 		return nil, err
 	}
 
 	var cohort data.Cohort
 	if db.Where("cohort_id = ?", cohortIdMapping.CohortId).First(&cohort).RecordNotFound() {
-		return nil, errors.New("Unable to find cohort")
+		return nil, errs.NewInternalError(fmt.Sprintf(
+			"Cannot find cohort with id %d",
+			cohortIdMapping.CohortId,
+		))
 	}
 	return &cohort, nil
 }
@@ -32,10 +37,14 @@ func GetUserCohort(db *gorm.DB, userId data.TUserID) (*data.Cohort, error) {
 /**
  * Get the particular cohort for a user.
  */
-func GetUserCohortMappingById(db *gorm.DB, userId data.TUserID) (*data.UserCohort, error) {
+func GetUserCohortMappingById(db *gorm.DB, userId data.TUserID) (*data.UserCohort, errs.Error) {
 	var cohort data.UserCohort
-	if err := db.Where("user_id = ?", userId).First(&cohort).Error; err != nil {
-		return nil, err
+	err := db.Where("user_id = ?", userId).First(&cohort).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil
+		}
+		return nil, errs.NewDbError(err)
 	}
 	return &cohort, nil
 }

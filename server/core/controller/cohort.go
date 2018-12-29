@@ -7,19 +7,8 @@ import (
 )
 
 /**
- * Api controller to get the cohort data for a specific user
+ * Returns all cohorts in the db
  */
-func GetCohortController(c *ctx.Context) errs.Error {
-	userId := c.SessionData.UserId
-	cohort, err := query.GetUserCohort(c.Db, userId)
-	if err != nil {
-		return errs.NewRequestError(err.Error())
-	}
-
-	c.Result = cohort
-	return nil
-}
-
 func GetAllCohortsController(c *ctx.Context) errs.Error {
 	cohorts, err := query.GetAllCohorts(c.Db)
 	if err != nil {

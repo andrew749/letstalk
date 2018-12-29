@@ -80,8 +80,8 @@ func GetProfile(
 	includeContactInfo bool,
 	includeSurveys bool,
 ) (*api.ProfileResponse, errs.Error) {
-	user, dbErr := GetUserProfileById(db, userId, includeContactInfo)
-	if dbErr != nil {
+	user, err := GetUserProfileById(db, userId, includeContactInfo)
+	if err != nil {
 		return nil, errs.NewRequestError("Unable to get user data.")
 	}
 	userCohort, dbErr := GetUserCohort(db, userId)

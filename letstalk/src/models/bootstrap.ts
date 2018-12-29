@@ -2,7 +2,6 @@ import Immutable from 'immutable';
 
 import { Cohort } from './cohort';
 import { UserPersonalInfo } from './user';
-import { OnboardingStatus } from './onboarding';
 import { Connection } from './connection';
 
 export interface Relationship {
@@ -66,7 +65,5 @@ interface BootstrapConnections {
 
 export interface BootstrapData {
   readonly state: UserState;
-  readonly cohort: Cohort;
-  readonly onboardingStatus: OnboardingStatus;
   readonly connections: BootstrapConnections;
 };

@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func GetUserSurvey(
+func getUserSurvey(
 	db *gorm.DB,
 	userId data.TUserID,
 	group data.SurveyGroup,
@@ -57,9 +57,85 @@ func GetUserGroupSurveys(db *gorm.DB, userId data.TUserID) ([]api.UserGroupSurve
 
 	for i, userGroupSurvey := range userGroupSurveys {
 		if userSurvey, ok := userSurveysByGroup[userGroupSurvey.Survey.Group]; ok {
-			userGroupSurveys[i].Survey.Responses = &userSurvey.Responses
+			relevantResponses := getRelevantResponses(userGroupSurveys[i].Survey, userSurvey.Responses)
+			userGroupSurveys[i].Survey.Responses = &relevantResponses
 		}
 	}
 
 	return userGroupSurveys, nil
+}
+
+func GetSurvey(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+) (*api.Survey, errs.Error) {
+	theSurvey := survey.GetSurveyDefinitionByGroup(group)
+	if theSurvey == nil {
+		return nil, errs.NewNotFoundError("no survey for user group '%v'", group)
+	}
+	if responses, err := getSurveyResponses(db, userId, group); err != nil {
+		return nil, err
+	} else if responses != nil {
+		// Filter out responses that aren't relevant to the current survey version
+		relevantResponses := getRelevantResponses(*theSurvey, *responses)
+		theSurvey.Responses = &relevantResponses
+	}
+	return theSurvey, nil
+}
+
+func getRelevantResponses(
+	survey api.Survey,
+	responses data.SurveyResponses,
+) data.SurveyResponses {
+	questionKeys := make(map[data.SurveyQuestionKey]interface{})
+	for _, question := range survey.Questions {
+		questionKeys[question.Key] = nil
+	}
+	relevantResponses := make(map[data.SurveyQuestionKey]data.SurveyOptionKey)
+	for key, response := range map[data.SurveyQuestionKey]data.SurveyOptionKey(responses) {
+		if _, ok := questionKeys[key]; ok {
+			relevantResponses[key] = response
+		}
+	}
+	return relevantResponses
+}
+
+func getSurveyResponses(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+) (*data.SurveyResponses, errs.Error) {
+	if userSurvey, err := getUserSurvey(db, userId, group); err != nil {
+		return nil, errs.NewDbError(err)
+	} else if userSurvey == nil {
+		return nil, nil
+	} else {
+		return &userSurvey.Responses, nil
+	}
+}
+
+func SaveSurveyResponses(
+	db *gorm.DB,
+	userId data.TUserID,
+	group data.SurveyGroup,
+	version int,
+	responses data.SurveyResponses,
+) errs.Error {
+	var newSurvey *data.UserSurvey
+	if oldSurvey, err := getUserSurvey(db, userId, group); err != nil {
+		return errs.NewDbError(err)
+	} else if oldSurvey != nil {
+		newSurvey = oldSurvey
+	} else {
+		newSurvey = &data.UserSurvey{}
+	}
+	newSurvey.UserId = userId
+	newSurvey.Group = group
+	newSurvey.Version = version
+	newSurvey.Responses = responses
+	if err := db.Save(&newSurvey).Error; err != nil {
+		return errs.NewInternalError("Error saving survey responses: %v", err)
+	}
+	return nil
 }

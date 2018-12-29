@@ -5,7 +5,6 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/notifications"
-	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 
@@ -47,17 +46,18 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Matching already exists between these users")
 	}
 
+	// TODO(wojtechnology): Check that users have finished onboarding using user_state module
 	// Ensure users have finished onboarding.
-	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentor.UserId); err != nil {
-		return err
-	} else if onboardingStatus.State != api.ONBOARDING_DONE {
-		return errs.NewRequestError("Mentor is not finished onboarding")
-	}
-	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentee.UserId); err != nil {
-		return err
-	} else if onboardingStatus.State != api.ONBOARDING_DONE {
-		return errs.NewRequestError("Mentee is not finished onboarding")
-	}
+	// if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentor.UserId); err != nil {
+	// 	return err
+	// } else if onboardingStatus.State != api.ONBOARDING_DONE {
+	// 	return errs.NewRequestError("Mentor is not finished onboarding")
+	// }
+	// if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentee.UserId); err != nil {
+	// 	return err
+	// } else if onboardingStatus.State != api.ONBOARDING_DONE {
+	// 	return errs.NewRequestError("Mentee is not finished onboarding")
+	// }
 
 	// Insert new matching.
 	matching := &data.Matching{
