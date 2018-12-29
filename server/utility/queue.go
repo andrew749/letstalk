@@ -14,7 +14,7 @@ type queueMessage struct {
 	retry   int
 }
 
-type SQSMock struct {
+type LocalQueueImpl struct {
 	listeners  map[string][]func(*events.SQSEvent) error
 	eventQueue chan queueMessage
 	doneQueue  chan bool
@@ -25,17 +25,17 @@ type SQSQueue interface {
 }
 
 // WaitForQueueDone Wait until a queue is done processing (has been closed)
-func (s SQSMock) WaitForQueueDone() {
+func (s LocalQueueImpl) WaitForQueueDone() {
 	// block on channel
 	<-s.doneQueue
 	s.doneQueue <- true
 }
 
-func (s SQSMock) CloseQueue() {
+func (s LocalQueueImpl) CloseQueue() {
 	close(s.eventQueue)
 }
 
-func (s SQSMock) QueueProcessor() {
+func (s LocalQueueImpl) QueueProcessor() {
 	for {
 		select {
 		case m, more := <-s.eventQueue:
@@ -73,7 +73,7 @@ func (s SQSMock) QueueProcessor() {
 	rlog.Debug("Queue processor exiting.")
 }
 
-func (s SQSMock) SendMessage(input *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
+func (s LocalQueueImpl) SendMessage(input *sqs.SendMessageInput) (*sqs.SendMessageOutput, error) {
 	queueUrl := input.QueueUrl
 	message := input.MessageBody
 	s.eventQueue <- queueMessage{
@@ -96,7 +96,7 @@ func messageToSQSEvent(message *string) *events.SQSEvent {
 	}
 }
 
-func (s SQSMock) SubscribeListener(url string, handler func(*events.SQSEvent) error) {
+func (s LocalQueueImpl) SubscribeListener(url string, handler func(*events.SQSEvent) error) {
 	_, ok := s.listeners[url]
 	if !ok {
 		s.listeners[url] = make([]func(*events.SQSEvent) error, 0, 1)
@@ -106,9 +106,9 @@ func (s SQSMock) SubscribeListener(url string, handler func(*events.SQSEvent) er
 	rlog.Infof("Subscribing listener for url %s", url)
 }
 
-func CreateMockSQSClient() SQSMock {
-	rlog.Info("Initializing mock SQS")
-	return SQSMock{
+func CreateLocalSQSClient() LocalQueueImpl {
+	rlog.Info("Initializing local SQS")
+	return LocalQueueImpl{
 		listeners:  make(map[string][]func(*events.SQSEvent) error),
 		eventQueue: make(chan queueMessage, 10),
 		doneQueue:  make(chan bool, 1),
