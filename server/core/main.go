@@ -111,6 +111,7 @@ func main() {
 
 	// finish processing any messages before closing
 	defer sqs.WaitForQueueDone()
+	defer sqs.CloseQueue()
 
 	// Start server
 	rlog.Info("Serving on port ", *port)
