@@ -62,8 +62,6 @@ import {
   fetchBootstrap,
 } from '../redux/bootstrap/reducer';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 interface DispatchActions {
   fetchMatchProfile: ActionCreator<ThunkAction<Promise<MatchProfileActionTypes>, MatchProfileState, void>>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;

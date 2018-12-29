@@ -73,8 +73,6 @@ import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { GROUP_GENERIC } from '../services/survey';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 type EditFormComponentProps = FormProps<PhotoResult> & PhotoResult;
 
 class EditForm extends Component<EditFormComponentProps, State> {

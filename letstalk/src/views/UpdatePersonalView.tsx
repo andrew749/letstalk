@@ -28,8 +28,6 @@ import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 import { combineFetchStates } from '../redux/actions';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 import {
   ActionButton,
   ButtonPicker,
