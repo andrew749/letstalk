@@ -74,7 +74,7 @@ func GetSurvey(
 	if theSurvey == nil {
 		return nil, errs.NewNotFoundError("no survey for user group '%v'", group)
 	}
-	if responses, err := getSurveyResponses(db, userId, group); err != nil {
+	if responses, err := GetSurveyResponses(db, userId, group); err != nil {
 		return nil, err
 	} else if responses != nil {
 		// Filter out responses that aren't relevant to the current survey version
@@ -101,7 +101,7 @@ func getRelevantResponses(
 	return relevantResponses
 }
 
-func getSurveyResponses(
+func GetSurveyResponses(
 	db *gorm.DB,
 	userId data.TUserID,
 	group data.SurveyGroup,

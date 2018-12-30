@@ -23,7 +23,7 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 
-	if newConnection, err := handleRequestConnection(c, input); err != nil {
+	if newConnection, err := HandleRequestConnection(c, input); err != nil {
 		return err
 	} else {
 		c.Result = newConnection
@@ -31,7 +31,8 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleRequestConnection(
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleRequestConnection(
 	c *ctx.Context,
 	request api.ConnectionRequest,
 ) (*api.ConnectionRequest, errs.Error) {
@@ -97,7 +98,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 
-	if newConnection, err := handleAcceptConnection(c, input); err != nil {
+	if newConnection, err := HandleAcceptConnection(c, input); err != nil {
 		return err
 	} else {
 		c.Result = newConnection
@@ -105,7 +106,8 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAcceptConnection(
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleAcceptConnection(
 	c *ctx.Context,
 	request api.AcceptConnectionRequest,
 ) (*api.ConnectionRequest, errs.Error) {

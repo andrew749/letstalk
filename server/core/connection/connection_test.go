@@ -34,7 +34,7 @@ func TestRequestConnection(t *testing.T) {
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: &searchedTrait,
 				}
-				result, err := handleRequestConnection(c, request)
+				result, err := HandleRequestConnection(c, request)
 				assert.NoError(t, err)
 				// Check result.
 				expected := request
@@ -66,13 +66,13 @@ func TestRequestConnection(t *testing.T) {
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: &searchedTrait,
 				}
-				handleRequestConnection(c, request)
+				HandleRequestConnection(c, request)
 				// Accept the request as user two.
 				c.SessionData = &sessions.SessionData{UserId: userTwo.UserId}
 				acceptReq := api.AcceptConnectionRequest{
 					UserId: userOne.UserId,
 				}
-				result, err := handleAcceptConnection(c, acceptReq)
+				result, err := HandleAcceptConnection(c, acceptReq)
 				// Assert that AcceptedAt appears in result.
 				assert.NoError(t, err)
 				assert.NotNil(t, result.AcceptedAt)
@@ -101,7 +101,7 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: &searchedTrait,
 				}
-				result, err := handleRequestConnection(c, request)
+				result, err := HandleRequestConnection(c, request)
 				assert.Error(t, err)
 				assert.Nil(t, result)
 			},
@@ -119,12 +119,12 @@ func TestRequestConnectionBadRequests(t *testing.T) {
 					IntentType:    data.INTENT_TYPE_SEARCH,
 					SearchedTrait: &searchedTrait,
 				}
-				handleRequestConnection(c, request)
+				HandleRequestConnection(c, request)
 				// Accept the request as the same user.
 				acceptReq := api.AcceptConnectionRequest{
 					UserId: userTwo.UserId,
 				}
-				result, err := handleAcceptConnection(c, acceptReq)
+				result, err := HandleAcceptConnection(c, acceptReq)
 				// Assert that AcceptedAt appears in result.
 				assert.Error(t, err)
 				assert.Nil(t, result)

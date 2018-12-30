@@ -3,7 +3,6 @@ package test_helpers
 import (
 	"fmt"
 
-	"letstalk/server/core/query"
 	"letstalk/server/core/survey"
 	"letstalk/server/data"
 
@@ -69,7 +68,12 @@ func CreateTestSetupUser(db *gorm.DB, num int) (*data.User, error) {
 		"school_work": "minimally",
 		"working_on":  "school",
 	}
-	err = query.SaveSurveyResponses(db, user.UserId, survey.Generic_v1.Group, 1, responses)
+	err = db.Save(&data.UserSurvey{
+		UserId:    user.UserId,
+		Group:     survey.Generic_v1.Group,
+		Version:   1,
+		Responses: responses,
+	}).Error
 	if err != nil {
 		return nil, err
 	}

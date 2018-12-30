@@ -25,7 +25,7 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
-	if err := handleAddMentorship(c.Db, &input); err != nil {
+	if err := HandleAddMentorship(c.Db, &input); err != nil {
 		rlog.Error("failed to add mentorship for mentor/mentee pair", input)
 		return err
 	}
@@ -38,7 +38,8 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
 	var mentor, mentee *data.User
 	var err errs.Error
 	if request.MentorEmail == request.MenteeEmail {

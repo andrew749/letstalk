@@ -4,6 +4,7 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/test"
 	"letstalk/server/data"
+	"letstalk/server/test_helpers"
 	"testing"
 
 	"github.com/jinzhu/gorm"
@@ -18,9 +19,9 @@ func TestDataSearching(t *testing.T) {
 				var err error
 				user1Id := 1
 				user2Id := 2
-				user, err := query.CreateTestUser(db, user1Id)
+				user, err := test_helpers.CreateTestUser(db, user1Id)
 				assert.NoError(t, err)
-				user2, err := query.CreateTestUser(db, user2Id)
+				user2, err := test_helpers.CreateTestUser(db, user2Id)
 				assert.NoError(t, err)
 				_, err = query.AddUserSimpleTraitByName(db, nil, data.TUserID(user1Id), "test trait")
 				assert.NoError(t, err)
@@ -36,10 +37,10 @@ func TestDataSearching(t *testing.T) {
 				var err error
 				user1Id := 3
 				user2Id := 4
-				user, err := query.CreateTestUser(db, user1Id)
+				user, err := test_helpers.CreateTestUser(db, user1Id)
 				assert.NoError(t, err)
 
-				user2, err := query.CreateTestUser(db, user2Id)
+				user2, err := test_helpers.CreateTestUser(db, user2Id)
 				assert.NoError(t, err)
 
 				bio := "Give me the zucc"
@@ -59,9 +60,9 @@ func TestDataSearching(t *testing.T) {
 				var err error
 				user1Id := 5
 				user2Id := 6
-				user, err := query.CreateTestUser(db, user1Id)
+				user, err := test_helpers.CreateTestUser(db, user1Id)
 				assert.NoError(t, err)
-				user2, err := query.CreateTestUser(db, user2Id)
+				user2, err := test_helpers.CreateTestUser(db, user2Id)
 				assert.NoError(t, err)
 
 				positionName := "test"
@@ -81,9 +82,9 @@ func TestDataSearching(t *testing.T) {
 				var err error
 				user1Id := 7
 				user2Id := 8
-				user, err := query.CreateTestUser(db, user1Id)
+				user, err := test_helpers.CreateTestUser(db, user1Id)
 				assert.NoError(t, err)
-				user2, err := query.CreateTestUser(db, user2Id)
+				user2, err := test_helpers.CreateTestUser(db, user2Id)
 				assert.NoError(t, err)
 
 				err = query.CreateUserGroups(db, nil, []data.TUserID{data.TUserID(user1Id)}, data.TGroupID("test"), "test")
