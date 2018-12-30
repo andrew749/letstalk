@@ -23,10 +23,8 @@ import {
   MultiTraitTypes,
 } from '../../models/multi-trait';
 import Colors from '../../services/colors';
+import Window from '../../services/window';
 import { greedyMatch } from '../../components/AutocompleteInput';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface ItemElement {
   readonly type: 'ITEM';
@@ -261,9 +259,9 @@ export default UserSearchAutocompleteModal;
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    width: SCREEN_WIDTH,
+    width: Window.WIDTH,
     // TODO: doesn't take into account header height
-    height: SCREEN_HEIGHT - Constants.statusBarHeight,
+    height: Window.HEIGHT - Constants.statusBarHeight,
     top: 0,
     left: 0,
     alignSelf: 'stretch',

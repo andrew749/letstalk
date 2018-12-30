@@ -47,14 +47,13 @@ import {
 } from '../components';
 import Loading from './Loading';
 import Colors from '../services/colors';
+import Window from '../services/window';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { AnalyticsHelper } from '../services';
 import { DEFAULT_SEARCH_SIZE } from '../services/user-search-service';
 import { UserSearchResult } from '../models/user-search';
 import { IntentTypes } from '../models/connection';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface DispatchActions {
   searchByCohort: ActionCreator<ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
@@ -414,7 +413,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     flexDirection: 'column',
-    width: SCREEN_WIDTH - 100,
+    width: Window.WIDTH - 100,
     paddingLeft: 10,
   },
   rightArrow: {

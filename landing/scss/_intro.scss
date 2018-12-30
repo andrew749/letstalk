@@ -33,7 +33,44 @@
     line-height: 56px;
     color: #fff;
   }
-  
+
+  #intro {
+    text-align: center;
+
+    .download-container * {
+      display: inline-block;
+    }
+
+    .google-link {
+      position: relative;
+      width:162px;
+      height: 60px;
+      margin-top:-30px;
+    }
+
+    .apple-link {
+      margin-top: -10px;
+      width:136px;
+      height:40px;
+    }
+  }
+
+  @media(max-width: 500px) {
+    #intro {
+      .download-container * {
+        display: block;
+      }
+
+      .apple-link {
+        margin: 0 auto;
+      }
+
+      .google-link {
+        margin-top: 0px;
+      }
+    }
+  }
+
   @media (max-width: 768px) {
     #intro h2 {
       font-size: 28px;

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Platform,
   StyleSheet,
   View,
 } from 'react-native';
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     // Bit of a hack that makes it easier to position the spinner
     width: 0,
     height: 0,
-    left: 107,
-    top: 123,
+    left: Platform.OS === 'ios' ? 107 : 105,
+    top: Platform.OS === 'ios' ? 123 : 121,
   },
 });
