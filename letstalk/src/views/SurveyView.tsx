@@ -24,6 +24,7 @@ import {headerStyle, headerTintColor, headerTitleStyle} from "./TopHeader";
 import {SurveyOption, SurveyQuestion, SurveyResponses} from "../models/survey";
 import {Text} from "react-native-elements";
 import Colors from "../services/colors";
+import Window from '../services/window';
 import ActionButton from "../components/ActionButton";
 import surveyService, { GROUP_GENERIC } from "../services/survey";
 import {
@@ -214,7 +215,6 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
   }
 }
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   surveyOption: {
     width: '90%',
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   questionCard: {
-    width: SCREEN_WIDTH - 80,
+    width: Window.WIDTH - 80,
     alignItems: 'center',
   },
   questionPromptContainer: {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   actionButton: {
-    width: SCREEN_WIDTH - 80,
+    width: Window.WIDTH - 80,
     marginTop: 10,
     marginBottom: 30,
     padding: 8,
