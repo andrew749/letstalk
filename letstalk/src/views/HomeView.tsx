@@ -457,7 +457,7 @@ class HomeView extends Component<Props, State> {
         return (
 
           <View style={styles.container}>
-gj           <ScrollView
+            <ScrollView
               refreshControl={
                 <RefreshControl
                   refreshing={this.state.refreshing}
