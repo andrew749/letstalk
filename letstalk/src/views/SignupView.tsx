@@ -29,8 +29,6 @@ import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import auth from "../services/auth";
 import { required, email, phoneNumber, password } from '../validators';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-
 interface SignupFormData {
   firstName: string;
   lastName: string;

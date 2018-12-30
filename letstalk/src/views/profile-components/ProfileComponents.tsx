@@ -28,14 +28,13 @@ import { UserPosition } from '../../models/position';
 import { UserSimpleTrait } from '../../models/simple-trait';
 import { UserGroupSurvey } from '../../models/profile';
 import Colors from '../../services/colors';
+import Window from '../../services/window';
 import { RootState } from '../../redux';
 import { genderIdToString, GenderId } from '../../models/user';
 import { State as SurveyState } from '../../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../../redux/survey/actions';
 import { State as ProfileState } from '../../redux/profile/reducer';
 import { ActionTypes as ProfileActionTypes } from '../../redux/profile/actions';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface PersonalInfoProps {
 	firstName: string;
@@ -486,7 +485,7 @@ export class UserSimpleTraits extends Component<UserSimpleTraitsProps, UserTrait
   }
 };
 
-const BUTTON_WIDTH = SCREEN_WIDTH - 80;
+const BUTTON_WIDTH = Window.WIDTH - 80;
 
 export const styles = StyleSheet.create({
   addTraitButton: {
