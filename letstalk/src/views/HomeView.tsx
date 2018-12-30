@@ -30,11 +30,22 @@ import {
   State as BootstrapState,
   fetchBootstrap,
 } from '../redux/bootstrap/reducer';
+import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
+import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
-import {MatchingState, Relationship, getHumanReadableUserType} from '../models/bootstrap';
+import {
+  USER_STATE_ACCOUNT_CREATED,
+  USER_STATE_ACCOUNT_EMAIL_VERIFIED,
+  USER_STATE_ACCOUNT_HAS_BASIC_INFO,
+  USER_STATE_ACCOUNT_SETUP,
+  USER_STATE_ACCOUNT_MATCHED,
+  MatchingState,
+  Relationship,
+  getHumanReadableUserType,
+} from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
   USER_TYPE_MENTEE,
@@ -53,11 +64,13 @@ import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../s
 import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
+import { GROUP_GENERIC } from '../services/survey';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
 }
 
 interface Props extends BootstrapState, DispatchActions {
@@ -97,31 +110,43 @@ class HomeView extends Component<Props, State> {
     if (!!this.props.bootstrap) {
       await this.loadBootstrap();
     } else {
-      await this.maybeNavigateRequired(this.props);
+      await this.maybeNavigateRequired();
     }
 
     await TutorialService.launchTutorial(this.props.navigation);
   }
 
-  async componentWillReceiveProps(nextProps: Props) {
-    await this.maybeNavigateRequired(nextProps);
+  async componentDidUpdate() {
+    await this.maybeNavigateRequired();
   }
 
   // Depending on the user's state, we may need to navigate to another view to get more info
-  private async maybeNavigateRequired(props: Props) {
-    if (!!props.bootstrap) {
-      if (props.bootstrap.state === 'account_created') {
-        // Email not yet verified, so take to email verification page
-        await this.props.navigation.dispatch(NavigationActions.reset({
-          index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
-        }));
-      } else if (props.bootstrap.state === 'account_email_verified') {
-        // Account not yet setup, so take to onboarding page
-        await this.props.navigation.dispatch(NavigationActions.reset({
-          index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
-        }));
+  private async maybeNavigateRequired() {
+    if (!!this.props.bootstrap) {
+      switch (this.props.bootstrap.state) {
+        case USER_STATE_ACCOUNT_CREATED:
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_EMAIL_VERIFIED:
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_HAS_BASIC_INFO:
+          await this.props.fetchSurvey(GROUP_GENERIC);
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'SurveyView' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_SETUP:
+          // fallthrough
+        case USER_STATE_ACCOUNT_MATCHED:
+          // fallthrough
       }
     }
   }
@@ -415,9 +440,11 @@ class HomeView extends Component<Props, State> {
 
     const { state } = this.props.bootstrap;
     switch (state) {
-      case 'account_created':
+      case USER_STATE_ACCOUNT_CREATED:
         // fallthrough
-      case 'account_email_verified':
+      case USER_STATE_ACCOUNT_EMAIL_VERIFIED:
+        // fallthrough
+      case USER_STATE_ACCOUNT_HAS_BASIC_INFO:
         // Should in reality not be shown, since we never show home page until state account_setup.
         return (
           <View style={styles.centeredContainer}>
@@ -425,7 +452,7 @@ class HomeView extends Component<Props, State> {
             <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
           </View>
         );
-      case 'account_setup':
+      case USER_STATE_ACCOUNT_SETUP:
         const peerMatches = this.renderPeerMatches();
         return (
 
@@ -450,7 +477,7 @@ gj           <ScrollView
             </ScrollView>
           </View>
         );
-      case 'account_matched':
+      case USER_STATE_ACCOUNT_MATCHED:
         const matches = this.renderMatches();
         // Watch out! Typescript hack below.
         return (
@@ -509,7 +536,7 @@ gj           <ScrollView
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap })(HomeView);
+  { errorToast, infoToast, fetchBootstrap, fetchSurvey })(HomeView);
 
 const styles = StyleSheet.create({
   container: {
