@@ -2,7 +2,6 @@ import Immutable from 'immutable';
 
 import { Cohort } from './cohort';
 import { UserPersonalInfo } from './user';
-import { OnboardingStatus } from './onboarding';
 import { Connection } from './connection';
 
 export interface Relationship {
@@ -40,9 +39,16 @@ export enum MatchingState {
   Expired,
 }
 
+export const USER_STATE_ACCOUNT_CREATED = 'account_created';
+export const USER_STATE_ACCOUNT_EMAIL_VERIFIED = 'account_email_verified';
+export const USER_STATE_ACCOUNT_HAS_BASIC_INFO = 'account_has_basic_info';
+export const USER_STATE_ACCOUNT_SETUP = 'account_setup';
+export const USER_STATE_ACCOUNT_MATCHED = 'account_matched';
+
 export type UserState =
   | 'account_created'
   | 'account_email_verified'
+  | 'account_has_basic_info'
   | 'account_setup'
   | 'account_matched';
 
@@ -66,7 +72,5 @@ interface BootstrapConnections {
 
 export interface BootstrapData {
   readonly state: UserState;
-  readonly cohort: Cohort;
-  readonly onboardingStatus: OnboardingStatus;
   readonly connections: BootstrapConnections;
 };

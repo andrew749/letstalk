@@ -5,8 +5,8 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/notifications"
-	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
+	"letstalk/server/core/user_state"
 	"letstalk/server/data"
 
 	raven "github.com/getsentry/raven-go"
@@ -47,15 +47,14 @@ func PostMatchingController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Matching already exists between these users")
 	}
 
-	// Ensure users have finished onboarding.
-	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentor.UserId); err != nil {
+	if userState, err := user_state.GetUserState(c.Db, mentor.UserId); err != nil {
 		return err
-	} else if onboardingStatus.State != api.ONBOARDING_DONE {
+	} else if *userState != api.ACCOUNT_SETUP {
 		return errs.NewRequestError("Mentor is not finished onboarding")
 	}
-	if onboardingStatus, err := onboarding.GetOnboardingInfo(c.Db, mentee.UserId); err != nil {
+	if userState, err := user_state.GetUserState(c.Db, mentee.UserId); err != nil {
 		return err
-	} else if onboardingStatus.State != api.ONBOARDING_DONE {
+	} else if *userState != api.ACCOUNT_SETUP {
 		return errs.NewRequestError("Mentee is not finished onboarding")
 	}
 

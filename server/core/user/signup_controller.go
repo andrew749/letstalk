@@ -6,7 +6,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/onboarding"
+	"letstalk/server/core/s3_assets"
 	"letstalk/server/core/utility"
 	"letstalk/server/data"
 	"letstalk/server/email"
@@ -149,7 +149,7 @@ func writeUser(userData *api.SignupRequest, c *ctx.Context) error {
 		}
 		reader := bytes.NewReader(photoData)
 		var location *string
-		if location, err = onboarding.UploadProfilePic(userModel.UserId, reader); err != nil {
+		if location, err = s3_assets.UploadProfilePic(userModel.UserId, reader); err != nil {
 			tx.Rollback()
 			return err
 		}

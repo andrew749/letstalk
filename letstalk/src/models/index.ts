@@ -4,18 +4,12 @@ import { ProfileData } from './profile';
 import {
   GenderId,
 } from './user';
-import {
-  OnboardingState,
-  OnboardingStatus,
-} from './onboarding';
 import { Survey } from './survey'
 
 export {
   BootstrapData,
   Cohort,
   GenderId,
-  OnboardingState,
-  OnboardingStatus,
   ProfileData,
   Relationship,
   UserState,

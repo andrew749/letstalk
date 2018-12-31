@@ -32,9 +32,12 @@ import {
   fetchProfile,
   setSurvey
 } from '../redux/profile/reducer';
+import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
+import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
 import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
 
 interface DispatchActions {
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setSurvey: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   setSurveyResponsesAction(surveyResponses: SurveyResponses): SetSurveyResponsesAction;
@@ -95,9 +98,21 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
         await surveyService.postSurveyResponses(survey);
         await this.props.fetchSurvey(survey.group);
         if (survey.group !== GROUP_GENERIC) {
+          // Generic survey is for all users and not to a particular group so we don't
+          // need to set its value for the group.
           await this.props.setSurvey(survey);
+          // Since we push the SurveyView onto the stack, and each new question is another
+          // SurveyView, pop back the correct number of screens.
+          await this.props.navigation.pop(survey.questions.size);
+        } else {
+          await this.props.fetchBootstrap();
+          // Since this is accessed from HomeView by resetting the stack, you can't actually go
+          // back to the HomeView. Need to place only the Tabbed view on the stack.
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+          }));
         }
-        await this.props.navigation.pop(survey.questions.size);
       } catch(e) {
         console.error("error submitting responses", e);
         throw new SubmissionError({_error: e.errorMsg});
@@ -298,6 +313,6 @@ const styles = StyleSheet.create({
 });
 
 const SurveyView = connect(({ survey } : RootState) => survey,
-  { fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
+  { fetchBootstrap, fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
 
 export default SurveyView;
