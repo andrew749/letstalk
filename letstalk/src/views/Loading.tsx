@@ -9,9 +9,16 @@ import {
 import auth from '../services/auth';
 import { ActionButton } from '../components';
 import { ErrorTypes } from '../services/requests';
+import {
+  FETCH_STATE_PREFETCH,
+  FETCH_STATE_FETCHING,
+  FETCH_STATE_ERROR,
+  FETCH_STATE_SUCCESS,
+  States,
+} from '../redux/actions';
 
 interface Props {
-  state: 'prefetch' | 'fetching' | 'error' | 'success';
+  state: States;
   errorMsg: string | null;
   errorType: ErrorTypes | null;
   renderBody(): ReactElement<any>;
@@ -23,15 +30,15 @@ const Loading: SFC<Props> = props => {
   const { state, errorMsg, errorType, load, navigation, renderBody } = props;
 
   switch (state) {
-    case 'prefetch':
-    case 'fetching':
+    case FETCH_STATE_PREFETCH:
+    case FETCH_STATE_FETCHING:
       return (
         <View style={styles.centeredContainer}>
           <Text style={styles.headline}>Loading...</Text>
           <ActivityIndicator size="large" />
         </View>
       );
-    case 'error':
+    case FETCH_STATE_ERROR:
       const isUnauthorized = !!errorType && errorType === 'UNAUTHORIZED';
       const headline = isUnauthorized ?
         'Your session token has expired' : 'Something went wrong :(';
@@ -57,7 +64,7 @@ const Loading: SFC<Props> = props => {
           {logoutButton}
         </View>
       );
-    case 'success':
+    case FETCH_STATE_SUCCESS:
       return renderBody();
     default:
       // Ensure exhaustiveness of select

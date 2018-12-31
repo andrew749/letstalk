@@ -2,7 +2,12 @@ import { Action } from 'redux';
 
 import { APIError, ErrorTypes } from '../services/requests';
 
-type States = 'prefetch' | 'fetching' | 'error' | 'success';
+export const FETCH_STATE_PREFETCH = 'prefetch';
+export const FETCH_STATE_FETCHING = 'fetching';
+export const FETCH_STATE_ERROR = 'error';
+export const FETCH_STATE_SUCCESS = 'success';
+
+export type States = 'prefetch' | 'fetching' | 'error' | 'success';
 
 export type FetchState = {
   readonly state: States;
@@ -64,11 +69,15 @@ export function getDataOrCur<P, D>(action: FetchActions<P, D>, cur: D): D | null
 export function fetchStateReducer<P, D>(action: FetchActions<P, D>): FetchState {
   switch (action.fetchType) {
     case FetchTypeKeys.RECEIVE:
-      return { state: 'success' };
+      return { state: FETCH_STATE_SUCCESS };
     case FetchTypeKeys.ERROR:
-      return { state: 'error', errorMsg: action.error.errorMsg, errorType: action.error.errorType };
+      return {
+        state: FETCH_STATE_ERROR,
+        errorMsg: action.error.errorMsg,
+        errorType: action.error.errorType,
+      };
     case FetchTypeKeys.START:
-      return { state: 'fetching' };
+      return { state: FETCH_STATE_FETCHING };
     default:
       // Ensure exhaustiveness of select
       const _: never = action;
@@ -90,7 +99,12 @@ export function combineFetchStates(fst: FetchState, snd: FetchState): FetchState
     (fst.errorMsg ? fst.errorMsg + ', ' + snd.errorMsg : snd.errorMsg) :
     fst.errorMsg;
   const errorType = combineErrorTypes(fst.errorType, snd.errorType);
-  const possibleStates = ['prefetch', 'fetching', 'error', 'success'] as Array<States>;
+  const possibleStates = [
+    FETCH_STATE_PREFETCH,
+    FETCH_STATE_FETCHING,
+    FETCH_STATE_ERROR,
+    FETCH_STATE_SUCCESS,
+  ] as Array<States>;
   const fstIdx = possibleStates.indexOf(fst.state);
   const sndIdx = possibleStates.indexOf(snd.state);
   const idx = fstIdx < sndIdx ? fstIdx : sndIdx;
@@ -102,5 +116,5 @@ export function combineFetchStates(fst: FetchState, snd: FetchState): FetchState
   };
 }
 
-const initialFetchState: FetchState = { state: 'prefetch' };
+const initialFetchState: FetchState = { state: FETCH_STATE_PREFETCH };
 export { initialFetchState };
