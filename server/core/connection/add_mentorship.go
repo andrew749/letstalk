@@ -47,10 +47,10 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	}
 	var noSuchMentorErr, noSuchMenteeErr string
 	if mentor, err = query.GetUserByEmail(db, request.MentorEmail); err != nil || mentor == nil {
-		noSuchMentorErr = fmt.Sprintf("no such user %s, %v", request.MentorEmail, err)
+		noSuchMentorErr = fmt.Sprintf("no such user %s, %+v", request.MentorEmail, err)
 	}
 	if mentee, err = query.GetUserByEmail(db, request.MenteeEmail); err != nil || mentee == nil {
-		noSuchMenteeErr = fmt.Sprintf("no such user %s, %v", request.MenteeEmail, err)
+		noSuchMenteeErr = fmt.Sprintf("no such user %s, %+v", request.MenteeEmail, err)
 	}
 	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
