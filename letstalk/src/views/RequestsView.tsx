@@ -56,6 +56,7 @@ import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { ConnectionRequestWithName } from '../models/bootstrap';
+import { FETCH_STATE_SUCCESS } from '../redux/actions';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -333,7 +334,7 @@ class RequestsView extends Component<Props, State> {
     // down, which means that we want to still display the ScrollView.
     return (
       <Loading
-        state={this.state.refreshing ? 'success' : state}
+        state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
         errorMsg={errorMsg}
         errorType={errorType}
         load={this.load}

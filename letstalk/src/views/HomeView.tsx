@@ -65,6 +65,7 @@ import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { GROUP_GENERIC } from '../services/survey';
+import { FETCH_STATE_SUCCESS } from '../redux/actions';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -522,7 +523,7 @@ class HomeView extends Component<Props, State> {
     return (
       <View style={{flex: 1}}>
         <Loading
-          state={this.state.refreshing ? 'success' : state}
+          state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
           errorMsg={errorMsg}
           errorType={errorType}
           load={this.loadBootstrap}
