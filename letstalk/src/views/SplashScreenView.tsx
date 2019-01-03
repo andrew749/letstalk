@@ -42,7 +42,7 @@ interface Props extends DispatchActions {
 // launch.
 let addedExpoToken = false;
 
-const PROBABILITY_SHOW_IOS_MODEL = 0.2;
+const PROBABILITY_SHOW_IOS_MODEL = 0.4;
 
 function showModal(): boolean {
   return Math.random() < PROBABILITY_SHOW_IOS_MODEL;
