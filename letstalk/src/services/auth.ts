@@ -8,6 +8,26 @@ import {FORGOT_PASSWORD_ROUTE, SEND_EMAIL_VERIFICATION_ROUTE} from './constants'
 import {Notifications, Permissions} from "expo";
 import {SendAccountVerificationEmailRequest} from "../models/verify_email";
 
+function AsyncIOSNotificationAlert(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // iOS doesn't show dialog a second time, so refer users to app settings to change config.
+    const onPress = () => {
+      Linking.openURL('app-settings:');
+      resolve();
+    }
+    Alert.alert(
+      'Notification Permissions',
+      'Open app settings to enable notifications permissions. Notifications will let you know ' +
+      'when you have new matches, remind you to check-in with your connections and inform you ' +
+      'about events happening on campus.',
+      [
+        {text: 'Cancel', onPress: () => resolve(), style: 'cancel'},
+        {text: 'Open Settings', onPress: onPress, style: 'default'},
+      ],
+    );
+  });
+}
+
 export class Auth {
   private sessionService: SessionService
   private sessionToken: SessionToken
@@ -79,18 +99,7 @@ export class Auth {
     // iOS won't necessarily prompt the user a second time.
     if (existingStatus !== 'granted') {
       if (Platform.OS === 'ios' && showModalOnMissing) {
-        const onPress = () => Linking.openURL('app-settings:');
-        // iOS doesn't show dialog a second time, so refer users to app settings to change config.
-        Alert.alert(
-          'Notification Permissions',
-          'Open app settings to enable notifications permissions. Notifications will let you know ' +
-          'when you have new matches, remind you to check-in with your connections and inform you ' +
-          'about events happening on campus.',
-          [
-            {text: 'Cancel', onPress: () => null, style: 'cancel'},
-            {text: 'Open Settings', onPress: onPress, style: 'default'},
-          ],
-        );
+        await AsyncIOSNotificationAlert();
       }
       // Android remote notification permissions are granted during the app
       // install, so this will only ask on iOS
