@@ -267,6 +267,10 @@ func Register(
 		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
 	)
 
+	// User Devices
+	v1.OPTIONS("/user_device/expo")
+	v1.POST("/user_device/expo", hw.wrapHandler(controller.AddExpoDeviceToken, true))
+
 	// User Positions
 	v1.OPTIONS("/user_position")
 	v1.POST("/user_position", hw.wrapHandler(controller.AddUserPositionController, true))

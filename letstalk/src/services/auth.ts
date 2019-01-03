@@ -1,6 +1,6 @@
 // TODO: Figure out how to make this library work, since we would prefer to encrypt our token
 // import * as Keychain from 'react-native-keychain';
-import { AsyncStorage } from 'react-native';
+import { Alert, AsyncStorage, Linking, Platform } from 'react-native';
 
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
@@ -69,13 +69,29 @@ export class Auth {
     return await this.sessionService.linkFb(sessionToken);
   }
 
-  async registerForPushNotificationsAsync(): Promise<string> {
+  // showModal: if true, and user on ios is missing the notification permission, will show a modal
+  // asking them to change the settings.
+  async registerForPushNotificationsAsync(showModalOnMissing: boolean = false): Promise<string> {
     const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS as any);
     let finalStatus = existingStatus;
 
     // only ask if permissions have not already been determined, because
     // iOS won't necessarily prompt the user a second time.
     if (existingStatus !== 'granted') {
+      if (Platform.OS === 'ios' && showModalOnMissing) {
+        const onPress = () => Linking.openURL('app-settings:');
+        // iOS doesn't show dialog a second time, so refer users to app settings to change config.
+        Alert.alert(
+          'Notification Permissions',
+          'Open app settings to enable notifications permissions. Notifications will let you know ' +
+          'when you have new matches, remind you to check-in with your connections and inform you ' +
+          'about events happening on campus.',
+          [
+            {text: 'Cancel', onPress: () => null, style: 'cancel'},
+            {text: 'Open Settings', onPress: onPress, style: 'default'},
+          ],
+        );
+      }
       // Android remote notification permissions are granted during the app
       // install, so this will only ask on iOS
       const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS as any);
@@ -84,7 +100,7 @@ export class Auth {
 
     // Stop here if the user did not grant permissions
     if (finalStatus !== 'granted') {
-      return;
+      return null;
     }
 
     // Get the token that uniquely identifies this device

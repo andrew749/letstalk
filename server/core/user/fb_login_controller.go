@@ -123,7 +123,7 @@ func FBController(c *ctx.Context) errs.Error {
 
 	// store device notification token if one exists
 	if loginRequest.NotificationToken != nil {
-		if err := data.AddExpoDeviceTokenforUser(c.Db, userId, *loginRequest.NotificationToken); err != nil {
+		if err := data.AddExpoDeviceTokenForUser(c.Db, userId, *loginRequest.NotificationToken); err != nil {
 			return errs.NewDbError(errors.Wrap(err, "Unable to register device in db."))
 		}
 	}

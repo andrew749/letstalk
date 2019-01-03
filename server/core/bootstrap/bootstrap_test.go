@@ -2,12 +2,9 @@ package bootstrap
 
 import (
 	"testing"
-	"time"
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/connection"
-	"letstalk/server/core/ctx"
-	"letstalk/server/core/sessions"
 	"letstalk/server/core/test"
 	"letstalk/server/data"
 	"letstalk/server/test_helpers"
@@ -15,14 +12,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
-
-func getContext(t *testing.T, db *gorm.DB, userId data.TUserID) *ctx.Context {
-	expiry := time.Now()
-	expiry = expiry.AddDate(1, 0, 0)
-	sessionData, err := sessions.CreateSessionData(userId, expiry)
-	assert.NoError(t, err)
-	return ctx.NewContext(nil, db, nil, sessionData, nil)
-}
 
 func requestConnection(
 	t *testing.T,
@@ -39,7 +28,7 @@ func requestConnection(
 		Message:       &message,
 	}
 	_, err := connection.HandleRequestConnection(
-		getContext(t, db, userOneId),
+		test_helpers.CreateTestContext(t, db, userOneId),
 		request,
 	)
 	assert.NoError(t, err)
@@ -55,7 +44,7 @@ func acceptConnection(
 		UserId: userTwoId,
 	}
 	_, err := connection.HandleAcceptConnection(
-		getContext(t, db, userOneId),
+		test_helpers.CreateTestContext(t, db, userOneId),
 		request,
 	)
 	assert.NoError(t, err)
@@ -97,7 +86,7 @@ func TestGetCurrentUserBootstrapStatusController(t *testing.T) {
 			createMentorship(t, db, users[0].UserId, users[0].Email, users[5].Email)
 			createMentorship(t, db, users[6].UserId, users[6].Email, users[0].Email)
 
-			c := getContext(t, db, users[0].UserId)
+			c := test_helpers.CreateTestContext(t, db, users[0].UserId)
 			err := GetCurrentUserBoostrapStatusController(c)
 			assert.NoError(t, err)
 
