@@ -29,6 +29,7 @@ import {
   SIGNUP_ROUTE,
   PROFILE_EDIT_ROUTE,
   PROFILE_PIC_ROUTE,
+  USER_DEVICE_EXPO_ROUTE,
 } from './constants';
 
 export interface SignupRequest {
@@ -45,24 +46,6 @@ export interface SignupRequest {
 interface UpdateCohortRequest extends UserAdditionalData {
   readonly cohortId: number;
 }
-
-export interface PersonalityVector {
-  readonly sociable: number;
-  readonly hardworking: number;
-  readonly ambitious: number;
-  readonly energetic: number;
-  readonly carefree: number;
-  readonly confident: number;
-}
-
-export enum UserVectorPreferenceType {
-  PREFERENCE_TYPE_ME = 0,
-  PREFERENCE_TYPE_YOU
-}
-
-type UpdateVectorRequest = PersonalityVector & {
-  readonly preferenceType: UserVectorPreferenceType;
-};
 
 export interface ProfileEditRequest extends UserAdditionalData {
   readonly firstName: string;
@@ -89,6 +72,10 @@ interface NotificationRes {
 interface UpdateNotificationStateRequest {
   notificationIds: Array<number>;
   state: string;
+}
+
+interface AddExpoDeviceTokenRequest {
+  token: string;
 }
 
 export interface ProfileService {
@@ -220,6 +207,12 @@ export class RemoteProfileService implements ProfileService {
       state,
     };
     await this.requestor.post(NOTIFICATIONS_UPDATE_STATE_ROUTE, request, sessionToken);
+  }
+
+  async addExpoDeviceToken(token: string): Promise<void> {
+    const sessionToken = await this.auth.getSessionToken();
+    const request: AddExpoDeviceTokenRequest = { token };
+    await this.requestor.post(USER_DEVICE_EXPO_ROUTE, request, sessionToken);
   }
 }
 

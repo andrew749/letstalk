@@ -35,7 +35,7 @@ func AddDeviceTokenForUser(db *gorm.DB, userId TUserID, token string, tokenType 
 	return db.FirstOrCreate(&userDevice).Error
 }
 
-func AddExpoDeviceTokenforUser(db *gorm.DB, userId TUserID, token string) error {
+func AddExpoDeviceTokenForUser(db *gorm.DB, userId TUserID, token string) error {
 	return AddDeviceTokenForUser(db, userId, token, EXPO_PUSH)
 }
 

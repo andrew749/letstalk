@@ -23,6 +23,7 @@ import {
 } from '../redux/bootstrap/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { AnalyticsHelper } from '../services/analytics';
+import profileService from '../services/profile-service';
 import auth from '../services/auth';
 import Color from '../services/colors';
 import Window from '../services/window';
@@ -37,12 +38,38 @@ interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
 
- class SplashScreenView extends Component<Props> {
+// Since this view gets rendered multiple times, we only want to add the device token once per app
+// launch.
+let addedExpoToken = false;
+
+const PROBABILITY_SHOW_IOS_MODEL = 0.4;
+
+function showModal(): boolean {
+  return Math.random() < PROBABILITY_SHOW_IOS_MODEL;
+}
+
+class SplashScreenView extends Component<Props> {
   SPLASH_SCREEN_VIEW_IDENTIFIER = "SplashScreenView";
 
   static navigationOptions = () => ({
     header: null as any,
   });
+
+  private triedAddingToken: boolean = false;
+
+  private async maybeAddExpoToken() {
+    if (!addedExpoToken) {
+      addedExpoToken = true;
+      try {
+        const token = await auth.registerForPushNotificationsAsync(showModal());
+        if (token !== null) {
+          await profileService.addExpoDeviceToken(token);
+        }
+      } catch(e){
+        console.log("Failed to register for notification " + e);
+      }
+    }
+  }
 
   private async load() {
     const sessionToken = await auth.getSessionToken();
@@ -50,6 +77,7 @@ interface Props extends DispatchActions {
       try {
         await Promise.all([
           this.props.fetchBootstrap(),
+          this.maybeAddExpoToken(),
         ]);
         await this.props.navigation.dispatch(NavigationActions.reset({
           index: 0,

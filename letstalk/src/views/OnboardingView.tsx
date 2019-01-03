@@ -32,10 +32,7 @@ import {
   ModalPicker,
   Rating,
 } from '../components';
-import profileService, {
-  PersonalityVector,
-  UserVectorPreferenceType,
-} from '../services/profile-service';
+import profileService from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
 import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';

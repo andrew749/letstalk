@@ -2,12 +2,25 @@ package test_helpers
 
 import (
 	"fmt"
+	"testing"
+	"time"
 
+	"letstalk/server/core/ctx"
+	"letstalk/server/core/sessions"
 	"letstalk/server/core/survey"
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"github.com/stretchr/testify/assert"
 )
+
+func CreateTestContext(t *testing.T, db *gorm.DB, userId data.TUserID) *ctx.Context {
+	expiry := time.Now()
+	expiry = expiry.AddDate(1, 0, 0)
+	sessionData, err := sessions.CreateSessionData(userId, expiry)
+	assert.NoError(t, err)
+	return ctx.NewContext(nil, db, nil, sessionData, nil)
+}
 
 // Creates a plain user to be used in tests.
 // Doesn't have anything setup yet.
