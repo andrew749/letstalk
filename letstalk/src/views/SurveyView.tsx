@@ -24,6 +24,7 @@ import {headerStyle, headerTintColor, headerTitleStyle} from "./TopHeader";
 import {SurveyOption, SurveyQuestion, SurveyResponses} from "../models/survey";
 import {Text} from "react-native-elements";
 import Colors from "../services/colors";
+import Window from '../services/window';
 import ActionButton from "../components/ActionButton";
 import surveyService, { GROUP_GENERIC } from "../services/survey";
 import {
@@ -31,9 +32,12 @@ import {
   fetchProfile,
   setSurvey
 } from '../redux/profile/reducer';
+import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
+import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
 import { ActionTypes as ProfileActionTypes } from '../redux/profile/actions';
 
 interface DispatchActions {
+  fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
   setSurvey: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
   setSurveyResponsesAction(surveyResponses: SurveyResponses): SetSurveyResponsesAction;
@@ -94,9 +98,21 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
         await surveyService.postSurveyResponses(survey);
         await this.props.fetchSurvey(survey.group);
         if (survey.group !== GROUP_GENERIC) {
+          // Generic survey is for all users and not to a particular group so we don't
+          // need to set its value for the group.
           await this.props.setSurvey(survey);
+          // Since we push the SurveyView onto the stack, and each new question is another
+          // SurveyView, pop back the correct number of screens.
+          await this.props.navigation.pop(survey.questions.size);
+        } else {
+          await this.props.fetchBootstrap();
+          // Since this is accessed from HomeView by resetting the stack, you can't actually go
+          // back to the HomeView. Need to place only the Tabbed view on the stack.
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
+          }));
         }
-        await this.props.navigation.pop(survey.questions.size);
       } catch(e) {
         console.error("error submitting responses", e);
         throw new SubmissionError({_error: e.errorMsg});
@@ -214,7 +230,6 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
   }
 }
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   surveyOption: {
     width: '90%',
@@ -240,7 +255,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   questionCard: {
-    width: SCREEN_WIDTH - 80,
+    width: Window.WIDTH - 80,
     alignItems: 'center',
   },
   questionPromptContainer: {
@@ -250,7 +265,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   actionButton: {
-    width: SCREEN_WIDTH - 80,
+    width: Window.WIDTH - 80,
     marginTop: 10,
     marginBottom: 30,
     padding: 8,
@@ -298,6 +313,6 @@ const styles = StyleSheet.create({
 });
 
 const SurveyView = connect(({ survey } : RootState) => survey,
-  { fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
+  { fetchBootstrap, fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
 
 export default SurveyView;

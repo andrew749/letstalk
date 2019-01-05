@@ -33,12 +33,12 @@ import {
   SEARCH_LIST_TYPE_CREDENTIALS,
 } from '../redux/search-bar/actions';
 import Colors from '../services/colors';
+import Window from '../services/window';
 import { MaterialIcons } from '@expo/vector-icons';
 import { logAnalyticsThenExecute, AnalyticsActions } from '../services/analytics';
 import autocompleteService from '../services/autocomplete-service';
 import { MultiTrait } from '../models/multi-trait';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const THROTTLE_TIME = 250; // ms
 
 const onQueryChange = async (
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     right: 12, // 16 - 4 (hard coded right - decrease in margin)
   },
   searchBarContainer: {
-    width: SCREEN_WIDTH - SEARCH_BAR_LEFT_MARGIN - SEARCH_BAR_RIGHT_MARGIN,
+    width: Window.WIDTH - SEARCH_BAR_LEFT_MARGIN - SEARCH_BAR_RIGHT_MARGIN,
     backgroundColor: Colors.HIVE_PRIMARY,
     borderBottomWidth: 0,
     borderTopWidth: 0,

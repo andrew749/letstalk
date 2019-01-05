@@ -30,11 +30,22 @@ import {
   State as BootstrapState,
   fetchBootstrap,
 } from '../redux/bootstrap/reducer';
+import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
+import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
 import Loading from './Loading';
-import {MatchingState, Relationship, getHumanReadableUserType} from '../models/bootstrap';
+import {
+  USER_STATE_ACCOUNT_CREATED,
+  USER_STATE_ACCOUNT_EMAIL_VERIFIED,
+  USER_STATE_ACCOUNT_HAS_BASIC_INFO,
+  USER_STATE_ACCOUNT_SETUP,
+  USER_STATE_ACCOUNT_MATCHED,
+  MatchingState,
+  Relationship,
+  getHumanReadableUserType,
+} from '../models/bootstrap';
 import {
   USER_TYPE_MENTOR,
   USER_TYPE_MENTEE,
@@ -53,11 +64,14 @@ import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../s
 import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
+import { GROUP_GENERIC } from '../services/survey';
+import { FETCH_STATE_SUCCESS } from '../redux/actions';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   infoToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
+  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
 }
 
 interface Props extends BootstrapState, DispatchActions {
@@ -83,7 +97,7 @@ class HomeView extends Component<Props, State> {
 
     this.state = { refreshing: false };
 
-    this.load = this.load.bind(this);
+    this.loadBootstrap = this.loadBootstrap.bind(this);
     this.renderHome = this.renderHome.bind(this);
     this.renderMatch = this.renderMatch.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
@@ -94,33 +108,57 @@ class HomeView extends Component<Props, State> {
       AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     });
 
-    this.load();
+    if (!!this.props.bootstrap) {
+      await this.loadBootstrap();
+    } else {
+      await this.maybeNavigateRequired();
+    }
+
     await TutorialService.launchTutorial(this.props.navigation);
   }
 
-  async componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_created') {
-      // Email not yet verified, so take to email verification page
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
-      }));
-    } else if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_email_verified') {
-      // Account not yet setup, so take to onboarding page
-      this.props.navigation.dispatch(NavigationActions.reset({
-        index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
-      }));
+  async componentDidUpdate() {
+    await this.maybeNavigateRequired();
+  }
+
+  // Depending on the user's state, we may need to navigate to another view to get more info
+  private async maybeNavigateRequired() {
+    if (!!this.props.bootstrap) {
+      switch (this.props.bootstrap.state) {
+        case USER_STATE_ACCOUNT_CREATED:
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_EMAIL_VERIFIED:
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_HAS_BASIC_INFO:
+          await this.props.fetchSurvey(GROUP_GENERIC);
+          await this.props.navigation.dispatch(NavigationActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'SurveyView' })]
+          }));
+          break;
+        case USER_STATE_ACCOUNT_SETUP:
+          // fallthrough
+        case USER_STATE_ACCOUNT_MATCHED:
+          // fallthrough
+      }
     }
   }
 
-  private async load() {
+  private async loadBootstrap() {
     await this.props.fetchBootstrap();
   }
 
   private async onRefresh() {
     this.setState({refreshing: true});
-    await this.load();
+    await this.loadBootstrap();
     this.setState({refreshing: false});
   }
 
@@ -403,17 +441,19 @@ class HomeView extends Component<Props, State> {
 
     const { state } = this.props.bootstrap;
     switch (state) {
-      case 'account_created':
+      case USER_STATE_ACCOUNT_CREATED:
         // fallthrough
-      case 'account_email_verified':
+      case USER_STATE_ACCOUNT_EMAIL_VERIFIED:
+        // fallthrough
+      case USER_STATE_ACCOUNT_HAS_BASIC_INFO:
         // Should in reality not be shown, since we never show home page until state account_setup.
         return (
           <View style={styles.centeredContainer}>
             <Text style={styles.headline}>Waiting for you to finish onboarding</Text>
-            <ActionButton onPress={() => this.load()} title="Check again" />
+            <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
           </View>
         );
-      case 'account_setup':
+      case USER_STATE_ACCOUNT_SETUP:
         const peerMatches = this.renderPeerMatches();
         return (
 
@@ -429,7 +469,7 @@ class HomeView extends Component<Props, State> {
               <View style={styles.scrollContainer}>
                 <View style={styles.centeredContainer}>
                   <Text style={styles.headline}>Waiting for your mentorship match</Text>
-                  <ActionButton onPress={() => this.load()} title="Check again" />
+                  <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
                 </View>
                 { feedbackPrompt }
                 { requestsButton }
@@ -438,7 +478,7 @@ class HomeView extends Component<Props, State> {
             </ScrollView>
           </View>
         );
-      case 'account_matched':
+      case USER_STATE_ACCOUNT_MATCHED:
         const matches = this.renderMatches();
         // Watch out! Typescript hack below.
         return (
@@ -483,10 +523,10 @@ class HomeView extends Component<Props, State> {
     return (
       <View style={{flex: 1}}>
         <Loading
-          state={this.state.refreshing ? 'success' : state}
+          state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
           errorMsg={errorMsg}
           errorType={errorType}
-          load={this.load}
+          load={this.loadBootstrap}
           renderBody={this.renderHome}
           navigation={this.props.navigation}
         />
@@ -497,7 +537,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap })(HomeView);
+  { errorToast, infoToast, fetchBootstrap, fetchSurvey })(HomeView);
 
 const styles = StyleSheet.create({
   container: {

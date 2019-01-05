@@ -23,7 +23,7 @@ class TutorialService {
         'Arial': require('../assets/fonts/Arial.ttf'),
       });
 
-      navigation.push('WalkthroughView');
+      await navigation.push('WalkthroughView');
     }
 }
 

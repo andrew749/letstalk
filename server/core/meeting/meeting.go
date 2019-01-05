@@ -29,9 +29,13 @@ func PostMeetingConfirmation(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Could not find user")
 	}
 
-	matchingObj, err := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, matchedUser.UserId)
-	if err != nil {
-		return errs.NewDbError(err)
+	matchingObj, dbErr := query.GetConnectionDetailsUndirected(
+		c.Db,
+		authUser.UserId,
+		matchedUser.UserId,
+	)
+	if dbErr != nil {
+		return errs.NewDbError(dbErr)
 	}
 
 	if matchingObj == nil {

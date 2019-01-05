@@ -19,22 +19,7 @@ import Immutable from 'immutable';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { RootState } from '../redux';
-import { State } from '../redux/onboarding/reducer';
-import {
-  ONBOARDING_COHORT,
-  ONBOARDING_VECTOR_ME,
-  ONBOARDING_VECTOR_YOU,
-  ONBOARDING_DONE,
-} from '../models/onboarding';
-import {
-  Cohort,
-  OnboardingState,
-  OnboardingStatus,
-} from '../models';
-import {
-  setOnboardingStatusAction,
-  SetOnboardingStatusAction,
-} from '../redux/onboarding/actions';
+import { Cohort } from '../models';
 import Loading from './Loading';
 import {
   ActionButton,
@@ -47,14 +32,9 @@ import {
   ModalPicker,
   Rating,
 } from '../components';
-import profileService, {
-  PersonalityVector,
-  UserVectorPreferenceType,
-} from '../services/profile-service';
-import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
+import profileService from '../services/profile-service';
 import { State as BootstrapState, fetchBootstrap } from '../redux/bootstrap/reducer';
 import { State as CohortsState, fetchCohorts } from '../redux/cohorts/reducer';
-import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { ActionTypes as BootstrapActionTypes} from '../redux/bootstrap/actions';
 import { ActionTypes as CohortsActionTypes } from '../redux/cohorts/actions';
 import {
@@ -190,88 +170,12 @@ const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   cohorts: state.cohorts.cohorts,
 }))(CohortForm));
 
-type PersonalityFormData = PersonalityVector;
-
-const vectorsWithLabels = Immutable.Map({
-  sociable: 'Sociable',
-  hardworking: 'Hardworking',
-  ambitious: 'Ambitious',
-  energetic: 'Energetic',
-  carefree: 'Carefree',
-  confident: 'Confident',
-});
-
-interface PersonalityProps {
-  values: PersonalityFormData;
-}
-
-const TOTAL_POINTS = 15;
-
-const PersonalityForm: React.SFC<FormProps<PersonalityFormData> & PersonalityProps> = props => {
-  const { error, handleSubmit, onSubmit, reset, submitting, valid } = props;
-  if (!props.initialized) {
-    props.initialize({
-      sociable: 4,
-      hardworking: 0,
-      ambitious: 0,
-      energetic: 0,
-      carefree: 0,
-      confident: 0,
-    });
-  }
-  const values: Immutable.Map<string, number> = Immutable.Map(props.values);
-  const total = values.reduce((acc, value) => acc + value, 0);
-  const onSubmitWithReset = async (values: PersonalityFormData): Promise<void> => {
-    await onSubmit(values);
-    reset();
-  };
-  let buttonLabel = "Submit Personality";
-  if (total < TOTAL_POINTS) buttonLabel = "You have " + (TOTAL_POINTS - total) + " points left";
-  if (total > TOTAL_POINTS) buttonLabel = (total - TOTAL_POINTS) + " points too many";
-  const fields = vectorsWithLabels.map((label, name) => (
-    <Field
-      key={name}
-      label={label}
-      name={name}
-      numElems={5}
-      component={Rating}
-    />
-  )).toArray();
-  return (
-    <View>
-      <InfoText>
-        You have <Text style={{fontWeight: 'bold'}}>{total + '/' + TOTAL_POINTS}</Text> points.
-      </InfoText>
-      {fields}
-      {error && <FormValidationMessage>{error}</FormValidationMessage>}
-      <ActionButton
-        style={styles.actionButton}
-        disabled={total !== TOTAL_POINTS}
-        loading={submitting}
-        title={submitting ? null : buttonLabel}
-        onPress={handleSubmit(onSubmitWithReset)}
-      />
-    </View>
-  );
-}
-
-const personalitySelector = formValueSelector('onboarding-personality');
-
-const PersonalityFormWithRedux = reduxForm<PersonalityFormData, FormP<PersonalityFormData>>({
-  form: 'onboarding-personality',
-})(connect((state: RootState) => ({
-  values: personalitySelector(state,
-    'sociable', 'hardworking', 'ambitious', 'energetic', 'carefree', 'confident'),
-}))(PersonalityForm));
-
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
   fetchCohorts: ActionCreator<ThunkAction<Promise<CohortsActionTypes>, CohortsState, void>>;
-  fetchSurvey: ActionCreator<ThunkAction<Promise<SurveyActionTypes>, SurveyState, void>>;
-  setOnboardingStatusAction(onboardingStatus: OnboardingStatus): SetOnboardingStatusAction;
 }
 
-interface Props extends State, DispatchActions {
+interface Props extends DispatchActions {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
   cohorts: CohortsState;
 }
@@ -307,106 +211,32 @@ class OnboardingView extends Component<Props> {
     const { programId, sequenceId, gradYear, mentorshipPreference, bio, hometown } = values;
     const cohortId = getCohortId(this.props.cohorts.cohorts, programId, sequenceId, gradYear);
     try {
-      const onboardingStatus = await profileService.updateCohort({
+      await profileService.updateCohort({
         cohortId,
         mentorshipPreference,
         bio,
         hometown,
       });
-      this.props.setOnboardingStatusAction(onboardingStatus);
-      this.props.fetchSurvey(GROUP_GENERIC);
       await this.props.fetchBootstrap();
       await this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
-      await this.props.navigation.navigate('SurveyView', {});
-    } catch(e) {
-      throw new SubmissionError({_error: e.errorMsg});
-    }
-  }
-
-  async onSubmitPersonality(preferenceType: UserVectorPreferenceType, values: PersonalityFormData) {
-    try {
-      const onboardingStatus = await profileService.updateVector(preferenceType, values);
-      this.props.setOnboardingStatusAction(onboardingStatus);
     } catch(e) {
       throw new SubmissionError({_error: e.errorMsg});
     }
   }
 
   renderBody() {
-    const { state } = this.props.onboardingStatus;
-    switch (state) {
-      case ONBOARDING_COHORT:
-        // TODO: Update copy here
-        return (
-          <KeyboardAwareScrollView>
-            <Header>Your Cohort</Header>
-            <InfoText>
-              Based on your information, we'll be better able to match you with a mentor/mentee!
-            </InfoText>
-            <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
-          </KeyboardAwareScrollView>
-        );
-      case ONBOARDING_VECTOR_ME:
-        // NOTE: This will not show up now
-        const onSubmitMine = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_ME, values);
-        };
-        return (
-          <ScrollView>
-            <Header>Your Personality</Header>
-            <InfoText>
-              Looks like you're going to be a big <Emoji name="man"/>! We'd like to get
-              to know you a little better, so that we can find you some lit <Emoji name="fire"/>
-              noobies to mentor.
-            </InfoText>
-            <PersonalityFormWithRedux onSubmit={onSubmitMine} />
-          </ScrollView>
-        );
-      case ONBOARDING_VECTOR_YOU:
-        // NOTE: This will not show up now
-        const onSubmitYour = async (values: PersonalityFormData) => {
-          await this.onSubmitPersonality(UserVectorPreferenceType.PREFERENCE_TYPE_YOU, values);
-          // Reload bootstrap data after updating
-          await this.props.fetchBootstrap();
-          this.props.navigation.dispatch(NavigationActions.reset({
-            index: 0,
-            actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
-          }));
-        };
-        return (
-          <ScrollView>
-            <Header>Their Personality</Header>
-            <InfoText>
-              We'd also like to get a sense of what kind of noobies <Emoji name="baby"/> you would
-              like to mentor.
-            </InfoText>
-            <PersonalityFormWithRedux onSubmit={onSubmitYour} />
-          </ScrollView>
-        );
-      case ONBOARDING_DONE:
-        // TODO: What to do in this case
-        return (
-          <ScrollView>
-            <Header>Nice work, you're done!</Header>
-            <ActionButton
-              backgroundColor={Colors.HIVE_PRIMARY}
-              onPress={() => {
-                this.props.navigation.dispatch(NavigationActions.reset({
-                  index: 0,
-                  actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
-                }));
-              }}
-              title="Enter Hive"
-            />
-          </ScrollView>
-        );
-      default:
-        // Ensure exhaustiveness of select
-        const _: never = state;
-    }
+    return (
+      <KeyboardAwareScrollView>
+        <Header>Your Cohort</Header>
+        <InfoText>
+          Based on your information, we'll be better able to match you with a mentor/mentee!
+        </InfoText>
+        <CohortFormWithRedux onSubmit={this.onSubmitCohort} />
+      </KeyboardAwareScrollView>
+    );
   }
 
   render() {
@@ -446,6 +276,6 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(({ onboarding, cohorts }: RootState) => {
-  return { ...onboarding, cohorts }
-}, { fetchBootstrap, fetchCohorts, fetchSurvey, setOnboardingStatusAction })(OnboardingView);
+export default connect(({ cohorts }: RootState) => {
+  return { cohorts }
+}, { fetchBootstrap, fetchCohorts })(OnboardingView);

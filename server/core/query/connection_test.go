@@ -6,6 +6,7 @@ import (
 
 	"letstalk/server/core/test"
 	"letstalk/server/data"
+	"letstalk/server/test_helpers"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
@@ -14,11 +15,11 @@ import (
 func TestGetMentorshipConnectionsByDate(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := CreateTestUser(db, 1)
+			user1, err := test_helpers.CreateTestSetupUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := CreateTestUser(db, 2)
+			user2, err := test_helpers.CreateTestSetupUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := CreateTestUser(db, 3)
+			user3, err := test_helpers.CreateTestSetupUser(db, 3)
 			assert.NoError(t, err)
 
 			now := time.Now()
@@ -87,11 +88,11 @@ func TestGetMentorshipConnectionsByDate(t *testing.T) {
 func TestGetMentorshipConnectionsByDateNotSpecified(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
-			user1, err := CreateTestUser(db, 1)
+			user1, err := test_helpers.CreateTestSetupUser(db, 1)
 			assert.NoError(t, err)
-			user2, err := CreateTestUser(db, 2)
+			user2, err := test_helpers.CreateTestSetupUser(db, 2)
 			assert.NoError(t, err)
-			user3, err := CreateTestUser(db, 3)
+			user3, err := test_helpers.CreateTestSetupUser(db, 3)
 			assert.NoError(t, err)
 
 			mentorship := data.Mentorship{

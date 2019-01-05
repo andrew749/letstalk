@@ -23,7 +23,7 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 
-	if newConnection, err := handleRequestConnection(c, input); err != nil {
+	if newConnection, err := HandleRequestConnection(c, input); err != nil {
 		return err
 	} else {
 		c.Result = newConnection
@@ -31,7 +31,11 @@ func PostRequestConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*api.ConnectionRequest, errs.Error) {
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleRequestConnection(
+	c *ctx.Context,
+	request api.ConnectionRequest,
+) (*api.ConnectionRequest, errs.Error) {
 	// Assert users exist and are not equal.
 	authUser, _ := query.GetUserById(c.Db, c.SessionData.UserId)
 	if c.SessionData.UserId == request.UserId {
@@ -42,9 +46,9 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		return nil, errs.NewRequestError("Invalid user id")
 	}
 	// Assert request does not already exist.
-	existing, err := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, connUser.UserId)
-	if err != nil {
-		return nil, errs.NewDbError(err)
+	existing, dbErr := query.GetConnectionDetailsUndirected(c.Db, authUser.UserId, connUser.UserId)
+	if dbErr != nil {
+		return nil, errs.NewDbError(dbErr)
 	}
 	if existing != nil {
 		return nil, errs.NewRequestError("Connection already exists")
@@ -60,7 +64,7 @@ func handleRequestConnection(c *ctx.Context, request api.ConnectionRequest) (*ap
 		SearchedTrait: request.SearchedTrait,
 		Message:       request.Message,
 	}
-	dbErr := c.WithinTx(func(tx *gorm.DB) error {
+	dbErr = c.WithinTx(func(tx *gorm.DB) error {
 		if err := tx.Create(&connection).Error; err != nil {
 			return err
 		}
@@ -94,7 +98,7 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 
-	if newConnection, err := handleAcceptConnection(c, input); err != nil {
+	if newConnection, err := HandleAcceptConnection(c, input); err != nil {
 		return err
 	} else {
 		c.Result = newConnection
@@ -102,7 +106,8 @@ func PostAcceptConnection(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAcceptConnection(
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleAcceptConnection(
 	c *ctx.Context,
 	request api.AcceptConnectionRequest,
 ) (*api.ConnectionRequest, errs.Error) {

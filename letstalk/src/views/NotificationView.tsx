@@ -41,6 +41,7 @@ import { ViewStyle } from 'react-native';
 import { TextStyle } from 'react-native';
 import { Linking } from 'expo';
 import ProfileAvatar from "../components/ProfileAvatar";
+import { FETCH_STATE_SUCCESS } from '../redux/actions';
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -291,7 +292,7 @@ class NotificationView extends Component<Props, State> {
     // down, which means that we want to still display the ListView.
     return (
       <Loading
-        state={this.state.refreshing ? 'success' : state}
+        state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
         errorMsg={errorMsg}
         errorType={errorType}
         load={this.load}

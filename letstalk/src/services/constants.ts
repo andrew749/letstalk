@@ -1,7 +1,7 @@
 // DEV
 
 export const BASE_URL = 'https://api.hiveapp.org';
-// export const BASE_URL = 'http://10.0.0.63';
+// export const BASE_URL = 'http://192.168.0.21';
 export const ANALYTICS_ID = 'UA-118691527-1';
 
 // Routes
@@ -17,7 +17,6 @@ export const MATCH_PROFILE_ROUTE              = '/v1/match_profile';
 export const ME_ROUTE                         = '/v1/me';
 export const PROFILE_PIC_ROUTE                = '/v1/profile_pic';
 export const SIGNUP_ROUTE                     = '/v1/signup';
-export const USER_VECTOR_ROUTE                = '/v1/user_vector';
 export const ALL_CREDENTIAL_ROUTE             = '/v1/all_credentials';
 export const CREDENTIALS_ROUTE                = '/v1/credentials';
 export const CREDENTIAL_ROUTE                 = '/v1/credential';
@@ -35,6 +34,7 @@ export const AUTOCOMPLETE_SIMPLE_TRAIT_ROUTE  = '/v1/autocomplete/simple_trait';
 export const AUTOCOMPLETE_ROLE_ROUTE          = '/v1/autocomplete/role';
 export const AUTOCOMPLETE_ORGANIZATION_ROUTE  = '/v1/autocomplete/organization';
 export const AUTOCOMPLETE_MULTI_TRAIT_ROUTE   = '/v1/autocomplete/multi_trait';
+export const USER_DEVICE_EXPO_ROUTE           = '/v1/user_device/expo';
 export const USER_GROUP                       = '/v1/user_group';
 export const USER_SEARCH_COHORT_ROUTE         = '/v1/user_search/cohort';
 export const USER_SEARCH_MY_COHORT_ROUTE      = '/v1/user_search/my_cohort';

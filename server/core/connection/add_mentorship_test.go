@@ -28,7 +28,7 @@ func TestAddMentorship(t *testing.T) {
 					MenteeEmail: userTwo.Email,
 					RequestType: api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN,
 				}
-				requestError := handleAddMentorship(db, &request)
+				requestError := HandleAddMentorship(db, &request)
 				assert.NoError(t, requestError)
 				// Check all database tables are updated.
 				conn, err := query.GetConnectionDetails(db, userOne.UserId, userTwo.UserId)
@@ -52,25 +52,25 @@ func TestAddMentorship(t *testing.T) {
 					RequestType: api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN,
 				}
 				// Same user id.
-				assert.Error(t, handleAddMentorship(c.Db, &request))
+				assert.Error(t, HandleAddMentorship(c.Db, &request))
 				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
 				connRequest := api.ConnectionRequest{
-					UserId:        userTwo.UserId,
-					IntentType:    data.INTENT_TYPE_SCAN_CODE,
+					UserId:     userTwo.UserId,
+					IntentType: data.INTENT_TYPE_SCAN_CODE,
 				}
-				handleRequestConnection(c, connRequest)
+				HandleRequestConnection(c, connRequest)
 				// Connection already exists.
 				request = api.CreateMentorshipByEmail{
 					MentorEmail: userOne.Email,
 					MenteeEmail: userTwo.Email,
 				}
-				assert.Error(t, handleAddMentorship(c.Db, &request))
+				assert.Error(t, HandleAddMentorship(c.Db, &request))
 				request = api.CreateMentorshipByEmail{
 					MentorEmail: "bademail@mail.com",
 					MenteeEmail: userTwo.Email,
 				}
 				// No such user.
-				assert.Error(t, handleAddMentorship(c.Db, &request))
+				assert.Error(t, HandleAddMentorship(c.Db, &request))
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func TestAddMentorship(t *testing.T) {
 					MenteeEmail: userTwo.Email,
 					RequestType: api.CREATE_MENTORSHIP_TYPE_DRY_RUN,
 				}
-				requestError := handleAddMentorship(db, &request)
+				requestError := HandleAddMentorship(db, &request)
 				assert.NoError(t, requestError)
 				// Check database tables are not updated.
 				conn, err := query.GetConnectionDetails(db, userOne.UserId, userTwo.UserId)

@@ -4,7 +4,6 @@ import requestor, { Requestor } from './requests';
 import {
   BootstrapData,
   Cohort,
-  OnboardingStatus,
   ProfileData,
   Relationship,
   UserState,
@@ -28,9 +27,9 @@ import {
   NOTIFICATION_ROUTE,
   NOTIFICATIONS_UPDATE_STATE_ROUTE,
   SIGNUP_ROUTE,
-  USER_VECTOR_ROUTE,
   PROFILE_EDIT_ROUTE,
   PROFILE_PIC_ROUTE,
+  USER_DEVICE_EXPO_ROUTE,
 } from './constants';
 
 export interface SignupRequest {
@@ -48,24 +47,6 @@ interface UpdateCohortRequest extends UserAdditionalData {
   readonly cohortId: number;
 }
 
-export interface PersonalityVector {
-  readonly sociable: number;
-  readonly hardworking: number;
-  readonly ambitious: number;
-  readonly energetic: number;
-  readonly carefree: number;
-  readonly confident: number;
-}
-
-export enum UserVectorPreferenceType {
-  PREFERENCE_TYPE_ME = 0,
-  PREFERENCE_TYPE_YOU
-}
-
-type UpdateVectorRequest = PersonalityVector & {
-  readonly preferenceType: UserVectorPreferenceType;
-};
-
 export interface ProfileEditRequest extends UserAdditionalData {
   readonly firstName: string;
   readonly lastName: string;
@@ -73,11 +54,6 @@ export interface ProfileEditRequest extends UserAdditionalData {
   readonly birthdate: string;
   readonly phoneNumber: string | null;
   readonly cohortId: number;
-}
-
-interface OnboardingUpdateResponse {
-  readonly message: string;
-  readonly onboardingStatus: OnboardingStatus;
 }
 
 interface NotificationRes {
@@ -98,13 +74,13 @@ interface UpdateNotificationStateRequest {
   state: string;
 }
 
+interface AddExpoDeviceTokenRequest {
+  token: string;
+}
+
 export interface ProfileService {
   signup(request: SignupRequest): Promise<number>;
-  updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus>;
-  updateVector(
-    preferenceType: UserVectorPreferenceType,
-    vector: PersonalityVector
-  ): Promise<OnboardingStatus>;
+  updateCohort(request: UpdateCohortRequest): Promise<void>;
   bootstrap(): Promise<BootstrapData>;
   getProfilePicUrl(userId: string): Promise<string>;
 }
@@ -128,25 +104,9 @@ export class RemoteProfileService implements ProfileService {
     await this.requestor.post(PROFILE_EDIT_ROUTE, request, sessionToken);
   }
 
-  async updateCohort(request: UpdateCohortRequest): Promise<OnboardingStatus> {
+  async updateCohort(request: UpdateCohortRequest): Promise<void> {
     const sessionToken = await this.auth.getSessionToken();
-    const response: OnboardingUpdateResponse = await this.requestor.post(
-      COHORT_ROUTE, request, sessionToken);
-    return response.onboardingStatus;
-  }
-
-  async updateVector(
-    preferenceType: UserVectorPreferenceType,
-    vector: PersonalityVector
-  ): Promise<OnboardingStatus> {
-    const sessionToken = await this.auth.getSessionToken();
-    const request: UpdateVectorRequest = {
-      ...vector,
-      preferenceType,
-    };
-    const response: OnboardingUpdateResponse = await this.requestor.post(
-      USER_VECTOR_ROUTE, request, sessionToken);
-    return response.onboardingStatus;
+    await this.requestor.post(COHORT_ROUTE, request, sessionToken);
   }
 
   async bootstrap(): Promise<BootstrapData> {
@@ -247,6 +207,12 @@ export class RemoteProfileService implements ProfileService {
       state,
     };
     await this.requestor.post(NOTIFICATIONS_UPDATE_STATE_ROUTE, request, sessionToken);
+  }
+
+  async addExpoDeviceToken(token: string): Promise<void> {
+    const sessionToken = await this.auth.getSessionToken();
+    const request: AddExpoDeviceTokenRequest = { token };
+    await this.requestor.post(USER_DEVICE_EXPO_ROUTE, request, sessionToken);
   }
 }
 

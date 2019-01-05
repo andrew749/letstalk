@@ -15,7 +15,6 @@ import (
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
 	"letstalk/server/core/notifications"
-	"letstalk/server/core/onboarding"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
@@ -119,11 +118,7 @@ func Register(
 	v1.OPTIONS("/cohort")
 	v1.POST(
 		"/cohort",
-		hw.wrapHandler(onboarding.UpdateUserCohort, true),
-	)
-	v1.GET(
-		"/cohort",
-		hw.wrapHandler(controller.GetCohortController, true),
+		hw.wrapHandler(controller.UpdateUserCohortAndAdditionalInfo, true),
 	)
 
 	// update user data
@@ -167,12 +162,6 @@ func Register(
 		user.LogoutHandler,
 		true),
 	)
-
-	v1.OPTIONS("/user_vector")
-	v1.POST("/user_vector", hw.wrapHandler(
-		onboarding.UserVectorUpdateController,
-		true,
-	))
 
 	// boostrap endpoints
 
@@ -235,7 +224,7 @@ func Register(
 	v1.OPTIONS("/upload_profile_pic")
 	v1.POST(
 		"/upload_profile_pic",
-		hw.wrapHandler(onboarding.ProfilePicController, true),
+		hw.wrapHandler(controller.UploadProfilePic, true),
 	)
 
 	v1.OPTIONS("/subscribe_email")
@@ -277,6 +266,10 @@ func Register(
 		"/user_simple_trait_by_name",
 		hw.wrapHandler(controller.AddUserSimpleTraitByNameController, true),
 	)
+
+	// User Devices
+	v1.OPTIONS("/user_device/expo")
+	v1.POST("/user_device/expo", hw.wrapHandler(controller.AddExpoDeviceToken, true))
 
 	// User Positions
 	v1.OPTIONS("/user_position")

@@ -47,14 +47,14 @@ import {
 } from '../components';
 import Loading from './Loading';
 import Colors from '../services/colors';
+import Window from '../services/window';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { AnalyticsHelper } from '../services';
 import { DEFAULT_SEARCH_SIZE } from '../services/user-search-service';
 import { UserSearchResult } from '../models/user-search';
 import { IntentTypes } from '../models/connection';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
+import { FETCH_STATE_PREFETCH, FETCH_STATE_SUCCESS } from '../redux/actions';
 
 interface DispatchActions {
   searchByCohort: ActionCreator<ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
@@ -102,7 +102,7 @@ class ExploreView extends Component<Props, State> {
     this.props.navigation.addListener('willFocus', (route) => {
       AnalyticsHelper.getInstance().recordPage(this.EXPLORE_VIEW_IDENTIFIER);
     });
-    if (this.props.fetchState.state === 'prefetch' &&
+    if (this.props.fetchState.state === FETCH_STATE_PREFETCH &&
       this.props.currentQuery.type === QueryTypes.YOUR_COHORT) {
       this.props.searchByMyCohort(DEFAULT_SEARCH_SIZE);
     }
@@ -348,7 +348,7 @@ class ExploreView extends Component<Props, State> {
     return (
       <View style={{flex: 1}}>
         <Loading
-          state={this.state.refreshing ? 'success' : state}
+          state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
           errorMsg={errorMsg}
           errorType={errorType}
           load={this.load}
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     flexDirection: 'column',
-    width: SCREEN_WIDTH - 100,
+    width: Window.WIDTH - 100,
     paddingLeft: 10,
   },
   rightArrow: {

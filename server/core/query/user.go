@@ -1,7 +1,6 @@
 package query
 
 import (
-	"errors"
 	"fmt"
 
 	"letstalk/server/core/ctx"
@@ -36,15 +35,18 @@ func MissingUsers(db *gorm.DB, userIds []data.TUserID) ([]data.TUserID, errs.Err
 	return missingUserIds, nil
 }
 
-func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, error) {
+func GetUserById(db *gorm.DB, userId data.TUserID) (*data.User, errs.Error) {
 	var user data.User
-	if db.Where(&data.User{UserId: userId}).First(&user).RecordNotFound() {
-		return nil, errs.NewNotFoundError("Unable to find user")
+	if err := db.Where(&data.User{UserId: userId}).First(&user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, errs.NewNotFoundError("Unable to find user")
+		}
+		return nil, errs.NewDbError(err)
 	}
 	return &user, nil
 }
 
-func GetUsersWithCohortAndSurveysByEmail(db *gorm.DB, emails []string) ([]data.User, error) {
+func GetUsersWithCohortAndSurveysByEmail(db *gorm.DB, emails []string) ([]data.User, errs.Error) {
 	users := make([]data.User, 0)
 	for _, email := range emails {
 		user, err := GetUserByEmail(db, email)
@@ -53,12 +55,12 @@ func GetUsersWithCohortAndSurveysByEmail(db *gorm.DB, emails []string) ([]data.U
 		} else if user == nil {
 			fmt.Printf("user_missing,%s\n", email)
 		} else {
-			if err = db.Model(user).Preload(
+			if dbErr := db.Model(user).Preload(
 				"Cohort.Cohort",
 			).Preload(
 				"UserSurveys",
-			).Find(user).Error; err != nil {
-				return nil, err
+			).Find(user).Error; dbErr != nil {
+				return nil, errs.NewDbError(dbErr)
 			}
 			users = append(users, *user)
 		}
@@ -66,19 +68,21 @@ func GetUsersWithCohortAndSurveysByEmail(db *gorm.DB, emails []string) ([]data.U
 	return users, nil
 }
 
-func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
+func GetUserByEmail(db *gorm.DB, email string) (*data.User, errs.Error) {
 	var user data.User
-	var err error
 	result := db.Where(&data.User{Email: email}).First(&user)
 	if result.RecordNotFound() {
 		// Fallback to looking for uwaterloo email
 		if !uw_email.Validate(email) {
 			return nil, nil
 		}
-		var verifyEmailId *data.VerifyEmailId
+		var (
+			verifyEmailId *data.VerifyEmailId
+			dbErr         error
+		)
 		uwEmail := uw_email.FromString(email)
-		if verifyEmailId, err = GetVerifyEmailIdByUwEmail(db, uwEmail); err != nil {
-			return nil, errs.NewDbError(err)
+		if verifyEmailId, dbErr = GetVerifyEmailIdByUwEmail(db, uwEmail); dbErr != nil {
+			return nil, errs.NewDbError(dbErr)
 		} else if verifyEmailId == nil {
 			return nil, nil
 		}
@@ -94,10 +98,13 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, error) {
 	return &user, nil
 }
 
-func GetUserBySecret(db *gorm.DB, secret string) (*data.User, error) {
+func GetUserBySecret(db *gorm.DB, secret string) (*data.User, errs.Error) {
 	var user data.User
-	if db.Where(&data.User{Secret: secret}).First(&user).RecordNotFound() {
-		return nil, errors.New("unable to find user")
+	if err := db.Where(&data.User{Secret: secret}).First(&user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, errs.NewNotFoundError("unable to find user")
+		}
+		return nil, errs.NewDbError(err)
 	}
 	return &user, nil
 }
@@ -106,7 +113,7 @@ func GetUserProfileById(
 	db *gorm.DB,
 	userId data.TUserID,
 	includeContactInfo bool,
-) (*data.User, error) {
+) (*data.User, errs.Error) {
 	var user data.User
 
 	query := db.Where(
@@ -117,11 +124,30 @@ func GetUserProfileById(
 		query = query.Preload("ExternalAuthData")
 	}
 
-	if query.First(&user).RecordNotFound() {
-		return nil, errs.NewNotFoundError("Unable to find user")
+	if err := query.First(&user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, errs.NewNotFoundError("Unable to find user")
+		}
+		return nil, errs.NewDbError(err)
 	}
 
 	return &user, nil
+}
+
+func GetUserAdditionalData(
+	db *gorm.DB,
+	userId data.TUserID,
+) (*data.UserAdditionalData, errs.Error) {
+	var additionalData data.UserAdditionalData
+
+	if err := db.Where(&data.UserAdditionalData{UserId: userId}).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil
+		}
+		return nil, errs.NewDbError(err)
+	}
+
+	return &additionalData, nil
 }
 
 // Need to pass in all of this information just cause we want it to be a challenge to actaully

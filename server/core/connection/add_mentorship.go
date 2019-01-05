@@ -11,10 +11,10 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/email"
 
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"fmt"
 )
 
 /**
@@ -25,7 +25,7 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
 	}
-	if err := handleAddMentorship(c.Db, &input); err != nil {
+	if err := HandleAddMentorship(c.Db, &input); err != nil {
 		rlog.Error("failed to add mentorship for mentor/mentee pair", input)
 		return err
 	}
@@ -38,18 +38,19 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 	return nil
 }
 
-func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
+// TODO(wojtechnology): Give this a more explicit public interface.
+func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
 	var mentor, mentee *data.User
-	var err error
+	var err errs.Error
 	if request.MentorEmail == request.MenteeEmail {
 		return errs.NewRequestError("mentor and mentee user must be different")
 	}
 	var noSuchMentorErr, noSuchMenteeErr string
 	if mentor, err = query.GetUserByEmail(db, request.MentorEmail); err != nil || mentor == nil {
-		noSuchMentorErr = fmt.Sprintf("no such user %s", request.MentorEmail)
+		noSuchMentorErr = fmt.Sprintf("no such user %s, %+v", request.MentorEmail, err)
 	}
 	if mentee, err = query.GetUserByEmail(db, request.MenteeEmail); err != nil || mentee == nil {
-		noSuchMenteeErr = fmt.Sprintf("no such user %s", request.MenteeEmail)
+		noSuchMenteeErr = fmt.Sprintf("no such user %s, %+v", request.MenteeEmail, err)
 	}
 	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
@@ -87,22 +88,22 @@ func handleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
 	mentor, err := query.GetUserByEmail(db, request.MentorEmail)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 
 	mentee, err := query.GetUserByEmail(db, request.MenteeEmail)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 
 	mentorCohort, err := query.GetUserCohort(db, mentor.UserId)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 
 	menteeCohort, err := query.GetUserCohort(db, mentee.UserId)
 	if err != nil {
-		return errs.NewDbError(err)
+		return err
 	}
 
 	// Send notifications to matched pair.
