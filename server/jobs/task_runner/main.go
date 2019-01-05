@@ -27,7 +27,7 @@ func main() {
 
 	rlog.Debugf("Queue processing")
 	// process anything in the sqs queue
-	if helper, ok := utility.QueueHelper.(utility.SQSMock); ok {
+	if helper, ok := utility.QueueHelper.(utility.LocalQueueImpl); ok {
 		helper.SubscribeListener(constants.NotificationQueueUrl, func(event *events.SQSEvent) error {
 			if err := sqs_notification_processor.SendNotificationLambda(*event); err != nil {
 				rlog.Critical(err)

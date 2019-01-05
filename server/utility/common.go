@@ -39,7 +39,7 @@ func Bootstrap() {
 	secrets.LoadSecrets(*secretsPath)
 
 	// Setup a worker to process all messages sent to a queue.
-	QueueHelper = CreateMockSQSClient()
+	QueueHelper = CreateLocalSQSClient()
 }
 
 func checkBootstrapped() {
