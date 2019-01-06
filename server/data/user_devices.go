@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql/driver"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -19,6 +20,7 @@ const (
 )
 
 type UserDevice struct {
+	DeletedAt             time.Time
 	User                  User                  `gorm:"foreign_key:UserId"`
 	UserId                TUserID               `gorm:"primary_key"`
 	NotificationToken     string                `gorm:"size:190;primary_key;not null"`
@@ -45,6 +47,11 @@ func GetDevicesForUser(db *gorm.DB, userId TUserID) (*[]UserDevice, error) {
 		return nil, err
 	}
 	return &userDevices, nil
+}
+
+// RemoveUserDevice Removes a user device from the db specified by the provided push token.
+func RemoveUserDevice(db *gorm.DB, notificationToken string) error {
+	return db.Delete(&UserDevice{NotificationToken: notificationToken}).Error
 }
 
 func GetDeviceNotificationTokensForUser(db *gorm.DB, userId TUserID) (*[]string, error) {

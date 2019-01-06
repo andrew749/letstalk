@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"letstalk/server/notifications"
 	"time"
 
 	"database/sql/driver"
@@ -58,6 +59,14 @@ func (u *JSONBlob) Scan(value interface{}) error {
 }
 func (u JSONBlob) Value() (driver.Value, error) { return string(u), nil }
 
+func GetNotification(db *gorm.DB, id uint) (*Notification, error) {
+	var notification Notification
+	if err := db.Where(id).First(&notification).Error; err != nil {
+		return nil, err
+	}
+	return &notification, nil
+}
+
 // PendingNotifications Notifications that have been sent to expo but not necessarily delivered
 type ExpoPendingNotification struct {
 	gorm.Model
@@ -67,6 +76,8 @@ type ExpoPendingNotification struct {
 	Receipt        *string      `gorm:"size:190"`
 	FailureMessage *string      `gorm:"type:text"`
 	FailureDetails *string      `gorm:"type:text"`
+	Checked        bool         `gorm:"default:false"`
+	FailureType    *notifications.ExpoNotificationFailureType
 }
 
 // NotificationSentToExpoDevice Check if a specific notification was sent to a specfic device
@@ -96,6 +107,15 @@ func ExistsPendingNotification(db *gorm.DB, notificationId uint, deviceId string
 	return true, nil
 }
 
+// GetPendingNotification Get an ExpoPendingNotification given the identifier of the record
+func GetPendingNotification(db *gorm.DB, id uint) (*ExpoPendingNotification, error) {
+	var notification ExpoPendingNotification
+	if err := db.Where(id).First(&notification).Error; err != nil {
+		return nil, err
+	}
+	return &notification, nil
+}
+
 func CreateNewPendingNotification(db *gorm.DB, notificationId uint, deviceId string) (*ExpoPendingNotification, error) {
 	notification := ExpoPendingNotification{
 		NotificationId: notificationId,
@@ -109,7 +129,11 @@ func CreateNewPendingNotification(db *gorm.DB, notificationId uint, deviceId str
 	return &notification, nil
 }
 
-func (e *ExpoPendingNotification) MarkNotificationError(db *gorm.DB, errorMessage *string, errorDetails interface{}) error {
+func (e *ExpoPendingNotification) MarkNotificationError(
+	db *gorm.DB, errorMessage *string,
+	errorDetails interface{},
+	errorType *notifications.ExpoNotificationFailureType,
+) error {
 	serializedErrorDetails, err := json.Marshal(errorDetails)
 	if err != nil {
 		return err
@@ -117,10 +141,16 @@ func (e *ExpoPendingNotification) MarkNotificationError(db *gorm.DB, errorMessag
 	serializedErrorString := string(serializedErrorDetails)
 	e.FailureDetails = &serializedErrorString
 	e.FailureMessage = errorMessage
+	e.FailureType = errorType
 	return db.Save(e).Error
 }
 
 func (e *ExpoPendingNotification) MarkNotificationSent(db *gorm.DB, receipt string) error {
 	e.Receipt = &receipt
+	return db.Save(e).Error
+}
+
+func (e *ExpoPendingNotification) MarkNotificationDelivered(db *gorm.DB) error {
+	e.Checked = true
 	return db.Save(e).Error
 }

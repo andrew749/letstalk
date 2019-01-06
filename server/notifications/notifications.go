@@ -67,6 +67,19 @@ type ExpoNotificationStatusRequest struct {
 	Ids []string `json:"ids"`
 }
 
+type ExpoNotificationFailureType string
+
+const (
+	// ErrorDeviceNotRegistered indicates the token is invalid
+	ErrorDeviceNotRegistered ExpoNotificationFailureType = "DeviceNotRegistered"
+
+	// ErrorMessageTooBig indicates the message went over payload size of 4096 bytes
+	ErrorMessageTooBig ExpoNotificationFailureType = "MessageTooBig"
+
+	// ErrorMessageRateExceeded indicates messages have been sent too frequently
+	ErrorMessageRateExceeded ExpoNotificationFailureType = "MessageRateExceeded"
+)
+
 // SendNotifications Send a notification to the expo api and serialize response
 func SendNotifications(notifications []ExpoNotification) (*ExpoNotificationSendResponse, error) {
 	marshalledNotification, err := json.Marshal(notifications)

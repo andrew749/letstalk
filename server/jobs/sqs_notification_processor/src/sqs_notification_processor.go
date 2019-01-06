@@ -115,7 +115,13 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 
 				// was this message errored
 				if response.Status == notification_api.ERROR_STATUS {
-					if err := temp.MarkNotificationError(tx, response.Message, response.Details); err != nil {
+					failureType := notification_api.ExpoNotificationFailureType(response.Details.Error)
+					if err := temp.MarkNotificationError(
+						tx,
+						response.Message,
+						response.Details,
+						&failureType,
+					); err != nil {
 						tx.Rollback()
 						rlog.Error(err)
 						raven.CaptureError(err, nil)
