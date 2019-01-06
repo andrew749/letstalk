@@ -142,6 +142,7 @@ func (e *ExpoPendingNotification) MarkNotificationError(
 	e.FailureDetails = &serializedErrorString
 	e.FailureMessage = errorMessage
 	e.FailureType = errorType
+	e.Checked = true
 	return db.Save(e).Error
 }
 

@@ -20,7 +20,7 @@ const (
 )
 
 type UserDevice struct {
-	DeletedAt             time.Time
+	DeletedAt             *time.Time
 	User                  User                  `gorm:"foreign_key:UserId"`
 	UserId                TUserID               `gorm:"primary_key"`
 	NotificationToken     string                `gorm:"size:190;primary_key;not null"`
