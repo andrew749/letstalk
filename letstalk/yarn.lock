@@ -6494,6 +6494,12 @@ react-lifecycles-compat@^1.0.2:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-1.1.4.tgz#fc005c72849b7ed364de20a0f64ff58ebdc2009a"
 
+react-native-animatable@^1.2.4:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/react-native-animatable/-/react-native-animatable-1.3.1.tgz#f004a7e9de6838d0fbf210d642593cff7affd9ef"
+  dependencies:
+    prop-types "^15.5.10"
+
 react-native-app-intro-slider@^0.2.4:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/react-native-app-intro-slider/-/react-native-app-intro-slider-0.2.4.tgz#e85e5aab826fd6c131f197ab7878d6686e7b468f"
@@ -6575,6 +6581,13 @@ react-native-maps@0.21.0:
     babel-plugin-module-resolver "^2.3.0"
     babel-preset-react-native "1.9.0"
 
+react-native-modal@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-modal/-/react-native-modal-7.0.2.tgz#6048217807e03cd585204dace2e1ca1726c0b647"
+  dependencies:
+    prop-types "^15.6.1"
+    react-native-animatable "^1.2.4"
+
 react-native-picker-select@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/react-native-picker-select/-/react-native-picker-select-3.1.0.tgz#99ba83835dec0e5d1630b2626f024d50a421c4ee"
@@ -6638,12 +6651,6 @@ react-native-sentry@^0.30.0:
     raven-js "^3.19.1"
     sentry-cli-binary "^1.21.0"
     xcode "^1.0.0"
-
-react-native-simple-picker@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/react-native-simple-picker/-/react-native-simple-picker-1.4.3.tgz#06cc2a436ab1026fbc509f388adcfd09e997f320"
-  dependencies:
-    prop-types "^15.5.10"
 
 react-native-svg-web@^1.0.1:
   version "1.0.1"
