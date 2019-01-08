@@ -8,7 +8,7 @@ import {
   PickerIOS,
   PickerProperties,
   Platform,
-  StyleProp, 
+  StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,6 +21,7 @@ import { FormValidationMessage } from 'react-native-elements';
 import RNPickerSelect from 'react-native-picker-select';
 
 import BottomModal from './BottomModal';
+import Colors from '../services/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -97,7 +98,13 @@ class StatefulModalPicker extends Component<Props, State> {
       ),
       'android': (
         <View style={this.props.containerStyle}>
-          <RNPickerSelect placeholder={{label: label, value: null}} items={items} onValueChange={onChange} value={value} />
+          <RNPickerSelect
+            placeholder={{label: label, value: null}}
+            placeholderTextColor={Colors.DARK_GRAY}
+            items={items}
+            onValueChange={onChange}
+            value={value}
+          />
           {touched && (
             (error && <FormValidationMessage>{error}</FormValidationMessage>) ||
             (warning && <FormValidationMessage>{warning}</FormValidationMessage>))}

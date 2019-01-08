@@ -53,11 +53,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  topLeftLabel: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+
   valueLabel: {
     fontSize: 18,
-    textAlign: 'center',
     color: 'gray',
-    paddingLeft: 10,
+    flex: 1,
+    flexWrap: 'wrap',
   },
 
   cardWithValue: {
@@ -67,7 +72,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     height: 60,
     padding: 10,
-    paddingLeft: 20,
+    paddingHorizontal: 20,
   },
 
   cardWithoutValue: {
@@ -135,17 +140,17 @@ class StatefulBottomModal extends Component<Props, State> {
     });
   }
 
-  renderDisplayWithValue() {
+  private renderDisplayWithValue() {
     const { valueLabel, label } = this.props;
     return (
-      <View style={styles.inlineLabel}>
-        <Text style={styles.label}>{label}</Text>
+      <View>
+        <Text style={styles.topLeftLabel}>{label}</Text>
         <Text style={styles.valueLabel}>{valueLabel}</Text>
       </View>
     );
   }
 
-  renderDisplayWithoutValue() {
+  private renderDisplayWithoutValue() {
     const { label } = this.props;
     return (
         <Text style={styles.label}>{label}</Text>
