@@ -6,6 +6,7 @@ import {
   Alert,
   Button as ReactNativeButton,
   Linking,
+  Picker,
   RefreshControl,
   RefreshControlProps,
   ScrollView,
@@ -20,8 +21,9 @@ import {
   NavigationStackAction,
   NavigationActions
 } from 'react-navigation';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import Immutable from 'immutable';
+import Modal from 'react-native-modal';
 
 import requestToMatchService from '../services/request-to-match-service';
 import { BootstrapConnection } from '../models/bootstrap';
@@ -66,6 +68,148 @@ import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './To
 import AllFilterableModals from './AllFilterableModals';
 import { GROUP_GENERIC } from '../services/survey';
 import { FETCH_STATE_SUCCESS } from '../redux/actions';
+import Window from '../services/window';
+
+interface ContactModalProps {
+  relationship: Relationship;
+}
+
+interface ContactModalState {
+  isVisible: boolean;
+}
+
+class ContactModal extends Component<ContactModalProps, ContactModalState> {
+
+  constructor(props: ContactModalProps) {
+    super(props);
+    this.state = { isVisible: false }
+  }
+
+  private getButton(
+    title: string,
+    profileType: string,
+    onClick: () => void,
+    icon?: string,
+    iconComponent?: ReactNode,
+  ): ReactNode {
+    const executable = () => {
+      onClick();
+      this.setState({ isVisible: false });
+    }
+    const onPress = logAnalyticsThenExecute.bind(
+      this,
+      "ContactProfile_" + profileType,
+      AnalyticsActions.CLICK,
+      getHumanReadableUserType(this.props.relationship.userType),
+      1,
+      executable);
+
+    return <Button
+      title={ title }
+      icon={ icon || null }
+      iconComponent={ iconComponent || null }
+      buttonStyle={ contactModalStyles.button }
+      onPress={ onPress }
+    />;
+  }
+
+  private getButtons(): Array<ReactNode> {
+    const buttonOpts = [];
+    const {
+      email,
+      fbId,
+      fbLink,
+      phoneNumber,
+    } = this.props.relationship;
+
+    if (fbLink != null) {
+      buttonOpts.push({
+        title: 'Add as a friend on FB',
+        icon: null,
+        iconComponent: <FontAwesome
+          style={{ position: 'absolute', left: 2, top: 1, margin: 4 }}
+          color={Colors.HIVE_PRIMARY}
+          name={'facebook-official'}
+          size={24}
+        />,
+        profileType: 'Facebook',
+        onPress: () => Linking.openURL(fbLink),
+      });
+    }
+    if (phoneNumber !== null) {
+      const smsLink = 'sms:' + phoneNumber;
+      buttonOpts.push({
+        title: 'Send a text',
+        icon: 'textsms',
+        iconComponent: null,
+        profileType: 'Sms',
+        onPress: () => Linking.openURL(smsLink),
+      });
+    }
+    const emailLink = 'mailto:' + email;
+    buttonOpts.push({
+      title: 'Send an email',
+      icon: 'email',
+      iconComponent: null,
+      profileType: 'Email',
+      onPress: () => Linking.openURL(emailLink),
+    });
+
+    return buttonOpts.map(opt => this.getButton(
+      opt.title,
+      opt.profileType,
+      opt.onPress,
+      opt.icon,
+      opt.iconComponent,
+    ));
+  }
+
+  render() {
+    const onPress = () => this.setState({ isVisible: true });
+    const icon = 'textsms';
+    const buttons = this.getButtons();
+    return (
+      <View>
+        <Modal isVisible={ this.state.isVisible }>
+          <View style={ contactModalStyles.container }>
+            <Text style={contactModalStyles.header}>Contact Options</Text>
+            { buttons }
+            <Button
+              title={ 'Close' }
+              buttonStyle={ contactModalStyles.closeButton }
+              textStyle={ contactModalStyles.closeButtonText }
+              onPress={ () => this.setState({ isVisible: false }) }
+            />
+          </View>
+        </Modal>
+        <Button buttonStyle={{ width: 150 }} icon={ icon } title="Contact" onPress={ onPress } />
+      </View>
+    );
+  }
+}
+
+const contactModalStyles = StyleSheet.create({
+  container: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.WHITE,
+  },
+  header: {
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  button: {
+    marginTop: 10,
+  },
+  closeButton: {
+    marginTop: 20,
+    borderColor: Colors.RED,
+    backgroundColor: Colors.RED,
+  },
+  closeButtonText: {
+    color: Colors.WHITE,
+  },
+});
 
 interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
@@ -238,30 +382,7 @@ class HomeView extends Component<Props, State> {
     const { userProfile } = connection;
     var icon: string;
     var onPress: () => void;
-    const {
-      userId,
-      email,
-      fbId,
-      fbLink,
-      phoneNumber,
-    } = userProfile;
-
-    let profileType;
-    if (fbLink != null) {
-      icon = 'face';
-      profileType = "Facebook";
-      onPress = () => Linking.openURL(fbLink);
-    } else if (phoneNumber !== null) {
-      const smsLink = 'sms:' + phoneNumber;
-      profileType = "Phone";
-      icon = 'textsms';
-      onPress = () => Linking.openURL(smsLink);
-    } else {
-      const emailLink = 'mailto:' + email;
-      profileType = "Email";
-      icon = 'email';
-      onPress = () => Linking.openURL(emailLink);
-    }
+    const { userId } = userProfile;
 
     // record user clicking to view mentor/mentee profile
     const viewProfile =
@@ -274,14 +395,6 @@ class HomeView extends Component<Props, State> {
         () => {
           this.props.navigation.navigate('MatchProfile', { userId });}
       );
-      onPress = logAnalyticsThenExecute.bind(
-        this,
-        "ContactProfile_" + profileType,
-        AnalyticsActions.CLICK,
-        getHumanReadableUserType(userProfile.userType),
-        1,
-        onPress,
-      );
 
     // TODO: Move into styles
     return (
@@ -291,7 +404,7 @@ class HomeView extends Component<Props, State> {
             View Profile
           </Text>
         </TouchableOpacity>
-        <Button buttonStyle={{ width: 150 }} icon={icon} title="Contact" onPress={onPress} />
+        <ContactModal relationship={userProfile} />
       </View>
     );
   }

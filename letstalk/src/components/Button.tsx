@@ -23,6 +23,7 @@ interface Props {
   title: string;
   icon?: string;
   color?: string;
+  iconComponent?: ReactNode;
 }
 
 const Button: React.SFC<Props> = props => {
@@ -42,13 +43,16 @@ const Button: React.SFC<Props> = props => {
       color: props.color || Colors.HIVE_PRIMARY,
     },
   });
-  const icon = props.icon ?
-    <MaterialIcons
-      style={{ position: 'absolute', left: 2, top: 2, margin: 4 }}
-      color={Colors.HIVE_PRIMARY}
-      name={props.icon}
-      size={24}
-    /> : null;
+  let icon = props.iconComponent;
+  if (!icon) {
+    icon = props.icon ?
+      <MaterialIcons
+        style={{ position: 'absolute', left: 2, top: 2, margin: 4 }}
+        color={Colors.HIVE_PRIMARY}
+        name={props.icon}
+        size={24}
+      /> : null;
+  }
   return (
     <TouchableOpacity style={[styles.loginButtonStyle, props.buttonStyle]} onPress={props.onPress}>
       { icon }
