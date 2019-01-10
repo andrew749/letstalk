@@ -88,12 +88,12 @@ class ContactModal extends Component<ContactModalProps, ContactModalState> {
   private getButton(
     title: string,
     profileType: string,
-    action: () => void,
+    onClick: () => void,
     icon?: string,
     iconComponent?: ReactNode,
   ): ReactNode {
-    const exectutable = () => {
-      action();
+    const executable = () => {
+      onClick();
       this.setState({ isVisible: false });
     }
     const onPress = logAnalyticsThenExecute.bind(
@@ -102,7 +102,7 @@ class ContactModal extends Component<ContactModalProps, ContactModalState> {
       AnalyticsActions.CLICK,
       getHumanReadableUserType(this.props.relationship.userType),
       1,
-      exectutable);
+      executable);
 
     return <Button
       title={ title }
