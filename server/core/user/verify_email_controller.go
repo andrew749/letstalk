@@ -4,6 +4,7 @@ import (
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/notifications/customized_notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/core/utility"
 	"letstalk/server/core/utility/uw_email"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
@@ -82,6 +84,7 @@ func VerifyEmailController(c *ctx.Context) errs.Error {
 	if err := handleEmailVerification(c, &req); err != nil {
 		return err
 	}
+
 	c.Result = "Ok"
 	return nil
 }
@@ -127,5 +130,11 @@ func handleEmailVerification(c *ctx.Context, req *api.VerifyEmailRequest) errs.E
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
+
+	// send out a notification. eat the error if there is one
+	// needs to happen after the commit so we get read after write consistency.
+	customized_notifications.SendSignupNotifiction(c.Db, verifyEmailId.UserId)
+	rlog.Errorf("%+v", err)
+
 	return nil
 }
