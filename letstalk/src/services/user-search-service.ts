@@ -11,7 +11,7 @@ import {
   USER_SEARCH_SIMPLE_TRAIT_ROUTE,
 } from './constants';
 
-const DEFAULT_SEARCH_SIZE = 30;
+const DEFAULT_SEARCH_SIZE = 50;
 export { DEFAULT_SEARCH_SIZE };
 
 interface BaseUserSearchRequest {
