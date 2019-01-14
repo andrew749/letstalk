@@ -51,7 +51,6 @@ import VerifyEmailView from './views/VerifyEmailView';
 import RequestConnectionView from './views/RequestConnectionView';
 import RequestsView from './views/RequestsView';
 import UpdatePersonalView from './views/UpdatePersonalView';
-import SplashScreenView from './views/SplashScreenView';
 import SurveyView from './views/SurveyView';
 
 import NotificationService, { RawNotification } from './services/notification-service';
@@ -171,9 +170,6 @@ const createTabView = () => TabNavigator({
 });
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
-  SplashScreenView: {
-    screen: SplashScreenView,
-  },
   AddPosition: {
     screen: AddPositionView,
     path: 'AddPosition',
@@ -306,9 +302,9 @@ class App extends React.Component<Props, AppState> {
   render() {
     const { loggedIn } = this.state;
 
-    // Splash screen loads bootstrap and navigates to tabbed view
-    let initialRouteName = 'SplashScreenView';
+    let initialRouteName = 'BlankDoNotUse';
     if (loggedIn === false) initialRouteName = 'Login';
+    else if (loggedIn === true) initialRouteName = 'Tabbed';
 
     const AppNavigation = createAppNavigation(initialRouteName);
 

@@ -5,8 +5,12 @@ import {
   ActivityIndicator,
   Alert,
   Button as ReactNativeButton,
+  Image,
+  ImageBackground,
   Linking,
+  Modal as ReactNativeModal,
   Picker,
+  Platform,
   RefreshControl,
   RefreshControlProps,
   ScrollView,
@@ -67,8 +71,11 @@ import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor  } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
 import { GROUP_GENERIC } from '../services/survey';
-import { FETCH_STATE_SUCCESS } from '../redux/actions';
+import { FETCH_STATE_PREFETCH, FETCH_STATE_FETCHING, FETCH_STATE_SUCCESS } from '../redux/actions';
 import Window from '../services/window';
+import Color from '../services/colors';
+import profileService from '../services/profile-service';
+import auth from '../services/auth';
 
 interface ContactModalProps {
   relationship: Relationship;
@@ -226,6 +233,16 @@ interface State {
   refreshing: boolean;
 }
 
+// Since this view gets rendered multiple times, we only want to add the device token once per app
+// launch.
+let addedExpoToken = false;
+
+const PROBABILITY_SHOW_IOS_MODEL = 0.4;
+
+function showModal(): boolean {
+  return Math.random() < PROBABILITY_SHOW_IOS_MODEL;
+}
+
 class HomeView extends Component<Props, State> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
@@ -235,6 +252,22 @@ class HomeView extends Component<Props, State> {
     headerTitleStyle,
     headerTintColor
   })
+
+  private triedAddingToken: boolean = false;
+
+  private async maybeAddExpoToken() {
+    if (!addedExpoToken) {
+      addedExpoToken = true;
+      try {
+        const token = await auth.registerForPushNotificationsAsync(showModal());
+        if (token !== null) {
+          await profileService.addExpoDeviceToken(token);
+        }
+      } catch(e){
+        console.log("Failed to register for notification " + e);
+      }
+    }
+  }
 
   constructor(props: Props) {
     super(props);
@@ -252,12 +285,10 @@ class HomeView extends Component<Props, State> {
       AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     });
 
-    if (!!this.props.bootstrap) {
-      await this.loadBootstrap();
-    } else {
-      await this.maybeNavigateRequired();
-    }
-
+    await Promise.all([
+      this.props.fetchBootstrap(),
+      this.maybeAddExpoToken(),
+    ]);
     await TutorialService.launchTutorial(this.props.navigation);
   }
 
@@ -633,19 +664,43 @@ class HomeView extends Component<Props, State> {
     } = this.props.fetchState;
     // If `this.state.refreshing` is true, it means that we are reloading data using the pull
     // down, which means that we want to still display the ScrollView.
-    return (
-      <View style={{flex: 1}}>
-        <Loading
-          state={this.state.refreshing ? FETCH_STATE_SUCCESS : state}
-          errorMsg={errorMsg}
-          errorType={errorType}
-          load={this.loadBootstrap}
-          renderBody={this.renderHome}
-          navigation={this.props.navigation}
-        />
-        { allModals }
-      </View>
-    );
+    const refreshingState = this.state.refreshing ? FETCH_STATE_SUCCESS : state;
+    if (refreshingState === FETCH_STATE_FETCHING || refreshingState === FETCH_STATE_PREFETCH) {
+      return (
+        <ReactNativeModal visible={true} animationType={'none'}>
+          <View style={styles.splashScreenContainer}>
+            <ImageBackground
+              style={styles.hiveLogo}
+              source={require('../img/logo_android.png')}
+            >
+              <ActivityIndicator
+                color={Color.HIVE_PRIMARY}
+                size="large"
+                style={styles.spinner}
+              />
+            </ImageBackground>
+            <Image
+              style={styles.hiveName}
+              source={require('../img/name_white.png')}
+            />
+          </View>
+        </ReactNativeModal>
+      );
+    } else {
+      return (
+        <View style={{flex: 1}}>
+          <Loading
+            state={refreshingState}
+            errorMsg={errorMsg}
+            errorType={errorType}
+            load={this.loadBootstrap}
+            renderBody={this.renderHome}
+            navigation={this.props.navigation}
+          />
+          { allModals }
+        </View>
+      );
+    }
   }
 }
 
@@ -728,5 +783,29 @@ const styles = StyleSheet.create({
   connectionCard: {
     marginHorizontal: 0,
     marginVertical: 0,
-  }
+  },
+  splashScreenContainer: {
+    width: Window.WIDTH,
+    height: Window.HEIGHT,
+    backgroundColor: Color.HIVE_PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hiveLogo: {
+    width: 200,
+    height: 200,
+  },
+  hiveName: {
+    marginTop: 20,
+    width: 101,
+    height: 57,
+  },
+  spinner: {
+    position: 'absolute',
+    // Bit of a hack that makes it easier to position the spinner
+    width: 0,
+    height: 0,
+    left: Platform.OS === 'ios' ? 107 : 105,
+    top: Platform.OS === 'ios' ? 123 : 121,
+  },
 })
