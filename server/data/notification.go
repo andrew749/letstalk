@@ -151,7 +151,7 @@ func (e *ExpoPendingNotification) MarkNotificationSent(db *gorm.DB, receipt stri
 	return db.Save(e).Error
 }
 
-func (e *ExpoPendingNotification) MarkNotificationDelivered(db *gorm.DB) error {
+func (e *ExpoPendingNotification) MarkNotificationChecked(db *gorm.DB) error {
 	e.Checked = true
 	return db.Save(e).Error
 }

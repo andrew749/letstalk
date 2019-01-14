@@ -38,7 +38,7 @@ func parseTaskRecordData(data jobmine.Metadata) taskRecordMetadata {
 }
 
 func processNotification(db *gorm.DB, e *data.ExpoPendingNotification) error {
-	// check the status of this notification from the server
+	// check the status of this notification from the expo servers
 	serverStatus, err := notification_api.GetNotificationStatus([]string{*e.Receipt})
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func processNotification(db *gorm.DB, e *data.ExpoPendingNotification) error {
 	status := serverStatus.Data[*e.Receipt].Status
 	// if the status is ok, mark the notification as such
 	if status == notification_api.OK_STATUS {
-		return e.MarkNotificationDelivered(db)
+		return e.MarkNotificationChecked(db)
 	}
 
 	// if there is an error update the state accordingly and try to remediate
@@ -80,7 +80,7 @@ func processNotification(db *gorm.DB, e *data.ExpoPendingNotification) error {
 		// wtf is happening?
 		rlog.Errorf("Unknown error: %+v", serverStatus.Data[*e.Receipt].Details.Error)
 	}
-	return nil
+	return e.MarkNotificationChecked(db)
 }
 
 var NotificationStatusChecker jobmine.JobSpec = jobmine.JobSpec{
