@@ -171,7 +171,7 @@ const createTabView = () => TabNavigator({
 });
 
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
-  SplashScreenView: {
+  SplashScreen: {
     screen: SplashScreenView,
   },
   AddPosition: {
@@ -270,6 +270,7 @@ const store = createStore(appReducer, applyMiddleware(thunk));
 
 interface AppState {
   loggedIn: null | boolean;
+  initialPathEmpty: null | boolean;
 }
 
 type Props = {};
@@ -281,6 +282,7 @@ class App extends React.Component<Props, AppState> {
     super(props);
     this.state = {
       loggedIn: null,
+      initialPathEmpty: null,
     };
 
     this.handleNotification = this.handleNotification.bind(this);
@@ -293,24 +295,38 @@ class App extends React.Component<Props, AppState> {
   }
 
   private linkHandler = (event: {url: string}) => {
-    let { path, queryParams } = Linking.parse(event.url);
+    const { path, queryParams } = Linking.parse(event.url);
     navService.navigate(path, queryParams);
   }
 
+  private getInitialRouteName(): string {
+    const { loggedIn, initialPathEmpty } = this.state;
+
+    let initialRouteName = 'BlankDoNotUse';
+    // If we have an initial url, let the link handler navigate you to the correct url
+    if (loggedIn !== null && initialPathEmpty === true) {
+      if (!loggedIn) {
+        initialRouteName = 'Login';
+      } else {
+        // Splash screen loads bootstrap and navigates to tabbed view
+        initialRouteName = 'SplashScreen';
+      }
+    }
+    return initialRouteName;
+  }
+
   async componentWillMount() {
-    const sessionToken = await auth.getSessionToken();
-    this.setState({ loggedIn: sessionToken !== null });
+    const [ sessionToken, initialUrl ] = await Promise.all([
+      auth.getSessionToken(),
+      Linking.getInitialURL(),
+    ]);
+    const { path } = Linking.parse(initialUrl);
+    this.setState({ loggedIn: sessionToken !== null, initialPathEmpty: path === '' });
     Notifications.addListener(this.handleNotification);
   }
 
   render() {
-    const { loggedIn } = this.state;
-
-    // Splash screen loads bootstrap and navigates to tabbed view
-    let initialRouteName = 'SplashScreenView';
-    if (loggedIn === false) initialRouteName = 'Login';
-
-    const AppNavigation = createAppNavigation(initialRouteName);
+    const AppNavigation = createAppNavigation(this.getInitialRouteName());
 
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
       navService.setTopLevelNavigator(navContainer);

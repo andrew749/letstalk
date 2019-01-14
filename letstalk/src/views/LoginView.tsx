@@ -163,7 +163,7 @@ export default class LoginView extends Component<Props> {
       if (await auth.loginWithFb(token)) {
         this.props.navigation.dispatch(NavigationActions.reset({
           index: 0,
-          actions: [NavigationActions.navigate({ routeName: 'SplashScreenView' })]
+          actions: [NavigationActions.navigate({ routeName: 'SplashScreen' })]
         }));
       }
     } catch(e) {
@@ -189,7 +189,7 @@ export default class LoginView extends Component<Props> {
       await auth.login(email, password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'SplashScreenView' })]
+        actions: [NavigationActions.navigate({ routeName: 'SplashScreen' })]
       }));
     } catch(e) {
       console.log("Unable to login: " + e)
