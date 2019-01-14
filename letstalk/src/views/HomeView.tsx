@@ -253,8 +253,6 @@ class HomeView extends Component<Props, State> {
     headerTintColor
   })
 
-  private triedAddingToken: boolean = false;
-
   private async maybeAddExpoToken() {
     if (!addedExpoToken) {
       addedExpoToken = true;
