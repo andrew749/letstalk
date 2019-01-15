@@ -12,16 +12,18 @@ import (
 // CreateAtStart, if provided, filters out users created before this time
 // CreateAtEnd, if provided, filters out users created after this time
 // UserIds, if provided, only fetches users with these ids
-// FollObjects, if provided, fills the user objects with other related objects (e.g. cohort)
 type UserFetcherOptions struct {
 	CreatedAtStart *time.Time
 	CreatedAtEnd   *time.Time
 	UserIds        []data.TUserID
-	PreloadObjects []string
 }
 
 // Fetches users from the database.
-func FetchUsers(db *gorm.DB, options UserFetcherOptions) ([]data.User, error) {
+func FetchUsers(
+	db *gorm.DB,
+	options UserFetcherOptions, // options related to which users to load
+	preloadObjects []string, // objects to preload for each user (e.g. cohort, positions)
+) ([]data.User, error) {
 	var users []data.User
 
 	query := db
@@ -34,8 +36,8 @@ func FetchUsers(db *gorm.DB, options UserFetcherOptions) ([]data.User, error) {
 	if options.UserIds != nil {
 		query = query.Where("user_id IN (?)", options.UserIds)
 	}
-	if options.PreloadObjects != nil {
-		for _, object := range options.PreloadObjects {
+	if preloadObjects != nil {
+		for _, object := range preloadObjects {
 			query = query.Preload(object)
 		}
 	}
