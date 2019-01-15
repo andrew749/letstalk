@@ -8,6 +8,7 @@ import FilterListModal, { FilterableElement } from './FilterListModal';
 import FloatingButton from './FloatingButton';
 import { FormP, FormProps } from './Form';
 import Header from './Header';
+import InformationCard from './InformationCard';
 import InfoText from './InfoText';
 import LabeledFormInput from './LabeledFormInput';
 import ModalPicker from './ModalPicker';
@@ -30,6 +31,7 @@ export {
   FloatingButton,
   Header,
   InfoText,
+  InformationCard,
   LabeledFormInput,
   ModalDatePicker,
   ModalPicker,

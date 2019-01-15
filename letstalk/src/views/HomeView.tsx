@@ -41,7 +41,7 @@ import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
-import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
+import { ActionButton, Button, Card, Header, ProfileAvatar, InformationCard } from '../components';
 import Loading from './Loading';
 import {
   USER_STATE_ACCOUNT_CREATED,
@@ -435,6 +435,14 @@ class HomeView extends Component<Props, State> {
     return null;
   }
 
+  private renderInformationCards() {
+    return(
+      <View>
+        <InformationCard />
+      </View>
+    );
+  }
+
   private renderContactButton(connection: BootstrapConnection) {
     const { userProfile } = connection;
     var icon: string;
@@ -594,6 +602,7 @@ class HomeView extends Component<Props, State> {
     // A little sketchy to be pasting this in all the cases, but haven't found an easy work around
     // yet.
     const requestsButton = this.renderRequestsButton();
+    const informationCards = this.renderInformationCards();
 
     const { state } = this.props.bootstrap;
     switch (state) {
@@ -628,6 +637,7 @@ class HomeView extends Component<Props, State> {
                   <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
                 </View>
                 { requestsButton }
+                { informationCards }
                 { peerMatches }
               </View>
             </ScrollView>
@@ -648,6 +658,7 @@ class HomeView extends Component<Props, State> {
             >
               <View style={styles.scrollContainer}>
                 { requestsButton }
+                { informationCards }
                 { matches }
               </View>
             </ScrollView>
