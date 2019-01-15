@@ -277,6 +277,7 @@ const styles = StyleSheet.create({
   },
   traitContainer: {
     paddingLeft: 10,
+    paddingRight: 20,
   },
   traitText: {
     fontSize: 16,
