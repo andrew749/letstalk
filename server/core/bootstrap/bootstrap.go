@@ -77,23 +77,16 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		userId   = c.SessionData.UserId
 	)
 
-	user, err := query.GetUserById(c.Db, userId)
-	if err != nil {
-		return errs.NewInternalError("Authenticated user not found")
-	}
-	if !user.IsEmailVerified {
-		// User email not yet verified, don't proceed to onboarding.
-		c.Result = response
-		return nil
-	} else {
-		response.State = api.ACCOUNT_EMAIL_VERIFIED
-	}
-
 	state, err := user_state.GetUserState(c.Db, userId)
 	if err != nil {
 		return err
 	}
 	response.State = *state
+	if *state != api.ACCOUNT_SETUP {
+		// Account isn't setup yet, so we shouldn't be fetching connections, even if they have them
+		c.Result = response
+		return nil
+	}
 
 	// Fetch all user's connections.
 
@@ -141,7 +134,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 		} else {
 			if conn.Mentorship != nil {
 				userType := api.USER_TYPE_MENTOR
-				if conn.Mentorship.MentorUserId == user.UserId {
+				if conn.Mentorship.MentorUserId == userId {
 					userType = api.USER_TYPE_MENTEE
 				}
 
@@ -155,7 +148,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 					),
 				}
 
-				if conn.Mentorship.MentorUserId == user.UserId {
+				if conn.Mentorship.MentorUserId == userId {
 					// Auth user is the mentor.
 					rlog.Debug("adding mentee", bc)
 					response.Connections.Mentees =
@@ -168,7 +161,7 @@ func GetCurrentUserBoostrapStatusController(c *ctx.Context) errs.Error {
 				}
 			} else {
 				userType := api.USER_TYPE_ASKER
-				if conn.UserOneId == user.UserId {
+				if conn.UserOneId == userId {
 					userType = api.USER_TYPE_ANSWERER
 				}
 				// Connection is not a mentorship.
