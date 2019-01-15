@@ -237,10 +237,10 @@ interface State {
 // launch.
 let addedExpoToken = false;
 
-const PROBABILITY_SHOW_IOS_MODEL = 0.4;
+const PROBABILITY_SHOW_IOS_MODAL = 0.4;
 
 function showModal(): boolean {
-  return Math.random() < PROBABILITY_SHOW_IOS_MODEL;
+  return Math.random() < PROBABILITY_SHOW_IOS_MODAL;
 }
 
 class HomeView extends Component<Props, State> {
