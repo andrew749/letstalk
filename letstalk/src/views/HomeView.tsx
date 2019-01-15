@@ -565,20 +565,6 @@ class HomeView extends Component<Props, State> {
   private renderHome() {
     // A little sketchy to be pasting this in all the cases, but haven't found an easy work around
     // yet.
-    const feedbackPrompt = (
-      <View>
-        <Text style={styles.feedbackText}>
-          Thank you for joining Hive! If you notice any bugs or
-          have any suggestions, please let us know!
-        </Text>
-        <Button
-          buttonStyle={styles.feedbackButton}
-          textStyle={styles.feedbackButtonText}
-          title="Submit Feedback"
-          onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
-        />
-      </View>
-    );
     const requestsButton = this.renderRequestsButton();
 
     const { state } = this.props.bootstrap;
@@ -613,7 +599,6 @@ class HomeView extends Component<Props, State> {
                   <Text style={styles.headline}>Waiting for your mentorship match</Text>
                   <ActionButton onPress={() => this.loadBootstrap()} title="Check again" />
                 </View>
-                { feedbackPrompt }
                 { requestsButton }
                 { peerMatches }
               </View>
@@ -634,7 +619,6 @@ class HomeView extends Component<Props, State> {
               }
             >
               <View style={styles.scrollContainer}>
-                { feedbackPrompt }
                 { requestsButton }
                 { matches }
               </View>
