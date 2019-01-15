@@ -223,7 +223,7 @@ export default class SignupView extends Component<Props> {
       await auth.login(values.email, values.password, token);
       this.props.navigation.dispatch(NavigationActions.reset({
         index: 0,
-        actions: [NavigationActions.navigate({ routeName: 'SplashScreenView' })]
+        actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
     } catch(e) {
       throw new SubmissionError({_error: e.errorMsg});
