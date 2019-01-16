@@ -5,7 +5,7 @@ import "letstalk/server/data"
 type SurveyPairwiseScore struct {
 }
 
-func (s *SurveyPairwiseScore) RequiredObjects() []string {
+func (s SurveyPairwiseScore) RequiredObjects() []string {
 	return []string{"UserSurveys"}
 }
 
@@ -19,7 +19,7 @@ func getSurveyMap(user *data.User) map[data.SurveyGroup]data.UserSurvey {
 	return surveyMap
 }
 
-func (s *SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (float32, error) {
+func (s SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (float32, error) {
 	userOneSurveyMap := getSurveyMap(userOne)
 	userTwoSurveyMap := getSurveyMap(userTwo)
 
