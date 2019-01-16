@@ -7,9 +7,5 @@ import "letstalk/server/data"
 // Match calculates a bunch of
 type Matcher interface {
 	RequiredObjects() []string
-	Match(
-		users []data.User,
-		userScores []UserScoreWithWeight,
-		pairwiseScores []PairwiseScoreWithWeight,
-	) ([]UserMatch, error)
+	Match(users []data.User, score PairwiseScore) ([]UserMatch, error)
 }

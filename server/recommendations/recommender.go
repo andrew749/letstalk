@@ -8,5 +8,5 @@ func Recommend(db *gorm.DB, strat RecommendationStrategy) ([]UserMatch, error) {
 		return nil, err
 	}
 
-	return strat.Matcher.Match(users, strat.UserScores, strat.PairwiseScores)
+	return strat.Matcher.Match(users, strat.Score)
 }
