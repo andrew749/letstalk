@@ -9,7 +9,7 @@ enum InformationCardType {
 
 interface Props {
     title: string;
-    key: InformationCardType;
+    cardType: InformationCardType;
 }
 
 interface State {
@@ -35,15 +35,13 @@ class InformationCard extends React.Component<Props, State> {
     }
 
     async componentDidMount() {
-        if (!!this.props.key) {
-            const visibility = await AsyncStorage.getItem(this.props.key);
-            this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.INVISIBLE : visibility as InformationCardVisibilityState })
-        }
+        const visibility = await AsyncStorage.getItem(this.props.cardType);
+        this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.INVISIBLE : visibility as InformationCardVisibilityState })
     }
 
     async onCancel() {
         this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE });
-        await AsyncStorage.setItem(this.props.key, InformationCardVisibilityState.INVISIBLE);
+        await AsyncStorage.setItem(this.props.cardType, InformationCardVisibilityState.INVISIBLE);
     }
 
     shouldRenderComponent = () => {
@@ -72,7 +70,7 @@ interface ClubDayProps { }
 
 export const ClubDayInformationCard: React.SFC<ClubDayProps> = props => {
     return (
-        <InformationCard title="Welcome to the Hive!" key={InformationCardType.CLUB_DAY}>
+        <InformationCard title="Welcome to the Hive!" cardType={InformationCardType.CLUB_DAY}>
             <Text style={[styles.textSection]}>
                 Matches will be coming out in the next couple of weeks. Stay tuned!
             </Text>
