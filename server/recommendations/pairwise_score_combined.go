@@ -10,7 +10,7 @@ type CombinedPairwiseScore struct {
 	PairwiseScores []PairwiseScoreWithWeight
 }
 
-func (s *CombinedPairwiseScore) RequiredObjects() []string {
+func (s CombinedPairwiseScore) RequiredObjects() []string {
 	options := make([]string, 0)
 	for _, userScore := range s.UserScores {
 		options = append(options, userScore.UserScore.RequiredObjects()...)
@@ -21,7 +21,7 @@ func (s *CombinedPairwiseScore) RequiredObjects() []string {
 	return dedupStringList(options)
 }
 
-func (s *CombinedPairwiseScore) Calculate(
+func (s CombinedPairwiseScore) Calculate(
 	userOne *data.User,
 	userTwo *data.User,
 ) (float32, error) {

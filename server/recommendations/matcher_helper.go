@@ -1,10 +1,7 @@
 package recommendations
 
 import (
-	"fmt"
 	"sort"
-
-	"github.com/pkg/errors"
 
 	"letstalk/server/data"
 )
@@ -36,20 +33,19 @@ func calculateSplitUserMatches(
 	for _, userLeft := range usersLeft {
 		matches[userLeft.UserId] = make([]UserMatch, 0, len(usersRight))
 		for _, userRight := range usersRight {
-			if userLeft.UserId == userRight.UserId {
-				return nil, errors.New(
-					fmt.Sprintf("User %d is repeated in left and right lists", userLeft.UserId))
+			// Don't create matches for two of the same user
+			if userLeft.UserId != userRight.UserId {
+				value, err := score.Calculate(&userLeft, &userRight)
+				if err != nil {
+					return nil, err
+				}
+				userMatch := UserMatch{
+					UserOneId: userLeft.UserId,
+					UserTwoId: userRight.UserId,
+					Score:     value,
+				}
+				matches[userLeft.UserId] = append(matches[userLeft.UserId], userMatch)
 			}
-			value, err := score.Calculate(&userLeft, &userRight)
-			if err != nil {
-				return nil, err
-			}
-			userMatch := UserMatch{
-				UserOneId: userLeft.UserId,
-				UserTwoId: userRight.UserId,
-				Score:     value,
-			}
-			matches[userLeft.UserId] = append(matches[userLeft.UserId], userMatch)
 		}
 		// Sort matches by decreasing score
 		sort.Sort(byScore(matches[userLeft.UserId]))

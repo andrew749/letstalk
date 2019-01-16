@@ -2,8 +2,12 @@ package recommendations
 
 import "github.com/jinzhu/gorm"
 
-func Recommend(db *gorm.DB, strat RecommendationStrategy) ([]UserMatch, error) {
-	users, err := FetchUsers(db, strat.UserFetcherOptions, strat.RequiredObjects())
+func Recommend(
+	db *gorm.DB,
+	fetcherOptions UserFetcherOptions,
+	strat RecommendationStrategy,
+) ([]UserMatch, error) {
+	users, err := FetchUsers(db, fetcherOptions, strat.RequiredObjects())
 	if err != nil {
 		return nil, err
 	}

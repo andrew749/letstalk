@@ -41,6 +41,42 @@ func CreateTestUser(db *gorm.DB, num int) (*data.User, error) {
 	return user, nil
 }
 
+func CreateCohortForUser(
+	db *gorm.DB,
+	user *data.User,
+	programId string,
+	programName string,
+	gradYear uint,
+	isCoop bool,
+	sequenceId *string,
+	sequenceName *string,
+) error {
+	cohort := &data.Cohort{
+		ProgramId:    programId,
+		ProgramName:  programName,
+		GradYear:     gradYear,
+		IsCoop:       isCoop,
+		SequenceId:   sequenceId,
+		SequenceName: sequenceName,
+	}
+	err := db.Save(cohort).Error
+	if err != nil {
+		return err
+	}
+
+	userCohort := &data.UserCohort{
+		UserId:   user.UserId,
+		CohortId: cohort.CohortId,
+	}
+	err = db.Save(userCohort).Error
+	if err != nil {
+		return err
+	}
+	userCohort.Cohort = cohort
+	user.Cohort = userCohort
+	return nil
+}
+
 // Creates a user that has already gone through onboarding.
 func CreateTestSetupUser(db *gorm.DB, num int) (*data.User, error) {
 	user, err := CreateTestUser(db, num)
@@ -52,27 +88,7 @@ func CreateTestSetupUser(db *gorm.DB, num int) (*data.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	cohort := &data.Cohort{
-		ProgramId:   "ARTS",
-		ProgramName: "Arts",
-		GradYear:    2018 + uint(num),
-		IsCoop:      false,
-	}
-	err = db.Save(cohort).Error
-	if err != nil {
-		return nil, err
-	}
-
-	userCohort := &data.UserCohort{
-		UserId:   user.UserId,
-		CohortId: cohort.CohortId,
-	}
-	err = db.Save(userCohort).Error
-	if err != nil {
-		return nil, err
-	}
-	userCohort.Cohort = cohort
-	user.Cohort = userCohort
+	err = CreateCohortForUser(db, user, "ARTS", "Arts", 2018+uint(num), false, nil, nil)
 
 	responses := map[data.SurveyQuestionKey]data.SurveyOptionKey{
 		"free_time":   "reading",

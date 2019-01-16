@@ -3,7 +3,6 @@ package recommendations
 import "letstalk/server/data"
 
 type SurveyPairwiseScore struct {
-	Normalize bool
 }
 
 func (s *SurveyPairwiseScore) RequiredObjects() []string {
@@ -44,9 +43,7 @@ func (s *SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) 
 
 	if numAnsweredByBoth == 0 {
 		return 0.0, nil
-	} else if s.Normalize {
-		return float32(numMatchingAnswers) / float32(numAnsweredByBoth), nil
 	} else {
-		return float32(numMatchingAnswers), nil
+		return float32(numMatchingAnswers) / float32(numAnsweredByBoth), nil
 	}
 }

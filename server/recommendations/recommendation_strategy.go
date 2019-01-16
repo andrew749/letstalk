@@ -1,9 +1,8 @@
 package recommendations
 
 type RecommendationStrategy struct {
-	UserFetcherOptions UserFetcherOptions
-	Score              PairwiseScore
-	Matcher            Matcher
+	Score   PairwiseScore
+	Matcher Matcher
 }
 
 func (r *RecommendationStrategy) RequiredObjects() []string {

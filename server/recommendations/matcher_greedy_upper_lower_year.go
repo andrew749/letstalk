@@ -6,18 +6,18 @@ import (
 	"letstalk/server/data"
 )
 
-type GreedyUpperLowerYearMapper struct {
+type GreedyUpperLowerYearMatcher struct {
 	MaxLowerYears     uint // Maximum number of lower-years per upper-year
 	MaxUpperYears     uint // Maximum number of upper-years per lower-year
 	YoungestUpperYear uint // Graduating year of "youngest" upper-year
 }
 
-func (m *GreedyUpperLowerYearMapper) RequiredObjects() []string {
+func (m GreedyUpperLowerYearMatcher) RequiredObjects() []string {
 	return []string{"Cohort.Cohort"}
 }
 
 // Splits users into upper-year and lower-year
-func (m *GreedyUpperLowerYearMapper) splitUsersByGradYear(
+func (m GreedyUpperLowerYearMatcher) splitUsersByGradYear(
 	users []data.User,
 ) ([]data.User, []data.User) {
 	lowerYears := make([]data.User, 0)
@@ -59,7 +59,7 @@ func lowerYearsOrderedByDecreasingBestScore(
 	return sortedLowerYearsIds
 }
 
-func (m *GreedyUpperLowerYearMapper) Match(
+func (m GreedyUpperLowerYearMatcher) Match(
 	users []data.User,
 	score PairwiseScore,
 ) ([]UserMatch, error) {
