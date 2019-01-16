@@ -23,7 +23,8 @@ import {
   NavigationScreenProp,
   NavigationScreenDetails,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  NavigationEventSubscription,
 } from 'react-navigation';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import Immutable from 'immutable';
@@ -112,6 +113,7 @@ class ContactModal extends Component<ContactModalProps, ContactModalState> {
       executable);
 
     return <Button
+      key={ title }
       title={ title }
       icon={ icon || null }
       iconComponent={ iconComponent || null }
@@ -231,6 +233,7 @@ interface Props extends BootstrapState, DispatchActions {
 
 interface State {
   refreshing: boolean;
+  focused: boolean;
 }
 
 // Since this view gets rendered multiple times, we only want to add the device token once per app
@@ -253,7 +256,11 @@ class HomeView extends Component<Props, State> {
     headerTintColor
   })
 
+  private willFocusHandler: NavigationEventSubscription;
+  private willBlurHandler: NavigationEventSubscription;
+
   private async maybeAddExpoToken() {
+
     if (!addedExpoToken) {
       addedExpoToken = true;
       try {
@@ -270,7 +277,7 @@ class HomeView extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.state = { refreshing: false };
+    this.state = { refreshing: false, focused: false };
 
     this.loadBootstrap = this.loadBootstrap.bind(this);
     this.renderHome = this.renderHome.bind(this);
@@ -279,7 +286,18 @@ class HomeView extends Component<Props, State> {
   }
 
   async componentDidMount() {
-    this.props.navigation.addListener('willFocus', (route) => {
+    // Hack since for some reason state is of type void, when it clearly has things inside
+    if ((this.props.navigation.state as any).routeName === 'Home') {
+      this.setState({ focused: true })
+    } else {
+      this.setState({ focused: false })
+    }
+
+    this.willBlurHandler = this.props.navigation.addListener('willBlur', (route) => {
+      this.setState({ focused: false })
+    });
+    this.willFocusHandler = this.props.navigation.addListener('willFocus', (route) => {
+      this.setState({ focused: true });
       AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     });
 
@@ -290,13 +308,23 @@ class HomeView extends Component<Props, State> {
     await TutorialService.launchTutorial(this.props.navigation);
   }
 
+  componentWillUnmount() {
+    this.willFocusHandler.remove();
+    this.willBlurHandler.remove();
+  }
+
   async componentDidUpdate() {
     await this.maybeNavigateRequired();
   }
 
   // Depending on the user's state, we may need to navigate to another view to get more info
   private async maybeNavigateRequired() {
-    if (!!this.props.bootstrap) {
+    // Need to check if we are currently focused because of the following edge case:
+    // User is not done onboarding but gets a push notification.
+    // When the app is opened, the notification is opened but then overriden by one of the below
+    // navigation actions.
+    // The user never actually ends up seeing the notification, resulting in a bad user experience.
+    if (!!this.props.bootstrap && this.state.focused) {
       switch (this.props.bootstrap.state) {
         case USER_STATE_ACCOUNT_CREATED:
           await this.props.navigation.dispatch(NavigationActions.reset({
