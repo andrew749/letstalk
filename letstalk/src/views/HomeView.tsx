@@ -3,6 +3,7 @@ import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
+  AsyncStorage,
   Alert,
   Button as ReactNativeButton,
   Image,
@@ -314,6 +315,8 @@ class HomeView extends Component<Props, State> {
   }
 
   async componentDidUpdate() {
+    const informationCardVisibility = await AsyncStorage.getItem(this.INFORMATION_CARD_KEY) as InformationCardVisibilityState;
+    this.setState({informationCardVisibility: informationCardVisibility});
     await this.maybeNavigateRequired();
   }
 
@@ -435,10 +438,17 @@ class HomeView extends Component<Props, State> {
     return null;
   }
 
+  INFORMATION_CARD_KEY = 'information-card-visibility';
+
   private renderInformationCards() {
-    return(
+    const cancelCallback = async () => {
+      this.setState({informationCardVisibility: InformationCardVisibilityState.INVISIBLE});
+      await AsyncStorage.setItem(this.INFORMATION_CARD_KEY, InformationCardVisibilityState.INVISIBLE);
+    }
+    return (this.state.informationCardVisibility === InformationCardVisibilityState.INVISIBLE) ? null : (
       <View>
-        <InformationCard />
+        <InformationCard 
+          onCancel={cancelCallback}/>
       </View>
     );
   }

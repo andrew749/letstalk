@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Colors from '../services/colors';
 import Card from '../components/Card';
 
-interface Props {}
+interface Props {
+    onCancel: () => Promise<void>;
+}
 
 /**
  * Generic information card which we can get from the server.
@@ -11,6 +13,9 @@ interface Props {}
 const InformationCard: React.SFC<Props> = props => {
     return (
         <Card style={styles.cardOverrides}>
+            <TouchableOpacity style={styles.cancelButtonContainer} onPress={async () => await props.onCancel()}>
+                <Text style={styles.cancelButton}>X</Text>
+            </TouchableOpacity>
             <Text style={[styles.cardHeader]}>
                 Welcome to the Hive!!
             </Text>
@@ -37,6 +42,14 @@ export default InformationCard;
 const PADDING_TEXT_SECTION = 10;
 
 const styles = StyleSheet.create({
+    cancelButtonContainer: {
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+    },
+    cancelButton: {
+        width: 30,
+        fontSize: 30
+    },
     cardOverrides: {
         marginHorizontal: 0,
     },
