@@ -113,6 +113,7 @@ class ContactModal extends Component<ContactModalProps, ContactModalState> {
       executable);
 
     return <Button
+      key={ title }
       title={ title }
       icon={ icon || null }
       iconComponent={ iconComponent || null }
@@ -256,10 +257,10 @@ class HomeView extends Component<Props, State> {
   })
 
   private willFocusHandler: NavigationEventSubscription;
-  private didFocusHandler: NavigationEventSubscription;
-  private didBlurHandler: NavigationEventSubscription;
+  private willBlurHandler: NavigationEventSubscription;
 
   private async maybeAddExpoToken() {
+
     if (!addedExpoToken) {
       addedExpoToken = true;
       try {
@@ -285,7 +286,18 @@ class HomeView extends Component<Props, State> {
   }
 
   async componentDidMount() {
+    // Hack since for some reason state is of type void, when it clearly has things inside
+    if ((this.props.navigation.state as any).routeName === 'Home') {
+      this.setState({ focused: true })
+    } else {
+      this.setState({ focused: false })
+    }
+
+    this.willBlurHandler = this.props.navigation.addListener('willBlur', (route) => {
+      this.setState({ focused: false })
+    });
     this.willFocusHandler = this.props.navigation.addListener('willFocus', (route) => {
+      this.setState({ focused: true });
       AnalyticsHelper.getInstance().recordPage(this.HOME_VIEW_IDENTIFIER);
     });
 
@@ -294,26 +306,11 @@ class HomeView extends Component<Props, State> {
       this.maybeAddExpoToken(),
     ]);
     await TutorialService.launchTutorial(this.props.navigation);
-
-    // Hack since for some reason state is of type void, when it clearly has things inside
-    if ((this.props.navigation.state as any).routeName === 'Home') {
-      this.setState({ focused: true })
-    } else {
-      this.setState({ focused: false })
-    }
-
-    this.didFocusHandler = this.props.navigation.addListener('didFocus',(route) => {
-      this.setState({ focused: true });
-    });
-    this.didBlurHandler = this.props.navigation.addListener('didBlur', (route) => {
-      this.setState({ focused: false })
-    });
   }
 
-  componentDidUnmount() {
+  componentWillUnmount() {
     this.willFocusHandler.remove();
-    this.didFocusHandler.remove();
-    this.didBlurHandler.remove();
+    this.willBlurHandler.remove();
   }
 
   async componentDidUpdate() {
