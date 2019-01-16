@@ -438,7 +438,7 @@ class HomeView extends Component<Props, State> {
     return null;
   }
 
-  INFORMATION_CARD_KEY = 'information-card-visibility';
+  INFORMATION_CARD_KEY = 'information-card-club-day-visibility';
 
   private renderInformationCards() {
     const cancelCallback = async () => {

@@ -47,8 +47,9 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     cancelButton: {
-        width: 30,
-        fontSize: 30
+        width: 22,
+        fontSize: 26,
+        color: '#9E9E9E'
     },
     cardOverrides: {
         marginHorizontal: 0,
