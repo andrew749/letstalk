@@ -42,7 +42,8 @@ import { State as SurveyState, fetchSurvey } from '../redux/survey/reducer';
 import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
-import { ActionButton, Button, Card, Header, ProfileAvatar, InformationCard } from '../components';
+import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
+import { ClubDayInformationCard } from '../components/InformationCard';
 import Loading from './Loading';
 import {
   USER_STATE_ACCOUNT_CREATED,
@@ -315,8 +316,6 @@ class HomeView extends Component<Props, State> {
   }
 
   async componentDidUpdate() {
-    const informationCardVisibility = await AsyncStorage.getItem(this.INFORMATION_CARD_KEY) as InformationCardVisibilityState;
-    this.setState({informationCardVisibility: informationCardVisibility});
     await this.maybeNavigateRequired();
   }
 
@@ -438,17 +437,10 @@ class HomeView extends Component<Props, State> {
     return null;
   }
 
-  INFORMATION_CARD_KEY = 'information-card-club-day-visibility';
-
   private renderInformationCards() {
-    const cancelCallback = async () => {
-      this.setState({informationCardVisibility: InformationCardVisibilityState.INVISIBLE});
-      await AsyncStorage.setItem(this.INFORMATION_CARD_KEY, InformationCardVisibilityState.INVISIBLE);
-    }
-    return (this.state.informationCardVisibility === InformationCardVisibilityState.INVISIBLE) ? null : (
+    return (
       <View>
-        <InformationCard 
-          onCancel={cancelCallback}/>
+        <ClubDayInformationCard />
       </View>
     );
   }
