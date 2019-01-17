@@ -1,10 +1,13 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { AsyncStorage, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { AsyncStorage, View, Text, StyleSheet, Image, TouchableOpacity, Button } from 'react-native';
 import Colors from '../services/colors';
 import Card from '../components/Card';
+import { Linking } from 'expo';
+import navService from '../services/navigation-service';
 
 enum InformationCardType {
     CLUB_DAY = 'information-card-club-day-visibility',
+    PROFILE_FILL_CALL_TO_ACTION = 'profile-fill-cta',
 }
 
 interface Props {
@@ -36,7 +39,7 @@ class InformationCard extends React.Component<Props, State> {
 
     async componentDidMount() {
         const visibility = await AsyncStorage.getItem(this.props.cardType);
-        this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.INVISIBLE : visibility as InformationCardVisibilityState })
+        this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.VISIBLE : visibility as InformationCardVisibilityState })
     }
 
     async onCancel() {
@@ -85,6 +88,19 @@ export const ClubDayInformationCard: React.SFC<ClubDayProps> = props => {
             <View style={styles.imageContainer}>
                 <Image style={styles.imageStyle} source={require('../img/logo_android.png')} />
             </View>
+        </InformationCard>
+    );
+}
+
+interface ProfileFillCallToActionProps { }
+
+export const ProfileFillCallToAction: React.SFC<ProfileFillCallToActionProps> = props => {
+    return (
+        <InformationCard title="Help us to get to know you better" cardType={InformationCardType.PROFILE_FILL_CALL_TO_ACTION}>
+            <Text style={[styles.textSection]}>
+               Help us help you. By filling out your profile, we can provide better connection recommendations. 
+            </Text>
+            <Button title="Go to your profile" onPress={() => navService.navigate("Profile", {})}></Button> 
         </InformationCard>
     );
 }
