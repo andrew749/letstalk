@@ -549,10 +549,6 @@ export const styles = StyleSheet.create({
     color: Colors.HIVE_PRIMARY,
     fontSize: 16
   },
-  feedbackText: {
-    fontSize: 14,
-    marginHorizontal: 15
-  },
   headerText: {
     textAlign: 'center',
   },

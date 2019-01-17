@@ -367,18 +367,17 @@ class ProfileView extends Component<Props, State> {
                   title={this.state.logoutRequest ? null : "Logout"}
                   onPress={this.onLogoutPress}
                 />
-                <View>
-                  <Text style={styles.feedbackText}>
-                    Thank you for joining Hive! If you notice any bugs or
-                    have any suggestions, please let us know!
-                  </Text>
-                  <Button
-                    buttonStyle={styles.feedbackButton}
-                    textStyle={styles.feedbackButtonText}
-                    title="Submit Feedback"
-                    onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
-                  />
-                </View>
+              </View>
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionHeader}>Feedback</Text>
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  buttonStyle={[styles.feedbackButton, styles.profileActionButton]}
+                  textStyle={styles.feedbackButtonText}
+                  title="Submit Feedback"
+                  onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
+                />
               </View>
             </View>
           </View>
