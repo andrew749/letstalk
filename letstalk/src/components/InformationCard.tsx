@@ -10,8 +10,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 
 enum InformationCardType {
-    CLUB_DAY = 'information-card-club-day-visibilitya',
-    PROFILE_FILL_CALL_TO_ACTION = 'profile-fill-ctaaaa',
+    CLUB_DAY = 'information-card-club-day-visibility',
+    PROFILE_FILL_CALL_TO_ACTION = 'profile-fill-cta',
 }
 
 interface Props {
