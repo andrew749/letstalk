@@ -43,7 +43,7 @@ import { errorToast, infoToast } from '../redux/toast';
 import { ActionTypes as BootstrapActionTypes } from '../redux/bootstrap/actions';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { ActionButton, Button, Card, Header, ProfileAvatar } from '../components';
-import { ClubDayInformationCard } from '../components/InformationCard';
+import { ClubDayInformationCard, ProfileFillCallToAction } from '../components/InformationCard';
 import Loading from './Loading';
 import {
   USER_STATE_ACCOUNT_CREATED,
@@ -441,6 +441,7 @@ class HomeView extends Component<Props, State> {
     return (
       <View>
         <ClubDayInformationCard />
+        <ProfileFillCallToAction />
       </View>
     );
   }
