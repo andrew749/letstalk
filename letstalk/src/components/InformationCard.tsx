@@ -94,11 +94,11 @@ export class ClubDayInformationCard extends React.Component<ClubDayProps, ClubDa
             <InformationCard title="Welcome to the Hive!" cardType={InformationCardType.CLUB_DAY}>
                 <Text style={[styles.textSection]}>
                     Matches will be coming out in the next couple of weeks. Stay tuned!
-            </Text>
+                </Text>
                 <Text style={styles.textSection}>
                     In the meanwhile, feel free to search for people you might be interested in connecting with. For example:
-            </Text>
-            {moreButton}
+                </Text>
+                {moreButton}
                 <Collapsible collapsed={this.state.isCollapsed}>
                     <Text style={[styles.points]}>- Meet other people in your cohort</Text>
                     <Text style={[styles.points]}>- Ask for tips from a person who worked at your dream company</Text>
