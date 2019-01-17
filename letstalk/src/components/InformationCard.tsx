@@ -47,8 +47,8 @@ class InformationCard extends React.Component<Props, State> {
         this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.VISIBLE : visibility as InformationCardVisibilityState })
     }
 
-    public async onCancel() {
-        dismissCard(this.props.cardType, () => this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE }));
+    async onCancel() {
+        await dismissCard(this.props.cardType, () => this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE }));
         if (this.props.onDismiss) {
             this.props.onDismiss();
         }
@@ -78,6 +78,7 @@ class InformationCard extends React.Component<Props, State> {
 
 async function dismissCard(cardType: InformationCardType, action: () => void) {
     await AsyncStorage.setItem(cardType, InformationCardVisibilityState.INVISIBLE);
+    action();
 }
 
 interface ClubDayProps { }
@@ -98,7 +99,7 @@ export class ClubDayInformationCard extends React.Component<ClubDayProps, ClubDa
             <Text style={styles.moreButton} >Show more</Text>
         </TouchableOpacity> : undefined;
         return (
-            <InformationCard title="Welcome to the Hive!" cardType={InformationCardType.CLUB_DAY}>
+            <InformationCard title="Welcome to Hive!" cardType={InformationCardType.CLUB_DAY}>
                 <Text style={[styles.textSection]}>
                     Matches will be coming out in the next couple of weeks. Stay tuned!
                 </Text>
