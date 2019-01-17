@@ -369,6 +369,17 @@ class ProfileView extends Component<Props, State> {
                 />
               </View>
             </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionHeader}>Feedback</Text>
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  buttonStyle={[styles.feedbackButton, styles.profileActionButton]}
+                  textStyle={styles.feedbackButtonText}
+                  title="Submit Feedback"
+                  onPress={() => Linking.openURL('https://goo.gl/forms/dkZf8AcgPPCNW7xe2')}
+                />
+              </View>
+            </View>
           </View>
         </ScrollView>
       </View>
