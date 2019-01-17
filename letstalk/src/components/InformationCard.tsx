@@ -1,10 +1,12 @@
 import React, { ReactElement, ReactNode } from 'react';
-import { AsyncStorage, View, Text, StyleSheet, Image, TouchableOpacity, Button } from 'react-native';
+import { AsyncStorage, View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Colors from '../services/colors';
 import Card from '../components/Card';
+import { Button } from '../components';
 import { Linking } from 'expo';
 import navService from '../services/navigation-service';
 import Collapsible from 'react-native-collapsible';
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 enum InformationCardType {
@@ -58,7 +60,7 @@ class InformationCard extends React.Component<Props, State> {
         return shouldRender ? 
             <Card style={styles.cardOverrides}>
                 <TouchableOpacity style={styles.cancelButtonContainer} onPress={this.onCancel}>
-                    <Text style={styles.cancelButton}>X</Text>
+                    <MaterialIcons name="close" size={18} />
                 </TouchableOpacity>
                 <Text style={[styles.cardHeader]}>
                     {this.props.title}
@@ -86,7 +88,7 @@ export class ClubDayInformationCard extends React.Component<ClubDayProps, ClubDa
 
     render() {
         const moreButton = (this.state.isCollapsed) ? <TouchableOpacity onPress={() => this.setState({ isCollapsed: false })}>
-            <Text>Show more</Text>
+            <Text style={styles.moreButton} >Show more</Text>
         </TouchableOpacity> : undefined;
         return (
             <InformationCard title="Welcome to the Hive!" cardType={InformationCardType.CLUB_DAY}>
@@ -120,7 +122,10 @@ export const ProfileFillCallToAction: React.SFC<ProfileFillCallToActionProps> = 
             <Text style={[styles.textSection]}>
                Help us help you. By filling out your profile, we can provide better connection recommendations. 
             </Text>
-            <Button title="Go to your profile" onPress={() => navService.navigate("Profile", {})}></Button> 
+            <Button
+              onPress={() => navService.navigate("Profile", {})}
+              title="Go to your profile"
+            />
         </InformationCard>
     );
 }
@@ -134,11 +139,6 @@ const styles = StyleSheet.create({
     cancelButtonContainer: {
         justifyContent: 'flex-end',
         alignItems: 'flex-end',
-    },
-    cancelButton: {
-        width: 22,
-        fontSize: 26,
-        color: '#9E9E9E'
     },
     cardOverrides: {
         marginHorizontal: 0,
