@@ -11,12 +11,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 enum InformationCardType {
     CLUB_DAY = 'information-card-club-day-visibilitya',
-    PROFILE_FILL_CALL_TO_ACTION = 'profile-fill-cta',
+    PROFILE_FILL_CALL_TO_ACTION = 'profile-fill-ctaaaa',
 }
 
 interface Props {
     title: string;
     cardType: InformationCardType;
+    onDismiss?: () => void;
 }
 
 interface State {
@@ -46,9 +47,9 @@ class InformationCard extends React.Component<Props, State> {
         this.setState({ informationCardVisibility: visibility == null ? InformationCardVisibilityState.VISIBLE : visibility as InformationCardVisibilityState })
     }
 
-    async onCancel() {
-        this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE });
-        await AsyncStorage.setItem(this.props.cardType, InformationCardVisibilityState.INVISIBLE);
+    public async onCancel() {
+        dismissCard(this.props.cardType, () => this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE }));
+        this.props.onDismiss();
     }
 
     shouldRenderComponent = () => {
@@ -57,7 +58,7 @@ class InformationCard extends React.Component<Props, State> {
 
     render() {
         const shouldRender = this.shouldRenderComponent();
-        return shouldRender ? 
+        return shouldRender ?
             <Card style={styles.cardOverrides}>
                 <TouchableOpacity style={styles.cancelButtonContainer} onPress={this.onCancel}>
                     <MaterialIcons name="close" size={18} />
@@ -69,12 +70,16 @@ class InformationCard extends React.Component<Props, State> {
                     {this.props.children}
                 </View>
             </Card>
-         : <View></View>;
+            : <View></View>;
     }
 }
 
+async function dismissCard(cardType: InformationCardType, action: () => void) {
+    await AsyncStorage.setItem(cardType, InformationCardVisibilityState.INVISIBLE);
+}
+
 interface ClubDayProps { }
-interface ClubDayState { 
+interface ClubDayState {
     isCollapsed: boolean;
 }
 
@@ -115,19 +120,38 @@ export class ClubDayInformationCard extends React.Component<ClubDayProps, ClubDa
 }
 
 interface ProfileFillCallToActionProps { }
+interface ProfileFillCallToActionState { 
+    isHidden: boolean;
+}
 
-export const ProfileFillCallToAction: React.SFC<ProfileFillCallToActionProps> = props => {
-    return (
-        <InformationCard title="Help us to get to know you better" cardType={InformationCardType.PROFILE_FILL_CALL_TO_ACTION}>
-            <Text style={[styles.textSection]}>
-               Help us help you. By filling out your profile, we can provide better connection recommendations. 
-            </Text>
-            <Button
-              onPress={() => navService.navigate("Profile", {})}
-              title="Go to your profile"
-            />
-        </InformationCard>
-    );
+export class ProfileFillCallToAction extends React.Component<ProfileFillCallToActionProps, ProfileFillCallToActionState> {
+    constructor(props: Props) {
+        super(props);
+        this.state = {isHidden: false};
+    }
+
+    render() {
+        return (this.state.isHidden) ? <View/> : (
+            <InformationCard title="Tell us about yourself" cardType={InformationCardType.PROFILE_FILL_CALL_TO_ACTION} onDismiss={() => this.setState({ isHidden: true })}>
+                <Text style={[styles.textSection]}>
+                    Your profile section gives others a first glance into your world. The more you give, the easier it'll be for others to relate to your experiences and understand you. 
+                </Text>
+                <Text style={[styles.textSection]}>
+                    Share your favorite spot in Waterloo, a hobby you're working on, or something you know way too much about!
+                </Text>
+                <Button
+                    buttonStyle={{ backgroundColor: Colors.HIVE_PRIMARY }}
+                    textStyle={{ color: Colors.WHITE }}
+                    onPress={async () => {
+                        await dismissCard(InformationCardType.PROFILE_FILL_CALL_TO_ACTION, () => { });
+                        this.setState({isHidden: true});
+                        await navService.navigate("Profile", {});
+                    }}
+                    title="Go to your profile"
+                />
+            </InformationCard>
+        );
+    }
 }
 
 const PADDING_TEXT_SECTION = 10;
