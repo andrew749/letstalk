@@ -41,6 +41,15 @@
       display: inline-block;
     }
 
+    .btn.btn-primary.referral {
+      background-color: $primary-80;
+      width:162px;
+      border: none;
+      padding: 8px;
+      border-radius: 20px;
+      margin: 15px;
+    }
+
     .google-link {
       position: relative;
       width:162px;
