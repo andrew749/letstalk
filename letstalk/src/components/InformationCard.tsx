@@ -49,7 +49,9 @@ class InformationCard extends React.Component<Props, State> {
 
     public async onCancel() {
         dismissCard(this.props.cardType, () => this.setState({ informationCardVisibility: InformationCardVisibilityState.INVISIBLE }));
-        this.props.onDismiss();
+        if (this.props.onDismiss) {
+            this.props.onDismiss();
+        }
     }
 
     shouldRenderComponent = () => {
