@@ -539,6 +539,20 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.HIVE_SUBDUED
   },
+  feedbackButton: {
+    backgroundColor: Colors.WHITE,
+    alignSelf: 'center',
+    width: 200,
+    marginVertical: 15,
+  },
+  feedbackButtonText: {
+    color: Colors.HIVE_PRIMARY,
+    fontSize: 16
+  },
+  feedbackText: {
+    fontSize: 14,
+    marginHorizontal: 15
+  },
   headerText: {
     textAlign: 'center',
   },
