@@ -3,8 +3,10 @@ package remind_meetup_job
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"letstalk/server/core/ctx"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
@@ -16,49 +18,49 @@ import (
 
 const REMIND_MEETUP_JOB jobmine.JobType = "RemindMeetupJob"
 
-type UserType string
+type MatchType string
 
 const (
-	USER_TYPE_MENTOR UserType = "MENTOR"
-	USER_TYPE_MENTEE UserType = "MENTEE"
+	MATCH_TYPE_MENTOR     MatchType = "MENTOR"
+	MATCH_TYPE_MENTEE     MatchType = "MENTEE"
+	MATCH_TYPE_CONNECTION MatchType = "CONNECTION"
 )
 
 const (
-	USER_TYPE_METADATA_KEY              = "userType"
-	USER_ID_METADATA_KEY                = "userId"
-	CONNECTION_USER_ID_METADATA_KEY     = "connectionUserId"
-	CONNECTION_FIRST_NAME_METADATA_KEY  = "connectionFirstName"
-	CONNECTION_LAST_NAME_METADATA_KEY   = "connectionLastName"
-	CONNECTION_PROFILE_PIC_METADATA_KEY = "connectionProfilePic"
-)
-
-const (
-	START_TIME_METADATA_KEY = "startTime"
-	END_TIME_METADATA_KEY   = "endTime"
+	REMINDER_ID_METADATA_KEY   = "reminderId"
+	REMINDER_TYPE_METADATA_KEY = "reminderType"
+	USER_ID_METADATA_KEY       = "userId"
+	MATCH_USER_ID_METADATA_KEY = "matchUserId"
 )
 
 func packageTaskRecordMetadata(
+	reminderId uint,
 	userId data.TUserID,
-	userType UserType,
-	connectionUserId data.TUserID,
-	connectionFirstName string,
-	connectionLastName string,
-	connectionProfilePic *string,
+	matchUserId data.TUserID,
 ) map[string]interface{} {
 	return map[string]interface{}{
-		USER_ID_METADATA_KEY:                userId,
-		USER_TYPE_METADATA_KEY:              userType,
-		CONNECTION_USER_ID_METADATA_KEY:     connectionUserId,
-		CONNECTION_FIRST_NAME_METADATA_KEY:  connectionFirstName,
-		CONNECTION_LAST_NAME_METADATA_KEY:   connectionLastName,
-		CONNECTION_PROFILE_PIC_METADATA_KEY: connectionProfilePic,
+		REMINDER_ID_METADATA_KEY:   reminderId,
+		USER_ID_METADATA_KEY:       userId,
+		MATCH_USER_ID_METADATA_KEY: matchUserId,
 	}
 }
 
-func parseUserInfo(taskRecord jobmine.TaskRecord) (data.TUserID, UserType) {
-	userId := data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
-	userType := UserType(taskRecord.Metadata[USER_TYPE_METADATA_KEY].(string))
-	return userId, userType
+func parseTaskRecord(taskRecord jobmine.TaskRecord) (reminderId uint, reminderType data.MeetupType, userId data.TUserID, matchUserId data.TUserID) {
+	reminderId = taskRecord.Metadata[REMINDER_ID_METADATA_KEY].(uint)
+	reminderType = data.MeetupType(taskRecord.Metadata[REMINDER_TYPE_METADATA_KEY].(string))
+	userId = data.TUserID(taskRecord.Metadata[USER_ID_METADATA_KEY].(uint))
+	matchUserId = data.TUserID(taskRecord.Metadata[MATCH_USER_ID_METADATA_KEY].(uint))
+	return reminderId, reminderType, userId, matchUserId
+}
+
+func getMatchType(userId data.TUserID, connection *data.Connection) MatchType {
+	if connection.Mentorship == nil {
+		return MATCH_TYPE_CONNECTION
+	} else if connection.Mentorship.MentorUserId == userId {
+		return MATCH_TYPE_MENTEE
+	} else {
+		return MATCH_TYPE_MENTOR
+	}
 }
 
 func execute(
@@ -66,29 +68,68 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
-	userId, _ := parseUserInfo(taskRecord)
-	templateParams := taskRecord.Metadata
-	connectionFirstName := templateParams[CONNECTION_FIRST_NAME_METADATA_KEY].(string)
-
-	err := notifications.CreateAdHocNotificationNoTransaction(
-		db,
-		userId,
-		"Reminder to Meet Up",
-		fmt.Sprintf("Meet up with %s!", connectionFirstName),
-		nil,
-		"remind_meetup_notification.html",
-		templateParams,
-		&jobRecord.RunId,
-	)
+	reminderId, reminderType, userId, matchUserId := parseTaskRecord(taskRecord)
+	connection, err := query.GetConnectionDetailsUndirected(db, userId, matchUserId)
 	if err != nil {
 		return nil, err
+	}
+	if connection == nil {
+		return nil, errors.New(fmt.Sprintf("Meetup reminder failed to find connection for users (%d, %d)", userId, matchUserId))
+	}
+
+	var user, matchUser *data.User
+	if connection.UserOneId == userId {
+		user = connection.UserOne
+		matchUser = connection.UserTwo
+	} else {
+		user = connection.UserTwo
+		matchUser = connection.UserOne
+	}
+
+	matchType := getMatchType(userId, connection)
+	templateParams := taskRecord.Metadata
+
+	// TODO(aklen): create updated meetup reminder template
+	dbErr := ctx.WithinTx(db, func(tx *gorm.DB) error {
+		// Mark reminder as processed.
+		if err := tx.Model(&data.MeetupReminder{}).
+			Update(&data.MeetupReminder{Model: gorm.Model{ID: reminderId}, State: data.MEETUP_REMINDER_PROCESSED}).
+			Error; err != nil {
+			return err
+		}
+		// Automatically schedule backup notification in three days.
+		backup := &data.MeetupReminder{
+			UserId:      userId,
+			MatchUserId: matchUserId,
+			Type:        reminderType,
+			State:       data.MEETUP_REMINDER_SCHEDULED,
+			ScheduledAt: time.Now().AddDate(0, 0, 3),
+		}
+		if err := tx.Model(&data.MeetupReminder{}).Create(&backup).Error; err != nil {
+			return err
+		}
+		if err := notifications.CreateAdHocNotificationNoTransaction(
+			tx,
+			user.UserId,
+			"Reminder to Meet Up",
+			fmt.Sprintf("Meet up with your %s, %s!", strings.ToLower(string(matchType)), matchUser.FirstName),
+			nil,
+			"remind_meetup_notification.html",
+			templateParams,
+			&jobRecord.RunId); err != nil {
+			return err
+		}
+		return nil
+	})
+	if dbErr != nil {
+		return nil, dbErr
 	}
 	return "Success", nil
 }
 
 func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
-	userId, userType := parseUserInfo(taskRecord)
-	rlog.Infof("Unable to send message of type=%s to user with id=%d: %+v", userType, userId, err)
+	reminderId, reminderType, userId, _ := parseTaskRecord(taskRecord)
+	rlog.Infof("Unable to send reminder %d (%s) to user with id=%d: %+v", reminderId, reminderType, userId, err)
 }
 
 func onSuccess(
@@ -97,8 +138,8 @@ func onSuccess(
 	taskRecord jobmine.TaskRecord,
 	res interface{},
 ) {
-	userId, userType := parseUserInfo(taskRecord)
-	rlog.Infof("Successfully sent message of type=%s to user with id=%d", userType, userId)
+	reminderId, reminderType, userId, _ := parseTaskRecord(taskRecord)
+	rlog.Infof("Successfully sent reminder %d (%s) to user with id=%d", reminderId, reminderType, userId)
 }
 
 var reminderTaskSpec = jobmine.TaskSpec{
@@ -107,81 +148,19 @@ var reminderTaskSpec = jobmine.TaskSpec{
 	OnSuccess: onSuccess,
 }
 
-func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
-	if userId == mentorUserId {
-		return USER_TYPE_MENTOR
-	} else {
-		return USER_TYPE_MENTEE
-	}
-}
-
-const TIME_LAYOUT = "2006-01-02T15:04:05Z"
-
-func getTime(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
-	if val, ok := jobRecord.Metadata[key]; ok {
-		var (
-			timeStr string
-			ok      bool
-		)
-		if timeStr, ok = val.(string); !ok {
-			return nil, errors.New(fmt.Sprintf("%s must be a time string", key))
-		}
-		time, err := time.Parse(TIME_LAYOUT, timeStr)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
-	}
-	return nil, nil
-}
-
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	startTime, err := getTime(jobRecord, START_TIME_METADATA_KEY)
+	reminders, err := query.GetMeetupRemindersScheduledBefore(db, time.Now())
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := getTime(jobRecord, END_TIME_METADATA_KEY)
-	if err != nil {
-		return nil, err
-	}
-
-	if startTime == nil {
-		rlog.Warn("No start time provided. Finding mentorships from beginning")
-	}
-	if endTime == nil {
-		rlog.Warn("No end time provided. Finding mentorships from beginning")
-	}
-
-	connections, err := query.GetMentorshipConnectionsByDate(db, startTime, endTime)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO(wojtek): Filter out connections that have already received this notification
-
-	metadata := make([]jobmine.Metadata, 0)
-	for _, connection := range connections {
-		if connection.Mentorship == nil || connection.UserOne == nil || connection.UserTwo == nil {
-			return nil, errors.New(fmt.Sprintf("Connection %d is missing data", connection.ConnectionId))
-		}
-
-		metadata1 := jobmine.Metadata(packageTaskRecordMetadata(
-			connection.UserOneId,
-			getUserType(connection.UserOneId, connection.Mentorship.MentorUserId),
-			connection.UserTwoId,
-			connection.UserTwo.FirstName,
-			connection.UserTwo.LastName,
-			connection.UserTwo.ProfilePic,
-		))
-		metadata2 := jobmine.Metadata(packageTaskRecordMetadata(
-			connection.UserTwoId,
-			getUserType(connection.UserTwoId, connection.Mentorship.MentorUserId),
-			connection.UserOneId,
-			connection.UserOne.FirstName,
-			connection.UserOne.LastName,
-			connection.UserOne.ProfilePic,
-		))
-		metadata = append(metadata, metadata1, metadata2)
+	metadata := make([]jobmine.Metadata, 0, len(reminders))
+	for _, reminder := range reminders {
+		metadata = append(metadata,
+			jobmine.Metadata(packageTaskRecordMetadata(
+				reminder.ID,
+				reminder.UserId,
+				reminder.MatchUserId,
+			)))
 	}
 	return metadata, nil
 }
@@ -195,12 +174,6 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 // CreateReminderJob Creates a reminder job record to get run at some point.
 func CreateReminderJob(db *gorm.DB, runId string, startTime *time.Time, endTime *time.Time) error {
 	metadata := map[string]interface{}{}
-	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = startTime.Format(TIME_LAYOUT)
-	}
-	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = endTime.Format(TIME_LAYOUT)
-	}
 
 	if err := db.Create(&jobmine.JobRecord{
 		JobType:  REMIND_MEETUP_JOB,

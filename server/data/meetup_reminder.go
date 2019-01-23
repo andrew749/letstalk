@@ -25,8 +25,6 @@ type MeetupReminder struct {
 	gorm.Model
 	UserId      TUserID
 	MatchUserId TUserID
-	User        *User `gorm:"foreignkey:UserId"`
-	MatchUser   *User `gorm:"foreignkey:MatchUserId"`
 	Type        MeetupType
 	State       MeetupReminderState
 	ScheduledAt time.Time
