@@ -17,7 +17,7 @@ func (s UserScoreOlder) RequiredObjects() []string {
 	return []string{}
 }
 
-func (s UserScoreOlder) Calculate(user *data.User) (float32, error) {
+func (s UserScoreOlder) Calculate(user *data.User) (Score, error) {
 	if _, ok := s.BlacklistUserIds[user.UserId]; ok {
 		return 0.0, nil
 	}

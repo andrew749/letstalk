@@ -15,7 +15,7 @@ func isGenderMF(user *data.User) bool {
 	return user.Gender == data.GENDER_MALE || user.Gender == data.GENDER_FEMALE
 }
 
-func (s GenderPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (float32, error) {
+func (s GenderPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (Score, error) {
 	userOneMF := isGenderMF(userOne)
 	userTwoMF := isGenderMF(userTwo)
 

@@ -36,6 +36,12 @@ func (m GreedyUpperLowerYearMatcher) splitUsersByGradYear(
 	return lowerYears, upperYears
 }
 
+// Returns a sorted list of lower year ids based on the current match we are looking at for each
+// lower year. If we've ran out of candidates for a lower year, we don't include them in the
+// returned list.
+// lowerYearIterIdxs - indexes into matchMap for the current upper year we are considering for a
+// match.
+// matchMap - list from lower year user id to list of potential matches for that lower year.
 func lowerYearsOrderedByDecreasingBestScore(
 	lowerYearIterIdxs map[data.TUserID]uint,
 	matchMap map[data.TUserID][]UserMatch,

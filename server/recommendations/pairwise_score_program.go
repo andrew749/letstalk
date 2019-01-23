@@ -16,7 +16,7 @@ func getProgramId(user *data.User) *string {
 	return nil
 }
 
-func (s ProgramPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (float32, error) {
+func (s ProgramPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (Score, error) {
 	programOneId := getProgramId(userOne)
 	programTwoId := getProgramId(userTwo)
 

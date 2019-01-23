@@ -1,6 +1,6 @@
-package recommendations
+package algo_helper
 
-func dedupStringList(ss []string) []string {
+func DedupStringList(ss []string) []string {
 	smap := make(map[string]interface{})
 	for _, s := range ss {
 		smap[s] = nil

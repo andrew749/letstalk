@@ -28,7 +28,7 @@ func TestGenderPairwiseScoreCalculateMF(t *testing.T) {
 
 			score, err := GenderPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(0.0), score)
+			assert.Equal(t, Score(0.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -51,7 +51,7 @@ func TestGenderPairwiseScoreCalculateMM(t *testing.T) {
 
 			score, err := GenderPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(1.0), score)
+			assert.Equal(t, Score(1.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -74,7 +74,7 @@ func TestGenderPairwiseScoreCalculateFF(t *testing.T) {
 
 			score, err := GenderPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(1.0), score)
+			assert.Equal(t, Score(1.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -97,7 +97,7 @@ func TestGenderPairwiseScoreCalculateUnspecifiedFirst(t *testing.T) {
 
 			score, err := GenderPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(1.0), score)
+			assert.Equal(t, Score(1.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -120,7 +120,7 @@ func TestGenderPairwiseScoreCalculateUnspecifiedSecond(t *testing.T) {
 
 			score, err := GenderPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(1.0), score)
+			assert.Equal(t, Score(1.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)

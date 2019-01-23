@@ -19,7 +19,7 @@ func getSurveyMap(user *data.User) map[data.SurveyGroup]data.UserSurvey {
 	return surveyMap
 }
 
-func (s SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (float32, error) {
+func (s SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (Score, error) {
 	userOneSurveyMap := getSurveyMap(userOne)
 	userTwoSurveyMap := getSurveyMap(userTwo)
 
@@ -44,6 +44,6 @@ func (s SurveyPairwiseScore) Calculate(userOne *data.User, userTwo *data.User) (
 	if numAnsweredByBoth == 0 {
 		return 0.0, nil
 	} else {
-		return float32(numMatchingAnswers) / float32(numAnsweredByBoth), nil
+		return Score(float32(numMatchingAnswers) / float32(numAnsweredByBoth)), nil
 	}
 }

@@ -9,10 +9,10 @@ import "letstalk/server/data"
 // unexpected value occurs, otherwise, use sane default values.
 type PairwiseScore interface {
 	RequiredObjects() []string
-	Calculate(userOne *data.User, userTwo *data.User) (float32, error)
+	Calculate(userOne *data.User, userTwo *data.User) (Score, error)
 }
 
 type PairwiseScoreWithWeight struct {
 	PairwiseScore PairwiseScore
-	Weight        float32
+	Weight        Weight
 }

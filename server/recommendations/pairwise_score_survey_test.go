@@ -49,7 +49,7 @@ func TestSurveyPairwiseScoreCalculateSomeOverlap(t *testing.T) {
 
 			score, err := SurveyPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(0.5), score)
+			assert.Equal(t, Score(0.5), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -86,7 +86,7 @@ func TestSurveyPairwiseScoreCalculateNoOverlap(t *testing.T) {
 
 			score, err := SurveyPairwiseScore{}.Calculate(user1, user2)
 			assert.NoError(t, err)
-			assert.Equal(t, float32(0.0), score)
+			assert.Equal(t, Score(0.0), score)
 		},
 	}
 	test.RunTestWithDb(thisTest)
