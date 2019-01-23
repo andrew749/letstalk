@@ -1,17 +1,15 @@
-package meeting
+package meetup_reminder
 
 import (
+	"time"
+
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
-	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
-	"time"
 
-	"github.com/getsentry/raven-go"
 	"github.com/jinzhu/gorm"
-	"letstalk/server/core/connection"
 )
 
 // PostMeetupReminder replaces exisitng meetup reminders for an ordered (user, match) pair with the given reminder.
@@ -86,3 +84,29 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	return nil
 }
 
+// ScheduleInitialReminder should be called whenever a new connection is made between two users. Schedules an
+// initial meetup reminder for each user.
+func ScheduleInitialReminder(tx *gorm.DB, userOne data.TUserID, userTwo data.TUserID) error {
+	scheduledAt := time.Now().AddDate(0, 0, 7) // Schedule one week from now.
+	userOneReminder := data.MeetupReminder{
+		UserId:      userOne,
+		MatchUserId: userTwo,
+		Type:        data.MEETUP_TYPE_INITIAL,
+		State:       data.MEETUP_REMINDER_SCHEDULED,
+		ScheduledAt: scheduledAt,
+	}
+	userTwoReminder := data.MeetupReminder{
+		UserId:      userTwo,
+		MatchUserId: userOne,
+		Type:        data.MEETUP_TYPE_INITIAL,
+		State:       data.MEETUP_REMINDER_SCHEDULED,
+		ScheduledAt: scheduledAt,
+	}
+	if err := tx.Create(&userOneReminder).Error; err != nil {
+		return err
+	}
+	if err := tx.Create(&userTwoReminder).Error; err != nil {
+		return err
+	}
+	return nil
+}

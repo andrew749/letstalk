@@ -2,9 +2,9 @@ package data
 
 import (
 	"database/sql/driver"
+	"time"
 
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type MeetupType string
