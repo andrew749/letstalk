@@ -14,6 +14,7 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
+	"letstalk/server/core/meetup_reminder"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/core/sessions"
@@ -292,6 +293,11 @@ func Register(
 	v1.POST("/survey", hw.wrapHandler(controller.PostSurveyResponses, true /* auth required */))
 	v1.OPTIONS("/survey/:group")
 	v1.GET("/survey/:group", hw.wrapHandler(controller.GetSurvey, true /* auth required */))
+
+	// Meetup reminders
+	v1.OPTIONS("/meetup_reminder")
+	v1.POST("/meetup_reminder", hw.wrapHandler(meetup_reminder.PostMeetupReminder, true /* auth required */))
+	v1.DELETE("/meetup_reminder", hw.wrapHandler(meetup_reminder.DeleteMeetupReminder, true /* auth required */))
 
 	// Autocomplete endpoints
 	autocompleteV1 := v1.Group("/autocomplete")

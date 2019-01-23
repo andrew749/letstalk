@@ -12,13 +12,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// PostMeetupReminder replaces exisitng meetup reminders for an ordered (user, match) pair with the given reminder.
+// PostMeetupReminder replaces existing meetup reminders for an ordered (user, match) pair with the given reminder.
 func PostMeetupReminder(c *ctx.Context) errs.Error {
 	authUser, err := query.GetUserById(c.Db, c.SessionData.UserId)
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-
 	var input api.MeetupReminder
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
@@ -26,7 +25,10 @@ func PostMeetupReminder(c *ctx.Context) errs.Error {
 	if authUser.UserId != input.UserId {
 		return errs.NewUnauthorizedError("Not authorized")
 	}
+	return HandlePostMeetupReminder(c, input)
+}
 
+func HandlePostMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
 	newReminder := data.MeetupReminder{
 		UserId:      input.UserId,
 		MatchUserId: input.MatchUserId,
@@ -35,10 +37,10 @@ func PostMeetupReminder(c *ctx.Context) errs.Error {
 		ScheduledAt: input.ReminderTime,
 	}
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
-		if err := tx.Delete(data.MeetupReminder{}, data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Error; err != nil {
+		if err := tx.Delete(&data.MeetupReminder{}, &data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Error; err != nil {
 			return err
 		}
-		if err := tx.Model(data.MeetupReminder{}).Create(newReminder).Error; err != nil {
+		if err := tx.Model(&data.MeetupReminder{}).Create(&newReminder).Error; err != nil {
 			return err
 		}
 		return nil
@@ -46,9 +48,7 @@ func PostMeetupReminder(c *ctx.Context) errs.Error {
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-
 	c.Result = input
-
 	return nil
 }
 
@@ -58,7 +58,6 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	if err != nil {
 		return errs.NewDbError(err)
 	}
-
 	var input api.MeetupReminder
 	if err := c.GinContext.BindJSON(&input); err != nil {
 		return errs.NewRequestError("Failed to parse input")
@@ -66,7 +65,10 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	if authUser.UserId != input.UserId {
 		return errs.NewUnauthorizedError("Not authorized")
 	}
+	return HandleDeleteMeetupReminder(c, input)
+}
 
+func HandleDeleteMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
 		if err := tx.Delete(data.MeetupReminder{}, data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Error; err != nil {
 			return err
@@ -79,8 +81,7 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-
-	c.Result = input
+	c.Result = "Ok"
 	return nil
 }
 
