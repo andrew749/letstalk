@@ -531,6 +531,15 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add meetup reminders table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(MeetupReminder{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
