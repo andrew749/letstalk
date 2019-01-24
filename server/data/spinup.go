@@ -531,6 +531,15 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Create user_verify_link table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(UserVerifyLink{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {

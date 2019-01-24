@@ -3,11 +3,12 @@ package utility
 import (
 	"fmt"
 
-	"github.com/namsral/flag"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/namsral/flag"
 	"github.com/romana/rlog"
+
+	"letstalk/server/core/errs"
 )
 
 // GetDB Gets a connection to the gorm db instance using command line params
@@ -27,4 +28,17 @@ func RunWithDb(c func(tx *gorm.DB) error) error {
 		return err
 	}
 	return c(db)
+}
+
+// Correctly wraps an error from a gorm.DB call with an errs.Error, returning a NotFoundError
+// if the item is not found and a DBError otherwise.
+func WrapGormDBError(dbErr error, notFoundMessage string) errs.Error {
+	if dbErr != nil {
+		if gorm.IsRecordNotFoundError(dbErr) {
+			return errs.NewNotFoundError(notFoundMessage)
+		} else {
+			return errs.NewDbError(dbErr)
+		}
+	}
+	return nil
 }
