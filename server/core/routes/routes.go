@@ -107,6 +107,10 @@ func Register(
 	v1.OPTIONS("/verify_email")
 	v1.POST("/verify_email", hw.wrapHandler(user.VerifyEmailController, false))
 
+	// callback to verify a link in the user_verify_link table
+	v1.OPTIONS("/verify_link")
+	v1.POST("/verify_link", hw.wrapHandler(controller.VerifyLinkController, false))
+
 	// for fb_authentication
 	v1.OPTIONS("/fb_login")
 	v1.POST("/fb_login", hw.wrapHandler(user.FBController, false))
