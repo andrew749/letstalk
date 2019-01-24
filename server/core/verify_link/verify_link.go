@@ -39,7 +39,7 @@ func ClickLink(db *gorm.DB, linkId data.TVerifyLinkID) errs.Error {
 	var link data.UserVerifyLink
 
 	err := utility.WrapGormDBError(
-		db.Where(&data.UserVerifyLink{Id: linkId}).Find(&link).Error,
+		db.Where(&data.UserVerifyLink{Id: linkId}).First(&link).Error,
 		"Link not found",
 	)
 	if err != nil {
