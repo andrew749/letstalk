@@ -120,6 +120,7 @@ func CreateNewPendingNotification(db *gorm.DB, notificationId uint, deviceId str
 	notification := ExpoPendingNotification{
 		NotificationId: notificationId,
 		DeviceId:       deviceId,
+		Checked:        false,
 	}
 
 	if err := db.Create(&notification).Error; err != nil {
