@@ -1,12 +1,6 @@
 # m h  dom mon dow   command
+# Runs backup
 0 0 * * * /var/app/letstalk/infra/backup_db.sh
 
 # Creates tasks to get run
-*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/job_runner' 1> "/var/log/jobmine/job_runner_$(date '+\%Y\%m\%dT\%H\%M\%S').out" 2> "/var/log/jobmine/job_runner_$(date '+\%Y\%m\%dT\%H\%M\%S').error"
-
-# Run tasks
-*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/task_runner' 1> "/var/log/jobmine/task_runner_$(date '+\%Y\%m\%dT\%H\%M\%S').out" 2> "/var/log/jobmine/task_runner_$(date '+\%Y\%m\%dT\%H\%M\%S').error"
-
-# JobStatusWatcher
-*/5 * * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/job_status_updater' 1> "/var/log/jobmine/job_status_updater_$(date '+\%Y\%m\%dT\%H\%M\%S').out" 2> "/var/log/jobmine/job_status_updater_$(date '+\%Y\%m\%dT\%H\%M\%S').error"
-
+0 */4 * * * PROD=true /var/app/letstalk/server/run_in_env.sh './process_jobs_daemon.sh' 1> "/var/log/jobmine/$(date '+%Y%m%dT%H%M%S').out" 2> "/var/log/jobmine/$(date '+%Y%m%dT%H%M%S').err"
