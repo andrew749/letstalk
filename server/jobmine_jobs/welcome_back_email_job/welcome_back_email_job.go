@@ -1,0 +1,205 @@
+package welcome_back_email_job
+
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"time"
+
+	"letstalk/server/core/query"
+	"letstalk/server/core/utility"
+	"letstalk/server/core/verify_link"
+	"letstalk/server/data"
+	"letstalk/server/email"
+	"letstalk/server/jobmine"
+
+	"github.com/jinzhu/gorm"
+	"github.com/romana/rlog"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+)
+
+const WELCOME_BACK_EMAIL_JOB jobmine.JobType = "WelcomeBackEmailJob"
+
+type UserType string
+
+const (
+	USER_TYPE_MENTOR UserType = "MENTOR"
+	USER_TYPE_MENTEE UserType = "MENTEE"
+)
+
+const USER_ID_METADATA_KEY = "userId"
+
+const (
+	START_TIME_METADATA_KEY   = "startTime"
+	END_TIME_METADATA_KEY     = "endTime"
+	TEST_USER_ID_METADATA_KEY = "testUserId"
+)
+
+func packageTaskRecordMetadata(userId data.TUserID) map[string]interface{} {
+	return map[string]interface{}{USER_ID_METADATA_KEY: userId}
+}
+
+func parseUserInfo(taskRecord jobmine.TaskRecord) data.TUserID {
+	userId := data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
+	return userId
+}
+
+func execute(
+	db *gorm.DB,
+	jobRecord jobmine.JobRecord,
+	taskRecord jobmine.TaskRecord,
+) (interface{}, error) {
+	userId := parseUserInfo(taskRecord)
+	user, err := query.GetUserById(db, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	linkIdPtr, err := verify_link.CreateLink(
+		db,
+		userId,
+		verify_link.LINK_TYPE_WHITELIST_WINTER_2019,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	linkId := *linkIdPtr
+
+	verifyLinkHrefLink := fmt.Sprintf(
+		"%s/welcome_back.html?requestId=%s",
+		utility.BaseUrl,
+		linkId,
+	)
+
+	to := mail.NewEmail(user.FirstName, user.Email)
+	if err := email.SendWelcomeBackEmail(to, verifyLinkHrefLink); err != nil {
+		return nil, err
+	}
+
+	return linkId, nil
+}
+
+func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
+	userId := parseUserInfo(taskRecord)
+	rlog.Infof("Unable to send email to user with id=%d: %+v", userId, err)
+}
+
+func onSuccess(
+	db *gorm.DB,
+	jobRecord jobmine.JobRecord,
+	taskRecord jobmine.TaskRecord,
+	res interface{},
+) {
+	userId := parseUserInfo(taskRecord)
+	linkId := res.(data.TVerifyLinkID)
+	rlog.Infof("Successfully sent email to user with id=%d and linkId=%s", userId, linkId)
+}
+
+var reminderTaskSpec = jobmine.TaskSpec{
+	Execute:   execute,
+	OnError:   onError,
+	OnSuccess: onSuccess,
+}
+
+func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
+	if userId == mentorUserId {
+		return USER_TYPE_MENTOR
+	} else {
+		return USER_TYPE_MENTEE
+	}
+}
+
+const TIME_LAYOUT = "2006-01-02T15:04:05Z"
+
+func getTime(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
+	if val, ok := jobRecord.Metadata[key]; ok {
+		var (
+			timeStr string
+			ok      bool
+		)
+		if timeStr, ok = val.(string); !ok {
+			return nil, errors.New(fmt.Sprintf("%s must be a time string", key))
+		}
+		time, err := time.Parse(TIME_LAYOUT, timeStr)
+		if err != nil {
+			return nil, err
+		}
+		return &time, nil
+	}
+	return nil, nil
+}
+
+func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
+	if testUserIdFloat, ok := jobRecord.Metadata[USER_ID_METADATA_KEY]; ok {
+		testUserId := data.TUserID(uint(testUserIdFloat.(float64)))
+		rlog.Warn(fmt.Sprintf("Only using test user %d", testUserId))
+		return []jobmine.Metadata{packageTaskRecordMetadata(testUserId)}, nil
+	}
+
+	startTime, err := getTime(jobRecord, START_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+	endTime, err := getTime(jobRecord, END_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+
+	if startTime == nil {
+		rlog.Warn("No start time provided. Finding users from beginning")
+	}
+	if endTime == nil {
+		rlog.Warn("No end time provided. Finding users from beginning")
+	}
+
+	users, err := query.GetUsersByCreatedAt(db, startTime, endTime)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO(wojtek): Filter out connections that have already received this notification
+
+	metadatas := make([]jobmine.Metadata, 0)
+	for _, user := range users {
+		metadata := jobmine.Metadata(packageTaskRecordMetadata(user.UserId))
+		metadatas = append(metadatas, metadata)
+	}
+	return metadatas, nil
+}
+
+var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
+	JobType:          WELCOME_BACK_EMAIL_JOB,
+	TaskSpec:         reminderTaskSpec,
+	GetTasksToCreate: getTasksToCreate,
+}
+
+// CreateReminderJob Creates a reminder job record to get run at some point.
+func CreateEmailJob(
+	db *gorm.DB,
+	runId string,
+	startTime *time.Time,
+	endTime *time.Time,
+	testUserId *data.TUserID,
+) error {
+	metadata := map[string]interface{}{}
+	if startTime != nil {
+		metadata[START_TIME_METADATA_KEY] = startTime.Format(TIME_LAYOUT)
+	}
+	if endTime != nil {
+		metadata[END_TIME_METADATA_KEY] = endTime.Format(TIME_LAYOUT)
+	}
+	if testUserId != nil {
+		metadata[TEST_USER_ID_METADATA_KEY] = strconv.Itoa(int(*testUserId))
+	}
+
+	if err := db.Create(&jobmine.JobRecord{
+		JobType:  WELCOME_BACK_EMAIL_JOB,
+		RunId:    runId,
+		Metadata: metadata,
+		Status:   jobmine.STATUS_CREATED,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
+}

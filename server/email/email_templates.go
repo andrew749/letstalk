@@ -13,6 +13,8 @@ const (
 	AccountVerifyEmail  = "0f4be460-b8b2-42bb-8682-222af0ddba99"
 	NewMentorEmail      = "463e3b51-167f-48d2-bf81-c3697c1daa5a"
 	NewMenteeEmail      = "acd79569-9cfe-4f7f-84d3-f6cc22f031fe"
+	// TODO(wojtechnology): Find correct id for welcome back emai
+	WelcomeBackEmail = "fewafwea"
 )
 
 func SendSubscribeEmail(
@@ -67,6 +69,23 @@ func SendAccountVerifyEmail(
 	}
 
 	message := CreateBasicTemplatedEmail(to, AccountVerifyEmail, &emailContext)
+
+	return SendEmail(message)
+}
+
+func SendWelcomeBackEmail(
+	to *mail.Email,
+	verifyLink string,
+) error {
+	var emailContext interface{} = struct {
+		RecipientEmail string `email_sub:":recipientemail"`
+		VerifyLink     string `email_sub:":verifylink"`
+	}{
+		to.Address,
+		verifyLink,
+	}
+
+	message := CreateBasicTemplatedEmail(to, WelcomeBackEmail, &emailContext)
 
 	return SendEmail(message)
 }
