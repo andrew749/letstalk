@@ -8,7 +8,7 @@ import (
 )
 
 func TestTimeFromJobRecord(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	sec, err := time.ParseDuration("1s")
 	assert.NoError(t, err)
 	now = now.Truncate(sec)
