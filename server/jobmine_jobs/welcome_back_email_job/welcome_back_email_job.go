@@ -27,8 +27,10 @@ const (
 	USER_TYPE_MENTEE UserType = "MENTEE"
 )
 
+//  Task record
 const USER_ID_METADATA_KEY = "userId"
 
+//  Job record
 const (
 	START_TIME_METADATA_KEY   = "startTime"
 	END_TIME_METADATA_KEY     = "endTime"
@@ -147,38 +149,22 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 	}
 }
 
-const TIME_LAYOUT = "2006-01-02T15:04:05Z"
-
-func getTime(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
-	if val, ok := jobRecord.Metadata[key]; ok {
-		var (
-			timeStr string
-			ok      bool
-		)
-		if timeStr, ok = val.(string); !ok {
-			return nil, errors.New(fmt.Sprintf("%s must be a time string", key))
-		}
-		time, err := time.Parse(TIME_LAYOUT, timeStr)
-		if err != nil {
-			return nil, err
-		}
-		return &time, nil
-	}
-	return nil, nil
-}
-
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	if testUserIdFloat, ok := jobRecord.Metadata[USER_ID_METADATA_KEY]; ok {
-		testUserId := data.TUserID(uint(testUserIdFloat.(float64)))
+	if testUserIdIntf, ok := jobRecord.Metadata[TEST_USER_ID_METADATA_KEY]; ok {
+		testUserIdFloat, ok := testUserIdFloat.(float64)
+		if !ok {
+			return nil, errors.New("Couldn't parse testUserId")
+		}
+		testUserId := data.TUserID(uint(testUserIdFloat))
 		rlog.Warn(fmt.Sprintf("Only using test user %d", testUserId))
 		return []jobmine.Metadata{packageTaskRecordMetadata(testUserId)}, nil
 	}
 
-	startTime, err := getTime(jobRecord, START_TIME_METADATA_KEY)
+	startTime, err := jobmine.TimeFromJobRecord(jobRecord, START_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := getTime(jobRecord, END_TIME_METADATA_KEY)
+	endTime, err := jobmine.TimeFromJobRecord(jobRecord, END_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
@@ -194,8 +180,6 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO(wojtek): Filter out connections that have already received this notification
 
 	metadatas := make([]jobmine.Metadata, 0)
 	for _, user := range users {
@@ -221,10 +205,10 @@ func CreateEmailJob(
 ) error {
 	metadata := map[string]interface{}{}
 	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = startTime.Format(TIME_LAYOUT)
+		metadata[START_TIME_METADATA_KEY] = jobmine.FormatTime(*startTime)
 	}
 	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = endTime.Format(TIME_LAYOUT)
+		metadata[END_TIME_METADATA_KEY] = jobmine.FormatTime(*endTime)
 	}
 	if testUserId != nil {
 		metadata[TEST_USER_ID_METADATA_KEY] = strconv.Itoa(int(*testUserId))

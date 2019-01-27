@@ -75,6 +75,36 @@ func TestGetUsersByCreatedAt(t *testing.T) {
 	test.RunTestWithDb(thisTest)
 }
 
+func TestGetUsersByCreatedAtBoundaryInclusive(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			user1, err := test_helpers.CreateTestSetupUser(db, 1)
+			assert.NoError(t, err)
+			_, err = test_helpers.CreateTestSetupUser(db, 2)
+			assert.NoError(t, err)
+			user3, err := test_helpers.CreateTestSetupUser(db, 3)
+			assert.NoError(t, err)
+
+			now := time.Now()
+
+			user1.CreatedAt = now.AddDate(0, 0, 1)
+			err = db.Save(user1).Error
+			assert.NoError(t, err)
+
+			user3.CreatedAt = now.AddDate(0, 0, -1)
+			err = db.Save(user3).Error
+			assert.NoError(t, err)
+
+			from := now.AddDate(0, 0, -1)
+			to := now.AddDate(0, 0, 1)
+			users, err := GetUsersByCreatedAt(db, &from, &to)
+			assert.NoError(t, err)
+			assert.Equal(t, 3, len(users))
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
 func TestGetUsersByCreatedAtNotSpecified(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
