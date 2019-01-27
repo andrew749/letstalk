@@ -1,7 +1,6 @@
 package welcome_back_email_job
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"letstalk/server/jobmine"
 
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -39,9 +39,21 @@ func packageTaskRecordMetadata(userId data.TUserID) map[string]interface{} {
 	return map[string]interface{}{USER_ID_METADATA_KEY: userId}
 }
 
-func parseUserInfo(taskRecord jobmine.TaskRecord) data.TUserID {
-	userId := data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
-	return userId
+func parseUserId(userIdIntf interface{}) (*data.TUserID, error) {
+	userIdFloat, ok := userIdIntf.(float64)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Invalid userId %v", userIdIntf))
+	}
+	userId := data.TUserID(uint(userIdFloat))
+	return &userId, nil
+}
+
+func parseUserInfo(taskRecord jobmine.TaskRecord) (*data.TUserID, error) {
+	userIdIntf, ok := taskRecord.Metadata[USER_ID_METADATA_KEY]
+	if !ok {
+		return nil, errors.New("Task missing userId")
+	}
+	return parseUserId(userIdIntf)
 }
 
 func execute(
@@ -49,7 +61,11 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
-	userId := parseUserInfo(taskRecord)
+	userIdPtr, err := parseUserInfo(taskRecord)
+	if err != nil {
+		return nil, err
+	}
+	userId := *userIdPtr
 	user, err := query.GetUserById(db, userId)
 	if err != nil {
 		return nil, err
@@ -81,8 +97,17 @@ func execute(
 }
 
 func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
-	userId := parseUserInfo(taskRecord)
-	rlog.Infof("Unable to send email to user with id=%d: %+v", userId, err)
+	userIdPtr, parseErr := parseUserInfo(taskRecord)
+	if parseErr != nil {
+		rlog.Infof(
+			"Unable to send email: %+v - couldn't parse userId from task record (%+v)",
+			err,
+			parseErr,
+		)
+	} else {
+		userId := *userIdPtr
+		rlog.Infof("Unable to send email to user with id=%d: %+v", userId, err)
+	}
 }
 
 func onSuccess(
@@ -91,8 +116,20 @@ func onSuccess(
 	taskRecord jobmine.TaskRecord,
 	res interface{},
 ) {
-	userId := parseUserInfo(taskRecord)
-	linkId := res.(data.TVerifyLinkID)
+	userIdPtr, err := parseUserInfo(taskRecord)
+	if err != nil {
+		rlog.Infof("Successfully sent email - couldn't parse userId from task record (%+v)", err)
+		return
+	}
+	userId := *userIdPtr
+	linkId, ok := res.(data.TVerifyLinkID)
+	if !ok {
+		rlog.Infof(
+			"Successfully sent email to user with id=%d - couldn't get linkId from task record",
+			userId,
+		)
+		return
+	}
 	rlog.Infof("Successfully sent email to user with id=%d and linkId=%s", userId, linkId)
 }
 
