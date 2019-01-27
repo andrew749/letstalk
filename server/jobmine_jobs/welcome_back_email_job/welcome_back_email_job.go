@@ -151,7 +151,7 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
 	if testUserIdIntf, ok := jobRecord.Metadata[TEST_USER_ID_METADATA_KEY]; ok {
-		testUserIdFloat, ok := testUserIdFloat.(float64)
+		testUserIdFloat, ok := testUserIdIntf.(float64)
 		if !ok {
 			return nil, errors.New("Couldn't parse testUserId")
 		}
