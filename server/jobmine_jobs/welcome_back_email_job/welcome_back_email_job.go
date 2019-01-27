@@ -20,13 +20,6 @@ import (
 
 const WELCOME_BACK_EMAIL_JOB jobmine.JobType = "WelcomeBackEmailJob"
 
-type UserType string
-
-const (
-	USER_TYPE_MENTOR UserType = "MENTOR"
-	USER_TYPE_MENTEE UserType = "MENTEE"
-)
-
 //  Task record
 const USER_ID_METADATA_KEY = "userId"
 
@@ -139,14 +132,6 @@ var reminderTaskSpec = jobmine.TaskSpec{
 	Execute:   execute,
 	OnError:   onError,
 	OnSuccess: onSuccess,
-}
-
-func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
-	if userId == mentorUserId {
-		return USER_TYPE_MENTOR
-	} else {
-		return USER_TYPE_MENTEE
-	}
 }
 
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
