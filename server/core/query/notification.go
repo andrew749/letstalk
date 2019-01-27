@@ -14,13 +14,22 @@ func GetNewestNotificationsForUser(
 	userId data.TUserID,
 	limit int,
 ) ([]api.Notification, errs.Error) {
-	var dataNotifs []data.Notification
+	var dataNotifs []data.Notification = make([]data.Notification, 0)
 
-	err := db.Order("id desc").Where(
-		&data.Notification{UserId: userId},
-	).Limit(limit).Find(&dataNotifs).Error
+	rows, err := db.
+		Table("notifications").Where(&data.Notification{UserId: userId}).
+		Limit(limit).
+		Find(&dataNotifs).
+		Rows()
 	if err != nil {
 		return nil, errs.NewDbError(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var notif data.Notification
+		db.ScanRows(rows, &notif)
+		dataNotifs = append(dataNotifs, notif)
 	}
 
 	apiNotifs, err := converters.NotificationsDataToApi(dataNotifs)
