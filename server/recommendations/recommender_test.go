@@ -14,8 +14,8 @@ import (
 )
 
 func getUpperLowerYearStrat(
-	maxLowerYears uint,
-	maxUpperYears uint,
+	maxLowerYearsPerUpperYear uint,
+	maxUpperYearsPerLowerYear uint,
 	youngestUpperYear uint,
 ) RecommendationStrategy {
 	return RecommendationStrategy{
@@ -37,9 +37,9 @@ func getUpperLowerYearStrat(
 			},
 		},
 		Matcher: GreedyUpperLowerYearMatcher{
-			MaxLowerYears:     maxLowerYears,
-			MaxUpperYears:     maxUpperYears,
-			YoungestUpperYear: youngestUpperYear,
+			MaxLowerYearsPerUpperYear: maxLowerYearsPerUpperYear,
+			MaxUpperYearsPerLowerYear: maxUpperYearsPerLowerYear,
+			YoungestUpperYear:         youngestUpperYear,
 		},
 	}
 }
@@ -140,6 +140,40 @@ func (a byUserOneId) Less(i, j int) bool {
 	} else {
 		return a[i].UserOneId < a[j].UserOneId
 	}
+}
+
+func TestGreedyUpperLowerYearRecommendationUpperYearUnbounded(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			users := seedUpperLowerYearUsers(t, db)
+			// Actual test
+			opts := UserFetcherOptions{}
+			strat := getUpperLowerYearStrat(100, 100, 2021)
+			res, err := Recommend(db, opts, strat)
+			assert.NoError(t, err)
+
+			sort.Sort(byUserOneId(res))
+			assert.Equal(t, 16, len(res))
+			assert.Equal(t, UserMatch{users[4].UserId, users[0].UserId, 2.0}, res[0])
+			assert.Equal(t, UserMatch{users[4].UserId, users[1].UserId, 0.0}, res[1])
+			assert.Equal(t, UserMatch{users[4].UserId, users[2].UserId, 1.0}, res[2])
+			assert.Equal(t, UserMatch{users[4].UserId, users[3].UserId, -1.0}, res[3])
+			assert.Equal(t, UserMatch{users[5].UserId, users[0].UserId, 0.0}, res[4])
+			assert.Equal(t, UserMatch{users[5].UserId, users[1].UserId, 2.0}, res[5])
+			assert.Equal(t, UserMatch{users[5].UserId, users[2].UserId, -1.0}, res[6])
+			assert.Equal(t, UserMatch{users[5].UserId, users[3].UserId, 1.0}, res[7])
+			assert.Equal(t, UserMatch{users[6].UserId, users[0].UserId, 1.0}, res[8])
+			assert.Equal(t, UserMatch{users[6].UserId, users[1].UserId, -1.0}, res[9])
+			assert.Equal(t, UserMatch{users[6].UserId, users[2].UserId, 0.0}, res[10])
+			assert.Equal(t, UserMatch{users[6].UserId, users[3].UserId, -2.0}, res[11])
+			assert.Equal(t, UserMatch{users[7].UserId, users[0].UserId, -1.0}, res[12])
+			assert.Equal(t, UserMatch{users[7].UserId, users[1].UserId, 1.0}, res[13])
+			assert.Equal(t, UserMatch{users[7].UserId, users[2].UserId, -2.0}, res[14])
+			assert.Equal(t, UserMatch{users[7].UserId, users[3].UserId, 0.0}, res[15])
+		},
+		TestName: "Test GreedyUpperLowerYearMatcher recommendations bounded by upper years",
+	}
+	test.RunTestWithDb(thisTest)
 }
 
 func TestGreedyUpperLowerYearRecommendationUpperYearBounded(t *testing.T) {
