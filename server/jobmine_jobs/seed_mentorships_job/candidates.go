@@ -1,9 +1,11 @@
 package seed_mentorships_job
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 
 	"letstalk/server/data"
 )
@@ -51,5 +53,44 @@ func GetCandidates(
 		userIds[i] = user.UserId
 	}
 
+	return userIds, nil
+}
+
+// Gets users for both lower and upper years.
+// Term start and end times only apply to lower years, since we already downweight upper years
+// created out of term during ranking.
+func GetLowerUpperYears(
+	db *gorm.DB,
+	programIds []string,
+	youngestUpperYear uint,
+	termStartTime *time.Time,
+	termEndTime *time.Time,
+) ([]data.TUserID, error) {
+	lowerYearIds, err := GetCandidates(
+		db, programIds, true, youngestUpperYear, termStartTime, termEndTime)
+	if err != nil {
+		return nil, err
+	}
+	upperYearIds, err := GetCandidates(db, programIds, false, youngestUpperYear, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	lowerYearIdSet := make(map[data.TUserID]interface{})
+	for _, lowerYearId := range lowerYearIds {
+		lowerYearIdSet[lowerYearId] = nil
+	}
+
+	overlapList := make([]data.TUserID, 0)
+	for _, upperYearId := range upperYearIds {
+		if _, ok := lowerYearIdSet[upperYearId]; ok {
+			overlapList = append(overlapList, upperYearId)
+		}
+	}
+
+	if len(overlapList) > 0 {
+		return nil, errors.New(fmt.Sprintf(
+			"Overlapping users between upper and lower year: %v", overlapList))
+	}
+	userIds := append(lowerYearIds, upperYearIds...)
 	return userIds, nil
 }

@@ -1,51 +1,67 @@
 package seed_mentorships_job
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
+	"github.com/romana/rlog"
+
+	"letstalk/server/core/api"
+	"letstalk/server/core/connection"
+	"letstalk/server/core/verify_link"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
-
-	"github.com/jinzhu/gorm"
-	"github.com/romana/rlog"
+	"letstalk/server/jobmine_utility"
+	"letstalk/server/recommendations"
 )
 
 const SEED_MENTORSHIPS_JOB jobmine.JobType = "SeedMentorshipsJob"
 
+// TaskRecord keys
 const (
-	USER_ID_METADATA_KEY                = "userId"
-	CONNECTION_USER_ID_METADATA_KEY     = "connectionUserId"
-	CONNECTION_FIRST_NAME_METADATA_KEY  = "connectionFirstName"
-	CONNECTION_LAST_NAME_METADATA_KEY   = "connectionLastName"
-	CONNECTION_PROFILE_PIC_METADATA_KEY = "connectionProfilePic"
+	MENTEE_USER_ID_METADATA_KEY = "menteeUserId"
+	MENTOR_USER_ID_METADATA_KEY = "mentorUserId"
 )
 
+// JobRecord keys
 const (
-	START_TIME_METADATA_KEY = "startTime"
-	END_TIME_METADATA_KEY   = "endTime"
+	PROGRAM_IDS_METADATA_KEY                    = "programIds"
+	YOUNGEST_UPPER_YEAR_METADATA_KEY            = "youngestUpperYear"
+	TERM_START_TIME_METADATA_KEY                = "termStartTime"
+	TERM_END_TIME_METADATA_KEY                  = "termEndTime"
+	MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY = "maxUpperYearsPerLowerYear"
+	MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY = "maxLowerYearsPerUpperYear"
+	IS_DRY_RUN_METADATA_KEY                     = "isDryRun"
 )
 
-func packageTaskRecordMetadata(
-	userId data.TUserID,
-	connectionUserId data.TUserID,
-	connectionFirstName string,
-	connectionLastName string,
-	connectionProfilePic *string,
-) map[string]interface{} {
+type userMatch struct {
+	menteeId data.TUserID
+	mentorId data.TUserID
+}
+
+func packageTaskRecordMetadata(match userMatch) map[string]interface{} {
 	return map[string]interface{}{
-		USER_ID_METADATA_KEY:                userId,
-		CONNECTION_USER_ID_METADATA_KEY:     connectionUserId,
-		CONNECTION_FIRST_NAME_METADATA_KEY:  connectionFirstName,
-		CONNECTION_LAST_NAME_METADATA_KEY:   connectionLastName,
-		CONNECTION_PROFILE_PIC_METADATA_KEY: connectionProfilePic,
+		MENTEE_USER_ID_METADATA_KEY: match.menteeId,
+		MENTOR_USER_ID_METADATA_KEY: match.mentorId,
 	}
 }
 
-func parseUserInfo(taskRecord jobmine.TaskRecord) data.TUserID {
-	userId := data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
-	return userId
+func parseUserInfo(taskRecord jobmine.TaskRecord) (*userMatch, error) {
+	menteeId, err := jobmine_utility.UserIdFromTaskRecord(taskRecord, MENTEE_USER_ID_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	} else if menteeId == nil {
+		return nil, errors.New("menteeId not provided in task record")
+	}
+	mentorId, err := jobmine_utility.UserIdFromTaskRecord(taskRecord, MENTOR_USER_ID_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	} else if mentorId == nil {
+		return nil, errors.New("mentorId not provided in task record")
+	}
+	return &userMatch{menteeId: *menteeId, mentorId: *mentorId}, nil
 }
 
 func execute(
@@ -53,12 +69,26 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
+	userMatch, err := parseUserInfo(taskRecord)
+	if err != nil {
+		return nil, err
+	}
+	err = connection.AddMentorship(
+		db, userMatch.mentorId, userMatch.menteeId, api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
+	if err != nil {
+		return nil, err
+	}
+
 	return "Success", nil
 }
 
 func onError(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord, err error) {
-	userId := parseUserInfo(taskRecord)
-	rlog.Infof("Unable to send message to user with id=%d: %+v", userId, err)
+	match, parseErr := parseUserInfo(taskRecord)
+	if parseErr != nil {
+		rlog.Infof("Unable to create mentorship (%+v): %+v", parseErr, err)
+	} else {
+		rlog.Infof("Unable to create mentorship for match %v: %+v", *match, err)
+	}
 }
 
 func onSuccess(
@@ -67,54 +97,166 @@ func onSuccess(
 	taskRecord jobmine.TaskRecord,
 	res interface{},
 ) {
-	userId := parseUserInfo(taskRecord)
-	rlog.Infof("Successfully sent message to user with id=%d", userId)
+	match, parseErr := parseUserInfo(taskRecord)
+	if parseErr != nil {
+		rlog.Infof("Successfully created mentorship (%+v)", parseErr)
+	} else {
+		rlog.Infof("Successfully created mentorship for match %v", *match)
+	}
 }
 
-var reminderTaskSpec = jobmine.TaskSpec{
+var seedTaskSpec = jobmine.TaskSpec{
 	Execute:   execute,
 	OnError:   onError,
 	OnSuccess: onSuccess,
 }
 
-const TIME_LAYOUT = "2006-01-02T15:04:05Z"
-
-func getTime(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
-	if val, ok := jobRecord.Metadata[key]; ok {
-		var (
-			timeStr string
-			ok      bool
-		)
-		if timeStr, ok = val.(string); !ok {
-			return nil, errors.New(fmt.Sprintf("%s must be a time string", key))
+func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
+	// default to true
+	isDryRun := true
+	if isDryRunIntf, exists := jobRecord.Metadata[IS_DRY_RUN_METADATA_KEY]; exists {
+		var isBool bool
+		if isDryRun, isBool = isDryRunIntf.(bool); !isBool {
+			return nil, errors.New(fmt.Sprintf("isDryRun must be a bool, got %v", isDryRunIntf))
 		}
-		time, err := time.Parse(TIME_LAYOUT, timeStr)
+	}
+
+	var programIds []string
+	if programIdsIntf, exists := jobRecord.Metadata[PROGRAM_IDS_METADATA_KEY]; exists {
+		var isStringArr bool
+		if programIds, isStringArr = programIdsIntf.([]string); !isStringArr {
+			return nil, errors.New(fmt.Sprintf(
+				"programIds must be an array of strings, got %v", programIdsIntf))
+		}
+	} else {
+		return nil, errors.New("jobRecord missing programIds")
+	}
+
+	youngestUpperYearPtr, err := jobmine_utility.UIntFromJobRecord(
+		jobRecord, YOUNGEST_UPPER_YEAR_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	} else if youngestUpperYearPtr == nil {
+		return nil, errors.New("jobRecord missing youngestUpperYear")
+	}
+	youngestUpperYear := *youngestUpperYearPtr
+
+	maxLowerYearsPerUpperYearPtr, err := jobmine_utility.UIntFromJobRecord(
+		jobRecord, MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	} else if maxLowerYearsPerUpperYearPtr == nil {
+		return nil, errors.New("jobRecord missing maxLowerYearsPerUpperYear")
+	}
+	maxLowerYearsPerUpperYear := *maxLowerYearsPerUpperYearPtr
+
+	maxUpperYearsPerLowerYearPtr, err := jobmine_utility.UIntFromJobRecord(
+		jobRecord, MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	} else if maxUpperYearsPerLowerYearPtr == nil {
+		return nil, errors.New("jobRecord missing maxUpperYearsPerLowerYear")
+	}
+	maxUpperYearsPerLowerYear := *maxUpperYearsPerLowerYearPtr
+
+	termStartTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, TERM_START_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+	termEndTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, TERM_END_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+
+	userIds, err := GetLowerUpperYears(db, programIds, youngestUpperYear, termStartTime, termEndTime)
+	if err != nil {
+		return nil, err
+	}
+
+	var strat recommendations.RecommendationStrategy
+
+	if termStartTime == nil {
+		strat = getRecommendationStrategy(
+			maxLowerYearsPerUpperYear,
+			maxUpperYearsPerLowerYear,
+			youngestUpperYear,
+		)
+	} else {
+		// Get users that verified the Winter 2019 whitelist and make them the blacklist for the
+		// older downrank. (I know a little confusing, but the blacklist refers to users that we
+		// omit from the downrank, so they will actually not be penalized during matching).
+		blacklistUserIds, err := verify_link.GetVerifiedUserIds(
+			db, verify_link.LINK_TYPE_WHITELIST_WINTER_2019)
 		if err != nil {
 			return nil, err
 		}
-		return &time, nil
+
+		strat = getRecommendationStrategyWithOlderDownrank(
+			maxLowerYearsPerUpperYear,
+			maxUpperYearsPerLowerYear,
+			youngestUpperYear,
+			*termStartTime,
+			blacklistUserIds,
+		)
 	}
-	return nil, nil
+
+	fetcherOptions := recommendations.UserFetcherOptions{UserIds: userIds}
+	matches, err := recommendations.Recommend(db, fetcherOptions, strat)
+	if err != nil {
+		return nil, err
+	}
+
+	if isDryRun {
+		for i, match := range matches {
+			rlog.Infof(
+				"match(%d), mentee(%d), mentor(%d), score(%f)",
+				i, match.UserOneId, match.UserTwoId, match.Score)
+		}
+
+		return []jobmine.Metadata{}, nil
+	} else {
+		metadatas := make([]jobmine.Metadata, len(matches))
+		for i, match := range matches {
+			metadatas[i] = packageTaskRecordMetadata(userMatch{
+				menteeId: match.UserOneId,
+				mentorId: match.UserTwoId,
+			})
+		}
+
+		return metadatas, nil
+	}
 }
 
-func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	return []jobmine.Metadata{}, nil
-}
-
-var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
+var SeedJobSpec jobmine.JobSpec = jobmine.JobSpec{
 	JobType:          SEED_MENTORSHIPS_JOB,
-	TaskSpec:         reminderTaskSpec,
+	TaskSpec:         seedTaskSpec,
 	GetTasksToCreate: getTasksToCreate,
 }
 
-// CreateReminderJob Creates a reminder job record to get run at some point.
-func CreateReminderJob(db *gorm.DB, runId string, startTime *time.Time, endTime *time.Time) error {
-	metadata := map[string]interface{}{}
-	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = startTime.Format(TIME_LAYOUT)
+// CreateSeedJob Creates a seed job record to get run at some point.
+func CreateSeedJob(
+	db *gorm.DB,
+	runId string,
+	isDryRun bool,
+	programIds []string,
+	youngestUpperYear uint,
+	maxLowerYearsPerUpperYear uint,
+	maxUpperYearsPerLowerYear uint,
+	termStartTime *time.Time,
+	termEndTime *time.Time,
+) error {
+	metadata := map[string]interface{}{
+		PROGRAM_IDS_METADATA_KEY:                    programIds,
+		YOUNGEST_UPPER_YEAR_METADATA_KEY:            youngestUpperYear,
+		MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY: maxLowerYearsPerUpperYear,
+		MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY: maxUpperYearsPerLowerYear,
+		IS_DRY_RUN_METADATA_KEY:                     isDryRun,
 	}
-	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = endTime.Format(TIME_LAYOUT)
+	if termStartTime != nil {
+		metadata[TERM_START_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*termStartTime)
+	}
+	if termEndTime != nil {
+		metadata[TERM_END_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*termEndTime)
 	}
 
 	if err := db.Create(&jobmine.JobRecord{
