@@ -71,7 +71,7 @@ func GetNotificationsForUser(
 	limit int,
 ) ([]api.Notification, errs.Error) {
 	// HACK: for some reason data is getting corrupted when being passed on the stack
-	rows, err := db.DB().Query("select * from notifications where user_id = ? and id < ? order by id desc limit ?", userId, limit)
+	rows, err := db.DB().Query("select * from notifications where user_id = ? and id < ? order by id desc limit ?", userId, past, limit)
 	if err != nil {
 		return nil, errs.NewDbError(err)
 	}
