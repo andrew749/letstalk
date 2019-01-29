@@ -53,7 +53,7 @@ func packageJobRecordData(recordMetaData jobRecordMetadata) map[string]interface
 func parseJobRecordData(data jobmine.Metadata) jobRecordMetadata {
 	var endTime *time.Time
 	if data[END_TIME_KEY] != nil {
-		parsedTime, err := time.Parse(time.RFC3339, string(data[END_TIME_KEY].(uint8)))
+		parsedTime, err := time.Parse(time.RFC3339, data[END_TIME_KEY].(string))
 		if err != nil {
 			panic(err)
 		}
