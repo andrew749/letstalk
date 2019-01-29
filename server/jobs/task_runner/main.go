@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	utility.Bootstrap()
 	db, err := utility.GetDB()
 	if err != nil {
 		rlog.Errorf("Unable to get database: %+v", err)
