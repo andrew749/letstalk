@@ -20,7 +20,7 @@ $(document).ready(function(){
   function submitLinkVerifyRequest(requestId) {
     console.log("sending link verify request for id: ", requestId);
     $.post( baseUrl + "/verify_link", JSON.stringify({
-      "id": requestId,
+      "verifyLinkId": requestId,
     })).done( function( data ) {
       // on success change ui
       console.log("Successfully submitted verify link request: ", data);
