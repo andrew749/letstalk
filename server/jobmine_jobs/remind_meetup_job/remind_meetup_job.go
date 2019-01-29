@@ -200,10 +200,10 @@ func CreateReminderJob(db *gorm.DB, runId string) error {
 	metadata := map[string]interface{}{}
 
 	if _, err := jobmine.CreateJobRecord(
-		JobType:  REMIND_MEETUP_JOB,
-		RunId:    runId,
-		Metadata: metadata,
-		Status:   jobmine.STATUS_CREATED,
+		runId,
+		REMIND_MEETUP_JOB,
+		metadata,
+		nil,
 	); err != nil {
 		return err
 	}
