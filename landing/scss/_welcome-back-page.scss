@@ -16,6 +16,13 @@ body {
     flex-direction: column;
   }
 
+  .messaging-content {
+    ul {
+      list-style-position: inside;
+      padding-left: 0;
+    }
+  }
+
   .find-out-more-container {
     display: flex;
     justify-content: center;
