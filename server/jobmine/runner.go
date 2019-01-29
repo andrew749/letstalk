@@ -101,13 +101,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 
 	// create each of the tasks
 	for _, taskMetadata := range tasksMetadata {
-		if err := tx.Create(&TaskRecord{
-			JobId:    job.ID,
-			JobType:  job.JobType,
-			RunId:    job.RunId,
-			Status:   STATUS_CREATED,
-			Metadata: taskMetadata,
-		}).Error; err != nil {
+		if _, err := CreateTaskRecord(db, job.ID, job.RunId, job.JobType, taskMetadata); err != nil {
 			tx.Rollback()
 			job.SetJobStatus(db, STATUS_FAILED)
 			rlog.Errorf("Unable to create task with metadata %+v", taskMetadata)
@@ -126,27 +120,36 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 	return tx.Commit().Error
 }
 
-// JobRunner Finds Jobs that havent been executed yet and schedule them
-// (by creating db records)
-func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB, jobTypeWhitelist []JobType, runIdWhitelist []string) error {
+// GetJobmineJobsToRun Jobs to run.
+func GetJobmineJobsToRun(db *gorm.DB, latestJob time.Time, jobTypeWhitelist []JobType, runIdWhitelist []string) ([]JobRecord, error) {
 	var jobs []JobRecord
-
 	query := db.
 		Where("status = ?", STATUS_CREATED).
-		Where("start_time < ?", time.Now())
+		Where("start_time < ?", latestJob)
 
 	if len(jobTypeWhitelist) > 0 {
-		query = query.Where("job_type in ?", jobTypeWhitelist)
+		query = query.Where("job_type in (?)", jobTypeWhitelist)
 	}
 
 	if len(runIdWhitelist) > 0 {
-		query = query.Where("run_id in ?", runIdWhitelist)
+		query = query.Where("run_id in (?)", runIdWhitelist)
 	}
 
 	// find all job records that are created but not started running
 	if err := query.
 		Find(&jobs).
 		Error; err != nil {
+		return nil, err
+	}
+
+	return jobs, nil
+}
+
+// JobRunner Finds Jobs that havent been executed yet and schedule them
+// (by creating db records)
+func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB, jobTypeWhitelist []JobType, runIdWhitelist []string) error {
+	jobs, err := GetJobmineJobsToRun(db, time.Now(), jobTypeWhitelist, runIdWhitelist)
+	if err != nil {
 		return err
 	}
 
@@ -171,25 +174,36 @@ func JobRunner(jobSpecStore JobSpecStore, db *gorm.DB, jobTypeWhitelist []JobTyp
 	return nil
 }
 
-// TaskRunner Finds tasks that havent started yet and schedule them.
-// whitelists are conjunctive as in they will filter the query
-func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB, jobTypeWhitelist []JobType, runIdWhitelist []string) error {
+// GetJobmineTasksToRun Tasks to run
+func GetJobmineTasksToRun(db *gorm.DB, jobTypeWhitelist []JobType, runIdWhitelist []string) ([]TaskRecord, error) {
 	var tasks []TaskRecord
 	query := db.
 		Where("status = ?", STATUS_CREATED).
 		Preload("Job")
 
 	if len(jobTypeWhitelist) > 0 {
-		query = query.Where("job_type in ?", jobTypeWhitelist)
+		query = query.Where("job_type in (?)", jobTypeWhitelist)
 	}
 
 	if len(runIdWhitelist) > 0 {
-		query = query.Where("run_id in ?", runIdWhitelist)
+		query = query.Where("run_id in (?)", runIdWhitelist)
 	}
 
 	if err := query.
 		Find(&tasks).
 		Error; err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+// TaskRunner Finds tasks that havent started yet and schedule them.
+// whitelists are conjunctive as in they will filter the query
+func TaskRunner(jobSpecStore JobSpecStore, db *gorm.DB, jobTypeWhitelist []JobType, runIdWhitelist []string) error {
+
+	tasks, err := GetJobmineTasksToRun(db, jobTypeWhitelist, runIdWhitelist)
+	if err != nil {
 		return err
 	}
 

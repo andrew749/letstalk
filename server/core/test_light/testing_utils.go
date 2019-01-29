@@ -17,12 +17,6 @@ type Test struct {
 	TestName string
 }
 
-// DB flags
-var (
-	databasePrefix = uuid.New().String()
-	dbPath         = fmt.Sprintf("/tmp/%s.db", databasePrefix)
-)
-
 func createFileIfNotExists(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -32,7 +26,7 @@ func createFileIfNotExists(path string) error {
 	return nil
 }
 
-func GetSqliteDB() (*gorm.DB, error) {
+func GetSqliteDB(dbPath string) (*gorm.DB, error) {
 	if err := createFileIfNotExists(dbPath); err != nil {
 		return nil, err
 	}
@@ -44,7 +38,7 @@ func GetSqliteDB() (*gorm.DB, error) {
 	return db, err
 }
 
-func TearDownLocalDatabase() {
+func TearDownLocalDatabase(dbPath string) {
 	os.Remove(dbPath)
 }
 
@@ -54,8 +48,11 @@ type DatabaseAwareFunc func(*gorm.DB) error
 func RunTestsWithDb(provisionDatabase DatabaseAwareFunc, tests []Test) {
 	var db *gorm.DB
 	var err error
-	TearDownLocalDatabase()
-	if db, err = GetSqliteDB(); err != nil {
+	databasePrefix := uuid.New().String()
+
+	dbPath := fmt.Sprintf("/tmp/%s.db", databasePrefix)
+	TearDownLocalDatabase(dbPath)
+	if db, err = GetSqliteDB(dbPath); err != nil {
 		rlog.Errorf("Failed to create db %s", err.Error())
 		panic(err)
 	}
@@ -71,7 +68,7 @@ func RunTestsWithDb(provisionDatabase DatabaseAwareFunc, tests []Test) {
 		runTestWithDb(db, test)
 	}
 
-	TearDownLocalDatabase()
+	TearDownLocalDatabase(dbPath)
 }
 
 func RunTestWithDb(databaseProvision DatabaseAwareFunc, test Test) {

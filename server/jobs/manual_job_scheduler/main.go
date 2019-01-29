@@ -42,12 +42,7 @@ func main() {
 	}
 
 	// actually create the job.
-	if err := db.Create(&jobmine.JobRecord{
-		JobType:  jobType,
-		RunId:    *runId,
-		Metadata: parsedMetadata,
-		Status:   jobmine.STATUS_CREATED,
-	}).Error; err != nil {
+	if _, err := jobmine.CreateJobRecord(db, *runId, jobType, metadata, nil); err != nil {
 		rlog.Errorf("Failed to schedule reminder job.")
 		panic(err)
 	}

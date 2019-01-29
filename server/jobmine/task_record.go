@@ -64,3 +64,18 @@ func (r *TaskRecord) GetJobRecordForTask(db *gorm.DB) (JobRecord, error) {
 	err := db.First(&jobRecord, r.JobId).Error
 	return jobRecord, err
 }
+
+// CreateTaskRecord Creates a new task record in the db
+func CreateTaskRecord(db *gorm.DB, jobId uint, runId string, jobType JobType, metadata Metadata) (*TaskRecord, error) {
+	taskRecord := TaskRecord{
+		JobId:    jobId,
+		RunId:    runId,
+		JobType:  jobType,
+		Metadata: metadata,
+		Status:   STATUS_CREATED,
+	}
+	if err := db.Save(&taskRecord).Error; err != nil {
+		return nil, err
+	}
+	return &taskRecord, nil
+}
