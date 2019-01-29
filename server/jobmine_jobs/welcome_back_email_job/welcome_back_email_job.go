@@ -84,7 +84,7 @@ func execute(
 	)
 
 	to := mail.NewEmail(user.FirstName, user.Email)
-	if err := email.SendWelcomeBackEmail(to, verifyLinkHrefLink); err != nil {
+	if err := email.SendWelcomeBackEmail(to, verifyLinkHrefLink, user.FirstName); err != nil {
 		return nil, err
 	}
 
