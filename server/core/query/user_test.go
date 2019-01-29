@@ -2,6 +2,7 @@ package query
 
 import (
 	"testing"
+	"time"
 
 	"letstalk/server/core/test"
 	"letstalk/server/core/utility/uw_email"
@@ -41,4 +42,81 @@ func TestSearchUserFallback(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestGetUsersByCreatedAt(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			user1, err := test_helpers.CreateTestSetupUser(db, 1)
+			assert.NoError(t, err)
+			user2, err := test_helpers.CreateTestSetupUser(db, 2)
+			assert.NoError(t, err)
+			user3, err := test_helpers.CreateTestSetupUser(db, 3)
+			assert.NoError(t, err)
+
+			now := time.Now()
+
+			user1.CreatedAt = now.AddDate(0, 0, 2)
+			err = db.Save(user1).Error
+			assert.NoError(t, err)
+
+			user3.CreatedAt = now.AddDate(0, 0, -2)
+			err = db.Save(user3).Error
+			assert.NoError(t, err)
+
+			from := now.AddDate(0, 0, -1)
+			to := now.AddDate(0, 0, 1)
+			users, err := GetUsersByCreatedAt(db, &from, &to)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, user2.UserId, users[0].UserId)
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestGetUsersByCreatedAtBoundaryInclusive(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			user1, err := test_helpers.CreateTestSetupUser(db, 1)
+			assert.NoError(t, err)
+			_, err = test_helpers.CreateTestSetupUser(db, 2)
+			assert.NoError(t, err)
+			user3, err := test_helpers.CreateTestSetupUser(db, 3)
+			assert.NoError(t, err)
+
+			now := time.Now()
+
+			user1.CreatedAt = now.AddDate(0, 0, 1)
+			err = db.Save(user1).Error
+			assert.NoError(t, err)
+
+			user3.CreatedAt = now.AddDate(0, 0, -1)
+			err = db.Save(user3).Error
+			assert.NoError(t, err)
+
+			from := now.AddDate(0, 0, -1)
+			to := now.AddDate(0, 0, 1)
+			users, err := GetUsersByCreatedAt(db, &from, &to)
+			assert.NoError(t, err)
+			assert.Equal(t, 3, len(users))
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestGetUsersByCreatedAtNotSpecified(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			for i := 0; i < 3; i++ {
+				_, err := test_helpers.CreateTestSetupUser(db, i+1)
+				assert.NoError(t, err)
+			}
+
+			users, err := GetUsersByCreatedAt(db, nil, nil)
+			assert.NoError(t, err)
+			assert.Equal(t, 3, len(users))
+		},
+	}
+	test.RunTestWithDb(thisTest)
 }
