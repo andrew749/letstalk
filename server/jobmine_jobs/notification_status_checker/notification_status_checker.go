@@ -2,6 +2,7 @@ package notification_status_checker
 
 import (
 	"fmt"
+	"letstalk/server/core/errs"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
 	notification_api "letstalk/server/notifications"
@@ -72,14 +73,23 @@ func processNotification(db *gorm.DB, e *data.ExpoPendingNotification) error {
 		return err
 	}
 
-	status := serverStatus.Data[*e.Receipt].Status
+	statusRecord, ok := serverStatus.Data[*e.Receipt]
+
+	if !ok {
+		msg := fmt.Sprintf("No response from expo for notification %d with receipt %s, skipping.", e.NotificationId, *e.Receipt)
+		rlog.Warn(msg)
+		return errs.NewBaseError(msg)
+	}
+
+	status := statusRecord.Status
 	// if the status is ok, mark the notification as such
 	if status == notification_api.OK_STATUS {
 		return e.MarkNotificationChecked(db)
 	}
+	rlog.Debugf("Got status %+v", status)
 
 	// if there is an error update the state accordingly and try to remediate
-	failureType := notification_api.ExpoNotificationFailureType(serverStatus.Data[*e.Receipt].Details.Error)
+	failureType := notification_api.ExpoNotificationFailureType(statusRecord.Details.Error)
 
 	// check the status of the notification on expo's side and perform remediation
 	switch failureType {
@@ -119,7 +129,6 @@ var NotificationStatusChecker jobmine.JobSpec = jobmine.JobSpec{
 	JobType: NOTIFICATION_STATUS_CHECKER_JOB,
 	TaskSpec: jobmine.TaskSpec{
 		Execute: func(db *gorm.DB, jobRecord jobmine.JobRecord, taskRecord jobmine.TaskRecord) (interface{}, error) {
-			rlog.Infof("Got data from taskRecord %s", taskRecord.Metadata["key"])
 			taskRecordMetadata := parseTaskRecordData(taskRecord.Metadata)
 
 			// get the actual notification object
