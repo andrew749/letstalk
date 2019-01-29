@@ -18,13 +18,6 @@ func main() {
 		panic(err)
 	}
 
-	// create new task runner
-	err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
-	if err != nil {
-		rlog.Errorf("Task runner ran into exception: %+v", err)
-		panic(err)
-	}
-
 	rlog.Debugf("Queue processing")
 	// process anything in the sqs queue
 	if helper, ok := utility.QueueHelper.(utility.LocalQueueImpl); ok {
@@ -36,6 +29,14 @@ func main() {
 			return nil
 		})
 		go helper.QueueProcessor()
+
+		// create new task runner
+		err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
+		if err != nil {
+			rlog.Errorf("Task runner ran into exception: %+v", err)
+			panic(err)
+		}
+
 		helper.CloseQueue()
 		rlog.Debugf("Running queue")
 		helper.WaitForQueueDone()
