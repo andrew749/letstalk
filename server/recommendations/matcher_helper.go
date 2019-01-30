@@ -1,37 +1,18 @@
 package recommendations
 
-import (
-	"sort"
-
-	"letstalk/server/data"
-)
-
-type byScore []UserMatch
-
-func (a byScore) Len() int {
-	return len(a)
-}
-
-func (a byScore) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-
-func (a byScore) Less(i, j int) bool {
-	// Sort by decreasing
-	return a[i].Score > a[j].Score
-}
+import "letstalk/server/data"
 
 // Calculates all user matches by taking the product of two lists of users.
 // Will return m * n user matches given m users on the left and n users on the right.
-// Map is keyed by user ids of left users, and each list is sorted by decreasing score.
+// Returns a list of all of these matches. userOneId will be users from the left list and userTwoId
+// will be users from the right list. Matches are unsorted
 func calculateSplitUserMatches(
 	usersLeft []data.User,
 	usersRight []data.User,
 	score PairwiseScore,
-) (map[data.TUserID][]UserMatch, error) {
-	matches := make(map[data.TUserID][]UserMatch)
+) ([]UserMatch, error) {
+	matches := make([]UserMatch, 0)
 	for _, userLeft := range usersLeft {
-		matches[userLeft.UserId] = make([]UserMatch, 0, len(usersRight))
 		for _, userRight := range usersRight {
 			// Don't create matches for two of the same user
 			if userLeft.UserId != userRight.UserId {
@@ -44,11 +25,9 @@ func calculateSplitUserMatches(
 					UserTwoId: userRight.UserId,
 					Score:     value,
 				}
-				matches[userLeft.UserId] = append(matches[userLeft.UserId], userMatch)
+				matches = append(matches, userMatch)
 			}
 		}
-		// Sort matches by decreasing score
-		sort.Sort(byScore(matches[userLeft.UserId]))
 	}
 	return matches, nil
 }
