@@ -2,10 +2,12 @@ package jobmine_jobs
 
 import (
 	"letstalk/server/jobmine"
+	"letstalk/server/jobmine_jobs/notification_status_checker"
 	"letstalk/server/jobmine_jobs/remind_meetup_job"
 	"letstalk/server/jobmine_jobs/remind_onboard_job"
 	"letstalk/server/jobmine_jobs/seed_mentorships_job"
 	"letstalk/server/jobmine_jobs/test_job"
+	"letstalk/server/jobmine_jobs/welcome_back_email_job"
 )
 
 // IMPORTANT: JobType and the key need to be identical here.
@@ -17,5 +19,7 @@ var Jobs = jobmine.JobSpecStore{
 		remind_onboard_job.REMIND_ONBOARD_JOB:     remind_onboard_job.ReminderJobSpec,
 		remind_meetup_job.REMIND_MEETUP_JOB:       remind_meetup_job.ReminderJobSpec,
 		seed_mentorships_job.SEED_MENTORSHIPS_JOB: seed_mentorships_job.SeedJobSpec,
+		welcome_back_email_job.WELCOME_BACK_EMAIL_JOB:               welcome_back_email_job.ReminderJobSpec,
+		notification_status_checker.NOTIFICATION_STATUS_CHECKER_JOB: notification_status_checker.NotificationStatusChecker,
 	},
 }

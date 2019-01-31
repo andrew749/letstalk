@@ -1,0 +1,76 @@
+body {
+  background-color: #eff5f5;
+}
+
+.welcome-back {
+  margin-top: 100px !important;
+  display: flex;
+  width: 75vw;
+  flex-direction: column;
+  max-width: 600px;
+
+  .header-content {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+  }
+
+  .messaging-content {
+    ul {
+      list-style-position: inside;
+      padding-left: 0;
+    }
+  }
+
+  .find-out-more-container {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: row;
+    margin-bottom: 10px;
+
+    .find-out-more-button {
+      background-color: $primary-80;
+      width:162px;
+      border: none;
+      padding: 8px;
+      border-radius: 20px;
+    }
+  }
+
+  .download-container {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    flex-direction: row;
+
+    .google-link {
+      position: relative;
+      width:162px;
+      height: 60px;
+      margin-top: -10px;
+    }
+
+    .apple-link {
+      width:136px;
+      height:40px;
+    }
+
+    @media(max-width: 600px) {
+      flex-direction: column;
+
+      .apple-link {
+        margin: 0 auto;
+      }
+
+      .google-link {
+        margin-top: 0px;
+      }
+    }
+  }
+}
+
+.row.center {
+  justify-content: center;
+}
