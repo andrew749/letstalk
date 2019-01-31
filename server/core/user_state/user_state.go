@@ -41,7 +41,7 @@ func GetUserState(db *gorm.DB, userId data.TUserID) (*api.UserState, errs.Error)
 	if err != nil {
 		return nil, err
 	}
-	if survey.Responses == nil || len(*survey.Responses) != len(survey.Questions) {
+	if survey.Responses == nil {
 		return &state, nil
 	}
 	state = api.ACCOUNT_SETUP
