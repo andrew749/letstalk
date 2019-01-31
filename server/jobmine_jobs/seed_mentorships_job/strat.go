@@ -35,9 +35,9 @@ func getRecommendationStrategy(
 			},
 		},
 		Matcher: recommendations.GreedyUpperLowerYearMatcher{
-			MaxLowerYears:     maxLowerYearsPerUpperYear,
-			MaxUpperYears:     maxUpperYearsPerLowerYear,
-			YoungestUpperYear: youngestUpperYear,
+			MaxLowerYearsPerUpperYear: maxLowerYearsPerUpperYear,
+			MaxUpperYearsPerLowerYear: maxUpperYearsPerLowerYear,
+			YoungestUpperYear:         youngestUpperYear,
 		},
 	}
 }
