@@ -17,22 +17,22 @@ const joinStr = `INNER JOIN (
 
 // Finds users that meet the following conditions:
 // - are in any of the given programIds
-// - if isLowerYear: graduating any year greater than youngestUpperYear
-// - if not isLowerYear: graduating any year less than or equal to youngestUpperYear
+// - if isLowerYear: graduating any year greater than youngestUpperGradYear
+// - if not isLowerYear: graduating any year less than or equal to youngestUpperGradYear
 // - optionally created within the [createdAfter, createdBefore] range
 func GetCandidates(
 	db *gorm.DB,
 	programIds []string,
 	isLowerYear bool,
-	youngestUpperYear uint,
+	youngestUpperGradYear uint,
 	createdAfter *time.Time,
 	createdBefore *time.Time,
 ) ([]data.TUserID, error) {
 	query := db.Model(&data.User{}).Joins(joinStr).Where("cohort.program_id IN (?)", programIds)
 	if isLowerYear {
-		query = query.Where("cohort.grad_year > ?", youngestUpperYear)
+		query = query.Where("cohort.grad_year > ?", youngestUpperGradYear)
 	} else {
-		query = query.Where("cohort.grad_year <= ?", youngestUpperYear)
+		query = query.Where("cohort.grad_year <= ?", youngestUpperGradYear)
 	}
 
 	if createdAfter != nil {
@@ -62,16 +62,16 @@ func GetCandidates(
 func GetLowerUpperYears(
 	db *gorm.DB,
 	programIds []string,
-	youngestUpperYear uint,
+	youngestUpperGradYear uint,
 	termStartTime *time.Time,
 	termEndTime *time.Time,
 ) ([]data.TUserID, error) {
 	lowerYearIds, err := GetCandidates(
-		db, programIds, true, youngestUpperYear, termStartTime, termEndTime)
+		db, programIds, true, youngestUpperGradYear, termStartTime, termEndTime)
 	if err != nil {
 		return nil, err
 	}
-	upperYearIds, err := GetCandidates(db, programIds, false, youngestUpperYear, nil, nil)
+	upperYearIds, err := GetCandidates(db, programIds, false, youngestUpperGradYear, nil, nil)
 	if err != nil {
 		return nil, err
 	}

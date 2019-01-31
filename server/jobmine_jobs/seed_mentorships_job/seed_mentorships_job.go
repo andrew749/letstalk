@@ -28,7 +28,7 @@ const (
 // JobRecord keys
 const (
 	PROGRAM_IDS_METADATA_KEY                    = "programIds"
-	YOUNGEST_UPPER_YEAR_METADATA_KEY            = "youngestUpperYear"
+	YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY       = "youngestUpperGradYear"
 	TERM_START_TIME_METADATA_KEY                = "termStartTime"
 	TERM_END_TIME_METADATA_KEY                  = "termEndTime"
 	MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY = "maxUpperYearsPerLowerYear"
@@ -111,20 +111,30 @@ var seedTaskSpec = jobmine.TaskSpec{
 	OnSuccess: onSuccess,
 }
 
-func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	// default to true
-	isDryRun := true
+type jobMetadata struct {
+	isDryRun                  bool
+	programIds                []string
+	youngestUpperGradYear     uint
+	maxLowerYearsPerUpperYear uint
+	maxUpperYearsPerLowerYear uint
+	termStartTime             *time.Time
+	termEndTime               *time.Time
+}
+
+func parseJobMetadata(jobRecord jobmine.JobRecord) (*jobMetadata, error) {
+	// default dry run to true
+	meta := jobMetadata{isDryRun: true}
+
 	if isDryRunIntf, exists := jobRecord.Metadata[IS_DRY_RUN_METADATA_KEY]; exists {
 		var isBool bool
-		if isDryRun, isBool = isDryRunIntf.(bool); !isBool {
+		if meta.isDryRun, isBool = isDryRunIntf.(bool); !isBool {
 			return nil, errors.New(fmt.Sprintf("isDryRun must be a bool, got %v", isDryRunIntf))
 		}
 	}
 
-	var programIds []string
 	if programIdsIntf, exists := jobRecord.Metadata[PROGRAM_IDS_METADATA_KEY]; exists {
 		var isStringArr bool
-		if programIds, isStringArr = programIdsIntf.([]string); !isStringArr {
+		if meta.programIds, isStringArr = programIdsIntf.([]string); !isStringArr {
 			return nil, errors.New(fmt.Sprintf(
 				"programIds must be an array of strings, got %v", programIdsIntf))
 		}
@@ -132,14 +142,14 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return nil, errors.New("jobRecord missing programIds")
 	}
 
-	youngestUpperYearPtr, err := jobmine_utility.UIntFromJobRecord(
-		jobRecord, YOUNGEST_UPPER_YEAR_METADATA_KEY)
+	youngestUpperGradYearPtr, err := jobmine_utility.UIntFromJobRecord(
+		jobRecord, YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY)
 	if err != nil {
 		return nil, err
-	} else if youngestUpperYearPtr == nil {
-		return nil, errors.New("jobRecord missing youngestUpperYear")
+	} else if youngestUpperGradYearPtr == nil {
+		return nil, errors.New("jobRecord missing youngestUpperGradYear")
 	}
-	youngestUpperYear := *youngestUpperYearPtr
+	meta.youngestUpperGradYear = *youngestUpperGradYearPtr
 
 	maxLowerYearsPerUpperYearPtr, err := jobmine_utility.UIntFromJobRecord(
 		jobRecord, MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY)
@@ -148,7 +158,7 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 	} else if maxLowerYearsPerUpperYearPtr == nil {
 		return nil, errors.New("jobRecord missing maxLowerYearsPerUpperYear")
 	}
-	maxLowerYearsPerUpperYear := *maxLowerYearsPerUpperYearPtr
+	meta.maxLowerYearsPerUpperYear = *maxLowerYearsPerUpperYearPtr
 
 	maxUpperYearsPerLowerYearPtr, err := jobmine_utility.UIntFromJobRecord(
 		jobRecord, MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY)
@@ -157,29 +167,40 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 	} else if maxUpperYearsPerLowerYearPtr == nil {
 		return nil, errors.New("jobRecord missing maxUpperYearsPerLowerYear")
 	}
-	maxUpperYearsPerLowerYear := *maxUpperYearsPerLowerYearPtr
+	meta.maxUpperYearsPerLowerYear = *maxUpperYearsPerLowerYearPtr
 
-	termStartTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, TERM_START_TIME_METADATA_KEY)
+	meta.termStartTime, err = jobmine_utility.TimeFromJobRecord(
+		jobRecord, TERM_START_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
-	termEndTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, TERM_END_TIME_METADATA_KEY)
+	meta.termEndTime, err = jobmine_utility.TimeFromJobRecord(
+		jobRecord, TERM_END_TIME_METADATA_KEY)
+	if err != nil {
+		return nil, err
+	}
+	return &meta, nil
+}
+
+func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
+	meta, err := parseJobMetadata(jobRecord)
 	if err != nil {
 		return nil, err
 	}
 
-	userIds, err := GetLowerUpperYears(db, programIds, youngestUpperYear, termStartTime, termEndTime)
+	userIds, err := GetLowerUpperYears(db, meta.programIds, meta.youngestUpperGradYear,
+		meta.termStartTime, meta.termEndTime)
 	if err != nil {
 		return nil, err
 	}
 
 	var strat recommendations.RecommendationStrategy
 
-	if termStartTime == nil {
+	if meta.termStartTime == nil {
 		strat = getRecommendationStrategy(
-			maxLowerYearsPerUpperYear,
-			maxUpperYearsPerLowerYear,
-			youngestUpperYear,
+			meta.maxLowerYearsPerUpperYear,
+			meta.maxUpperYearsPerLowerYear,
+			meta.youngestUpperGradYear,
 		)
 	} else {
 		// Get users that verified the Winter 2019 whitelist and make them the blacklist for the
@@ -192,10 +213,10 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		}
 
 		strat = getRecommendationStrategyWithOlderDownrank(
-			maxLowerYearsPerUpperYear,
-			maxUpperYearsPerLowerYear,
-			youngestUpperYear,
-			*termStartTime,
+			meta.maxLowerYearsPerUpperYear,
+			meta.maxUpperYearsPerLowerYear,
+			meta.youngestUpperGradYear,
+			*meta.termStartTime,
 			blacklistUserIds,
 		)
 	}
@@ -206,7 +227,7 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return nil, err
 	}
 
-	if isDryRun {
+	if meta.isDryRun {
 		for i, match := range matches {
 			rlog.Infof(
 				"match(%d), mentee(%d), mentor(%d), score(%f)",
@@ -239,7 +260,7 @@ func CreateSeedJob(
 	runId string,
 	isDryRun bool,
 	programIds []string,
-	youngestUpperYear uint,
+	youngestUpperGradYear uint,
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
 	termStartTime *time.Time,
@@ -247,7 +268,7 @@ func CreateSeedJob(
 ) error {
 	metadata := map[string]interface{}{
 		PROGRAM_IDS_METADATA_KEY:                    programIds,
-		YOUNGEST_UPPER_YEAR_METADATA_KEY:            youngestUpperYear,
+		YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY:       youngestUpperGradYear,
 		MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY: maxLowerYearsPerUpperYear,
 		MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY: maxUpperYearsPerLowerYear,
 		IS_DRY_RUN_METADATA_KEY:                     isDryRun,
