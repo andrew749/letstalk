@@ -25,16 +25,16 @@ func main() {
 	var jobTypes []jobmine.JobType
 	var runIds []string
 
-	if jobTypeFilter != "" {
-		rawTypes = utility.ParseListCommandLineFlags(jobTypeFilter)
+	if jobTypeFilter != nil && *jobTypeFilter != "" {
+		rawTypes := utility.ParseListCommandLineFlags(*jobTypeFilter)
 		jobTypes = make([]jobmine.JobType, 0)
 		for _, t := range rawTypes {
 			jobTypes = append(jobTypes, jobmine.JobType(t))
 		}
 	}
 
-	if runIdFilter != "" {
-		runIds = utility.ParseListCommandLineFlags(runIdFilter)
+	if runIdFilter != nil && *runIdFilter != "" {
+		runIds = utility.ParseListCommandLineFlags(*runIdFilter)
 	}
 
 	// create new job runner to run jobs
