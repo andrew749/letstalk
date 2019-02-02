@@ -3,32 +3,12 @@ import React from 'react';
 import getProperty from './context.jsx';
 import './scss/notification.scss';
 import { identifyUser, trackNotificationOpened, trackAction, trackLinkClicked } from './metrics/mixpanel';
+import { serverUrl } from './config.js'
 
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
-
-const mentorFoodSuggestion =
-  'Take your mentee out for Waterloo specialities such as bubble tea or shawarma.';
-const mentorTopics = [
-  'University lifehacks',
-  'Life outside of school',
-  'Memorable experiences so far',
-  'Advice on dealing with stress',
-];
-const mentorOutro =
-  'Chances are you\'ve been in their shoes, why not help them out? ' +
-  'What would you have wished you knew in your first years at Waterloo?';
-
-const menteeFoodSuggestion =
-  'Ask your mentor to take you to a new food or bubble tea joint.';
-const menteeTopics = [
-  'Favourite memory from your first years at Waterloo',
-  'Life outside of school',
-  'Memorable experiences so far',
-  'Why you chose your program',
-];
-const menteeOutro =
-  'Chances are your mentor has been in your shoes, here\'s an opportunity to look into the future!';
+const meetupReminderUrl = `${serverUrl}/v1/meetup_reminder`;
+const homeViewLink = 'hive://Home';
 
 function switchMatchType(matchType, mentor, mentee, connection) {
   if (matchType === 'MENTOR') {
@@ -48,20 +28,18 @@ const VIEW_DID_NOT_MEET = 'did_not_meet';
 const VIEW_DONT_REMIND = 'no_dont_remind';
 const VIEW_REMINDER_CONFIRMED = 'reminder_confirmed';
 
-const link_did_meet = 'did-meet';
-const link_did_not_meet = 'did-not-meet';
-
 class RemindMeetupNotification extends React.Component {
   /*
    * state: {
-   *  view: VIEW_DEFAULT | VIEW_DID_MEET | VIEW_DID_NOT_MEET,
+   *  view: string
    *  followupIn: int (weeks)
+   *  errorMsg: string
    * }
    */
 
   constructor() {
     super();
-    this.state = { view: VIEW_DEFAULT, followupIn: 1 };
+    this.state = { view: VIEW_DEFAULT, followupIn: 1, errorMsg: '' };
 
     this.render = this.render.bind(this);
     this.renderDefaultView = this.renderDefaultView.bind(this);
@@ -69,6 +47,8 @@ class RemindMeetupNotification extends React.Component {
     this.renderDidNotMeetView = this.renderDidNotMeetView.bind(this);
     this.renderReminderConfirmedView = this.renderReminderConfirmedView.bind(this);
     this.renderDontRemindView = this.renderDontRemindView.bind(this);
+    this.postMeetupReminder = this.postMeetupReminder.bind(this);
+    this.deleteMeetupReminder = this.deleteMeetupReminder.bind(this);
   }
 
   componentDidMount() {
@@ -76,6 +56,35 @@ class RemindMeetupNotification extends React.Component {
     identifyUser(user.UserId);
     trackNotificationOpened(NOTIFICATION_NAME);
     trackLinkClicked(NOTIFICATION_NAME, '#view-match-profile', 'view-match-profile');
+  }
+
+  postMeetupReminder(sessionId, userId, matchUserId, reminderTime) {
+    fetch(meetupReminderUrl, {
+      method: 'POST',
+      headers: {'sessionId': sessionId},
+      body: JSON.stringify({
+        userId,
+        matchUserId,
+        reminderTime,
+      })
+    }).catch(err => {
+        console.warn(err);
+        this.setState({errorMsg: err})
+    });
+  }
+
+  deleteMeetupReminder(sessionId, userId, matchUserId) {
+    fetch(meetupReminderUrl, {
+      method: 'DELETE',
+      headers: {'sessionId': sessionId},
+      body: JSON.stringify({
+        userId,
+        matchUserId,
+      })
+    }).catch(err => {
+        console.warn(err);
+        this.setState({errorMsg: err})
+    });
   }
 
   renderDefaultView(matchType, meetupType, matchFirstName, matchLastName) {
@@ -127,7 +136,7 @@ class RemindMeetupNotification extends React.Component {
     );
   }
 
-  renderDidMeetView(matchType, meetupType, matchUserId, matchFirstName) {
+  renderDidMeetView(sessionId, userId, matchUserId, matchType, meetupType, matchFirstName) {
     let bodyText = '';
     let title = 'Follow up with ' + matchFirstName;
     if (meetupType === 'INITIAL_MEETING') {
@@ -167,7 +176,10 @@ class RemindMeetupNotification extends React.Component {
           id="btn-follow-up"
           className="btn-primary"
           onClick={() => {
-            // TODO POST followup api
+            const {followupIn} = this.state; // weeks
+            const millisPerWeek = 7*24*60*60*1000;
+            const reminderTime = new Date(new Date().getTime() + (followupIn*millisPerWeek));
+            this.postMeetupReminder(sessionId, userId, matchUserId, reminderTime);
             this.setState({view:VIEW_REMINDER_CONFIRMED});
           }}>
           Submit
@@ -177,7 +189,8 @@ class RemindMeetupNotification extends React.Component {
           className="btn-decline"
           onClick={() => {
             trackAction(NOTIFICATION_NAME, "click-no-follow-up");
-            // TODO DELETE followup, nav?
+            this.deleteMeetupReminder(sessionId, userId, matchUserId);
+            this.setState({view:VIEW_DONT_REMIND});
           }}>
           Don't follow up
         </a>
@@ -185,7 +198,7 @@ class RemindMeetupNotification extends React.Component {
     );
   }
 
-  renderDidNotMeetView(matchType, meetupType, matchProfileLink, matchFirstName, matchLastName) {
+  renderDidNotMeetView(sessionId, userId, matchUserId, matchType, meetupType, matchProfileLink, matchFirstName, matchLastName) {
     let bodyText = '';
     let title = '';
     let matchFullName = matchFirstName + ' ' + matchLastName;
@@ -271,7 +284,7 @@ class RemindMeetupNotification extends React.Component {
           className="btn-decline"
           onClick={() => {
             trackAction(NOTIFICATION_NAME, "click-no-reminder");
-            // TODO DELETE followup api
+            this.deleteMeetupReminder(sessionId, userId, matchUserId);
             this.setState({view:VIEW_DONT_REMIND});
           }}>
           Don't remind me again
@@ -281,23 +294,26 @@ class RemindMeetupNotification extends React.Component {
   }
 
   renderReminderConfirmedView(matchType, matchFirstName, matchLastName) {
-    const { followupIn } = this.state;
+    const { followupIn, errorMsg } = this.state;
     const matchFullName = matchFirstName + ' ' + matchLastName;
     const title = 'Reminder confirmed';
     const bodyText = "Ok, we'll remind you to meet up with your " +
       switchMatchType(matchType, "mentor", "mentee", "connection") + " " + matchFullName +
-      " in " + (followupIn === 1 ? "1 week." : followupIn + " weeks.");
+      " in " + followupIn + " week" + (followupIn > 1 ? "s." : ".");
 
     return (
       <div className="content">
         <p className="title">{ title }</p>
         <p className="message">{bodyText}</p>
+        { errorMsg &&
+        <p className="error-text">
+          Error communicating with server, please try again later.
+        </p>}
         <a
           id="btn-close"
           className="btn-decline"
-          onClick={() => {
-            // Navigate close?
-          }}>
+          href={homeViewLink}
+          >
           Close
         </a>
       </div>
@@ -305,6 +321,7 @@ class RemindMeetupNotification extends React.Component {
   }
 
   renderDontRemindView(matchFirstName, matchLastName) {
+    const { errorMsg } = this.state;
     let title = 'Reminder cancelled';
     let matchFullName = matchFirstName + ' ' + matchLastName;
     let bodyText = 'We\'ll no longer remind you to meet up with ' + matchFullName + '.';
@@ -313,12 +330,14 @@ class RemindMeetupNotification extends React.Component {
       <div className="content">
         <p className="title">{ title }</p>
         <p className="message">{bodyText}</p>
+        { errorMsg &&
+        <p className="error-text">
+          Error communicating with server, please try again later.
+        </p>}
         <a
           id="btn-close"
           className="btn-decline"
-          onClick={() => {
-            // Navigate close?
-          }}>
+          href={homeViewLink}>
           Close
         </a>
       </div>
@@ -327,9 +346,6 @@ class RemindMeetupNotification extends React.Component {
 
   /* Test:
   {
-    title: 'Hello World',
-    body: 'Body',
-    thumbnail: 'https://www.dike.lib.ia.us/images/sample-1.jpg/image',
     matchType: 'MENTOR',
     meetupType: 'INITIAL_MEETING',
     matchUserId: '1',
@@ -339,6 +355,7 @@ class RemindMeetupNotification extends React.Component {
    */
 
   render() {
+    const user = getProperty('user');
     const matchType = getProperty('matchType');
     const meetupType = getProperty('meetupType');
     const matchUserId = getProperty('matchUserId');
@@ -347,14 +364,16 @@ class RemindMeetupNotification extends React.Component {
     const matchProfilePic = getProperty('matchProfilePic') || defaultProfilePic;
     const profileLink = 'hive://MatchProfile?userId=' + matchUserId;
 
+    const { sessionId } = this.props;
     const { view } = this.state;
+
     let body = <div/>;
     if (view === VIEW_DEFAULT) {
       body = this.renderDefaultView(matchType, meetupType, matchFirstName, matchLastName);
     } else if (view === VIEW_DID_MEET) {
-      body = this.renderDidMeetView(matchType, meetupType, matchUserId, matchFirstName);
+      body = this.renderDidMeetView(sessionId, user.UserId, matchUserId, matchType, meetupType, matchFirstName);
     } else if (view === VIEW_DID_NOT_MEET ) {
-      body = this.renderDidNotMeetView(matchType, meetupType, profileLink, matchFirstName, matchLastName);
+      body = this.renderDidNotMeetView(sessionId, user.UserId, matchUserId, matchType, meetupType, profileLink, matchFirstName, matchLastName);
     } else if (view === VIEW_REMINDER_CONFIRMED ) {
       body = this.renderReminderConfirmedView(matchType, matchFirstName, matchLastName)
     } else if (view === VIEW_DONT_REMIND ) {
