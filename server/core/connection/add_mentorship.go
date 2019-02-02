@@ -15,6 +15,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"letstalk/server/core/meetup_reminder"
 )
 
 /**
@@ -78,7 +79,16 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	}
 	if request.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
 		rlog.Infof("not a dry run, adding (%s, %s)", mentor.Email, mentee.Email)
-		if err := db.Create(&conn).Error; err != nil {
+		dbErr := ctx.WithinTx(db, func(tx *gorm.DB) error {
+			if err := tx.Create(&conn).Error; err != nil {
+				return err
+			}
+			if err := meetup_reminder.ScheduleInitialReminder(tx, conn.UserOneId, conn.UserTwoId); err != nil {
+				return err
+			}
+			return nil
+		})
+		if dbErr != nil {
 			return errs.NewDbError(err)
 		}
 	}

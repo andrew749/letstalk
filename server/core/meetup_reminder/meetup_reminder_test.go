@@ -71,6 +71,23 @@ func TestScheduleInitialReminder(t *testing.T) {
 				assertInitialReminderScheduled(t, db, userTwo.UserId, userOne.UserId)
 			},
 		},
+		{
+			TestName: "Test auto-scheduling reminder on an admin added mentorship",
+			Test: func(db *gorm.DB) {
+				c := ctx.NewContext(nil, db, nil, nil, nil)
+				userOne := user.CreateUserForTest(t, c.Db)
+				userTwo := user.CreateUserForTest(t, c.Db)
+				c.SessionData = &sessions.SessionData{UserId: userOne.UserId}
+				request := api.CreateMentorshipByEmail{
+					MentorEmail: userOne.Email,
+					MenteeEmail: userTwo.Email,
+					RequestType: api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN,
+				}
+				err := connection.HandleAddMentorship(c.Db, &request)
+				assert.NoError(t, err)
+				assertInitialReminderScheduled(t, db, userOne.UserId, userTwo.UserId)
+			},
+		},
 	}
 	test.RunTestsWithDb(tests)
 }
