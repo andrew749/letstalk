@@ -12,16 +12,10 @@ import (
 )
 
 func main() {
+	utility.Bootstrap()
 	db, err := utility.GetDB()
 	if err != nil {
 		rlog.Errorf("Unable to get database: %+v", err)
-		panic(err)
-	}
-
-	// create new task runner
-	err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
-	if err != nil {
-		rlog.Errorf("Task runner ran into exception: %+v", err)
 		panic(err)
 	}
 
@@ -36,8 +30,18 @@ func main() {
 			return nil
 		})
 		go helper.QueueProcessor()
+
+		// create new task runner
+		rlog.Debug("Running tasks")
+		err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
+		if err != nil {
+			rlog.Errorf("Task runner ran into exception: %+v", err)
+			panic(err)
+		}
+		rlog.Debug("Done running tasks")
+
 		helper.CloseQueue()
-		rlog.Debugf("Running queue")
+		rlog.Debugf("Finishing queue")
 		helper.WaitForQueueDone()
 		rlog.Debugf("Queue done processing")
 	}

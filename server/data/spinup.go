@@ -532,6 +532,30 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
+			ID: "Create user_verify_link table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(UserVerifyLink{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Add notification status updating job",
+			Migrate: func(tx *gorm.DB) error {
+				if err := tx.AutoMigrate(&ExpoPendingNotification{}).Error; err != nil {
+					return err
+				}
+				if err := tx.AutoMigrate(&UserDevice{}).Error; err != nil {
+					return err
+				}
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Add meetup reminders table",
 			Migrate: func(tx *gorm.DB) error {
 				return tx.AutoMigrate(MeetupReminder{}).Error

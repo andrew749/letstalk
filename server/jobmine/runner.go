@@ -105,6 +105,7 @@ func RunJob(db *gorm.DB, specStore JobSpecStore, job JobRecord) error {
 		if err := tx.Create(&TaskRecord{
 			JobId:    job.ID,
 			JobType:  job.JobType,
+			RunId:    job.RunId,
 			Status:   STATUS_CREATED,
 			Metadata: taskMetadata,
 		}).Error; err != nil {

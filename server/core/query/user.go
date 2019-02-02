@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"time"
 
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
@@ -148,6 +149,26 @@ func GetUserAdditionalData(
 	}
 
 	return &additionalData, nil
+}
+
+func GetUsersByCreatedAt(
+	db *gorm.DB,
+	startDate *time.Time,
+	endDate *time.Time,
+) ([]data.User, error) {
+	var users []data.User
+	query := db.Model(&data.User{})
+	if startDate != nil {
+		query = query.Where("created_at >= ?", *startDate)
+	}
+	if endDate != nil {
+		query = query.Where("created_at <= ?", *endDate)
+	}
+
+	if err := query.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // Need to pass in all of this information just cause we want it to be a challenge to actaully
