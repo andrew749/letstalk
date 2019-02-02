@@ -1,1 +1,1 @@
-export const serverUrl = "http://localhost";
+export const serverUrl = 'https://api.hiveapp.org';
