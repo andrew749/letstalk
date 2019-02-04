@@ -188,7 +188,7 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return nil, err
 	}
 
-	userIds, err := GetLowerUpperYears(db, meta.programIds, meta.youngestUpperGradYear,
+	userIds, err := GetFilteredLowerAndAllUpperYears(db, meta.programIds, meta.youngestUpperGradYear,
 		meta.termStartTime, meta.termEndTime)
 	if err != nil {
 		return nil, err

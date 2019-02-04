@@ -226,7 +226,7 @@ func TestGetLowerUpperYears(t *testing.T) {
 				&sequenceId, &sequenceName)
 			assert.NoError(t, err)
 
-			userIds, err := GetLowerUpperYears(
+			userIds, err := GetFilteredLowerAndAllUpperYears(
 				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, 2021, nil, nil)
 			assert.NoError(t, err)
 
@@ -299,7 +299,7 @@ func TestGetLowerUpperYearsRanges(t *testing.T) {
 
 			from := now.AddDate(0, 0, -1)
 			to := now.AddDate(0, 0, 1)
-			userIds, err := GetLowerUpperYears(
+			userIds, err := GetFilteredLowerAndAllUpperYears(
 				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, 2021, &from, &to)
 			assert.NoError(t, err)
 

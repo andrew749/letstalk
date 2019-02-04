@@ -59,7 +59,7 @@ func GetCandidates(
 // Gets users for both lower and upper years.
 // Term start and end times only apply to lower years, since we already downweight upper years
 // created out of term during ranking.
-func GetLowerUpperYears(
+func GetFilteredLowerAndAllUpperYears(
 	db *gorm.DB,
 	programIds []string,
 	youngestUpperGradYear uint,

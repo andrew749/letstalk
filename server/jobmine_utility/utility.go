@@ -12,6 +12,7 @@ import (
 
 const TIME_LAYOUT = time.RFC3339
 
+// Returns nil if value with given key doesn't exist and an error if it is misformatted
 func TimeFromJobRecord(jobRecord jobmine.JobRecord, key string) (*time.Time, error) {
 	if val, ok := jobRecord.Metadata[key]; ok {
 		var (
@@ -30,6 +31,7 @@ func TimeFromJobRecord(jobRecord jobmine.JobRecord, key string) (*time.Time, err
 	return nil, nil
 }
 
+// Returns nil if value with given key doesn't exist and an error if it is misformatted
 func UIntFromJobRecord(jobRecord jobmine.JobRecord, key string) (*uint, error) {
 	if valIntf, exists := jobRecord.Metadata[key]; exists {
 		if valFloat, isFloat := valIntf.(float64); isFloat {
@@ -46,6 +48,7 @@ func FormatTime(tme time.Time) string {
 	return tme.Format(TIME_LAYOUT)
 }
 
+// Returns nil if value with given key doesn't exist and an error if it is misformatted
 func UserIdFromTaskRecord(taskRecord jobmine.TaskRecord, key string) (*data.TUserID, error) {
 	if val, ok := taskRecord.Metadata[key]; ok {
 		var (
