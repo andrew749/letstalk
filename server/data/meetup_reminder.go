@@ -30,11 +30,11 @@ type MeetupReminder struct {
 	ScheduledAt time.Time
 }
 
-func (u *MeetupType) Scan(value interface{}) error { *u = MeetupType(value.([]uint8)); return nil }
+func (u *MeetupType) Scan(value interface{}) error { *u = MeetupType(value.([]byte)); return nil }
 func (u MeetupType) Value() (driver.Value, error)  { return string(u), nil }
 
 func (u *MeetupReminderState) Scan(value interface{}) error {
-	*u = MeetupReminderState(value.([]uint8))
+	*u = MeetupReminderState(value.([]byte))
 	return nil
 }
 func (u MeetupReminderState) Value() (driver.Value, error) { return string(u), nil }

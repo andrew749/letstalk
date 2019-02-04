@@ -1,11 +1,11 @@
 package remind_meetup_job
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"letstalk/server/core/errs"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
@@ -69,10 +69,10 @@ func packageNotificationData(matchType MatchType, meetupType data.MeetupType, ma
 }
 
 func parseTaskRecord(taskRecord jobmine.TaskRecord) (reminderId uint, meetupType data.MeetupType, userId data.TUserID, matchUserId data.TUserID) {
-	reminderId = (uint)(taskRecord.Metadata[REMINDER_ID_METADATA_KEY].(float64))
+	reminderId = uint(taskRecord.Metadata[REMINDER_ID_METADATA_KEY].(float64))
 	meetupType = data.MeetupType(taskRecord.Metadata[MEETUP_TYPE_METADATA_KEY].(string))
-	userId = data.TUserID((uint)(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
-	matchUserId = data.TUserID((uint)(taskRecord.Metadata[MATCH_USER_ID_METADATA_KEY].(float64)))
+	userId = data.TUserID(uint(taskRecord.Metadata[USER_ID_METADATA_KEY].(float64)))
+	matchUserId = data.TUserID(uint(taskRecord.Metadata[MATCH_USER_ID_METADATA_KEY].(float64)))
 	return reminderId, meetupType, userId, matchUserId
 }
 
@@ -110,7 +110,7 @@ func execute(
 		if err := markReminderProcessed(db, reminderId); err != nil {
 			return nil, err
 		}
-		return nil, errors.New(fmt.Sprintf("Meetup reminder failed to find connection for users (%d, %d)", userId, matchUserId))
+		return nil, errs.NewBaseError("Meetup reminder failed to find connection for users (%d, %d)", userId, matchUserId)
 	}
 
 	matchUser, err := query.GetUserById(db, matchUserId)
@@ -135,7 +135,7 @@ func execute(
 	if err := db.Model(&data.MeetupReminder{}).Create(&backup).Error; err != nil {
 		return nil, err
 	}
-	rlog.Info("Creating meetup notification with params: ", templateParams)
+	rlog.Info("Creating meetup notification with params: %v", templateParams)
 	if err := notifications.CreateAdHocNotificationNoTransaction(
 		db,
 		userId,

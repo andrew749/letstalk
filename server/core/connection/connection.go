@@ -157,7 +157,6 @@ func HandleAcceptConnection(
 		return meetup_reminder.ScheduleInitialReminder(tx, authUser.UserId, connUser.UserId)
 	})
 	if dbErr != nil {
-		fmt.Printf("DEBUG, WTF got dbError: %v\n", dbErr)
 		return nil, errs.NewDbError(err)
 	}
 	result.AcceptedAt = connection.AcceptedAt

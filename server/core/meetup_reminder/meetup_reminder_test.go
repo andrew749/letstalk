@@ -101,6 +101,7 @@ func TestPostMeetupReminder(t *testing.T) {
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
 				meetup_reminder.ScheduleInitialReminder(db, userOne.UserId, userTwo.UserId)
+				assertInitialReminderScheduled(t, db, userOne.UserId, userTwo.UserId)
 				request := api.MeetupReminder{
 					UserId:       userOne.UserId,
 					MatchUserId:  userTwo.UserId,
@@ -131,6 +132,7 @@ func TestDeleteMeetupReminder(t *testing.T) {
 				userOne := user.CreateUserForTest(t, c.Db)
 				userTwo := user.CreateUserForTest(t, c.Db)
 				meetup_reminder.ScheduleInitialReminder(db, userOne.UserId, userTwo.UserId)
+				assertInitialReminderScheduled(t, db, userOne.UserId, userTwo.UserId)
 				request := api.MeetupReminder{
 					UserId:      userOne.UserId,
 					MatchUserId: userTwo.UserId,

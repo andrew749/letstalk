@@ -12,6 +12,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const NUM_DAYS_UNTIL_INITIAL_REMINDER = 7 // Schedule initial meetup reminder a week after match.
+
 // PostMeetupReminder replaces existing meetup reminders for an ordered (user, match) pair with the given reminder.
 func PostMeetupReminder(c *ctx.Context) errs.Error {
 	authUser, err := query.GetUserById(c.Db, c.SessionData.UserId)
@@ -37,10 +39,10 @@ func HandlePostMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Err
 		ScheduledAt: input.ReminderTime,
 	}
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
-		if err := tx.Delete(&data.MeetupReminder{}, &data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Error; err != nil {
+		if err := tx.Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
 			return err
 		}
-		if err := tx.Model(&data.MeetupReminder{}).Create(&newReminder).Error; err != nil {
+		if err := tx.Create(&newReminder).Error; err != nil {
 			return err
 		}
 		return nil
@@ -70,10 +72,10 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 
 func HandleDeleteMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
-		if err := tx.Delete(data.MeetupReminder{}, data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Error; err != nil {
+		if err := tx.Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
 			return err
 		}
-		if err := tx.Delete(data.MeetupReminder{}, data.MeetupReminder{UserId: input.MatchUserId, MatchUserId: input.UserId}).Error; err != nil {
+		if err := tx.Where(&data.MeetupReminder{UserId: input.MatchUserId, MatchUserId: input.UserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
 			return err
 		}
 		return nil
@@ -88,7 +90,7 @@ func HandleDeleteMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.E
 // ScheduleInitialReminder should be called whenever a new connection is made between two users. Schedules an
 // initial meetup reminder for each user.
 func ScheduleInitialReminder(tx *gorm.DB, userOne data.TUserID, userTwo data.TUserID) error {
-	scheduledAt := time.Now().AddDate(0, 0, 7) // Schedule one week from now.
+	scheduledAt := time.Now().AddDate(0, 0, NUM_DAYS_UNTIL_INITIAL_REMINDER)
 	userOneReminder := data.MeetupReminder{
 		UserId:      userOne,
 		MatchUserId: userTwo,

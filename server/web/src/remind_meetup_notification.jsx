@@ -4,6 +4,8 @@ import getProperty from './context.jsx';
 import './scss/notification.scss';
 import { identifyUser, trackNotificationOpened, trackAction, trackLinkClicked } from './metrics/mixpanel';
 import { serverUrl } from './config.js'
+import {withCookies} from 'react-cookie';
+import CookieAwareComponent from './cookie_aware_component.jsx'
 
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
@@ -58,7 +60,7 @@ class RemindMeetupNotification extends React.Component {
     trackLinkClicked(NOTIFICATION_NAME, '#view-match-profile', 'view-match-profile');
   }
 
-  postMeetupReminder(sessionId, userId, matchUserId, reminderTime) {
+  postMeetupReminder(sessionId, userId, matchUserId, reminderTime, final) {
     fetch(meetupReminderUrl, {
       method: 'POST',
       headers: {'sessionId': sessionId},
@@ -70,10 +72,10 @@ class RemindMeetupNotification extends React.Component {
     }).catch(err => {
         console.warn(err);
         this.setState({errorMsg: err})
-    });
+    }).finally(() => final());
   }
 
-  deleteMeetupReminder(sessionId, userId, matchUserId) {
+  deleteMeetupReminder(sessionId, userId, matchUserId, final) {
     fetch(meetupReminderUrl, {
       method: 'DELETE',
       headers: {'sessionId': sessionId},
@@ -84,7 +86,7 @@ class RemindMeetupNotification extends React.Component {
     }).catch(err => {
         console.warn(err);
         this.setState({errorMsg: err})
-    });
+    }).finally(() => final());
   }
 
   renderDefaultView(matchType, meetupType, matchFirstName, matchLastName) {
@@ -179,8 +181,9 @@ class RemindMeetupNotification extends React.Component {
             const {followupIn} = this.state; // weeks
             const millisPerWeek = 7*24*60*60*1000;
             const reminderTime = new Date(new Date().getTime() + (followupIn*millisPerWeek));
-            this.postMeetupReminder(sessionId, userId, matchUserId, reminderTime);
-            this.setState({view:VIEW_REMINDER_CONFIRMED});
+            this.postMeetupReminder(sessionId, userId, matchUserId, reminderTime, () => {
+              this.setState({view:VIEW_REMINDER_CONFIRMED})
+            });
           }}>
           Submit
         </a>
@@ -189,8 +192,9 @@ class RemindMeetupNotification extends React.Component {
           className="btn-decline"
           onClick={() => {
             trackAction(NOTIFICATION_NAME, "click-no-follow-up");
-            this.deleteMeetupReminder(sessionId, userId, matchUserId);
-            this.setState({view:VIEW_DONT_REMIND});
+            this.deleteMeetupReminder(sessionId, userId, matchUserId, () => {
+              this.setState({view:VIEW_DONT_REMIND})
+            });
           }}>
           Don't follow up
         </a>
@@ -284,8 +288,9 @@ class RemindMeetupNotification extends React.Component {
           className="btn-decline"
           onClick={() => {
             trackAction(NOTIFICATION_NAME, "click-no-reminder");
-            this.deleteMeetupReminder(sessionId, userId, matchUserId);
-            this.setState({view:VIEW_DONT_REMIND});
+            this.deleteMeetupReminder(sessionId, userId, matchUserId, () => {
+              this.setState({view:VIEW_DONT_REMIND});
+            });
           }}>
           Don't remind me again
         </a>
@@ -348,7 +353,7 @@ class RemindMeetupNotification extends React.Component {
   {
     matchType: 'MENTOR',
     meetupType: 'INITIAL_MEETING',
-    matchUserId: '1',
+    matchUserId: 1,
     matchFirstName: 'Foo',
     matchLastName: 'Bar'
   }
@@ -364,7 +369,8 @@ class RemindMeetupNotification extends React.Component {
     const matchProfilePic = getProperty('matchProfilePic') || defaultProfilePic;
     const profileLink = 'hive://MatchProfile?userId=' + matchUserId;
 
-    const { sessionId } = this.props;
+    const { cookies } = this.props;
+    const sessionId = cookies.get('sessionId');
     const { view } = this.state;
 
     let body = <div/>;
@@ -391,4 +397,6 @@ class RemindMeetupNotification extends React.Component {
   }
 }
 
-ReactDOM.render(<RemindMeetupNotification />, document.getElementById('content'));
+const CookieAwareNotification = CookieAwareComponent(withCookies(RemindMeetupNotification));
+
+ReactDOM.render(<CookieAwareNotification />, document.getElementById('content'));
