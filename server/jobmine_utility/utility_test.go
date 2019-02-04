@@ -1,10 +1,12 @@
-package jobmine
+package jobmine_utility
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"letstalk/server/jobmine"
 )
 
 func TestTimeFromJobRecord(t *testing.T) {
@@ -14,7 +16,7 @@ func TestTimeFromJobRecord(t *testing.T) {
 	now = now.Truncate(sec)
 	metadata := make(map[string]interface{})
 	metadata["time"] = FormatTime(now)
-	jobRecord := JobRecord{Metadata: metadata}
+	jobRecord := jobmine.JobRecord{Metadata: metadata}
 
 	newNow, err := TimeFromJobRecord(jobRecord, "time")
 	assert.NoError(t, err)
@@ -23,7 +25,7 @@ func TestTimeFromJobRecord(t *testing.T) {
 
 func TestTimeFromJobRecordMissing(t *testing.T) {
 	metadata := make(map[string]interface{})
-	jobRecord := JobRecord{Metadata: metadata}
+	jobRecord := jobmine.JobRecord{Metadata: metadata}
 	newNow, err := TimeFromJobRecord(jobRecord, "time")
 	assert.NoError(t, err)
 	assert.Nil(t, newNow)
@@ -32,7 +34,7 @@ func TestTimeFromJobRecordMissing(t *testing.T) {
 func TestTimeFromJobRecordInvalidFormat(t *testing.T) {
 	metadata := make(map[string]interface{})
 	metadata["time"] = "not a time"
-	jobRecord := JobRecord{Metadata: metadata}
+	jobRecord := jobmine.JobRecord{Metadata: metadata}
 
 	newNow, err := TimeFromJobRecord(jobRecord, "time")
 	assert.Error(t, err)

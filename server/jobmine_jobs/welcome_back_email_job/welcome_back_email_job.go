@@ -11,6 +11,7 @@ import (
 	"letstalk/server/data"
 	"letstalk/server/email"
 	"letstalk/server/jobmine"
+	"letstalk/server/jobmine_utility"
 
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
@@ -145,11 +146,11 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return []jobmine.Metadata{packageTaskRecordMetadata(testUserId)}, nil
 	}
 
-	startTime, err := jobmine.TimeFromJobRecord(jobRecord, START_TIME_METADATA_KEY)
+	startTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, START_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := jobmine.TimeFromJobRecord(jobRecord, END_TIME_METADATA_KEY)
+	endTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, END_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
@@ -190,10 +191,10 @@ func CreateEmailJob(
 ) error {
 	metadata := map[string]interface{}{}
 	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = jobmine.FormatTime(*startTime)
+		metadata[START_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*startTime)
 	}
 	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = jobmine.FormatTime(*endTime)
+		metadata[END_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*endTime)
 	}
 	if testUserId != nil {
 		metadata[TEST_USER_ID_METADATA_KEY] = strconv.Itoa(int(*testUserId))

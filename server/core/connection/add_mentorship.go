@@ -1,21 +1,21 @@
 package connection
 
 import (
+	"fmt"
 	"time"
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/meetup_reminder"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/email"
 
-	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"letstalk/server/core/meetup_reminder"
 )
 
 /**
@@ -56,7 +56,19 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
-	if conn, err := query.GetConnectionDetailsUndirected(db, mentor.UserId, mentee.UserId); err != nil {
+	return AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType)
+}
+
+func AddMentorship(
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+	requestType api.CreateMentorshipType,
+) errs.Error {
+	if mentorUserId == menteeUserId {
+		return errs.NewRequestError("mentor and mentee user must be different")
+	}
+	if conn, err := query.GetConnectionDetailsUndirected(db, mentorUserId, menteeUserId); err != nil {
 		return errs.NewDbError(err)
 	} else if conn != nil {
 		return errs.NewRequestError("connection already exists")
@@ -66,19 +78,19 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	}
 	createdAt := time.Now()
 	mentorship := data.Mentorship{
-		MentorUserId: mentor.UserId,
+		MentorUserId: mentorUserId,
 		CreatedAt:    createdAt,
 	}
 	conn := data.Connection{
-		UserOneId:  mentor.UserId,
-		UserTwoId:  mentee.UserId,
+		UserOneId:  mentorUserId,
+		UserTwoId:  menteeUserId,
 		CreatedAt:  createdAt,
 		AcceptedAt: &createdAt, // Automatically accept.
 		Intent:     &intent,
 		Mentorship: &mentorship,
 	}
-	if request.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
-		rlog.Infof("not a dry run, adding (%s, %s)", mentor.Email, mentee.Email)
+	if requestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		rlog.Infof("not a dry run, adding (%d, %d)", mentorUserId, menteeUserId)
 		dbErr := ctx.WithinTx(db, func(tx *gorm.DB) error {
 			if err := tx.Create(&conn).Error; err != nil {
 				return err
@@ -89,7 +101,7 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 			return nil
 		})
 		if dbErr != nil {
-			return errs.NewDbError(err)
+			return errs.NewDbError(dbErr)
 		}
 	}
 	return nil
