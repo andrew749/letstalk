@@ -6,6 +6,7 @@ type TSimpleTraitID EntID
 
 type SimpleTraitType string
 
+func (u *SimpleTraitType) Scan(value interface{}) error { *u = SimpleTraitType(value.([]byte)); return nil }
 func (u SimpleTraitType) Value() (driver.Value, error) { return string(u), nil }
 
 const (

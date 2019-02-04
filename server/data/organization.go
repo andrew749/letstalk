@@ -6,6 +6,7 @@ type TOrganizationID EntID
 
 type OrganizationType string
 
+func (u *OrganizationType) Scan(value interface{}) error { *u = OrganizationType(value.([]byte)); return nil }
 func (u OrganizationType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
