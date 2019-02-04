@@ -57,3 +57,20 @@ func ClickLink(db *gorm.DB, linkId data.TVerifyLinkID) errs.Error {
 
 	return nil
 }
+
+func GetVerifiedUserIds(db *gorm.DB, linkType data.VerifyLinkType) ([]data.TUserID, errs.Error) {
+	var links []data.UserVerifyLink
+	if err := db.Where(&data.UserVerifyLink{
+		Type:    linkType,
+		Clicked: true,
+	}).Find(&links).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	userIds := make([]data.TUserID, len(links))
+	for i, link := range links {
+		userIds[i] = link.UserId
+	}
+
+	return userIds, nil
+}

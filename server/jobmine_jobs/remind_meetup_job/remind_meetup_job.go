@@ -9,6 +9,7 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
+	"letstalk/server/jobmine_utility"
 
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
@@ -116,11 +117,11 @@ func getUserType(userId data.TUserID, mentorUserId data.TUserID) UserType {
 }
 
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
-	startTime, err := jobmine.TimeFromJobRecord(jobRecord, START_TIME_METADATA_KEY)
+	startTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, START_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
-	endTime, err := jobmine.TimeFromJobRecord(jobRecord, END_TIME_METADATA_KEY)
+	endTime, err := jobmine_utility.TimeFromJobRecord(jobRecord, END_TIME_METADATA_KEY)
 	if err != nil {
 		return nil, err
 	}
@@ -176,10 +177,10 @@ var ReminderJobSpec jobmine.JobSpec = jobmine.JobSpec{
 func CreateReminderJob(db *gorm.DB, runId string, startTime *time.Time, endTime *time.Time) error {
 	metadata := map[string]interface{}{}
 	if startTime != nil {
-		metadata[START_TIME_METADATA_KEY] = jobmine.FormatTime(*startTime)
+		metadata[START_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*startTime)
 	}
 	if endTime != nil {
-		metadata[END_TIME_METADATA_KEY] = jobmine.FormatTime(*endTime)
+		metadata[END_TIME_METADATA_KEY] = jobmine_utility.FormatTime(*endTime)
 	}
 
 	if err := db.Create(&jobmine.JobRecord{

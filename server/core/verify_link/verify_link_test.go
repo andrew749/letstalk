@@ -115,3 +115,32 @@ func TestClickLinkExpiryFail(t *testing.T) {
 	}
 	test.RunTestWithDb(thisTest)
 }
+
+func TestGetVerifiedUserIds(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+			user1Id := data.TUserID(1)
+			link1Id, err := CreateLink(db, user1Id, LINK_TYPE_WHITELIST_WINTER_2019, nil)
+			assert.NoError(t, err)
+
+			user2Id := data.TUserID(2)
+			link2Id, err := CreateLink(db, user2Id, LINK_TYPE_WHITELIST_WINTER_2019, nil)
+			assert.NoError(t, err)
+
+			user3Id := data.TUserID(3)
+			_, err = CreateLink(db, user3Id, LINK_TYPE_WHITELIST_WINTER_2019, nil)
+			assert.NoError(t, err)
+
+			err = ClickLink(db, *link1Id)
+			assert.NoError(t, err)
+			err = ClickLink(db, *link2Id)
+			assert.NoError(t, err)
+
+			userIds, err := GetVerifiedUserIds(db, LINK_TYPE_WHITELIST_WINTER_2019)
+			assert.NoError(t, err)
+			assert.ElementsMatch(t, []data.TUserID{user1Id, user2Id}, userIds)
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}

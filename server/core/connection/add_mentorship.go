@@ -55,7 +55,19 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
-	if conn, err := query.GetConnectionDetailsUndirected(db, mentor.UserId, mentee.UserId); err != nil {
+	return AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType)
+}
+
+func AddMentorship(
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+	requestType api.CreateMentorshipType,
+) errs.Error {
+	if mentorUserId == menteeUserId {
+		return errs.NewRequestError("mentor and mentee user must be different")
+	}
+	if conn, err := query.GetConnectionDetailsUndirected(db, mentorUserId, menteeUserId); err != nil {
 		return errs.NewDbError(err)
 	} else if conn != nil {
 		return errs.NewRequestError("connection already exists")
@@ -65,19 +77,19 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	}
 	createdAt := time.Now()
 	mentorship := data.Mentorship{
-		MentorUserId: mentor.UserId,
+		MentorUserId: mentorUserId,
 		CreatedAt:    createdAt,
 	}
 	conn := data.Connection{
-		UserOneId:  mentor.UserId,
-		UserTwoId:  mentee.UserId,
+		UserOneId:  mentorUserId,
+		UserTwoId:  menteeUserId,
 		CreatedAt:  createdAt,
 		AcceptedAt: &createdAt, // Automatically accept.
 		Intent:     &intent,
 		Mentorship: &mentorship,
 	}
-	if request.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
-		rlog.Infof("not a dry run, adding (%s, %s)", mentor.Email, mentee.Email)
+	if requestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
+		rlog.Infof("not a dry run, adding (%d, %d)", mentorUserId, menteeUserId)
 		if err := db.Create(&conn).Error; err != nil {
 			return errs.NewDbError(err)
 		}
