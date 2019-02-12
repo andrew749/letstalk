@@ -7,10 +7,13 @@ import { serverUrl } from './config.js'
 import {withCookies} from 'react-cookie';
 import CookieAwareComponent from './cookie_aware_component.jsx'
 
+//const hiveDeepLinkRoot = 'hive://';
+const hiveDeepLinkRoot = 'exp://192.168.1.117:19000/--/';
+
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
 const meetupReminderUrl = `${serverUrl}/v1/meetup_reminder`;
-const homeViewLink = 'hive://Home';
+const homeViewLink = `${hiveDeepLinkRoot}Home`;
 
 function switchMatchType(matchType, mentor, mentee, connection) {
   if (matchType === 'MENTOR') {
