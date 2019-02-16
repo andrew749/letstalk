@@ -11,12 +11,10 @@ import (
 // syncChannel is used to synchronize with the calling process since these are to be run in goroutines (no return code)
 // taskRecord The actual task to run
 func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore, taskRecord TaskRecord) error {
-	tx := db.Begin()
 
 	// find the code to run
 	taskSpec, err := specStore.GetTaskSpecForJobType(taskRecord.JobType)
 	if err != nil {
-		tx.Rollback()
 		rlog.Errorf("Unable to find task spec for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
 		taskRecord.RecordError(db, err)
@@ -26,7 +24,6 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 	// get the job metadata
 	jobRecord, err := taskRecord.GetJobRecordForTask(db)
 	if err != nil {
-		tx.Rollback()
 		rlog.Errorf("Unable to get jobRecord for jobType=[%s]: %+v", taskRecord.JobType, err)
 		syncChannel <- taskRecord
 		taskRecord.RecordError(db, err)
@@ -38,6 +35,7 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 	taskRecord.RecordRunning(db)
 
 	// Actually run the code
+	tx := db.Begin()
 	res, err := taskSpec.Execute(tx, jobRecord, taskRecord)
 
 	// React to return value of code.
@@ -63,12 +61,13 @@ func RunTask(db *gorm.DB, syncChannel chan<- TaskRecord, specStore JobSpecStore,
 
 		// write success status to job
 		// note the use of db rather than tx since we want all people to see this update
-		taskRecord.RecordSuccess(db)
 
 		err = tx.Commit().Error
 		if err != nil {
 			rlog.Criticalf("Failed to commit changes to job.")
 		}
+
+		taskRecord.RecordSuccess(db)
 
 		// tell the runner that we're done
 		syncChannel <- taskRecord
