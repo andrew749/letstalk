@@ -29,6 +29,7 @@ const (
 // JobRecord keys
 const (
 	PROGRAM_IDS_METADATA_KEY                    = "programIds"
+	GRAD_YEARS_METADATA_KEY                     = "gradYears"
 	YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY       = "youngestUpperGradYear"
 	TERM_START_TIME_METADATA_KEY                = "termStartTime"
 	TERM_END_TIME_METADATA_KEY                  = "termEndTime"
@@ -165,6 +166,7 @@ var seedTaskSpec = jobmine.TaskSpec{
 type jobMetadata struct {
 	isDryRun                  bool
 	programIds                []string
+	gradYears                 []uint
 	youngestUpperGradYear     uint
 	maxLowerYearsPerUpperYear uint
 	maxUpperYearsPerLowerYear uint
@@ -203,6 +205,28 @@ func parseJobMetadata(jobRecord jobmine.JobRecord) (*jobMetadata, error) {
 		}
 	} else {
 		return nil, errors.New("jobRecord missing programIds")
+	}
+
+	if gradYearsIntf, exists := jobRecord.Metadata[GRAD_YEARS_METADATA_KEY]; exists {
+		var (
+			gradYearIntfs []interface{}
+			isStringArr   bool
+		)
+		if gradYearIntfs, isStringArr = gradYearsIntf.([]interface{}); !isStringArr {
+			return nil, errors.New(fmt.Sprintf(
+				"gradYears must be an array of uints, got %v", gradYearsIntf))
+		}
+		meta.gradYears = make([]uint, len(gradYearIntfs))
+		for i, gradYearIntf := range gradYearIntfs {
+			if gradYear, isNum := gradYearIntf.(float64); !isNum {
+				return nil, errors.New(fmt.Sprintf(
+					"gradYears must be an array of uints, got %v", gradYearsIntf))
+			} else {
+				meta.gradYears[i] = uint(gradYear)
+			}
+		}
+	} else {
+		return nil, errors.New("jobRecord missing gradYears")
 	}
 
 	youngestUpperGradYearPtr, err := jobmine_utility.UIntFromJobRecord(
@@ -251,8 +275,8 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return nil, err
 	}
 
-	userIds, err := GetFilteredLowerAndAllUpperYears(db, meta.programIds, meta.youngestUpperGradYear,
-		meta.termStartTime, meta.termEndTime)
+	userIds, err := GetFilteredLowerAndAllUpperYears(db, meta.programIds, meta.gradYears,
+		meta.youngestUpperGradYear, meta.termStartTime, meta.termEndTime)
 	if err != nil {
 		return nil, err
 	}
@@ -321,6 +345,7 @@ func CreateSeedJob(
 	runId string,
 	isDryRun bool,
 	programIds []string,
+	gradYears []uint,
 	youngestUpperGradYear uint,
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
@@ -329,6 +354,7 @@ func CreateSeedJob(
 ) error {
 	metadata := map[string]interface{}{
 		PROGRAM_IDS_METADATA_KEY:                    programIds,
+		GRAD_YEARS_METADATA_KEY:                     gradYears,
 		YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY:       youngestUpperGradYear,
 		MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY: maxLowerYearsPerUpperYear,
 		MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY: maxUpperYearsPerLowerYear,
