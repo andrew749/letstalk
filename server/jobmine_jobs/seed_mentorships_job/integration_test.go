@@ -118,7 +118,30 @@ func createUsers(db *gorm.DB) ([]data.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return []data.User{*user1, *user2, *user3, *user4, *user5, *user6}, nil
+
+	// These users should be ignored
+	user7, err := test_helpers.CreateTestUser(db, 7)
+	if err != nil {
+		return nil, err
+	}
+	err = test_helpers.CreateCohortForUser(
+		db, user7, "SOFTWARE_ENGINEERING", "Software Engineering", 2020, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user8, err := test_helpers.CreateTestUser(db, 8)
+	if err != nil {
+		return nil, err
+	}
+	err = test_helpers.CreateCohortForUser(
+		db, user8, "COMPUTER_ENGINEERING", "Computer Engineering", 2023, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+	return []data.User{*user1, *user2, *user3, *user4, *user5, *user6, *user7, *user8}, nil
 }
 
 func nukeConnections(db *gorm.DB) error {
@@ -140,6 +163,7 @@ func TestJobIntegration(t *testing.T) {
 
 				err = CreateSeedJob(db, runId, false,
 					[]string{"COMPUTER_ENGINEERING", "SOFTWARE_ENGINEERING"},
+					[]uint{2021, 2022},
 					2021, 1, 100, nil, nil)
 				assert.NoError(t, err)
 
@@ -184,6 +208,7 @@ func TestJobIntegration(t *testing.T) {
 				to := now.AddDate(0, 0, 1)
 				err = CreateSeedJob(db, runId, false,
 					[]string{"COMPUTER_ENGINEERING", "SOFTWARE_ENGINEERING"},
+					[]uint{2021, 2022},
 					2021, 100, 1, &from, &to)
 				assert.NoError(t, err)
 
@@ -216,6 +241,7 @@ func TestJobIntegration(t *testing.T) {
 
 				err := CreateSeedJob(db, runId, true,
 					[]string{"COMPUTER_ENGINEERING", "SOFTWARE_ENGINEERING"},
+					[]uint{2021, 2022},
 					2021, 100, 100, nil, nil)
 				assert.NoError(t, err)
 

@@ -12,6 +12,7 @@ import (
 	"letstalk/server/test_helpers"
 )
 
+// TODO: Can consolidate these tests
 func TestGetLowerYears(t *testing.T) {
 	thisTest := test.Test{
 		Test: func(db *gorm.DB) {
@@ -47,7 +48,8 @@ func TestGetLowerYears(t *testing.T) {
 			assert.NoError(t, err)
 
 			userIds, err := GetCandidates(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, true, 2021, nil, nil)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022},
+				true, 2021, nil, nil)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{user1.UserId, user3.UserId}, userIds)
@@ -91,7 +93,8 @@ func TestGetUpperYears(t *testing.T) {
 			assert.NoError(t, err)
 
 			userIds, err := GetCandidates(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, false, 2021, nil, nil)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022}, false,
+				2021, nil, nil)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{user2.UserId, user3.UserId}, userIds)
@@ -137,7 +140,8 @@ func TestGetLowerYearsWithinCreatedAtRange(t *testing.T) {
 			from := now.AddDate(0, 0, -1)
 			to := now.AddDate(0, 0, 1)
 			userIds, err := GetCandidates(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, true, 2021, &from, &to)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022}, true,
+				2021, &from, &to)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{user2.UserId}, userIds)
@@ -183,7 +187,8 @@ func TestGetLowerYearsWithinCreatedAtRangeBoundaryInclusive(t *testing.T) {
 			from := now.AddDate(0, 0, -2)
 			to := now.AddDate(0, 0, 2)
 			userIds, err := GetCandidates(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, true, 2021, &from, &to)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022}, true,
+				2021, &from, &to)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{user1.UserId, user2.UserId, user3.UserId}, userIds)
@@ -227,10 +232,41 @@ func TestGetLowerUpperYears(t *testing.T) {
 			assert.NoError(t, err)
 
 			userIds, err := GetFilteredLowerAndAllUpperYears(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, 2021, nil, nil)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022}, 2021,
+				nil, nil)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{user1.UserId, user2.UserId, user3.UserId}, userIds)
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestGetLowerUpperYearsRestrictGradYears(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			sequenceId := "8_STREAM"
+			sequenceName := "8 Stream"
+
+			user1, err := test_helpers.CreateTestUser(db, 1)
+			assert.NoError(t, err)
+			err = test_helpers.CreateCohortForUser(
+				db, user1, "SOFTWARE_ENGINEERING", "Software Engineering", 2022, true,
+				&sequenceId, &sequenceName)
+			assert.NoError(t, err)
+
+			user2, err := test_helpers.CreateTestUser(db, 2)
+			assert.NoError(t, err)
+			err = test_helpers.CreateCohortForUser(
+				db, user2, "SOFTWARE_ENGINEERING", "Software Engineering", 2021, true,
+				&sequenceId, &sequenceName)
+			assert.NoError(t, err)
+
+			userIds, err := GetFilteredLowerAndAllUpperYears(
+				db, []string{"SOFTWARE_ENGINEERING"}, []uint{2021}, 2000, nil, nil)
+			assert.NoError(t, err)
+
+			assert.ElementsMatch(t, []data.TUserID{user2.UserId}, userIds)
 		},
 	}
 	test.RunTestWithDb(thisTest)
@@ -300,7 +336,8 @@ func TestGetLowerUpperYearsRanges(t *testing.T) {
 			from := now.AddDate(0, 0, -1)
 			to := now.AddDate(0, 0, 1)
 			userIds, err := GetFilteredLowerAndAllUpperYears(
-				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, 2021, &from, &to)
+				db, []string{"SOFTWARE_ENGINEERING", "MECHATRONICS_ENGINEERING"}, []uint{2021, 2022}, 2021,
+				&from, &to)
 			assert.NoError(t, err)
 
 			assert.ElementsMatch(t, []data.TUserID{
