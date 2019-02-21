@@ -99,16 +99,13 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 			}
 
 			rlog.Debugf("Sent Notifications and got response: %v", res)
-			// create pending notification for each message we tried to send
-			tx := db.Begin()
 
-			// for each notification response, add the receipt
+			// for the single notification response, add the receipt
 			// none of these should fail since we have a successful response from expo
 			for i, response := range res.Data {
 				rlog.Debugf("Processing response: %+v", response)
-				temp, err := data.CreateNewPendingNotification(tx, notification.ID, (*sendNotifications)[i].To)
+				temp, err := data.CreateNewPendingNotification(db, notification.ID, (*sendNotifications)[i].To)
 				if err != nil {
-					tx.Rollback()
 					raven.CaptureError(err, nil)
 					continue
 				}
@@ -117,19 +114,18 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 				if response.Status == notification_api.ERROR_STATUS {
 					failureType := notification_api.ExpoNotificationFailureType(response.Details.Error)
 					if err := temp.MarkNotificationError(
-						tx,
+						db,
 						response.Message,
 						response.Details,
 						&failureType,
 					); err != nil {
-						tx.Rollback()
 						rlog.Error(err)
 						raven.CaptureError(err, nil)
 						continue
 					}
 				}
 
-				if err = temp.MarkNotificationSent(tx, response.Id); err != nil {
+				if err = temp.MarkNotificationSent(db, response.Id); err != nil {
 					rlog.Error(err)
 					raven.CaptureError(err, nil)
 					continue
@@ -138,11 +134,6 @@ func SendNotificationLambda(sqsEvent events.SQSEvent) error {
 				rlog.Debug("Done processing response")
 			}
 
-			err = tx.Commit().Error
-			if err != nil {
-				raven.CaptureError(err, nil)
-				rlog.Error(err)
-			}
 		}
 	}
 	// will never reach here

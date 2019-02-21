@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -68,6 +69,12 @@ type ExpoNotificationStatusRequest struct {
 }
 
 type ExpoNotificationFailureType string
+
+func (u *ExpoNotificationFailureType) Scan(value interface{}) error {
+	*u = ExpoNotificationFailureType(value.([]uint8))
+	return nil
+}
+func (u ExpoNotificationFailureType) Value() (driver.Value, error) { return string(u), nil }
 
 const (
 	// ErrorDeviceNotRegistered indicates the token is invalid
