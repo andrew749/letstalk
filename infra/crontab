@@ -7,3 +7,4 @@
 
 # Creates nightly job to check notification status
 0 1 * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/manual_job_scheduler -runId "status_checker_$(date '+%Y%m%dT%H%M%S')" -jobType NotificationStatusChecker -metadata "{}"'
+
