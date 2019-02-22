@@ -12,6 +12,7 @@ import (
 	"letstalk/server/data"
 
 	"github.com/jinzhu/gorm"
+	"letstalk/server/core/meetup_reminder"
 )
 
 /**
@@ -152,7 +153,8 @@ func HandleAcceptConnection(
 		); err != nil {
 			return err
 		}
-		return nil
+		// Schedule first meetup reminder for both users in the match.
+		return meetup_reminder.ScheduleInitialReminder(tx, authUser.UserId, connUser.UserId)
 	})
 	if dbErr != nil {
 		return nil, errs.NewDbError(err)

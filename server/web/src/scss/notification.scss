@@ -55,6 +55,11 @@
   margin-top: 10px;
 }
 
+.error-text {
+  color: #e13a3a;
+  margin-top: 10px;
+}
+
 .profile-pic {
   border-radius: 50px;
 }
@@ -97,6 +102,27 @@ div[style*="margin: 16px 0;"] {
   padding: 8px 25px;
   margin: 25px;
   color: #ffffff;
+  display: block;
+  text-align: center;
+}
+
+.btn-primary, .btn-primary:hover, .btn-primary:focus {
+  background: #ffbe43;
+  border: 1px solid #D4DADF;
+  border-radius: 4px;
+  padding: 8px 25px;
+  margin: 25px;
+  color: #ffffff;
+  display: block;
+  text-align: center;
+}
+
+.btn-decline {
+  background: none;
+  border: none;
+  padding: 10px;
+  margin: 10px;
+  color: #FFB52A;
   display: block;
   text-align: center;
 }

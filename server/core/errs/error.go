@@ -40,11 +40,11 @@ func NewInternalError(msg string, args ...interface{}) IError {
 }
 
 func NewDbError(err error) IError {
-	return &DatabaseError{NewInternalError("Encountered database error: %s", err)}
+	return &DatabaseError{NewInternalError("Encountered database error: %v", err)}
 }
 
 func NewEsError(err error) IError {
-	return &ElasticsearchError{NewInternalError("Encountered elasticsearch error: %s", err)}
+	return &ElasticsearchError{NewInternalError("Encountered elasticsearch error: %v", err)}
 }
 
 type InvalidPasswordError struct {

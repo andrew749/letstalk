@@ -9,6 +9,7 @@ type (
 	TGroupID     string
 )
 
+func (u *TGroupID) Scan(value interface{}) error { *u = TGroupID(value.([]byte)); return nil }
 func (u TGroupID) Value() (driver.Value, error) { return string(u), nil }
 
 // Stores groups that a user is a part of

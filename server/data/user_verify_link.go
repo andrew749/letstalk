@@ -11,13 +11,13 @@ type TVerifyLinkID string
 type VerifyLinkType string
 
 func (u *VerifyLinkType) Scan(value interface{}) error {
-	*u = VerifyLinkType(value.([]uint8))
+	*u = VerifyLinkType(value.([]byte))
 	return nil
 }
 func (u VerifyLinkType) Value() (driver.Value, error) { return string(u), nil }
 
 func (u *TVerifyLinkID) Scan(value interface{}) error {
-	*u = TVerifyLinkID(value.([]uint8))
+	*u = TVerifyLinkID(value.([]byte))
 	return nil
 }
 func (u TVerifyLinkID) Value() (driver.Value, error) { return string(u), nil }

@@ -24,15 +24,15 @@ type UserSurvey struct {
 	User *User `gorm:"foreignkey:UserId"`
 }
 
-func (u *SurveyGroup) Scan(value interface{}) error { *u = SurveyGroup(value.([]uint8)); return nil }
+func (u *SurveyGroup) Scan(value interface{}) error { *u = SurveyGroup(value.([]byte)); return nil }
 func (u SurveyGroup) Value() (driver.Value, error)  { return string(u), nil }
 func (u *SurveyQuestionKey) Scan(value interface{}) error {
-	*u = SurveyQuestionKey(value.([]uint8))
+	*u = SurveyQuestionKey(value.([]byte))
 	return nil
 }
 func (u SurveyQuestionKey) Value() (driver.Value, error) { return string(u), nil }
 func (u *SurveyOptionKey) Scan(value interface{}) error {
-	*u = SurveyOptionKey(value.([]uint8))
+	*u = SurveyOptionKey(value.([]byte))
 	return nil
 }
 func (u SurveyOptionKey) Value() (driver.Value, error) { return string(u), nil }

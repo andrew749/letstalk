@@ -1,17 +1,18 @@
 package connection
 
 import (
+	"fmt"
 	"time"
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/meetup_reminder"
 	"letstalk/server/core/notifications"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
 	"letstalk/server/email"
 
-	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/romana/rlog"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -55,11 +56,19 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 	if len(noSuchMentorErr) > 0 || len(noSuchMenteeErr) > 0 {
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
-	return AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType)
+	tx := db.Begin()
+	if err := AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if dbErr := tx.Commit().Error; dbErr != nil {
+		return errs.NewDbError(dbErr)
+	}
+	return nil
 }
 
 func AddMentorship(
-	db *gorm.DB,
+	tx *gorm.DB,
 	mentorUserId data.TUserID,
 	menteeUserId data.TUserID,
 	requestType api.CreateMentorshipType,
@@ -67,7 +76,7 @@ func AddMentorship(
 	if mentorUserId == menteeUserId {
 		return errs.NewRequestError("mentor and mentee user must be different")
 	}
-	if conn, err := query.GetConnectionDetailsUndirected(db, mentorUserId, menteeUserId); err != nil {
+	if conn, err := query.GetConnectionDetailsUndirected(tx, mentorUserId, menteeUserId); err != nil {
 		return errs.NewDbError(err)
 	} else if conn != nil {
 		return errs.NewRequestError("connection already exists")
@@ -90,7 +99,10 @@ func AddMentorship(
 	}
 	if requestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
 		rlog.Infof("not a dry run, adding (%d, %d)", mentorUserId, menteeUserId)
-		if err := db.Create(&conn).Error; err != nil {
+		if err := tx.Create(&conn).Error; err != nil {
+			return errs.NewDbError(err)
+		}
+		if err := meetup_reminder.ScheduleInitialReminder(tx, conn.UserOneId, conn.UserTwoId); err != nil {
 			return errs.NewDbError(err)
 		}
 	}

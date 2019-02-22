@@ -21,9 +21,14 @@ function trackNotificationOpened(notificationName, extraProperties) {
   mixpanel.track(eventName, getProperties(extraProperties));
 }
 
+function trackAction(notificationName, action, extraProperties) {
+  const eventName = notificationName + '/' + action;
+  mixpanel.track(eventName, getProperties(extraProperties));
+}
+
 function trackLinkClicked(notificationName, linkAccessor, linkName, extraProperties) {
   const eventName = notificationName + '/' + LINK_CLICKED_PREFIX + '/' + linkName;
   mixpanel.track_links(linkAccessor, eventName, getProperties(extraProperties));
 }
 
-export { identifyUser, trackNotificationOpened, trackLinkClicked };
+export { identifyUser, trackNotificationOpened, trackAction, trackLinkClicked };

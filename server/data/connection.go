@@ -31,7 +31,7 @@ const (
 	INTENT_TYPE_ASSIGNED    IntentType = "ASSIGNED_MATCH"
 )
 
-func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]uint8)); return nil }
+func (u *IntentType) Scan(value interface{}) error { *u = IntentType(value.([]byte)); return nil }
 func (u IntentType) Value() (driver.Value, error)  { return string(u), nil }
 
 type ConnectionIntent struct {

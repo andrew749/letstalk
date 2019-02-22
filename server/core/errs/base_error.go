@@ -48,9 +48,8 @@ func (e *BaseError) GetExtraData() map[string]interface{} {
 
 func NewBaseError(msg string, args ...interface{}) *BaseError {
 	extraData := make(map[string]interface{})
-	message := fmt.Sprintf(msg, args...)
 	return &BaseError{
-		errors.New(message),
+		errors.Errorf(msg, args...),
 		extraData,
 	}
 }
