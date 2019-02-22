@@ -3,10 +3,7 @@ import React from 'react';
 import getProperty from './context.jsx';
 import './scss/notification.scss';
 import { identifyUser, trackNotificationOpened, trackAction, trackLinkClicked } from './metrics/mixpanel';
-import { serverUrl } from './config.js'
-
-const hiveDeepLinkRoot = 'hive:/';
-//const hiveDeepLinkRoot = 'exp://192.168.0.179:19000/--'; // For dev
+import { serverUrl, hiveDeepLinkRoot } from './config.js'
 
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
