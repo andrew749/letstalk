@@ -7,13 +7,12 @@ import { serverUrl } from './config.js'
 import {withCookies} from 'react-cookie';
 import CookieAwareComponent from './cookie_aware_component.jsx'
 
-//const hiveDeepLinkRoot = 'hive://';
-const hiveDeepLinkRoot = 'exp://192.168.1.117:19000/--/';
+const hiveDeepLinkRoot = 'hive:/';
 
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
 const meetupReminderUrl = `${serverUrl}/v1/meetup_reminder`;
-const homeViewLink = `${hiveDeepLinkRoot}Home`;
+const homeViewLink = `${hiveDeepLinkRoot}/Home`;
 
 function switchMatchType(matchType, mentor, mentee, connection) {
   if (matchType === 'MENTOR') {
@@ -283,7 +282,7 @@ class RemindMeetupNotification extends React.Component {
         <a
           id="view-match-profile"
           className="btn-primary"
-          href={matchProfileLink}>
+          onClick={() => { document.location.href = matchProfileLink }}>
           View {matchFullName}'s Profile
         </a>
         <a
@@ -340,7 +339,8 @@ class RemindMeetupNotification extends React.Component {
         <p className="message">{bodyText}</p>
         { errorMsg &&
         <p className="error-text">
-          Error communicating with server, please try again later.
+          Error communicating with server, please try again later.<br/>
+          Message: {errorMsg}
         </p>}
         <a
           id="btn-close"
@@ -370,7 +370,7 @@ class RemindMeetupNotification extends React.Component {
     const matchFirstName = getProperty('matchFirstName');
     const matchLastName = getProperty('matchLastName');
     const matchProfilePic = getProperty('matchProfilePic') || defaultProfilePic;
-    const profileLink = 'hive://MatchProfile?userId=' + matchUserId;
+    const profileLink = `${hiveDeepLinkRoot}/MatchProfile?userId=${matchUserId}`;
 
     const { cookies } = this.props;
     const sessionId = cookies.get('sessionId');
