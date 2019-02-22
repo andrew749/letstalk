@@ -61,10 +61,16 @@ class NotificationContentView extends React.Component<Props, State> {
       return `${BASE_URL}${NOTIFICATION_PAGE_ROUTE}?notificationId=${notificationId}`;
     }
 
+    private getJavaScriptCookieInjector(sessionId: string): string {
+      return `(function(){document.cookie="sessionId=${sessionId};";})();`;
+    }
+
     render() {
       const url = this.getNotificationPage(this.notificationId);
       if (this.state.sessionId !== undefined && this.state.sessionId !== null) {
-        return <WebView source={{
+        return <WebView 
+        injectedJavaScript={this.getJavaScriptCookieInjector(this.state.sessionId)}
+        source={{
           uri: url,
           headers: {"sessionId": this.state.sessionId}
         }} />;
