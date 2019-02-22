@@ -11,7 +11,6 @@ const hiveDeepLinkRoot = 'hive:/';
 const defaultProfilePic =
   'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg';
 const meetupReminderUrl = `${serverUrl}/v1/meetup_reminder`;
-const homeViewLink = `${hiveDeepLinkRoot}/Home`;
 
 function switchMatchType(matchType, mentor, mentee, connection) {
   if (matchType === 'MENTOR') {
@@ -313,13 +312,6 @@ class RemindMeetupNotification extends React.Component {
         <p className="error-text">
           Error communicating with server, please try again later.
         </p>}
-        <a
-          id="btn-close"
-          className="btn-decline"
-          href={homeViewLink}
-          >
-          Close
-        </a>
       </div>
     );
   }
@@ -339,12 +331,6 @@ class RemindMeetupNotification extends React.Component {
           Error communicating with server, please try again later.<br/>
           Message: {errorMsg}
         </p>}
-        <a
-          id="btn-close"
-          className="btn-decline"
-          href={homeViewLink}>
-          Close
-        </a>
       </div>
     );
   }
