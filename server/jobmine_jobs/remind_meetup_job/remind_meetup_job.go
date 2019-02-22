@@ -88,7 +88,7 @@ func getMatchType(userId data.TUserID, connection *data.Connection) MatchType {
 
 func markReminderProcessed(tx *gorm.DB, meetupReminderId uint) error {
 	if err := tx.Model(&data.MeetupReminder{}).
-		Update(&data.MeetupReminder{Model: gorm.Model{ID: meetupReminderId}, State: data.MEETUP_REMINDER_PROCESSED}).
+		Update(&data.MeetupReminder{Model: gorm.Model{ID: meetupReminderId}, State: data.MEETUP_REMINDER_SENT}).
 		Error; err != nil {
 		return err
 	}

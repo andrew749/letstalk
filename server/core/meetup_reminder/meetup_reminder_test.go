@@ -102,21 +102,25 @@ func TestPostMeetupReminder(t *testing.T) {
 				userTwo := user.CreateUserForTest(t, c.Db)
 				meetup_reminder.ScheduleInitialReminder(db, userOne.UserId, userTwo.UserId)
 				assertInitialReminderScheduled(t, db, userOne.UserId, userTwo.UserId)
+				twoWeeks := time.Now().AddDate(0, 0, 14)
 				request := api.MeetupReminder{
 					UserId:       userOne.UserId,
 					MatchUserId:  userTwo.UserId,
-					ReminderTime: time.Now().AddDate(0, 0, 14), // Reschedule to two weeks from now
+					ReminderTime: &twoWeeks, // Reschedule to two weeks from now
 				}
 				reqErr := meetup_reminder.HandlePostMeetupReminder(c, request)
 				assert.NoError(t, reqErr)
-				result := &data.MeetupReminder{}
-				err := db.Model(&data.MeetupReminder{}).First(&result, &data.MeetupReminder{UserId: userOne.UserId}).Error
+				result := []data.MeetupReminder{}
+				err := db.Model(&data.MeetupReminder{}).Find(&result, &data.MeetupReminder{UserId: userOne.UserId}).Error
 				assert.NoError(t, err)
-				assert.Equal(t, request.UserId, result.UserId)
-				assert.Equal(t, request.MatchUserId, result.MatchUserId)
-				assert.WithinDuration(t, request.ReminderTime, result.ScheduledAt, time.Second)
-				assert.Equal(t, data.MEETUP_TYPE_FOLLOWUP, result.Type)
-				assert.Equal(t, data.MEETUP_REMINDER_SCHEDULED, result.State)
+				assert.Equal(t, request.UserId, result[0].UserId)
+				assert.Equal(t, request.MatchUserId, result[0].MatchUserId)
+				assert.Equal(t, data.MEETUP_REMINDER_REPLACED, result[0].State)
+				assert.Equal(t, request.UserId, result[1].UserId)
+				assert.Equal(t, request.MatchUserId, result[1].MatchUserId)
+				assert.WithinDuration(t, *request.ReminderTime, result[1].ScheduledAt, time.Second)
+				assert.Equal(t, data.MEETUP_TYPE_FOLLOWUP, result[1].Type)
+				assert.Equal(t, data.MEETUP_REMINDER_SCHEDULED, result[1].State)
 			},
 		},
 	}
@@ -137,9 +141,14 @@ func TestDeleteMeetupReminder(t *testing.T) {
 					UserId:      userOne.UserId,
 					MatchUserId: userTwo.UserId,
 				}
-				reqErr := meetup_reminder.HandleDeleteMeetupReminder(c, request)
+				reqErr := meetup_reminder.HandleCancelMeetupReminder(c, request)
 				assert.NoError(t, reqErr)
-				assert.True(t, db.Model(&data.MeetupReminder{}).First(&data.MeetupReminder{}, &data.MeetupReminder{UserId: userOne.UserId}).RecordNotFound(), "Record not found")
+				result := &data.MeetupReminder{}
+				err := db.Model(&data.MeetupReminder{}).First(result, &data.MeetupReminder{UserId: userOne.UserId}).Error
+				assert.NoError(t, err)
+				assert.Equal(t, request.UserId, result.UserId)
+				assert.Equal(t, request.MatchUserId, result.MatchUserId)
+				assert.Equal(t, data.MEETUP_REMINDER_CANCELLED, result.State)
 			},
 		},
 	}

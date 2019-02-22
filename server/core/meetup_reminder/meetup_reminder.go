@@ -31,15 +31,19 @@ func PostMeetupReminder(c *ctx.Context) errs.Error {
 }
 
 func HandlePostMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
+	if input.ReminderTime == nil {
+		return errs.NewRequestError("Missing reminder time field")
+	}
 	newReminder := data.MeetupReminder{
 		UserId:      input.UserId,
 		MatchUserId: input.MatchUserId,
 		Type:        data.MEETUP_TYPE_FOLLOWUP, // POSTed reminders are always for followup.
 		State:       data.MEETUP_REMINDER_SCHEDULED,
-		ScheduledAt: input.ReminderTime,
+		ScheduledAt: *input.ReminderTime,
 	}
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
-		if err := tx.Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
+		if err := tx.Model(&data.MeetupReminder{}).Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId, State: data.MEETUP_REMINDER_SCHEDULED}).
+		Update(&data.MeetupReminder{State: data.MEETUP_REMINDER_REPLACED}).Error; err != nil {
 			return err
 		}
 		if err := tx.Create(&newReminder).Error; err != nil {
@@ -54,7 +58,7 @@ func HandlePostMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Err
 	return nil
 }
 
-// DeleteMeetupReminder deletes existing meetup reminders for (user, match) and (match, user).
+// DeleteMeetupReminder cancels existing meetup reminders for (user, match) and (match, user).
 func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	authUser, err := query.GetUserById(c.Db, c.SessionData.UserId)
 	if err != nil {
@@ -67,15 +71,17 @@ func DeleteMeetupReminder(c *ctx.Context) errs.Error {
 	if authUser.UserId != input.UserId {
 		return errs.NewUnauthorizedError("Not authorized")
 	}
-	return HandleDeleteMeetupReminder(c, input)
+	return HandleCancelMeetupReminder(c, input)
 }
 
-func HandleDeleteMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
+func HandleCancelMeetupReminder(c *ctx.Context, input api.MeetupReminder) errs.Error {
 	dbErr := c.WithinTx(func(tx *gorm.DB) error {
-		if err := tx.Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
+		if err := tx.Model(&data.MeetupReminder{}).Where(&data.MeetupReminder{UserId: input.UserId, MatchUserId: input.MatchUserId, State: data.MEETUP_REMINDER_SCHEDULED}).
+		Update(&data.MeetupReminder{State: data.MEETUP_REMINDER_CANCELLED}).Error; err != nil {
 			return err
 		}
-		if err := tx.Where(&data.MeetupReminder{UserId: input.MatchUserId, MatchUserId: input.UserId}).Delete(&data.MeetupReminder{}).Error; err != nil {
+		if err := tx.Model(&data.MeetupReminder{}).Where(&data.MeetupReminder{UserId: input.MatchUserId, MatchUserId: input.UserId, State: data.MEETUP_REMINDER_SCHEDULED}).
+		Update(&data.MeetupReminder{State: data.MEETUP_REMINDER_CANCELLED}).Error; err != nil {
 			return err
 		}
 		return nil

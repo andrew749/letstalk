@@ -17,8 +17,10 @@ const (
 type MeetupReminderState string
 
 const (
-	MEETUP_REMINDER_SCHEDULED MeetupReminderState = "SCHEDULED"
-	MEETUP_REMINDER_PROCESSED MeetupReminderState = "PROCESSED"
+	MEETUP_REMINDER_SCHEDULED MeetupReminderState = "SCHEDULED" // Scheduled to be sent
+	MEETUP_REMINDER_SENT MeetupReminderState = "SENT"           // Sent to user
+	MEETUP_REMINDER_CANCELLED MeetupReminderState = "CANCELLED" // Cancelled by user
+	MEETUP_REMINDER_REPLACED MeetupReminderState = "REPLACED"   // Replaced with a later reminder.
 )
 
 type MeetupReminder struct {
