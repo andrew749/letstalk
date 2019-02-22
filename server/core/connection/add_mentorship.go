@@ -31,7 +31,7 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 		return err
 	}
 	if input.RequestType == api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN {
-		if err := sendMentorshipNotifications(c.Db, &input); err != nil {
+		if err := sendMentorshipNotificationsHandler(c.Db, &input); err != nil {
 			return err
 		}
 	}
@@ -107,17 +107,7 @@ func AddMentorship(
 	return nil
 }
 
-func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
-	mentor, err := query.GetUserByEmail(db, request.MentorEmail)
-	if err != nil {
-		return err
-	}
-
-	mentee, err := query.GetUserByEmail(db, request.MenteeEmail)
-	if err != nil {
-		return err
-	}
-
+func SendMentorshipNotifications(db *gorm.DB, mentor, mentee *data.User) errs.Error {
 	mentorCohort, err := query.GetUserCohort(db, mentor.UserId)
 	if err != nil {
 		return err
@@ -163,4 +153,18 @@ func sendMentorshipNotifications(db *gorm.DB, request *api.CreateMentorshipByEma
 		return compositeError
 	}
 	return nil
+}
+
+func sendMentorshipNotificationsHandler(
+	db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
+	mentor, err := query.GetUserByEmail(db, request.MentorEmail)
+	if err != nil {
+		return err
+	}
+
+	mentee, err := query.GetUserByEmail(db, request.MenteeEmail)
+	if err != nil {
+		return err
+	}
+	return SendMentorshipNotifications(db, mentor, mentee)
 }

@@ -10,6 +10,7 @@ import (
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/connection"
+	"letstalk/server/core/query"
 	"letstalk/server/core/verify_link"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
@@ -28,6 +29,7 @@ const (
 // JobRecord keys
 const (
 	PROGRAM_IDS_METADATA_KEY                    = "programIds"
+	GRAD_YEARS_METADATA_KEY                     = "gradYears"
 	YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY       = "youngestUpperGradYear"
 	TERM_START_TIME_METADATA_KEY                = "termStartTime"
 	TERM_END_TIME_METADATA_KEY                  = "termEndTime"
@@ -64,6 +66,43 @@ func parseUserInfo(taskRecord jobmine.TaskRecord) (*userMatch, error) {
 	return &userMatch{menteeId: *menteeId, mentorId: *mentorId}, nil
 }
 
+func userStr(db *gorm.DB, user data.User, userStr string) string {
+	if user.Cohort != nil && user.Cohort.Cohort != nil {
+		return fmt.Sprintf("%s(%d, %d) - program(%s, %d)", userStr, user.UserId, user.Gender,
+			user.Cohort.Cohort.ProgramId, user.Cohort.Cohort.GradYear)
+	} else {
+		return fmt.Sprintf("%s(%d, %d)", userStr, user.UserId, user.Gender)
+	}
+}
+
+func printMatches(db *gorm.DB, matches []recommendations.UserMatch) error {
+	allUserIds := make([]data.TUserID, 0)
+	for _, match := range matches {
+		allUserIds = append(allUserIds, match.UserOneId, match.UserTwoId)
+	}
+
+	var users []data.User
+	err := db.Where("user_id IN (?)", allUserIds).Preload("Cohort.Cohort").Find(&users).Error
+	if err != nil {
+		return err
+	}
+
+	usersById := make(map[data.TUserID]data.User)
+	for _, user := range users {
+		usersById[user.UserId] = user
+	}
+
+	for i, match := range matches {
+		menteeStr := userStr(db, usersById[match.UserOneId], "mentee")
+		mentorStr := userStr(db, usersById[match.UserTwoId], "mentor")
+
+		rlog.Infof(
+			"match(%d), %s, %s, score(%f)",
+			i, menteeStr, mentorStr, match.Score)
+	}
+	return nil
+}
+
 func execute(
 	db *gorm.DB,
 	jobRecord jobmine.JobRecord,
@@ -75,6 +114,19 @@ func execute(
 	}
 	err = connection.AddMentorship(
 		db, userMatch.mentorId, userMatch.menteeId, api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
+	if err != nil {
+		return nil, err
+	}
+
+	mentor, err := query.GetUserById(db, userMatch.mentorId)
+	if err != nil {
+		return nil, err
+	}
+	mentee, err := query.GetUserById(db, userMatch.menteeId)
+	if err != nil {
+		return nil, err
+	}
+	err = connection.SendMentorshipNotifications(db, mentor, mentee)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +166,7 @@ var seedTaskSpec = jobmine.TaskSpec{
 type jobMetadata struct {
 	isDryRun                  bool
 	programIds                []string
+	gradYears                 []uint
 	youngestUpperGradYear     uint
 	maxLowerYearsPerUpperYear uint
 	maxUpperYearsPerLowerYear uint
@@ -133,13 +186,47 @@ func parseJobMetadata(jobRecord jobmine.JobRecord) (*jobMetadata, error) {
 	}
 
 	if programIdsIntf, exists := jobRecord.Metadata[PROGRAM_IDS_METADATA_KEY]; exists {
-		var isStringArr bool
-		if meta.programIds, isStringArr = programIdsIntf.([]string); !isStringArr {
+		var (
+			programIdIntfs []interface{}
+			isStringArr    bool
+		)
+		if programIdIntfs, isStringArr = programIdsIntf.([]interface{}); !isStringArr {
 			return nil, errors.New(fmt.Sprintf(
 				"programIds must be an array of strings, got %v", programIdsIntf))
 		}
+		meta.programIds = make([]string, len(programIdIntfs))
+		for i, programIdIntf := range programIdIntfs {
+			if programId, isString := programIdIntf.(string); !isString {
+				return nil, errors.New(fmt.Sprintf(
+					"programIds must be an array of strings, got %v", programIdsIntf))
+			} else {
+				meta.programIds[i] = programId
+			}
+		}
 	} else {
 		return nil, errors.New("jobRecord missing programIds")
+	}
+
+	if gradYearsIntf, exists := jobRecord.Metadata[GRAD_YEARS_METADATA_KEY]; exists {
+		var (
+			gradYearIntfs []interface{}
+			isStringArr   bool
+		)
+		if gradYearIntfs, isStringArr = gradYearsIntf.([]interface{}); !isStringArr {
+			return nil, errors.New(fmt.Sprintf(
+				"gradYears must be an array of uints, got %v", gradYearsIntf))
+		}
+		meta.gradYears = make([]uint, len(gradYearIntfs))
+		for i, gradYearIntf := range gradYearIntfs {
+			if gradYear, isNum := gradYearIntf.(float64); !isNum {
+				return nil, errors.New(fmt.Sprintf(
+					"gradYears must be an array of uints, got %v", gradYearsIntf))
+			} else {
+				meta.gradYears[i] = uint(gradYear)
+			}
+		}
+	} else {
+		return nil, errors.New("jobRecord missing gradYears")
 	}
 
 	youngestUpperGradYearPtr, err := jobmine_utility.UIntFromJobRecord(
@@ -188,8 +275,8 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 		return nil, err
 	}
 
-	userIds, err := GetFilteredLowerAndAllUpperYears(db, meta.programIds, meta.youngestUpperGradYear,
-		meta.termStartTime, meta.termEndTime)
+	userIds, err := GetFilteredLowerAndAllUpperYears(db, meta.programIds, meta.gradYears,
+		meta.youngestUpperGradYear, meta.termStartTime, meta.termEndTime)
 	if err != nil {
 		return nil, err
 	}
@@ -228,12 +315,10 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 	}
 
 	if meta.isDryRun {
-		for i, match := range matches {
-			rlog.Infof(
-				"match(%d), mentee(%d), mentor(%d), score(%f)",
-				i, match.UserOneId, match.UserTwoId, match.Score)
+		err = printMatches(db, matches)
+		if err != nil {
+			return nil, err
 		}
-
 		return []jobmine.Metadata{}, nil
 	} else {
 		metadatas := make([]jobmine.Metadata, len(matches))
@@ -260,6 +345,7 @@ func CreateSeedJob(
 	runId string,
 	isDryRun bool,
 	programIds []string,
+	gradYears []uint,
 	youngestUpperGradYear uint,
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
@@ -268,6 +354,7 @@ func CreateSeedJob(
 ) error {
 	metadata := map[string]interface{}{
 		PROGRAM_IDS_METADATA_KEY:                    programIds,
+		GRAD_YEARS_METADATA_KEY:                     gradYears,
 		YOUNGEST_UPPER_GRAD_YEAR_METADATA_KEY:       youngestUpperGradYear,
 		MAX_LOWER_YEARS_PER_UPPER_YEAR_METADATA_KEY: maxLowerYearsPerUpperYear,
 		MAX_UPPER_YEARS_PER_LOWER_YEAR_METADATA_KEY: maxUpperYearsPerLowerYear,
