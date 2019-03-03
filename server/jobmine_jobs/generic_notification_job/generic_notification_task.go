@@ -79,7 +79,7 @@ func execute(
 			message,
 			nil,
 			*jobRecordMetadata.NotificationTemplate,
-			taskRecordMetadata.Data,
+			mergedTemplateData,
 			&jobRecord.RunId,
 		)
 		if err != nil {

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
+	"strconv"
 	"strings"
 
 	"github.com/jinzhu/gorm"
@@ -50,14 +51,11 @@ func rowToMap(columns []string, columnPointers []interface{}, columnValues []int
 	for i, col := range columns {
 		switch columnValues[i].(type) {
 		case []byte:
-			byteValue := columnValues[i].([]byte)
-			res[col] = string(byteValue)
+			res[col] = string(columnValues[i].([]byte))
 			rlog.Warnf("Processing byte array column %s => %s", col, res[col])
 		case string:
 			res[col] = columnValues[i].(string)
 			rlog.Warnf("Processing string column %s => %s", col, res[col])
-		case int:
-			rlog.Warnf("Processing int column %s => %s", col, res[col])
 		case int64:
 			res[col] = columnValues[i].(int64)
 			rlog.Warnf("Processing int64 column %s => %s", col, res[col])
@@ -84,6 +82,7 @@ func getMetadataForQuery(db *gorm.DB, query string) ([]TaskRecordMetadata, error
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	rlog.Debugf("Successfully executed user selector.")
 
 	columns, err := rows.Columns()
@@ -107,18 +106,29 @@ func getMetadataForQuery(db *gorm.DB, query string) ([]TaskRecordMetadata, error
 
 		userIdRaw, found := taskData[userIdDbKey]
 		if !found {
-			return nil, errors.New("Unable to get userId field. Terminating job.")
+			return nil, errors.New("Unable to get user_id field. Terminating job.")
 		}
 
-		userIdInt, success := userIdRaw.(int64)
-		if !success {
-			return nil, errors.New("Unable to convert userId field to int64. Terminating job.")
+		var (
+			userIdInt uint
+			success   error
+		)
+		switch userIdRaw.(type) {
+		case string:
+			var userIdIntTmp int
+			userIdIntTmp, success = strconv.Atoi(userIdRaw.(string))
+			userIdInt = uint(userIdIntTmp)
+		case int64:
+			userIdInt = uint(userIdRaw.(int64))
+		}
+		if success != nil {
+			return nil, errors.New("Unable to convert user_id field to int64. Terminating job.")
 		}
 
 		taskMetadata = append(
 			taskMetadata,
 			TaskRecordMetadata{
-				UserId: data.TUserID(uint(userIdInt)),
+				UserId: data.TUserID(userIdInt),
 				Data:   taskData,
 			},
 		)
