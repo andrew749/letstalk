@@ -42,7 +42,35 @@ func getField(v interface{}, field string) string {
 	return f.String()
 }
 
-// GetBasicTemplatedEmail
+// CreateBasicTemplateEmailFromMap Creates a templated email, with passed in substitutions from a map
+func CreateBasicTemplatedEmailFromMap(
+	recipient *mail.Email,
+	templateID string,
+	emailContext map[string]interface{},
+) *mail.SGMailV3 {
+	// Create message and configure with empty text to force template
+	// body to be used instead. You have to set up a transactional
+	// template on SendGrid's web site and reference its ID below where
+	// it says <template_id>.
+	message := mail.NewV3Mail()
+	message.SetFrom(mail.NewEmail(defaultSenderName, defaultSenderAddress))
+
+	// personalize the email to the user
+	p := mail.NewPersonalization()
+	tos := []*mail.Email{
+		recipient,
+	}
+	// set recipients
+	p.AddTos(tos...)
+
+	p.DynamicTemplateData = emailContext
+
+	message.AddPersonalizations(p)
+	message.SetTemplateID(templateID)
+	return message
+}
+
+// CreateBasicTemplatedEmail creates a templated email using a struct as context to fill in fields
 func CreateBasicTemplatedEmail(
 	recipient *mail.Email,
 	templateID string,
@@ -106,6 +134,17 @@ func SendBasicEmail(
 	return nil
 }
 
+// SendBasicTemplatedEmailFromMap Send a templated email with the corresponding context present in the map
+// note that we try to convert the context into a string since this is sendgrid's interface
+func SendBasicTemplatedEmailFromMap(
+	recipient *mail.Email,
+	templateID string,
+	emailContext map[string]interface{},
+) error {
+	msg := CreateBasicTemplatedEmailFromMap(recipient, templateID, emailContext)
+	return SendEmail(msg)
+}
+
 // SendEmail  Helper to deliver an already created email message
 func SendEmail(message *mail.SGMailV3) error {
 	client := sendgrid.NewSendClient(secrets.GetSecrets().SendGrid)
@@ -115,6 +154,7 @@ func SendEmail(message *mail.SGMailV3) error {
 	} else {
 		rlog.Debug(response.StatusCode)
 		rlog.Debug(response.Headers)
+		rlog.Debug(response.Body)
 	}
 	return err
 }

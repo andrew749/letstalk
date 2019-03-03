@@ -67,7 +67,7 @@
 
 [[constraint]]
   name = "github.com/sendgrid/sendgrid-go"
-  version = "3.4.1"
+  revision = "49fb945410d3b36be6eecdfa5ce91210e8b2b807"
 
 [[constraint]]
   name = "github.com/jinzhu/gorm"

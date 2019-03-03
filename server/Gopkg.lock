@@ -284,15 +284,14 @@
   version = "v2.4.1"
 
 [[projects]]
-  digest = "1:bf326e9bc2c70dfc765590bfa9c9985e41355f7972fb50e7f052440f3a5122a2"
+  digest = "1:2a4649b34b820ea54ed9983d61880ef675115fa111d40493fe3491eb5f109732"
   name = "github.com/sendgrid/sendgrid-go"
   packages = [
     ".",
     "helpers/mail",
   ]
   pruneopts = "UT"
-  revision = "8caf17aa96b4a98bae8bd216878dd50ff12897b5"
-  version = "v3.4.1"
+  revision = "49fb945410d3b36be6eecdfa5ce91210e8b2b807"
 
 [[projects]]
   digest = "1:1bc4a5bd879ce6b44fdaa2e8e1144921c145604764e92220009b951c1f2439f5"
