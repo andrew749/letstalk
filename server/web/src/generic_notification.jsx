@@ -6,34 +6,23 @@ import { identifyUser, trackNotificationOpened, trackLinkClicked } from './metri
 
 const NOTIFICATION_NAME = (s) => `generic-notification`;
 
-const mentorTitle = genericOutro("mentee");
-const menteeTitle = genericOutro("mentor");
-
 class GenericMessageNotification extends React.Component {
 
   componentDidMount() {
     const user = getProperty('user');
-    // whether the user is a mentor or mentee
-    const userType = getProperty('userType');
     identifyUser(user.UserId);
     trackNotificationOpened(NOTIFICATION_NAME);
   }
 
   render() {
-    let title;
-    if (userType === 'MENTOR') {
-      title = mentorTitle;
-    } else {
-      title = menteeTitle;
-    }
-
-    const message = getProperty('message');
+    const caption = getProperty('caption');
+    const body = getProperty('body')
     return (
       <div className="notification-background">
         <div className="notification-container">
           <div className="content">
-            <p className="title">{title}</p>
-            <p className="message">{message}</p>
+            <p className="title">{caption}</p>
+            <p className="message">{body}</p>
           </div>
         </div>
     </div>
