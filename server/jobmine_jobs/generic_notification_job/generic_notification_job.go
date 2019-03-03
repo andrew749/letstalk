@@ -41,9 +41,12 @@ const GENERIC_NOTIFICATION_JOB jobmine.JobType = "GenericNotificationJob"
 const userIdDbKey = "user_id"
 
 // rowToMap convert primary valued database columns to known types (from byte)
-func rowToMap(columns []string, columnPointers []interface{}, columnValues []interface{}, rows *sql.Rows) map[string]interface{} {
+func rowToMap(columns []string, columnPointers []interface{}, columnValues []interface{}, rows *sql.Rows) (map[string]interface{}, error) {
 	res := map[string]interface{}{}
-	rows.Scan(columnPointers...)
+	err := rows.Scan(columnPointers...)
+	if err != nil {
+		return nil, err
+	}
 	for i, col := range columns {
 		switch columnValues[i].(type) {
 		case []byte:
@@ -65,7 +68,7 @@ func rowToMap(columns []string, columnPointers []interface{}, columnValues []int
 			rlog.Warnf("Ignoring column %s => %v", col, columnValues[i])
 		}
 	}
-	return res
+	return res, nil
 }
 
 // getMetadataForQuery gets executes a query and packages as task metadata
@@ -97,7 +100,10 @@ func getMetadataForQuery(db *gorm.DB, query string) ([]TaskRecordMetadata, error
 		columnPointers[i] = &columnValues[i]
 	}
 	for rows.Next() {
-		taskData := rowToMap(columns, columnPointers, columnValues, rows)
+		taskData, err := rowToMap(columns, columnPointers, columnValues, rows)
+		if err != nil {
+			return nil, err
+		}
 
 		userIdRaw, found := taskData[userIdDbKey]
 		if !found {
