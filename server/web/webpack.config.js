@@ -10,6 +10,7 @@ module.exports = {
     notification_with_quote: path.resolve(__dirname, 'src', 'notification_with_quote.jsx'),
     remind_meetup_notification: path.resolve(__dirname, 'src', 'remind_meetup_notification.jsx'),
     signup_notification: path.resolve(__dirname, 'src', 'signup_notification.jsx'),
+    generic_notification: path.resolve(__dirname, 'src', 'generic_notification.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -86,6 +87,12 @@ module.exports = {
       filename: "../signup_notification.html",
       title: "Welcome to Hive!",
       chunks: ['signup_notification']
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../generic_notification.html",
+      title: "Notification",
+      chunks: ['generic_notification']
     })
   ]
 };
