@@ -4,14 +4,15 @@ import getProperty from './context.jsx';
 import './scss/notification.scss';
 import { identifyUser, trackNotificationOpened, trackLinkClicked } from './metrics/mixpanel';
 
-const NOTIFICATION_NAME = (s) => `generic-notification`;
+const NOTIFICATION_NAME = (s) => `generic-notification-${s}` ? s : `generic-notification`;
 
 class GenericMessageNotification extends React.Component {
 
   componentDidMount() {
     const user = getProperty('user');
+    const notificationTracking = NOTIFICATION_NAME(getProperty('trackingId'));
     identifyUser(user.UserId);
-    trackNotificationOpened(NOTIFICATION_NAME);
+    trackNotificationOpened(notificationTracking);
   }
 
   render() {
