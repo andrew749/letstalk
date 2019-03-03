@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # check number of arguments
 if [ "$#" -ne "9" ]; then
@@ -31,11 +31,11 @@ SEND_PUSH=${9}
 
 # determine which platforms to send to
 PLATFORM_STRING=""
-if [[ "$SEND_PUSH" -eq "1" ]]; then
+if [[ "$SEND_PUSH" == "true" ]]; then
  PLATFORM_STRING+=",\\\"notificationTemplate\\\":\\\"generic_notification.html\\\"";
 fi
 
-if [[ "$SEND_EMAIL" -eq "1" ]]; then
+if [[ "$SEND_EMAIL" == "true" ]]; then
  PLATFORM_STRING+=", \\\"emailTemplate\\\": \\\"d-e54d5bdf1c7b4155a42adc379a82369b\\\""
 fi
 echo "$PLATFORM_STRING"
