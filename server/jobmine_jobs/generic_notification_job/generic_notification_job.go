@@ -16,16 +16,31 @@ import (
 // Currently the way to specify who to send notifications to is done via setting
 // a metadata property USER_SELECTOR_QUERY that should return a row of the form:
 //
-// (userId, otherProperties...)
+// (user_id, otherProperties...)
 //
 // where other properties are arbitrary metadata that you want to pass to templating
-// functions for Notifications and Email.
+// functions for Notifications and Email. The name of the column will be how you can
+// access the property in the template.
+//
+// For example, for emails, this means if you return columns:
+//  - user_id (remember you NEED to include this)
+//  - first_name as first_name
+//  - SUM(...) as num_mentees
+// you will be able to access these properties in the template as user_id, first_name
+// and num_mentees respectively.
+//
+// Similarly, the data parameter for job metadata will be available to every task in the
+// same templating fashion.
+//
+// NOTE: A job will fail if there are duplicate keys in the data parameter and what gets
+// selected from the database.
 
 const GENERIC_NOTIFICATION_JOB jobmine.JobType = "GenericNotificationJob"
 
-// How mysql sends back userId keys
+// How mysql sends back userId keys by default
 const userIdDbKey = "user_id"
 
+// rowToMap convert primary valued database columns to known types (from byte)
 func rowToMap(columns []string, columnPointers []interface{}, columnValues []interface{}, rows *sql.Rows) map[string]interface{} {
 	res := map[string]interface{}{}
 	rows.Scan(columnPointers...)
@@ -53,6 +68,7 @@ func rowToMap(columns []string, columnPointers []interface{}, columnValues []int
 	return res
 }
 
+// getMetadataForQuery gets executes a query and packages as task metadata
 func getMetadataForQuery(db *gorm.DB, query string) ([]TaskRecordMetadata, error) {
 	// check for potential bad query
 	if err := safetyCheck(query); err != nil {
