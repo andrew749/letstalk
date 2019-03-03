@@ -94,7 +94,7 @@ func execute(
 		if err := email.SendBasicTemplatedEmailFromMap(
 			to,
 			*jobRecordMetadata.EmailTemplate,
-			taskRecordMetadata.Data,
+			mergedTemplateData,
 		); err != nil {
 			return nil, err
 		}
