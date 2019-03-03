@@ -1,0 +1,3 @@
+#!/bin/sh
+# not dry run, send a notification to all users. With appropriate templating.
+DB_NET=letstalk_db_net ./run_in_env.sh "RLOG_LOG_LEVEL=DEBUG build/manual_job_scheduler -runId testGenericNotification$JOB_ID -jobType GenericNotificationJob -metadata \"{\\\"dryRun\\\":false,\\\"message\\\":\\\"Hey {{.first_name}}, connect with your mentor\\\",\\\"notificationTemplate\\\":\\\"sample_template.html\\\",\\\"title\\\":\\\"Hello {{.first_name}}\\\",\\\"userSelectorQuery\\\":\\\"SELECT * from users;\\\", \\\"emailTemplate\\\": \\\"d-7fc85f51e72f47908714260ebb37d15d\\\", \\\"data\\\": {\\\"title\\\": \\\"title\\\", \\\"body\\\": \\\"This is a body\\\"}}\"";((JOB_ID+=1));
