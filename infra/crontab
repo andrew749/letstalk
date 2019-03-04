@@ -3,10 +3,10 @@
 0 0 * * * /var/app/letstalk/infra/backup_db.sh
 
 # Creates tasks to get run
-0 */4 * * * PROD=true /var/app/letstalk/server/run_in_env.sh './process_jobs_daemon.sh' 1> "/var/log/jobmine/$(date '+%Y%m%dT%H%M%S').out" 2> "/var/log/jobmine/$(date '+%Y%m%dT%H%M%S').err"
+0 */4 * * * PROD=true /var/app/letstalk/server/run_in_env.sh './process_jobs_daemon.sh' 1> "/var/log/jobmine/$(date '+\%Y\%m\%dT\%H\%M\%S').out" 2> "/var/log/jobmine/$(date '+\%Y\%m\%dT\%H\%M\%S').err"
 
 # Creates nightly job to check notification status
-0 1 * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/manual_job_scheduler -runId "status_checker_$(date '+%Y%m%dT%H%M%S')" -jobType NotificationStatusChecker -metadata "{}"'
+0 1 * * * PROD=true /var/app/letstalk/server/run_in_env.sh 'build/manual_job_scheduler -runId "status_checker_$(date '+\%Y\%m\%dT\%H\%M\%S')" -jobType NotificationStatusChecker -metadata "{}"'
 
 # Creates weekly job to remind people to update
-0 15 * * Thu PROD=true /var/app/letstalk/server/run_in_env.sh 'build/manual_job_scheduler -runId "remind_update_profile_$(date '+%Y%m%dT%H%M%S')" -jobType RemindOnboardJob -metadata "{}"'
+0 15 * * Thu PROD=true /var/app/letstalk/server/run_in_env.sh 'build/manual_job_scheduler -runId "remind_update_profile_$(date '+\%Y\%m\%dT\%H\%M\%S')" -jobType RemindOnboardJob -metadata "{}"'
