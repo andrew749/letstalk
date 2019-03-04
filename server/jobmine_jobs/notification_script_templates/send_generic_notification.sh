@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check number of arguments
-if [ "$#" -ne "9" ]; then
+if [ "$#" -ne "10" ]; then
 echo "
 Usage:
     $0 RUN_ID DRY_RUN TITLE MESSAGE CAPTION BODY USER_SELECTOR SEND_EMAIL SEND_PUSH
@@ -14,6 +14,7 @@ Usage:
     - USER_SELECTOR An sql query defining which users to send to.
     - SEND_EMAIL 1 if we want to send an email, otherwise anything else
     - SEND_PUSH 1 if we want to send a push, otherwise anything else
+    - BODY_IS_HTML 1 if the body should be interpreted as html
 "
 exit 1;
 fi
@@ -28,6 +29,7 @@ BODY=${6}
 USER_SELECTOR=${7}
 SEND_EMAIL=${8}
 SEND_PUSH=${9}
+BODY_IS_HTML=${10}
 
 # determine which platforms to send to
 PLATFORM_STRING=""
@@ -45,5 +47,5 @@ DB_NET=letstalk_db_net ./run_in_env.sh \
 "RLOG_LOG_LEVEL=DEBUG build/manual_job_scheduler \
  -runId $RUN_ID \
  -jobType GenericNotificationJob \
- -metadata \"{\\\"dryRun\\\":$DRY_RUN,\\\"message\\\":\\\"$MESSAGE\\\",\\\"title\\\":\\\"$TITLE\\\" $PLATFORM_STRING, \\\"userSelectorQuery\\\":\\\"$USER_SELECTOR\\\", \\\"data\\\": {\\\"caption\\\": \\\"$CAPTION\\\",\\\"body\\\": \\\"$BODY\\\"}}\"";
+ -metadata \"{\\\"dryRun\\\":$DRY_RUN,\\\"message\\\":\\\"$MESSAGE\\\",\\\"title\\\":\\\"$TITLE\\\" $PLATFORM_STRING, \\\"userSelectorQuery\\\":\\\"$USER_SELECTOR\\\", \\\"data\\\": {\\\"caption\\\": \\\"$CAPTION\\\",\\\"body\\\": \\\"$BODY\\\", \\\"bodyIsHTML\\\":\\\"$BODY_IS_HTML\\\"}}\"";
 ((JOB_ID+=1));

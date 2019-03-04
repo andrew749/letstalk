@@ -15,15 +15,25 @@ class GenericMessageNotification extends React.Component {
     trackNotificationOpened(notificationTracking);
   }
 
+  // dont do this at home kids
+  body(isHTML, body) {
+    if (!!isHTML) {
+      return <div dangerouslySetInnerHTML={{__html: body}}></div>;
+    } else {
+      return <p className="message">{body}</p>;
+    }
+  }
+
   render() {
     const caption = getProperty('caption');
-    const body = getProperty('body')
+    const bodyContent = getProperty('body')
+    const bodyIsHTML = getProperty('bodyIsHTML');
     return (
       <div className="notification-background">
         <div className="notification-container">
           <div className="content">
             <p className="title">{caption}</p>
-            <p className="message">{body}</p>
+            {this.body(bodyIsHTML, bodyContent)}
           </div>
         </div>
     </div>
