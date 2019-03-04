@@ -4,7 +4,7 @@ import getProperty from './context.jsx';
 import './scss/notification.scss';
 import { identifyUser, trackNotificationOpened, trackLinkClicked } from './metrics/mixpanel';
 
-const NOTIFICATION_NAME = (s) => (s != null && s != undefined) ? `generic-notification-${s}` : `generic-notification`;
+const NOTIFICATION_NAME = (s) => (!!s) ? `generic-notification-${s}` : `generic-notification`;
 
 class GenericMessageNotification extends React.Component {
 
