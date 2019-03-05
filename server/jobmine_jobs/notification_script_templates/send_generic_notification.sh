@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check number of arguments
-if [ "$#" -ne "10" ]; then
+if [ "$#" -ne "11" ]; then
 echo "
 Usage:
     $0 RUN_ID DRY_RUN TITLE MESSAGE CAPTION BODY USER_SELECTOR SEND_EMAIL SEND_PUSH
@@ -12,9 +12,10 @@ Usage:
     - CAPTION The caption that will be printed in both the push and email.
     - BODY The content of the actual message
     - USER_SELECTOR An sql query defining which users to send to.
-    - SEND_EMAIL 1 if we want to send an email, otherwise anything else
-    - SEND_PUSH 1 if we want to send a push, otherwise anything else
-    - BODY_IS_HTML 1 if the body should be interpreted as html
+    - SEND_EMAIL true if we want to send an email, otherwise anything else
+    - SEND_PUSH true if we want to send a push, otherwise anything else
+    - BODY_IS_HTML true if the body should be interpreted as html
+    - EMAIL_TEMPLATE the template to use for email
 "
 exit 1;
 fi
@@ -30,6 +31,7 @@ USER_SELECTOR=${7}
 SEND_EMAIL=${8}
 SEND_PUSH=${9}
 BODY_IS_HTML=${10}
+EMAIL_TEMPLATE=${11}
 
 # determine which platforms to send to
 PLATFORM_STRING=""
@@ -38,7 +40,7 @@ if [[ "$SEND_PUSH" == "true" ]]; then
 fi
 
 if [[ "$SEND_EMAIL" == "true" ]]; then
- PLATFORM_STRING+=", \\\"emailTemplate\\\": \\\"d-e54d5bdf1c7b4155a42adc379a82369b\\\""
+ PLATFORM_STRING+=", \\\"emailTemplate\\\": \\\"$EMAIL_TEMPLATE\\\""
 fi
 echo "$PLATFORM_STRING"
 
