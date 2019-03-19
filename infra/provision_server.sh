@@ -4,26 +4,13 @@ FOLDER=/var/app/letstalk
 set -e
 # To be run from AWS cloud in an EC2 instance
 
-# Group to create for server administration (including running the server)
-ADMINGROUP="server_grp"
-ADMINUSER="server"
-
 # directories for the app
-APP=/var/app/letstalk
+APPDIR=/var/app
+APP=${APPDIR}/letstalk
 SERVER=${APP}/server
 SECRETS_PATH=${SERVER}/secrets.json
 DATADOG_CONF=/etc/datadog-agent/conf.d
 DATADOG_DOCKER_CONF=$DATADOG_CONF/docker.d
-
-# create group and add the current user to the group
-create_admin_group() {
-    sudo groupadd $ADMINGROUP
-}
-
-create_admin_user() {
-    sudo useradd $ADMINUSER
-    sudo usermod -aG $ADMINGROUP $ADMINUSER
-}
 
 # install dependencies
 install_dependencies() {
@@ -31,16 +18,19 @@ install_dependencies() {
     sudo apt-get update
     sudo apt-get install docker \
       docker-compose \
+      mysql-client \
       jq \
       software-properties-common \
       python-certbot-nginx \
       apt-transport-https \
       python3 \
+      nodejs \
+      npm \
       virtualenv \
       ruby
 
-    gem update
-    gem install mustache
+    sudo gem update
+    sudo gem install mustache
 }
 
 setup_docker() {
@@ -49,10 +39,9 @@ setup_docker() {
 }
 
 generate_ssh() {
-  su $ADMINUSER
-  ssh-keygen
+  sudo ssh-keygen
   echo "BEGIN PUBLIC KEY"
-  cat ~/.ssh/id_rsa.pub
+  cat /home/$USER/.ssh/id_rsa.pub
   echo "END PUBLIC KEY"
 }
 
@@ -72,23 +61,23 @@ setup_datadog() {
   # configure agent
   read -p "Datadog api key: " DATADOG_API_KEY
   sudo sh -c "sed 's/api_key:.*/api_key: $DATADOG_API_KEY/' /var/app/letstalk/infra/config/datadog.yaml > /etc/datadog-agent/datadog.yaml"
-  systemctl start datadog-agent
-  systemctl enable datadog-agent
+  sudo systemctl start datadog-agent
+  sudo systemctl enable datadog-agent
 
   # install agent checks
-  cp $APP/infra/monitoring/docker_daemon.yaml $DATADOG_DOCKER_CONF
+  sudo cp $APP/infra/monitoring/docker_daemon.yaml $DATADOG_DOCKER_CONF
 
   #setup permissions
-  usermod -a -G docker dd-agent
+  sudo usermod -a -G docker dd-agent
 
   # restart agent
-  systemctl restart datadog-agent
+  sudo systemctl restart datadog-agent
 }
 
 # install logging service
 install_logging() {
   # put the systemd service in the appropriate folder
-  cat $SECRETS_PATH | mustache - $APP/infra/healthcheck/nginx_tailer.service > /lib/systemd/system/nginx_tailer.service
+  sudo bash "cat $SECRETS_PATH | mustache - $APP/infra/healthcheck/nginx_tailer.service > /lib/systemd/system/nginx_tailer.service"
 
   # install pip and dependencies
   pushd $APP/infra/healthcheck
@@ -98,18 +87,38 @@ install_logging() {
     deactivate
   popd
   # enable to service to start
-  systemctl enable nginx_tailer.service
+  sudo systemctl enable nginx_tailer.service
 }
 
-# start of actual program
+install_dependencies
+
+echo "Creating server administration user"
 create_admin_group
 create_admin_user
-install_dependencies
-generate_ssh
-setup_docker
-setup_datadog
+echo "DONE: Creating server administration user"
 
+echo "Generating ssh keys"
+generate_ssh
+
+# wait for user input
+read -n 1 -p "Add this ssh key to the github repo."
+sudo mkdir -p $APPDIR
+sudo chown $USER $APPDIR
+cd $APPDIR
 echo "\033[92mAdding source code.\033[0m"
 git clone git@github.com:andrew749/letstalk.git
 
-echo "\033[91mRemember to manually add secrets to this server in the server root!!!\033[0m"
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+# add the admin
+sudo systemctl start docker
+
+setup_docker
+
+read -n 1 -p "\033[91mManually add secrets.json to this server in the server root $APP!!!\033[0m"
+setup_datadog
+install_logging
+
+echo "Server is provisioned."
+
