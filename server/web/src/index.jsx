@@ -1,8 +1,9 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Button, FormGroup, FormControl, ControlLabel, Alert } from "react-bootstrap";
-import CookieAwareComponent from './cookie_aware_component.jsx'
+import { Button, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
+import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
+import {HiveToolTemplate} from './hive_tool_template.jsx';
 
 const serverUrl = "http://localhost/v1";
 
@@ -63,45 +64,43 @@ export class LoginPage extends React.Component {
         let alert;
         if (this.state.submitState) {
             if (this.state.submitState === "SUCCESS") {
-                alert = (<Alert bsStyle="success">Succesfully logged in.</Alert>);
+                alert = (<Alert variant="success">Succesfully logged in.</Alert>);
             } else if (this.state.submitState === "ERROR") {
-                alert = (<Alert bsStyle="danger">Failed to login because {this.state.err}</Alert>)
+                alert = (<Alert variant="danger">Failed to login because {this.state.err}</Alert>)
             }
         }
         return (
-            <div>
-                <h2>Hive</h2>
-                <form onSubmit={this.onSubmit}>
-                    <FormGroup controlId="email" bsSize="large">
-                        <ControlLabel>Email</ControlLabel>
-                        <FormControl
+            <HiveToolTemplate>
+                <Form onSubmit={this.onSubmit}>
+                    <Form.Group controlId="email">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
                             autoFocus
                             type="email"
                             value={this.state.email}
                             onChange={this.handleChange}
                         />
-                    </FormGroup>
-                    <FormGroup controlId="password" bsSize="large">
-                        <ControlLabel>Password</ControlLabel>
-                        <FormControl
+                    </Form.Group>
+                    <Form.Group controlId="password">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
                             value={this.state.password}
                             onChange={this.handleChange}
                             type="password"
                         />
-                    </FormGroup>
+                    </Form.Group>
                     <Button
                         block
-                        bsSize="large"
                         disabled={!this.validateForm()}
                         type="submit"
                     >
                         Login
                     </Button>
-                </form>
+                </Form>
                 <div className="message-container">
                     {alert}
                 </div>
-            </div>
+            </HiveToolTemplate>
         );
     }
 }
