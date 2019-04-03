@@ -4,9 +4,7 @@ import { Button, FormGroup, FormControl, ControlLabel, Alert, Form } from "react
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {HiveToolTemplate} from './hive_tool_template.jsx';
-
-const serverUrl = "http://localhost/v1";
-
+import {loginUrl} from './config.js';
 
 export class LoginPage extends React.Component {
     constructor(props) {
@@ -35,7 +33,7 @@ export class LoginPage extends React.Component {
         const {cookies} = this.props;
         event.preventDefault();
         // send to api server
-        fetch(`${serverUrl}/login`, {
+        fetch(loginUrl, {
             method: 'POST',
             body: JSON.stringify({
                 email: this.state.email,
