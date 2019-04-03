@@ -79,6 +79,9 @@ func Register(
 	router.OPTIONS("/notification_console")
 	router.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
 
+	router.OPTIONS("/admin_panel")
+	router.GET("/admin_panel", hw.wrapHandlerHTML(controller.GetAdminPanel, false))
+
 	v1 := router.Group("/v1")
 
 	// additional asset routes
