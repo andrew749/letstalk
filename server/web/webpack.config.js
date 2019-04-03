@@ -11,6 +11,7 @@ module.exports = {
     remind_meetup_notification: path.resolve(__dirname, 'src', 'remind_meetup_notification.jsx'),
     signup_notification: path.resolve(__dirname, 'src', 'signup_notification.jsx'),
     generic_notification: path.resolve(__dirname, 'src', 'generic_notification.jsx'),
+    admin_panel: path.resolve(__dirname, 'src', 'admin_panel.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -96,6 +97,12 @@ module.exports = {
       filename: "../generic_notification.html",
       title: "Notification",
       chunks: ['generic_notification']
+    }),
+   new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      filename: "../admin_panel.html",
+      title: "Admin Panel",
+      chunks: ['admin_panel']
     })
   ]
 };
