@@ -1,8 +1,6 @@
 package user
 
 import (
-	"net/http"
-
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"

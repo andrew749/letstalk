@@ -1,6 +1,6 @@
 import React from 'react';
 import {Redirect} from 'react-router-dom';
-import { Button, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
+import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
 import {loginUrl} from './config.js';
 import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
@@ -96,7 +96,7 @@ export class LoginPage extends React.Component {
             }
         }
         return (
-            <div>
+            <Container>
                 <Form onSubmit={this.onSubmit}>
                     <Form.Group controlId="email">
                         <Form.Label>Email</Form.Label>
@@ -126,7 +126,7 @@ export class LoginPage extends React.Component {
                 <div className="message-container">
                     {alert}
                 </div>
-            </div>
+            </Container>
         );
     }
 }
