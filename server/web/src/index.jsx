@@ -1,108 +1,41 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Button, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
-import CookieAwareComponent from './cookie_aware_component.jsx';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import { Switch, Route, Redirect, BrowserRouter} from 'react-router-dom';
 import {withCookies} from 'react-cookie';
-import {HiveToolTemplate} from './hive_tool_template.jsx';
-import {loginUrl} from './config.js';
 
-export class LoginPage extends React.Component {
-    constructor(props) {
-        super(props);
+import CookieAwareComponent from './cookie_aware_component.jsx';
+import LoginPage, {loginReducer} from './login.jsx';
+import AdhocAddPage from './adhoc_add.jsx';
+import LandingPage from './landing.jsx';
 
-        this.state = {
-            email: "",
-            password: ""
-        };
+import AuthenticatedRoute from './authenticate_component.jsx';
+import { URL_PREFIX, loginPath, adhocAddToolPath, landingPath } from './routes.js';
+import HiveToolTemplate from './hive_tool_template.jsx';
 
-        this.handleChange = this.handleChange.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-    }
+const reducers = combineReducers({
+    loginReducer
+});
 
-    validateForm() {
-        return this.state.email.length > 0 && this.state.password.length > 0;
-    }
+const store = createStore(reducers);
 
-    handleChange(event) {
-        this.setState({
-            [event.target.id]: event.target.value
-        });
-    }
-
-    onSubmit(event) {
-        const {cookies} = this.props;
-        event.preventDefault();
-        // send to api server
-        fetch(loginUrl, {
-            method: 'POST',
-            body: JSON.stringify({
-                email: this.state.email,
-                password: this.state.password
-            })
-        })
-            .then(response => response.json())
-            .then((data) => {
-                console.log(cookies)
-                console.log(data.Result.sessionId);
-                cookies.set('sessionId', data.Result.sessionId);
-                this.setState({
-                    submitState: 'SUCCESS'
-                });
-            }).catch(err => {
-                this.setState({
-                    submitState: 'ERROR',
-                    err: err.body
-                });
-            });
-
-    }
-
+class App extends React.Component {
     render() {
-
-        let alert;
-        if (this.state.submitState) {
-            if (this.state.submitState === "SUCCESS") {
-                alert = (<Alert variant="success">Succesfully logged in.</Alert>);
-            } else if (this.state.submitState === "ERROR") {
-                alert = (<Alert variant="danger">Failed to login because {this.state.err}</Alert>)
-            }
-        }
         return (
-            <HiveToolTemplate>
-                <Form onSubmit={this.onSubmit}>
-                    <Form.Group controlId="email">
-                        <Form.Label>Email</Form.Label>
-                        <Form.Control
-                            autoFocus
-                            type="email"
-                            value={this.state.email}
-                            onChange={this.handleChange}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="password">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                            value={this.state.password}
-                            onChange={this.handleChange}
-                            type="password"
-                        />
-                    </Form.Group>
-                    <Button
-                        block
-                        disabled={!this.validateForm()}
-                        type="submit"
-                    >
-                        Login
-                    </Button>
-                </Form>
-                <div className="message-container">
-                    {alert}
-                </div>
-            </HiveToolTemplate>
+            <Provider store={store}>
+                <BrowserRouter>
+                    <HiveToolTemplate />
+                    <Switch>
+                        <Route path={loginPath} component={LoginPage} />
+                        <AuthenticatedRoute exact path={landingPath} component={LandingPage} />
+                        <AuthenticatedRoute path={adhocAddToolPath} component={AdhocAddPage} />
+                    </Switch>
+                </BrowserRouter>
+            </Provider>
         );
     }
 }
 
-const CookieAwareLoginPage = CookieAwareComponent(withCookies(LoginPage));
-
-ReactDOM.render(<CookieAwareLoginPage/>, document.getElementById('content'));
+const CookieAwarePage = CookieAwareComponent(withCookies(App));
+ReactDOM.render(<CookieAwarePage/>, document.getElementById('content'));

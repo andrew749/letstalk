@@ -1,11 +1,10 @@
-import ReactDOM from 'react-dom';
 import React from 'react';
 import CookieAwareComponent from './cookie_aware_component.jsx'
 import { withCookies } from 'react-cookie';
 import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import './scss/notification_console.scss';
-import { HiveToolTemplate } from './hive_tool_template.jsx';
 import { createMentorshipFromEmails } from './admin_api_controller.js';
+import {connect} from 'react-redux';
 
 class AdminPanel extends React.Component {
 
@@ -87,7 +86,6 @@ class AdminPanel extends React.Component {
       ? <Alert key="adhocMatchingToolResponse" variant="danger">{this.state.adhocMatchingToolModel.error}</Alert>
       : undefined;
     return (
-      <HiveToolTemplate>
         <Container>
           <Row>
             <h1>
@@ -118,11 +116,10 @@ class AdminPanel extends React.Component {
             </Col>
           </Row>
         </Container>
-      </HiveToolTemplate>
     );
   }
 }
 
-const CookieAwareAdminPanel = CookieAwareComponent(withCookies(AdminPanel));
+const AdminPanelComponent = connect(null, null)(CookieAwareComponent(withCookies(AdminPanel)));
 
-ReactDOM.render(<CookieAwareAdminPanel />, document.getElementById('content'));
+export default AdminPanelComponent;

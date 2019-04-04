@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -11,7 +12,6 @@ module.exports = {
     remind_meetup_notification: path.resolve(__dirname, 'src', 'remind_meetup_notification.jsx'),
     signup_notification: path.resolve(__dirname, 'src', 'signup_notification.jsx'),
     generic_notification: path.resolve(__dirname, 'src', 'generic_notification.jsx'),
-    admin_panel: path.resolve(__dirname, 'src', 'admin_panel.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -50,12 +50,6 @@ module.exports = {
     }
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: 'src/index.html',
-      filename: "../index.html",
-      title: "{{.WebpageTitle}}",
-      chunks: ['index']
-    }),
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       filename: "../sample_template.html",
@@ -98,11 +92,8 @@ module.exports = {
       title: "Notification",
       chunks: ['generic_notification']
     }),
-   new HtmlWebpackPlugin({
-      template: 'src/index.html',
-      filename: "../admin_panel.html",
-      title: "Admin Panel",
-      chunks: ['admin_panel']
-    })
+    new CopyWebpackPlugin([
+      {from: 'src/admin_panel.html', to: "../admin_panel.html"}
+    ])
   ]
 };
