@@ -1,28 +1,32 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import {Navbar} from 'react-bootstrap';
+import {Link} from 'react-router-dom';
+import {Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
+import {adhocAddToolPath} from './routes.js';
 
-export class HiveToolTemplate extends React.Component {
+const CustomNavItem = (path, title) =>
+        <Nav.Item as={Link} to={path}>{title}</Nav.Item>;
+
+
+export default class HiveToolTemplate extends React.Component {
     render() {
         return (
-            <div>
-                <Navbar bg="dark" variant="dark">
-                    <Navbar.Brand href="#home">
-                        <img
-                            id="hive-logo"
-                            alt="Hive"
-                            src={require('./img/logo.png')}
-                            width="30"
-                            height="30"
-                        />
-                        {' Hive Admin Console'}
-                    </Navbar.Brand>
-                </Navbar>
-                <div className="content-container">
-                    { this.props.children }
-                </div>
-            </div>
+            <Navbar bg="dark" variant="dark">
+                <Navbar.Brand href="#home">
+                    <img
+                        id="hive-logo"
+                        alt="Hive"
+                        src={require('./img/logo.png')}
+                        width="30"
+                        height="30"
+                    />
+                    {' Hive Admin Console'}
+                </Navbar.Brand>
+                <Nav>
+                    {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
+                </Nav>
+            </Navbar>
         );
     }
 }
