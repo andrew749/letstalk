@@ -17,11 +17,12 @@ class AdminPanel extends React.Component {
       adhocMatchingToolModel: {
         mentorEmail: undefined,
         menteeEmail: undefined,
-        error: undefined
+        error: undefined,
+        success: false
       }
     }
 
-    this.adhocMatchingToolChange = this.onChange.bind(this, 'adhocMatchingToolModel');
+    this.adhocMatchingToolChange = onChange.bind(this, 'adhocMatchingToolModel');
     this.createConnection = this.createConnection.bind(this);
   }
 
@@ -34,7 +35,8 @@ class AdminPanel extends React.Component {
       this.setState({
         adhocMatchingToolModel: {
           ...this.state.adhocMatchingToolModel,
-          error: "Missing required field"
+          error: "Missing required field",
+          success: false
         }
       })
       return;
@@ -45,10 +47,10 @@ class AdminPanel extends React.Component {
     createMentorshipFromEmails(mentorEmail, menteeEmail)
       .then((data) => {
         // handle success response
-        this.setState({ adhocMatchingToolModel: { error: undefined } });
+        this.setState({ adhocMatchingToolModel: { error: undefined, success: true } });
         console.log("Successfully created mentorship.");
       }).catch(err => {
-        this.setState({ adhocMatchingToolModel: { error: err.message } });
+        this.setState({ adhocMatchingToolModel: { error: err.message, success: false } });
         console.warn("Failed to create mentorship");
       });
   }
@@ -57,6 +59,9 @@ class AdminPanel extends React.Component {
     const { cookies } = this.props;
     const adhocMatchingToolError = (this.state.adhocMatchingToolModel.error)
       ? <Alert key="adhocMatchingToolResponse" variant="danger">{this.state.adhocMatchingToolModel.error}</Alert>
+      : undefined;
+    const adhocMatchingToolSuccess = (this.state.adhocMatchingToolModel.success)
+      ? <Alert key="adhocMatchingToolResponse" variant="success">Successfully created mentorship connection.</Alert>
       : undefined;
     return (
         <Container>
@@ -85,6 +90,7 @@ class AdminPanel extends React.Component {
                   Match
               </Button>
                 {adhocMatchingToolError}
+                {adhocMatchingToolSuccess}
               </Form>
             </Col>
           </Row>
