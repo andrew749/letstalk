@@ -4,7 +4,6 @@ import { withCookies } from 'react-cookie';
 import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import './scss/notification_console.scss';
 import { createMentorshipFromEmails } from './admin_api_controller.js';
-import { createMentorshipFromEmails, deleteUser as deleteUserApi } from './admin_api_controller.js';
 import {connect} from 'react-redux';
 
 class AdminPanel extends React.Component {
@@ -69,31 +68,7 @@ class AdminPanel extends React.Component {
       });
   }
 
-  deleteUser(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const model = this.state.userDeletionToolModel;
-    if (!(model.email && model.firstName && model.lastName && model.userId )) {
-      console.log("Not enough fields filled out");
-      this.setState({
-        userDeletionToolModel: {
-          ...this.state.userDeletionToolModel,
-          error: "Missing required field"
-        }
-      })
-      return;
-    }
-    deleteUserApi(model.userId, model.firstName, model.lastName, model.email)
-      .then((data) => {
-        // handle success response
-        console.log(data);
-        this.setState({ userDeletionToolModel: { error: undefined } });
-        console.log("Successfully deleted user");
-      }).catch(err => {
-        this.setState({ userDeletionToolModel: { error: err.message } });
-        console.warn("Failed to delete user");
-      });
-  }
+
 
   onChange(model, event) {
     console.log(model);
@@ -150,32 +125,7 @@ class AdminPanel extends React.Component {
             </Col>
           </Row>
           <hr/>
-          <Row>
-            <h1>
-              {"User Deletion tool"}
-            </h1>
-          </Row>
-          <Row>
-            <p>
-              Enter the details of the user to delete.
-            </p>
-          </Row>
-          <Row>
-            <Col style={{ paddingLeft: 0, paddingRight: 0 }} lg="12">
-              <Form onSubmit={this.deleteUser}>
-                <Form.Group controlId="formDeleteUser">
-                  <Form.Control size="lg" type="number" name="userId" placeholder="User Id" onChange={this.userDeletionToolChange} />
-                  <Form.Control size="lg" type="email" name="email" placeholder="Email" onChange={this.userDeletionToolChange} />
-                  <Form.Control size="lg" type="text" name="firstName" placeholder="First Name" onChange={this.userDeletionToolChange} />
-                  <Form.Control size="lg" type="text" name="lastName" placeholder="Last Name" onChange={this.userDeletionToolChange} />
-                </Form.Group>
-                <Button variant="primary" type="submit">
-                  Delete
-              </Button>
-                {deleteToolError}
-              </Form>
-            </Col>
-          </Row>
+
           <hr/>
         </Container>
     );
