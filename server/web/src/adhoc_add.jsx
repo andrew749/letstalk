@@ -5,12 +5,12 @@ import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import './scss/notification_console.scss';
 import { createMentorshipFromEmails } from './admin_api_controller.js';
 import {connect} from 'react-redux';
+import {onChange} from './util.js';
 
 class AdminPanel extends React.Component {
 
   constructor(props) {
     super(props)
-    this.onUpdateData = this.onUpdateData.bind(this);
     this.state = {
       // to be sent to server to echo back with information
       notificationState: {},
@@ -18,31 +18,16 @@ class AdminPanel extends React.Component {
         mentorEmail: undefined,
         menteeEmail: undefined,
         error: undefined
-      },
-      userDeletionToolModel: {
-        userId: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        email: undefined,
-        error: undefined
-      },
+      }
     }
 
     this.adhocMatchingToolChange = this.onChange.bind(this, 'adhocMatchingToolModel');
-    this.userDeletionToolChange = this.onChange.bind(this, 'userDeletionToolModel');
     this.createConnection = this.createConnection.bind(this);
-    this.deleteUser = this.deleteUser.bind(this);
-  }
-
-  onUpdateData(newNotificationData) {
-    this.setState({ notificationState: newNotificationData });
   }
 
   createConnection(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Create Connection");
-    console.log(this.state);
     // validation
     if (!this.state.adhocMatchingToolModel.menteeEmail || !this.state.adhocMatchingToolModel.mentorEmail) {
       console.log("Not enough fields filled out");
@@ -68,31 +53,10 @@ class AdminPanel extends React.Component {
       });
   }
 
-
-
-  onChange(model, event) {
-    console.log(model);
-    let fieldName = event.target.name;
-    let fieldValue = event.target.value;
-    console.log(fieldName);
-    console.log(fieldValue);
-    this.setState(
-      prevState => ({
-        [model]: {
-          ...prevState[model],
-          [fieldName]: fieldValue
-        }
-      })
-    );
-  }
-
   render() {
     const { cookies } = this.props;
     const adhocMatchingToolError = (this.state.adhocMatchingToolModel.error)
       ? <Alert key="adhocMatchingToolResponse" variant="danger">{this.state.adhocMatchingToolModel.error}</Alert>
-      : undefined;
-    const deleteToolError = (this.state.userDeletionToolModel.error)
-      ? <Alert key="deleteToolResponse" variant="danger">{this.state.userDeletionToolModel.error}</Alert>
       : undefined;
     return (
         <Container>
@@ -124,9 +88,6 @@ class AdminPanel extends React.Component {
               </Form>
             </Col>
           </Row>
-          <hr/>
-
-          <hr/>
         </Container>
     );
   }

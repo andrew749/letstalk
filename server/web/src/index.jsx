@@ -9,9 +9,10 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import LoginPage, {loginReducer} from './login.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
 import LandingPage from './landing.jsx';
+import DeleteUserToolPage from './user_delete_tool.jsx';
 
 import AuthenticatedRoute from './authenticate_component.jsx';
-import { URL_PREFIX, loginPath, adhocAddToolPath, landingPath } from './routes.js';
+import { URL_PREFIX, loginPath, adhocAddToolPath, landingPath, deleteUserToolPath } from './routes.js';
 import HiveToolTemplate from './hive_tool_template.jsx';
 
 const reducers = combineReducers({
@@ -30,6 +31,7 @@ class App extends React.Component {
                         <Route path={loginPath} component={LoginPage} />
                         <AuthenticatedRoute exact path={landingPath} component={LandingPage} />
                         <AuthenticatedRoute path={adhocAddToolPath} component={AdhocAddPage} />
+                        <AuthenticatedRoute path={deleteUserToolPath} component={DeleteUserToolPage} />
                     </Switch>
                 </BrowserRouter>
             </Provider>
