@@ -10,3 +10,4 @@ export const loginUrl = `${apiUrl}/login`;
 
 // admin endpoints
 export const mentorshipUrl = `${serverUrl}/admin/mentorship`;
+export const deleteUrl = `${serverUrl}/admin/nuke_user`;

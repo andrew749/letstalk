@@ -3,7 +3,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import {Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
-import {adhocAddToolPath} from './routes.js';
+import {adhocAddToolPath, deleteUserToolPath} from './routes.js';
 
 const CustomNavItem = (path, title) =>
         <Nav.Item as={Link} to={path}>{title}</Nav.Item>;
@@ -25,6 +25,7 @@ export default class HiveToolTemplate extends React.Component {
                 </Navbar.Brand>
                 <Nav>
                     {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
+                    {CustomNavItem(deleteUserToolPath, "Delete User Tool")}
                 </Nav>
             </Navbar>
         );

@@ -5,42 +5,38 @@ import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import './scss/notification_console.scss';
 import { createMentorshipFromEmails } from './admin_api_controller.js';
 import {connect} from 'react-redux';
+import {onChange} from './util.js';
 
 class AdminPanel extends React.Component {
 
   constructor(props) {
     super(props)
-    this.onUpdateData = this.onUpdateData.bind(this);
     this.state = {
       // to be sent to server to echo back with information
       notificationState: {},
       adhocMatchingToolModel: {
         mentorEmail: undefined,
         menteeEmail: undefined,
-        error: undefined
+        error: undefined,
+        success: false
       }
     }
 
-    this.adhocMatchingToolChange = this.onChange.bind(this, 'adhocMatchingToolModel');
+    this.adhocMatchingToolChange = onChange.bind(this, 'adhocMatchingToolModel');
     this.createConnection = this.createConnection.bind(this);
-  }
-
-  onUpdateData(newNotificationData) {
-    this.setState({ notificationState: newNotificationData });
   }
 
   createConnection(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Create Connection");
-    console.log(this.state);
     // validation
     if (!this.state.adhocMatchingToolModel.menteeEmail || !this.state.adhocMatchingToolModel.mentorEmail) {
       console.log("Not enough fields filled out");
       this.setState({
         adhocMatchingToolModel: {
           ...this.state.adhocMatchingToolModel,
-          error: "Missing required field"
+          error: "Missing required field",
+          success: false
         }
       })
       return;
@@ -49,41 +45,23 @@ class AdminPanel extends React.Component {
     const mentorEmail = this.state.adhocMatchingToolModel.mentorEmail;
     const menteeEmail = this.state.adhocMatchingToolModel.menteeEmail;
     createMentorshipFromEmails(mentorEmail, menteeEmail)
-      .then(response => response.json())
       .then((data) => {
-        if (data.Error) {
-          throw new Error(data.Error.message)
-        }
         // handle success response
-        console.log(data);
-        this.setState({ adhocMatchingToolModel: { error: undefined } });
+        this.setState({ adhocMatchingToolModel: { error: undefined, success: true } });
         console.log("Successfully created mentorship.");
       }).catch(err => {
-        this.setState({ adhocMatchingToolModel: { error: err.message } });
+        this.setState({ adhocMatchingToolModel: { error: err.message, success: false } });
         console.warn("Failed to create mentorship");
       });
-  }
-
-  onChange(model, event) {
-    console.log(model);
-    let fieldName = event.target.name;
-    let fieldValue = event.target.value;
-    console.log(fieldName);
-    console.log(fieldValue);
-    this.setState(
-      prevState => ({
-        [model]: {
-          ...prevState[model],
-          [fieldName]: fieldValue
-        }
-      })
-    );
   }
 
   render() {
     const { cookies } = this.props;
     const adhocMatchingToolError = (this.state.adhocMatchingToolModel.error)
       ? <Alert key="adhocMatchingToolResponse" variant="danger">{this.state.adhocMatchingToolModel.error}</Alert>
+      : undefined;
+    const adhocMatchingToolSuccess = (this.state.adhocMatchingToolModel.success)
+      ? <Alert key="adhocMatchingToolResponse" variant="success">Successfully created mentorship connection.</Alert>
       : undefined;
     return (
         <Container>
@@ -112,6 +90,7 @@ class AdminPanel extends React.Component {
                   Match
               </Button>
                 {adhocMatchingToolError}
+                {adhocMatchingToolSuccess}
               </Form>
             </Col>
           </Row>
