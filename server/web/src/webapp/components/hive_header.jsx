@@ -1,9 +1,8 @@
-import ReactDOM from 'react-dom';
 import React from 'react';
 import {LinkContainer} from 'react-router-bootstrap'
 import {Navbar, Nav} from 'react-bootstrap';
-import './scss/hive_tool_template.scss';
-import {adhocAddToolPath, deleteUserToolPath} from './routes.js';
+import '../../scss/hive_tool_template.scss';
+import {landingPathWeb} from '../../routes.js';
 
 const CustomNavItem = (path, title) =>
     <LinkContainer to={path}>
@@ -11,7 +10,7 @@ const CustomNavItem = (path, title) =>
     </LinkContainer>
 
 
-export default class HiveToolTemplate extends React.Component {
+export default class HiveHeader extends React.Component {
     render() {
         return (
             <Navbar bg="dark" variant="dark">
@@ -19,15 +18,14 @@ export default class HiveToolTemplate extends React.Component {
                     <img
                         id="hive-logo"
                         alt="Hive"
-                        src={require('./img/logo.png')}
+                        src={require('../../img/logo.png')}
                         width="30"
                         height="30"
                     />
-                    {' Hive Admin Console'}
+                    {' Hive'}
                 </Navbar.Brand>
                 <Nav>
-                    {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
-                    {CustomNavItem(deleteUserToolPath, "Delete User")}
+                    {CustomNavItem(landingPathWeb, "Home")}
                 </Nav>
             </Navbar>
         );

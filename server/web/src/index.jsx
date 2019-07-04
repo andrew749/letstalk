@@ -21,6 +21,13 @@ const reducers = combineReducers({
 
 const store = createStore(reducers);
 
+// Specialize the general AuthenticatedRoute component to work with admin login page.
+const AuthenticatedRouteAdmin = (...props) => 
+    <AuthenticatedRoute 
+        loginPath={loginPath} 
+        {...props}
+        />;
+
 class App extends React.Component {
     render() {
         return (
@@ -29,9 +36,9 @@ class App extends React.Component {
                     <HiveToolTemplate />
                     <Switch>
                         <Route path={loginPath} component={LoginPage} />
-                        <AuthenticatedRoute exact path={landingPath} component={LandingPage} />
-                        <AuthenticatedRoute path={adhocAddToolPath} component={AdhocAddPage} />
-                        <AuthenticatedRoute path={deleteUserToolPath} component={DeleteUserToolPage} />
+                        <AuthenticatedRouteAdmin exact path={landingPath} component={LandingPage} />
+                        <AuthenticatedRouteAdmin path={adhocAddToolPath} component={AdhocAddPage} />
+                        <AuthenticatedRouteAdmin path={deleteUserToolPath} component={DeleteUserToolPage} />
                     </Switch>
                 </BrowserRouter>
             </Provider>
