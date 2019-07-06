@@ -1,11 +1,11 @@
 import React from 'react';
-import {Redirect} from 'react-router-dom';
+import {Redirect, Link} from 'react-router-dom';
 import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
 import {loginUrl} from '../config.js';
 import { connect } from 'react-redux';
 import CookieAwareComponent from '../cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPath} from '../routes.js';
+import {landingPathWeb, signupPathWeb} from '../routes.js';
 
 const LOGIN_ACTION = 'LOGIN';
 
@@ -81,7 +81,7 @@ export class LoginPage extends React.Component {
     render() {
 
         let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPath } };
+        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
 
         if (!!redirectToReferrer) {
             return <Redirect to={from} />;
@@ -125,6 +125,12 @@ export class LoginPage extends React.Component {
                 </Form>
                 <div className="message-container">
                     {alert}
+                </div>
+                <div>
+                    <h4>Don't have an account?</h4>
+                    <Link to={signupPathWeb}>
+                        <Button>Signup</Button>
+                    </Link>
                 </div>
             </Container>
         );

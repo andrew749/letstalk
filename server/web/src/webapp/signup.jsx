@@ -6,6 +6,8 @@ import { connect } from 'react-redux';
 import CookieAwareComponent from '../cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {landingPathWeb} from '../routes.js';
+import RedirectPage from './redirect-flash';
+import {SIGNUP_REDIRECT_DURATION_SECONDS, SIGNUP_REDIRECT_MESSAGE} from './webapp.config.js';
 
 const SIGNUP_ACTION = 'SIGNUP';
 
@@ -92,7 +94,6 @@ export class SignupPage extends React.Component {
         })
             .then(response => response.json())
             .then((data) => {
-                console.log(data);
                 this.props.didSignup();
                 this.setState({
                     submitState: 'SUCCESS',
@@ -112,8 +113,7 @@ export class SignupPage extends React.Component {
         let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
 
         if (!!redirectToReferrer) {
-            console.log(from);
-            return <Redirect to={from} />;
+            return <RedirectPage to={from} duration={SIGNUP_REDIRECT_DURATION_SECONDS} message={SIGNUP_REDIRECT_MESSAGE}/>;
         }
 
         let alert;
