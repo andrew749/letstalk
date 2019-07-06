@@ -12,7 +12,7 @@ import LandingPage from './landing.jsx';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 
 import AuthenticatedRoute from './authenticate_component.jsx';
-import { URL_PREFIX, loginPath, adhocAddToolPath, landingPath, deleteUserToolPath } from './routes.js';
+import { loginPath, adhocAddToolPath, landingPath, deleteUserToolPath } from './routes.js';
 import HiveToolTemplate from './hive_tool_template.jsx';
 
 const reducers = combineReducers({
@@ -22,7 +22,7 @@ const reducers = combineReducers({
 const store = createStore(reducers);
 
 // Specialize the general AuthenticatedRoute component to work with admin login page.
-const AuthenticatedRouteAdmin = (...props) => 
+const AuthenticatedRouteAdmin = (props) => 
     <AuthenticatedRoute 
         loginPath={loginPath} 
         {...props}

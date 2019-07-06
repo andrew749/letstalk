@@ -5,25 +5,26 @@ import {signupUrl} from '../config.js';
 import { connect } from 'react-redux';
 import CookieAwareComponent from '../cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPath} from '../routes.js';
+import {landingPathWeb} from '../routes.js';
 
 const SIGNUP_ACTION = 'SIGNUP';
 
-// unspecified
+// Unspecified gender is default 3 on server side.
+// TODO: need a better way to keep these in sync.
 const DEFAULT_GENDER = 3;
 
 const initialState = {
-  isAuthenticated: false
+  didSignup: false
 }
 
 export function signupAction() {
-    return {type: LOGIN_ACTION};
+    return {type: SIGNUP_ACTION};
 }
 
 export function signupReducer(state = initialState, action) {
     switch(action.type) {
         case SIGNUP_ACTION:
-            return Object.assign({}, state, {isAuthenticated: true});
+            return Object.assign({}, state, {didSignup: true});
         default:
             return state;
     }
@@ -92,8 +93,7 @@ export class SignupPage extends React.Component {
             .then(response => response.json())
             .then((data) => {
                 console.log(data);
-                // cookies.set('sessionId', data.Result.sessionId);
-                // this.props.didAuthenticate();
+                this.props.didSignup();
                 this.setState({
                     submitState: 'SUCCESS',
                     redirectToReferrer: true
@@ -109,9 +109,10 @@ export class SignupPage extends React.Component {
     render() {
 
         let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPath } };
+        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
 
         if (!!redirectToReferrer) {
+            console.log(from);
             return <Redirect to={from} />;
         }
 
@@ -217,7 +218,7 @@ const SignupPageComponent = connect(
     null,
     (dispatch) => {
         return {
-            didAuthenticate: () => {dispatch(signupAction())}
+            didSignup: () => {dispatch(signupAction())}
         };
     }
 )(CookieAwareComponent(withCookies(SignupPage)));

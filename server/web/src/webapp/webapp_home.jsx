@@ -2,13 +2,13 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
-import { Switch, Route, Redirect, BrowserRouter} from 'react-router-dom';
+import { Switch, Route, BrowserRouter} from 'react-router-dom';
 import {withCookies} from 'react-cookie';
 
 import CookieAwareComponent from '../cookie_aware_component.jsx';
 import SignupPage, {signupReducer} from './signup.jsx';
 import LoginPage, {loginReducer} from './login.jsx';
-import LandingPage from '../landing.jsx';
+import LandingPage from './landing.jsx';
 
 import AuthenticatedRoute from '../authenticate_component.jsx';
 import { loginPathWeb, signupPathWeb, landingPathWeb } from '../routes.js';
@@ -22,11 +22,12 @@ const reducers = combineReducers({
 const store = createStore(reducers);
 
 // Specialized AuthenticatedRoute component for the normal login page.
-const AuthenticatedRouteWebapp = (...props) => 
-    <AuthenticatedRoute 
-        {...props} 
+const AuthenticatedRouteWebapp = (props) => {
+    return <AuthenticatedRoute 
         loginPath={loginPathWeb}
+        {...props} 
         />;
+}
 
 class App extends React.Component {
     render() {
