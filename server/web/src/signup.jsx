@@ -1,15 +1,15 @@
 import React from 'react';
-import {Redirect} from 'react-router-dom';
-import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from 'react-bootstrap';
-import {signupUrl} from '../config.js';
+import { Button, Container, Alert, Form } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import CookieAwareComponent from '../cookie_aware_component.jsx';
+import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPathWeb} from '../routes.js';
-import RedirectPage from './redirect-flash';
-import {SIGNUP_REDIRECT_DURATION_SECONDS, SIGNUP_REDIRECT_MESSAGE} from './webapp.config.js';
+import {landingPathWeb} from './routes.js';
+import RedirectPage from './redirect-flash.jsx';
+import { HiveApiService } from './api_controller.js';
 
 const SIGNUP_ACTION = 'SIGNUP';
+const SIGNUP_REDIRECT_DURATION_SECONDS = 10;
+const SIGNUP_REDIRECT_MESSAGE = "Thank you for signing up. Please login using your newly created account.";
 
 // Unspecified gender is default 3 on server side.
 // TODO: need a better way to keep these in sync.
@@ -80,19 +80,15 @@ export class SignupPage extends React.Component {
         const {cookies} = this.props;
         event.preventDefault();
         // send to api server
-        fetch(signupUrl, {
-            method: 'POST',
-            body: JSON.stringify({
-                firstName: this.state.firstName,
-                lastName: this.state.lastName,
-                email: this.state.email,
-                gender: this.state.gender,
-                birthdate: this.state.birthdate,
-                phoneNumber: this.state.phoneNumber,
-                password: this.state.password
-            })
-        })
-            .then(response => response.json())
+        HiveApiService.signup(
+            this.state.firstName, 
+            this.state.lastName,
+            this.state.email,
+            this.state.gender,
+            this.state.birthdate,
+            this.state.phoneNumber,
+            this.state.password
+        )
             .then((data) => {
                 this.props.didSignup();
                 this.setState({

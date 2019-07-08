@@ -22,10 +22,14 @@ const AuthenticatedRoute = ({ component: Component, ...rest }) =>
   }
 />;
 
+function isAuthenticated(state) {
+    return state.loginReducer.isAuthenticated;
+}
+
 const AuthenticatedComponent = connect(
     (state) => {
         return {
-            isAuthenticated: state.loginReducer.isAuthenticated
+            isAuthenticated: isAuthenticated(state)
         };
     },
     null

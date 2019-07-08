@@ -1,26 +1,27 @@
 import React from 'react';
-import {Redirect} from 'react-router-dom';
+import {Redirect, Link} from 'react-router-dom';
 import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
-import {loginUrl} from './config.js';
 import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPath} from './routes.js';
+import {landingPathWeb, signupPathWeb} from './routes.js';
+import {HiveApiService} from './api_controller.js';
 
 const LOGIN_ACTION = 'LOGIN';
 
 const initialState = {
-  isAuthenticated: false
+  isAuthenticated: false,
+  sessionId: undefined
 }
 
-export function loginAction() {
-    return {type: LOGIN_ACTION};
+export function loginAction(sessionId) {
+    return {type: LOGIN_ACTION, sessionId: sessionId};
 }
 
 export function loginReducer(state = initialState, action) {
     switch(action.type) {
         case LOGIN_ACTION:
-            return Object.assign({}, state, {isAuthenticated: true});
+            return Object.assign({}, state, {isAuthenticated: true, sessionId: action.sessionId});
         default:
             return state;
     }
@@ -54,18 +55,11 @@ export class LoginPage extends React.Component {
         const {cookies} = this.props;
         event.preventDefault();
         // send to api server
-        fetch(loginUrl, {
-            method: 'POST',
-            body: JSON.stringify({
-                email: this.state.email,
-                password: this.state.password
-            })
-        })
-            .then(response => response.json())
+
+        HiveApiService.login(this.state.email, this.state.password)
             .then((data) => {
-                console.log(data.Result.sessionId);
                 cookies.set('sessionId', data.Result.sessionId);
-                this.props.didAuthenticate();
+                this.props.didAuthenticate(data.Result.sessionId);
                 this.setState({
                     submitState: 'SUCCESS',
                     redirectToReferrer: true
@@ -81,7 +75,7 @@ export class LoginPage extends React.Component {
     render() {
 
         let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPath } };
+        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
 
         if (!!redirectToReferrer) {
             return <Redirect to={from} />;
@@ -126,6 +120,12 @@ export class LoginPage extends React.Component {
                 <div className="message-container">
                     {alert}
                 </div>
+                <div>
+                    <h4>Don't have an account?</h4>
+                    <Link to={signupPathWeb}>
+                        <Button>Signup</Button>
+                    </Link>
+                </div>
             </Container>
         );
     }
@@ -135,7 +135,7 @@ const LoginPageComponent = connect(
     null,
     (dispatch) => {
         return {
-            didAuthenticate: () => {dispatch(loginAction())}
+            didAuthenticate: (state) => {dispatch(loginAction(state))}
         };
     }
 )(CookieAwareComponent(withCookies(LoginPage)));

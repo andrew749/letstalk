@@ -3,6 +3,8 @@ package query
 import (
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -67,6 +69,21 @@ func CreateUserGroups(
 	return nil
 }
 
+// CreateGroup Create a new group.
+func CreateGroup(db *gorm.DB, groupName string) (*data.Group, errs.Error) {
+	groupUUID, err := uuid.NewUUID()
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+	group := data.Group{GroupId: data.TGroupID(groupUUID.String()), GroupName: groupName}
+	err = db.Create(&group).Error
+	if err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+	return &group, nil
+}
+
+// GetUserGroups Find all groups a user is part of.
 func GetUserGroups(db *gorm.DB, userId data.TUserID) ([]data.UserGroup, errs.Error) {
 	var userGroups []data.UserGroup
 	err := db.Where(&data.UserGroup{UserId: userId}).Find(&userGroups).Error
@@ -76,6 +93,7 @@ func GetUserGroups(db *gorm.DB, userId data.TUserID) ([]data.UserGroup, errs.Err
 	return userGroups, nil
 }
 
+// AddUserGroup Add a user to a group. Idempotent operation.
 func AddUserGroup(
 	db *gorm.DB,
 	userId data.TUserID,
@@ -87,23 +105,16 @@ func AddUserGroup(
 		GroupId:   groupId,
 		GroupName: groupName,
 	}
-	// TODO(wojtek): Might want to index the groups here, but since we plan on hard coding them for
-	// now, going to leave that out.
-	var foundUserGroup data.UserGroup
-	res := db.Where(&userGroup).First(&foundUserGroup)
+	var group data.Group
+	res := db.Where(&data.Group{GroupId: groupId}).First(&group)
 	if res.RecordNotFound() {
-		err := db.Create(&userGroup).Error
-		if err != nil {
-			return nil, errs.NewDbError(err)
-		}
-		return &userGroup, nil
-	} else if res.Error != nil {
-		return nil, errs.NewDbError(res.Error)
-	} else {
-		return nil, errs.NewRequestError(
-			fmt.Sprintf("You are already a part of the %s group", groupName),
-		)
+		return nil, errs.NewRequestError("Invalid group id.")
 	}
+
+	if err := db.Where(&data.UserGroup{UserId: userId, GroupId: groupId}).FirstOrCreate(&userGroup).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	return &userGroup, nil
 }
 
 func RemoveUserGroup(db *gorm.DB, userId data.TUserID, userGroupId data.TUserGroupID) errs.Error {
@@ -115,4 +126,58 @@ func RemoveUserGroup(db *gorm.DB, userId data.TUserID, userGroupId data.TUserGro
 		return errs.NewDbError(err)
 	}
 	return nil
+}
+
+// EnrollUserInManagedGroup Enroll the user into an administrator managed group.
+func EnrollUserInManagedGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) errs.Error {
+	var managedGroup data.ManagedGroup
+
+	// find the group by uuid
+	if err := db.Where(&data.ManagedGroup{GroupId: groupId}).Preload("Group").First(&managedGroup).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return errs.NewRequestError("Group does not exist")
+		}
+
+		return errs.NewInternalError(err.Error())
+	}
+	// The group exists for the mapping
+	_, err := AddUserGroup(db, userId, managedGroup.Group.GroupId, managedGroup.Group.GroupName)
+	return err
+}
+
+// CreateManagedGroup Create a group that this admin manages.
+func CreateManagedGroup(
+	db *gorm.DB,
+	adminUserID data.TUserID,
+	groupName string,
+) (*data.ManagedGroup, errs.Error) {
+	var managedGroup data.ManagedGroup
+	group, err := CreateGroup(db, groupName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	managedGroup.GroupId = group.GroupId
+	managedGroup.AdministratorId = adminUserID
+
+	err2 := db.Create(&managedGroup).Error
+	if err2 != nil {
+		return nil, errs.NewBaseError(err2.Error())
+	}
+
+	return &managedGroup, nil
+}
+
+// GetManagedGroups Get all the groups that the admin manages.
+func GetManagedGroups(
+	db *gorm.DB,
+	adminUserID data.TUserID,
+) ([]data.ManagedGroup, errs.Error) {
+	var groups []data.ManagedGroup
+	if err := db.Where(&data.ManagedGroup{AdministratorId: adminUserID}).Preload("Group").Find(&groups).Error; err != nil {
+		return nil, errs.NewInternalError(err.Error())
+	}
+	rlog.Info("%+v", groups)
+	return groups, nil
 }

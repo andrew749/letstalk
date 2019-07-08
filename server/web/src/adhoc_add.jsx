@@ -3,7 +3,7 @@ import CookieAwareComponent from './cookie_aware_component.jsx'
 import { withCookies } from 'react-cookie';
 import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import './scss/notification_console.scss';
-import { createMentorshipFromEmails } from './admin_api_controller.js';
+import {HiveApiService} from './api_controller.js';
 import {connect} from 'react-redux';
 import {onChange} from './util.js';
 
@@ -44,7 +44,7 @@ class AdminPanel extends React.Component {
     console.log("Sending request");
     const mentorEmail = this.state.adhocMatchingToolModel.mentorEmail;
     const menteeEmail = this.state.adhocMatchingToolModel.menteeEmail;
-    createMentorshipFromEmails(mentorEmail, menteeEmail)
+    HiveApiService.createMentorshipFromEmails(mentorEmail, menteeEmail)
       .then((data) => {
         // handle success response
         this.setState({ adhocMatchingToolModel: { error: undefined, success: true } });
