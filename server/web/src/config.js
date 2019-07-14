@@ -7,6 +7,7 @@ export const apiUrl = `${serverUrl}/v1`;
 
 // api v1 endpoints
 export const loginUrl = `${apiUrl}/login`;
+export const signupUrl = `${apiUrl}/signup`;
 
 // admin endpoints
 export const mentorshipUrl = `${serverUrl}/admin/mentorship`;

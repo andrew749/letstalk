@@ -12,6 +12,7 @@ module.exports = {
     remind_meetup_notification: path.resolve(__dirname, 'src', 'remind_meetup_notification.jsx'),
     signup_notification: path.resolve(__dirname, 'src', 'signup_notification.jsx'),
     generic_notification: path.resolve(__dirname, 'src', 'generic_notification.jsx'),
+    webapp_home: path.resolve(__dirname, 'src/webapp', 'webapp_home.jsx'),
   },
   output: {
     path: path.resolve(__dirname, 'dist', 'assets'),
@@ -94,6 +95,9 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       {from: 'src/admin_panel.html', to: "../admin_panel.html"}
+    ]),
+    new CopyWebpackPlugin([
+      {from: "src/webapp/webapp_home.html", to: "../webapp_home.html"}
     ])
   ]
 };

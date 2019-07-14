@@ -75,6 +75,9 @@ func Register(
 	router.OPTIONS("/admin_panel")
 	router.GET("/admin_panel/*any", hw.wrapHandlerHTML(controller.GetAdminPanel, false))
 
+	router.OPTIONS("/web")
+	router.GET("/web/*any", hw.wrapHandlerHTML(controller.GetWebapp, false))
+
 	// Render a page to make it easy to send notification campaigns
 	router.OPTIONS("/notification_console")
 	router.GET("/notification_console", hw.wrapHandlerHTML(controller.GetNotificationManagementConsole, false))
