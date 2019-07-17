@@ -72,8 +72,11 @@ func Register(
 	router.Static("/assets", "web/dist/assets/")
 
 	// Html login page
-	router.OPTIONS("/login_page")
-	router.GET("/login_page", hw.wrapHandlerHTML(user.RenderLoginPage, false))
+	router.OPTIONS("/admin_panel")
+	router.GET("/admin_panel/*any", hw.wrapHandlerHTML(controller.GetAdminPanel, false))
+
+	router.OPTIONS("/web")
+	router.GET("/web/*any", hw.wrapHandlerHTML(controller.GetWebapp, false))
 
 	// Render a page to make it easy to send notification campaigns
 	router.OPTIONS("/notification_console")

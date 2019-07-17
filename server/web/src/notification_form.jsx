@@ -2,10 +2,8 @@ import {withCookies} from 'react-cookie';
 import React from 'react';
 import locale from 'react-json-editor-ajrm/locale/en';
 import JSONInput from 'react-json-editor-ajrm';
-import { Button, FormGroup, FormControl, ControlLabel, Alert } from "react-bootstrap";
+import { Button, FormGroup, Form, FormControl, ControlLabel, Alert } from "react-bootstrap";
 import {serverUrl} from './config.js'
-
-const FORM_ELEMENT_SIZE = 'small';
 
 class NotificationForm extends React.Component {
   constructor(props) {
@@ -113,45 +111,45 @@ class NotificationForm extends React.Component {
     return (
       <div className="notification-form">
         <h2>Notification Management Console</h2>
-        <form onSubmit={this.onSubmit}>
-          <FormGroup controlId="title" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Title</ControlLabel>
-            <FormControl
+        <Form onSubmit={this.onSubmit}>
+          <Form.Group controlId="title" >
+            <Form.Label>Title</Form.Label>
+            <Form.Control
               autoFocus
               value={this.state.notification.title}
               onChange={this.handleChange}
             />
-          </FormGroup>
-          <FormGroup controlId="message" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Message</ControlLabel>
-            <FormControl
+          </Form.Group>
+          <Form.Group controlId="message" >
+            <Form.Label>Message</Form.Label>
+            <Form.Control
               value={this.state.notification.message}
               onChange={this.handleChange}
             />
-          </FormGroup>
-          <FormGroup controlId="templatePath" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Template</ControlLabel>
-            <FormControl
+          </Form.Group>
+          <Form.Group controlId="templatePath" >
+            <Form.Label>Template</Form.Label>
+            <Form.Control
               value={this.state.notification.templatePath}
               onChange={this.handleChange}
             />
-          </FormGroup>
-          <FormGroup controlId="groupId" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Group ID</ControlLabel>
-            <FormControl
+          </Form.Group>
+          <Form.Group controlId="groupId" >
+            <Form.Label>Group ID</Form.Label>
+            <Form.Control
               value={this.state.notification.groupId}
               onChange={this.handleChange}
             />
-          </FormGroup>
-          <FormGroup controlId="runId" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Run ID</ControlLabel>
-            <FormControl
+          </Form.Group>
+          <Form.Group controlId="runId" >
+            <Form.Label>Run ID</Form.Label>
+            <Form.Control
               value={this.state.notification.runId}
               onChange={this.handleChange}
             />
-          </FormGroup>
-          <FormGroup controlId="templateMetadata" bsSize={FORM_ELEMENT_SIZE}>
-            <ControlLabel>Data</ControlLabel>
+          </Form.Group>
+          <Form.Group controlId="templateMetadata" >
+            <Form.Label>Data</Form.Label>
             <JSONInput
               id='notification-content-editor'
               locale={ locale }
@@ -160,15 +158,14 @@ class NotificationForm extends React.Component {
               value={this.state.notification.templateMetadata}
               height='100px'
             />
-          </FormGroup>
+          </Form.Group>
           <Button
             block
-            bsSize="large"
             disabled={!this.validateForm()}
             type="submit">
             Send
           </Button>
-        </form>
+        </Form>
         <div className="message-container">
           {alert}
         </div>
