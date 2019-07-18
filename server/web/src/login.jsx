@@ -4,7 +4,7 @@ import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } 
 import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPathWeb, signupPathWeb} from './routes.js';
+import {landingPathWeb, signupPathWeb, signupPath} from './routes.js';
 import {HiveApiService} from './api_controller.js';
 
 const LOGIN_ACTION = 'LOGIN';
@@ -27,6 +27,10 @@ export function loginReducer(state = initialState, action) {
     }
 }
 
+/**
+ * Props:
+ *  - isAdminPage: determine whether this is the admin page
+ */
 export class LoginPage extends React.Component {
     constructor(props) {
         super(props);
@@ -89,6 +93,18 @@ export class LoginPage extends React.Component {
                 alert = (<Alert variant="danger">Failed to login because {this.state.err}</Alert>)
             }
         }
+
+        let signupLink = null;
+        if (!this.props.isAdminPage) {
+            signupLink=(
+                <div>
+                    <h4>Don't have an account?</h4>
+                    <Link to={(this.props.isAdminPage) ? signupPath : signupPathWeb}>
+                        <Button>Signup</Button>
+                    </Link>
+                </div>
+            );
+        }
         return (
             <Container>
                 <Form onSubmit={this.onSubmit}>
@@ -120,12 +136,7 @@ export class LoginPage extends React.Component {
                 <div className="message-container">
                     {alert}
                 </div>
-                <div>
-                    <h4>Don't have an account?</h4>
-                    <Link to={signupPathWeb}>
-                        <Button>Signup</Button>
-                    </Link>
-                </div>
+                {signupLink}
             </Container>
         );
     }

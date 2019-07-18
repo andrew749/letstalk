@@ -38,9 +38,9 @@ store.subscribe(() => {
 
 // Specialized AuthenticatedRoute component for the normal login page.
 const AuthenticatedRouteWebapp = (props) => {
-    return <AuthenticatedRoute 
+    return <AuthenticatedRoute
         loginPath={loginPathWeb}
-        {...props} 
+        {...props}
         />;
 }
 
@@ -52,7 +52,7 @@ class App extends React.Component {
                     <HiveHeader />
                     <Switch>
                         <Route path={loginPathWeb} component={LoginPage} />
-                        <Route path={signupPathWeb} component={SignupPage} />
+                        <Route path={signupPathWeb} component={SignupPage} isAdminPage={false} />
                         <AuthenticatedRouteWebapp path={registerWithGroupPathWeb} component={GroupRegisterPage} />
                         <AuthenticatedRouteWebapp exact path={landingPathWeb} component={LandingPage} />
                     </Switch>

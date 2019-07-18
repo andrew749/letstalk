@@ -7,6 +7,7 @@ import {withCookies} from 'react-cookie';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import LoginPage, {loginReducer} from './login.jsx';
+import SignupPage, {signupReducer} from './signup.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
 import LandingPage from './landing.jsx';
 import DeleteUserToolPage from './user_delete_tool.jsx';
@@ -15,11 +16,12 @@ import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, got
 import {HiveApiService} from './api_controller.js';
 
 import AuthenticatedRoute from './authenticate_component.jsx';
-import { loginPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath } from './routes.js';
+import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath } from './routes.js';
 import HiveToolTemplate from './hive_tool_template.jsx';
 
 const reducers = combineReducers({
     loginReducer,
+    signupReducer,
     getManagedGroupsReducer
 });
 
@@ -40,7 +42,7 @@ store.subscribe(() => {
     let shouldFetchGroups = getShouldFetchGroups(store.getState());
     if (!!shouldFetchGroups) {
         HiveApiService.fetchGroups(
-            () => {store.dispatch(fetchingGroupsAction())}, 
+            () => {store.dispatch(fetchingGroupsAction())},
             (data) => {store.dispatch(gotGroupsAction(data.Result.managedGroups))},
             (err) => {store.dispatch(errorFetchingGroupsAction(err))}
         );
@@ -49,9 +51,9 @@ store.subscribe(() => {
 
 
 // Specialize the general AuthenticatedRoute component to work with admin login page.
-const AuthenticatedRouteAdmin = (props) => 
-    <AuthenticatedRoute 
-        loginPath={loginPath} 
+const AuthenticatedRouteAdmin = (props) =>
+    <AuthenticatedRoute
+        loginPath={loginPath}
         {...props}
         />;
 
@@ -62,7 +64,8 @@ class App extends React.Component {
                 <BrowserRouter>
                     <HiveToolTemplate />
                     <Switch>
-                        <Route path={loginPath} component={LoginPage} />
+                        <Route path={loginPath} render={(props) => <LoginPage {...props} isAdminPage={true} />} />
+                        <Route path={signupPath} render={(props) => <SignupPage {...props} isAdminPage={true} />}  />
                         <AuthenticatedRouteAdmin exact path={landingPath} component={LandingPage} />
                         <AuthenticatedRouteAdmin path={adhocAddToolPath} component={AdhocAddPage} />
                         <AuthenticatedRouteAdmin path={deleteUserToolPath} component={DeleteUserToolPage} />
