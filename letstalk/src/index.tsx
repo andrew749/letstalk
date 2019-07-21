@@ -58,6 +58,7 @@ import navService from './services/navigation-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
 import { AsyncStorage } from 'react-native';
+import { BASE_URL as server } from './services/constants';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -169,6 +170,8 @@ const createTabView = () => TabNavigator({
   tabBarComponent: TabBar,
 });
 
+const emptyView = () => <View/>;
+
 const createAppNavigation = (initialRouteName: string) => StackNavigator({
   AddPosition: {
     screen: AddPositionView,
@@ -183,7 +186,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     path: 'AddSimpleTrait',
   },
   BlankDoNotUse: {
-    screen: View
+    screen: emptyView
   },
   ChangeCohort: {
     screen: ChangeCohortView
@@ -313,10 +316,16 @@ class App extends React.Component<Props, AppState> {
       // TODO: refactor to use navigation service
       this.notificationService.setNavContainer(navContainer);
     }
+
+    let debugInfo;
+    if (__DEV__) {
+      debugInfo = <Text>{`Server: ${server}`}</Text>;
+    }
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
           <AppNavigation uriPrefix={prefix} ref={addNavContainer} />
+          {debugInfo}
           <NotificationComponent
             ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
             notificationBodyComponent={ NotificationBody }

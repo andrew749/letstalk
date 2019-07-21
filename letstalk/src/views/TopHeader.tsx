@@ -10,7 +10,7 @@ import {
   BackHandler,
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 import {
   NavigationScreenProp,
   NavigationRoute,

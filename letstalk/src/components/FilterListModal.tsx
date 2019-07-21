@@ -1,7 +1,6 @@
 import Immutable from 'immutable';
 import fuzzysearch from 'fuzzysearch';
 import Fuse from 'fuse-js-latest';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import React, { Component, ReactNode } from 'react';
 import {
@@ -17,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 
 import {
   SearchBar,

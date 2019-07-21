@@ -6,7 +6,7 @@
     "icon": "./src/img/logo.png",
     "version": "1.0.1",
     "slug": "hive-alpha",
-    "sdkVersion": "27.0.0",
+    "sdkVersion": "32.0.0",
     "ios": {
       "icon": "./src/img/logo.png",
       "bundleIdentifier": "org.hiveapp.hive",
@@ -34,11 +34,6 @@
       "icon": "./src/img/notification_icon.png"
     },
     "packagerOpts": {
-      "sourceExts": [
-        "ts",
-        "tsx"
-      ],
-      "transformer": "node_modules/react-native-typescript-transformer/index.js"
     },
     "orientation": "portrait",
     "scheme": "hive"
