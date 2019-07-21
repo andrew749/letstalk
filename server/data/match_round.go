@@ -49,7 +49,7 @@ type MatchRound struct {
 	GroupId TGroupID `gorm:"not null"`
 
 	// Data mainly for debugging purposes since the parameters of the run aren't passed to jobmine
-	MatchParameters MatchParameters `gorm:"type:text,not null"`
+	MatchParameters MatchParameters `gorm:"type:text;not null"`
 
 	// RunId for the CommitMatchRound job associated with this match round. If this is null, it means
 	// that the job has not yet been created (i.e. admin has not yet committed the match round).

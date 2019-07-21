@@ -564,6 +564,18 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add match round data models",
+			Migrate: func(tx *gorm.DB) error {
+				if err := tx.AutoMigrate(MatchRound{}).Error; err != nil {
+					return err
+				}
+				return tx.AutoMigrate(MatchRoundMatch{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
