@@ -9,8 +9,7 @@ type UserGroup struct {
 }
 
 type AddUserGroupRequest struct {
-	GroupId   data.TGroupID `json:"groupId"`
-	GroupName string        `json:"groupName"`
+	GroupId data.TGroupID `json:"groupId"`
 }
 
 type RemoveUserGroupRequest struct {

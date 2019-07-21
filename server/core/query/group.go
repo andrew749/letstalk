@@ -98,12 +98,10 @@ func AddUserGroup(
 	db *gorm.DB,
 	userId data.TUserID,
 	groupId data.TGroupID,
-	groupName string,
 ) (*data.UserGroup, errs.Error) {
 	userGroup := data.UserGroup{
-		UserId:    userId,
-		GroupId:   groupId,
-		GroupName: groupName,
+		UserId:  userId,
+		GroupId: groupId,
 	}
 	var group data.Group
 	res := db.Where(&data.Group{GroupId: groupId}).First(&group)
@@ -111,7 +109,7 @@ func AddUserGroup(
 		return nil, errs.NewRequestError("Invalid group id.")
 	}
 
-	if err := db.Where(&data.UserGroup{UserId: userId, GroupId: groupId}).FirstOrCreate(&userGroup).Error; err != nil {
+	if err := db.Where(&data.UserGroup{UserId: userId, GroupId: groupId, GroupName: group.GroupName}).FirstOrCreate(&userGroup).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 	return &userGroup, nil
@@ -141,7 +139,7 @@ func EnrollUserInManagedGroup(db *gorm.DB, userId data.TUserID, groupId data.TGr
 		return errs.NewInternalError(err.Error())
 	}
 	// The group exists for the mapping
-	_, err := AddUserGroup(db, userId, managedGroup.Group.GroupId, managedGroup.Group.GroupName)
+	_, err := AddUserGroup(db, userId, managedGroup.Group.GroupId)
 	return err
 }
 
@@ -178,6 +176,6 @@ func GetManagedGroups(
 	if err := db.Where(&data.ManagedGroup{AdministratorId: adminUserID}).Preload("Group").Find(&groups).Error; err != nil {
 		return nil, errs.NewInternalError(err.Error())
 	}
-	rlog.Info("%+v", groups)
+	rlog.Infof("%+v", groups)
 	return groups, nil
 }

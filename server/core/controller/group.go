@@ -19,21 +19,20 @@ func AddUserGroupController(c *ctx.Context) errs.Error {
 	}
 	groupSurvey := survey.GetSurveyDefinitionByGroupId(req.GroupId)
 	if groupSurvey == nil {
-		return errs.NewRequestError(fmt.Sprintf("No survey for the %s group", req.GroupName))
+		return errs.NewRequestError(fmt.Sprintf("No survey for the %s group", req.GroupId))
 	}
 	survey, dbErr := query.GetSurvey(c.Db, c.SessionData.UserId, groupSurvey.Group)
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-	userGroup, err := query.AddUserGroup(c.Db, c.SessionData.UserId, req.GroupId, req.GroupName)
+	userGroup, err := query.AddUserGroup(c.Db, c.SessionData.UserId, req.GroupId)
 	if err != nil {
 		return err
 	}
 	c.Result = &api.UserGroupSurvey{
 		UserGroup: api.UserGroup{
-			Id:        userGroup.Id,
-			GroupId:   userGroup.GroupId,
-			GroupName: userGroup.GroupName,
+			Id:      userGroup.Id,
+			GroupId: userGroup.GroupId,
 		},
 		Survey: *survey,
 	}
