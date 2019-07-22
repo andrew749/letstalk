@@ -79,7 +79,7 @@ func CreateNotification(
 		Title:         title,
 		Message:       message,
 		ThumbnailLink: thumbnail,
-		Timestamp:     createdAt,
+		Timestamp:     &createdAt,
 		Link:          &link,
 		RunId:         runId,
 	}
