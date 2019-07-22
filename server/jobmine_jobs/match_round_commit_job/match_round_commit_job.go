@@ -186,9 +186,6 @@ func CreateCommitJob(
 	}).Error; err != nil {
 		return nil, err
 	}
-	if err != nil {
-		return nil, err
-	}
 
 	return &runId, nil
 }

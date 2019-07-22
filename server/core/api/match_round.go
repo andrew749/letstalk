@@ -21,6 +21,10 @@ type CreateMatchRoundRequest struct {
 	UserIds []data.TUserID `json:"userIds" binding:"required"`
 }
 
+type CommitMatchRoundRequest struct {
+	MatchRoundId data.TMatchRoundID `json:"matchRoundId" binding:"required"`
+}
+
 // Doesn't enforce that cohort exists so that we are more liberal with which type of users are
 // accepted for a match.
 type MatchUser struct {

@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/jobmine_jobs/match_round_commit_job"
 	"letstalk/server/recommendations"
 	"time"
 
@@ -84,6 +85,58 @@ func handleCreateMatchRound(
 	)
 
 	return matchRound, nil
+}
+
+// Controller for commit_match_round admin endpoint
+// Creates the job to commit the match round, updates the match round model and returns.
+func CommitMatchRoundController(c *ctx.Context) errs.Error {
+	var request api.CommitMatchRoundRequest
+	if err := c.GinContext.BindJSON(&request); err != nil {
+		return errs.NewRequestError("Failed to parse input")
+	}
+
+	err := handleCommitMatchRound(
+		c.Db,
+		c.SessionData.UserId,
+		request.MatchRoundId,
+	)
+	if err != nil {
+		return err
+	}
+
+	c.Result = "Success"
+	return nil
+}
+
+func handleCommitMatchRound(
+	db *gorm.DB,
+	userId data.TUserID,
+	matchRoundId data.TMatchRoundID,
+) errs.Error {
+	// TODO(match-api): Check that user is authorized to commit this round
+	err := ctx.WithinTx(db, func(db *gorm.DB) error {
+		runId, err := match_round_commit_job.CreateCommitJob(db, matchRoundId)
+		if err != nil {
+			return err
+		}
+
+		var matchRound data.MatchRound
+		if err := db.Where(&data.MatchRound{Id: matchRoundId}).Find(&matchRound).Error; err != nil {
+			return err
+		}
+
+		matchRound.RunId = runId
+		if err := db.Save(&matchRound).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return errs.NewDbError(err)
+	}
+
+	return nil
 }
 
 func createMatchParameters(
