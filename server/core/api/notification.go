@@ -13,7 +13,7 @@ type Notification struct {
 	State          data.NotifState        `json:"state"`
 	Title          string                 `json:"title"`
 	Message        string                 `json:"message"`
-	Timestamp      time.Time              `json:"timestamp"`
+	Timestamp      *time.Time             `json:"timestamp"`
 	ThumbnailLink  *string                `json:"thumbnail"`
 	Data           map[string]interface{} `json:"data"`
 	Link           *string                `json:"link"`
