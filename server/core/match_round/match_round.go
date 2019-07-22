@@ -21,7 +21,7 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError("Failed to parse input")
 	}
 
-	err := handleCreateMatchRound(
+	matchRound, err := handleCreateMatchRound(
 		c.Db,
 		request.Parameters.MaxLowerYearsPerUpperYear,
 		request.Parameters.MaxUpperYearsPerLowerYear,
@@ -33,6 +33,7 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 		return err
 	}
 
+	c.Result = matchRound
 	return nil
 }
 
@@ -43,9 +44,9 @@ func handleCreateMatchRound(
 	youngestUpperGradYear uint,
 	groupId data.TGroupID,
 	userIds []data.TUserID,
-) errs.Error {
+) (*api.MatchRound, errs.Error) {
 	if userIds == nil {
-		return errs.NewRequestError("Expected non-nil user ids")
+		return nil, errs.NewRequestError("Expected non-nil user ids")
 	}
 
 	// TODO(match-api): Check if users are in given group
@@ -62,11 +63,11 @@ func handleCreateMatchRound(
 	if err != nil {
 		errStr := fmt.Sprintf("Error when generating matches, %+v", err)
 		rlog.Error(errStr)
-		return errs.NewRequestError(errStr)
+		return nil, errs.NewRequestError(errStr)
 	}
 
 	if len(matches) == 0 {
-		return errs.NewRequestError("Parameters result in no matches")
+		return nil, errs.NewRequestError("Parameters result in no matches")
 	}
 
 	parameters := createMatchParameters(
@@ -75,15 +76,14 @@ func handleCreateMatchRound(
 		youngestUpperGradYear,
 	)
 
-	_, err = createMatchRound(
+	matchRound, err := createMatchRound(
 		db,
 		groupId,
 		matches,
 		parameters,
 	)
-	// TODO(match-api): Make this return the users matched to each other (first/last names and programs)
 
-	return nil
+	return matchRound, nil
 }
 
 func createMatchParameters(
