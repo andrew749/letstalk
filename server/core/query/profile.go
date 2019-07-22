@@ -2,6 +2,7 @@ package query
 
 import (
 	"letstalk/server/core/api"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -96,15 +97,7 @@ func GetProfile(
 	}
 
 	userModel := api.ProfileResponse{
-		UserPersonalInfo: api.UserPersonalInfo{
-			UserId:     userId,
-			FirstName:  user.FirstName,
-			LastName:   user.LastName,
-			Gender:     user.Gender,
-			Birthdate:  user.Birthdate,
-			Secret:     user.Secret,
-			ProfilePic: user.ProfilePic,
-		},
+		UserPersonalInfo: converters.ApiUserPersonalInfoFromDataUser(user),
 		UserContactInfo: api.UserContactInfo{
 			Email: email,
 		},

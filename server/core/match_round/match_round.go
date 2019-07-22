@@ -3,6 +3,7 @@ package match_round
 import (
 	"fmt"
 	"letstalk/server/core/api"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
@@ -104,13 +105,15 @@ func generateMatchRoundName(groupId data.TGroupID) string {
 	return fmt.Sprintf("%s: %s", groupName, now.Format("2006-01-02 at 15:04:05"))
 }
 
+// Assumes matches is non-empty
 func createMatchRound(
 	db *gorm.DB,
 	groupId data.TGroupID,
 	matches []recommendations.UserMatch,
 	parameters data.MatchParameters,
-) (*data.MatchRound, error) {
+) (*api.MatchRound, error) {
 	var matchRound *data.MatchRound
+	var roundMatches []data.MatchRoundMatch
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
 		matchRound = &data.MatchRound{
@@ -124,7 +127,7 @@ func createMatchRound(
 			return err
 		}
 
-		roundMatches := make([]data.MatchRoundMatch, 0, len(matches))
+		roundMatches = make([]data.MatchRoundMatch, 0, len(matches))
 		for _, match := range matches {
 			roundMatches = append(roundMatches, data.MatchRoundMatch{
 				MatchRoundId: matchRound.Id,
@@ -144,5 +147,24 @@ func createMatchRound(
 		return nil, err
 	}
 
-	return matchRound, nil
+	// Not sure how to avoid reloading the match round matches here, since Preload assumes you're
+	// loading in new data.
+	var matchRoundMatches []data.MatchRoundMatch
+
+	err = db.Preload(
+		"MenteeUser.Cohort.Cohort",
+	).Preload(
+		"MentorUser.Cohort.Cohort",
+	).Where(
+		&data.MatchRoundMatch{MatchRoundId: matchRound.Id},
+	).Find(&matchRoundMatches).Error
+
+	// NOTE: Will not get not found error since we are guaranteed to have at least one match
+	// Look at error checking in `handleCreateMatchRound`.
+	if err != nil {
+		return nil, err
+	}
+
+	apiMatchRound := converters.ApiMatchRoundFromDataEntities(matchRound, matchRoundMatches)
+	return &apiMatchRound, nil
 }

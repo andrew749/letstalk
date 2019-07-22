@@ -20,3 +20,22 @@ type CreateMatchRoundRequest struct {
 	// This endpoint checks that the users are in the given group
 	UserIds []data.TUserID `json:"userIds" binding:"required"`
 }
+
+// Doesn't enforce that cohort exists so that we are more liberal with which type of users are
+// accepted for a match.
+type MatchUser struct {
+	User   UserPersonalInfo `json:"user" binding:"required"`
+	Cohort *CohortV2        `json:"cohort"`
+}
+
+type MatchRoundMatch struct {
+	Mentee MatchUser `json:"mentee" binding:"required"`
+	Mentor MatchUser `json:"mentor" binding:"required"`
+	Score  float32   `json:"score" binding:"required"`
+}
+
+type MatchRound struct {
+	MatchRoundId data.TMatchRoundID `json:"matchRoundId" binding:"required"`
+	Name         string             `json:"name" binding:"required"`
+	Matches      []MatchRoundMatch  `json:"matches" binding:"required"`
+}
