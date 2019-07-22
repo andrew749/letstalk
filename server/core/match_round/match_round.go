@@ -10,6 +10,7 @@ import (
 	"letstalk/server/jobmine"
 	"letstalk/server/jobmine_jobs/match_round_commit_job"
 	"letstalk/server/recommendations"
+	"strconv"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -143,6 +144,7 @@ func handleCommitMatchRound(
 // Controller for GET match_rounds admin endpoint
 // Returns match rounds for a given group, including matches in that match round and its status
 func GetMatchRoundsController(c *ctx.Context) errs.Error {
+	// TODO(match-api): Check that user is authorized to get match rounds for this group
 	// TODO(match-api): Figure out if this is the right ID after Andrew's changes, might require
 	// conversion checking.
 	groupId := data.TGroupID(c.GinContext.Param("groupId"))
@@ -185,6 +187,39 @@ func handleGetMatchRounds(
 			apiMatchRounds, converters.ApiMatchRoundFromDataEntities(&matchRound, state))
 	}
 	return apiMatchRounds, nil
+}
+
+// Controller for DELETE match_round endpoint
+func DeleteMatchRoundController(c *ctx.Context) errs.Error {
+	matchRoundIdStr := c.GinContext.Param("matchRoundId")
+	tempMatchRoundId, convErr := strconv.Atoi(matchRoundIdStr)
+	matchRoundId := data.TMatchRoundID(tempMatchRoundId)
+
+	if convErr != nil {
+		return errs.NewRequestError(convErr.Error())
+	}
+
+	if err := handleDeleteMatchRound(c.Db, c.SessionData.UserId, matchRoundId); err != nil {
+		return err
+	}
+
+	c.Result = "Success"
+	return nil
+}
+
+func handleDeleteMatchRound(
+	db *gorm.DB,
+	userId data.TUserID,
+	matchRoundId data.TMatchRoundID,
+) errs.Error {
+	// TODO(match-api): Check that user is authorized to delete this match round
+
+	if err := db.Where(&data.MatchRound{Id: matchRoundId}).Delete(
+		&data.MatchRound{},
+	).Error; err != nil {
+		return errs.NewDbError(err)
+	}
+	return nil
 }
 
 func createMatchParameters(
