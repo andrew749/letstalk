@@ -8,7 +8,7 @@ import (
 
 const webappTemplateLink = "webapp_home.html"
 
-// GetAdminPanel Render the admin panel
+// GetWebapp Render the admin panel
 func GetWebapp(ctx *ctx.Context) errs.Error {
 	ctx.GinContext.HTML(http.StatusOK, webappTemplateLink, &map[string]string{})
 	return nil

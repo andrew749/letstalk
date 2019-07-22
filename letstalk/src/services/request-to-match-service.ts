@@ -43,7 +43,6 @@ export interface AddUserPositionRequest {
 }
 export interface AddUserGroupRequest {
   groupId: number;
-  groupName: number;
 }
 interface RemoveUserPositionRequest { userPositionId: number }
 interface RemoveUserSimpleTraitRequest { userSimpleTraitId: number }

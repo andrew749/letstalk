@@ -21,18 +21,14 @@ func TestGetUserByGroupId(t *testing.T) {
 			assert.NoError(t, err)
 			user3, err := test_helpers.CreateTestSetupUser(db, 3)
 			assert.NoError(t, err)
-			_, err = AddUserGroup(
-				db,
-				user1.UserId,
-				"WICS",
-				"Women in Computer Science",
-			)
+			wicsGroup, err := CreateGroup(db, "WICS")
+			assert.NoError(t, err)
+			engGroup, err := CreateGroup(db, "ENG_MENTORSHIP")
 			assert.NoError(t, err)
 			_, err = AddUserGroup(
 				db,
 				user3.UserId,
-				"ENG_MENTORSHIP",
-				"Engineering Mentorship",
+				engGroup.GroupId,
 			)
 			assert.NoError(t, err)
 
@@ -40,11 +36,11 @@ func TestGetUserByGroupId(t *testing.T) {
 				db,
 				nil,
 				[]data.TUserID{user1.UserId, user2.UserId},
-				"WICS",
-				"Women in Computer Science",
+				wicsGroup.GroupId,
+				wicsGroup.GroupName,
 			)
 
-			users, err := GetUsersByGroupId(db, "WICS")
+			users, err := GetUsersByGroupId(db, wicsGroup.GroupId)
 			assert.NoError(t, err)
 			assert.Equal(t, len(users), 2)
 
@@ -63,18 +59,20 @@ func TestUserGroups(t *testing.T) {
 			assert.NoError(t, err)
 			user2, err := test_helpers.CreateTestSetupUser(db, 2)
 			assert.NoError(t, err)
+			wicsGroup, err := CreateGroup(db, "WICS")
+			assert.NoError(t, err)
+			engGroup, err := CreateGroup(db, "ENG_MENTORSHIP")
+			assert.NoError(t, err)
 			_, err = AddUserGroup(
 				db,
 				user1.UserId,
-				"WICS",
-				"Women in Computer Science",
+				wicsGroup.GroupId,
 			)
 			assert.NoError(t, err)
 			_, err = AddUserGroup(
 				db,
 				user2.UserId,
-				"ENG_MENTORSHIP",
-				"Engineering Mentorship",
+				engGroup.GroupId,
 			)
 			assert.NoError(t, err)
 
@@ -83,8 +81,8 @@ func TestUserGroups(t *testing.T) {
 			assert.Equal(t, len(userGroups), 1)
 
 			assert.Equal(t, userGroups[0].UserId, user1.UserId)
-			assert.Equal(t, userGroups[0].GroupId, data.TGroupID("WICS"))
-			assert.Equal(t, userGroups[0].GroupName, "Women in Computer Science")
+			assert.Equal(t, userGroups[0].GroupId, wicsGroup.GroupId)
+			assert.Equal(t, userGroups[0].GroupName, "WICS")
 		},
 		TestName: "Test get user groups by user id",
 	}
@@ -97,11 +95,13 @@ func TestCreateUserGroupsMissingUsers(t *testing.T) {
 			user1, err := test_helpers.CreateTestSetupUser(db, 1)
 			assert.NoError(t, err)
 
+			group, err := CreateGroup(db, "WICS")
+			assert.NoError(t, err)
 			err = CreateUserGroups(
 				db,
 				nil,
 				[]data.TUserID{user1.UserId, user1.UserId + 1},
-				"WICS",
+				group.GroupId,
 				"Women in Computer Science",
 			)
 			assert.Error(t, err)
@@ -122,21 +122,18 @@ func TestAddUserGroup(t *testing.T) {
 			user1, err := test_helpers.CreateTestSetupUser(db, 1)
 			assert.NoError(t, err)
 
-			userGroup, err := AddUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")
+			group, err := CreateGroup(db, "WICS")
+			assert.NoError(t, err)
+
+			userGroup, err := AddUserGroup(db, user1.UserId, group.GroupId)
 			assert.NoError(t, err)
 			assert.Equal(t, userGroup.UserId, user1.UserId)
-			assert.Equal(t, userGroup.GroupId, data.TGroupID("WICS"))
-			assert.Equal(t, userGroup.GroupName, "Women in Computer Science")
+			assert.Equal(t, userGroup.GroupName, "WICS")
 
-			_, err = AddUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")
-			assert.Error(t, err)
-			assert.Equal(
-				t,
-				err.Error(),
-				fmt.Sprintf("You are already a part of the Women in Computer Science group"),
-			)
+			_, err = AddUserGroup(db, user1.UserId, group.GroupId)
+			assert.NoError(t, err)
 		},
-		TestName: "Tests add user group and that we return an error if user group already exists",
+		TestName: "Tests add user to group and that we don't return an error if user is already part of the group",
 	}
 	test.RunTestWithDb(thisTest)
 }
@@ -147,7 +144,10 @@ func TestRemoveUserGroup(t *testing.T) {
 			user1, err := test_helpers.CreateTestSetupUser(db, 1)
 			assert.NoError(t, err)
 
-			userGroup, err := AddUserGroup(db, user1.UserId, "WICS", "Women in Computer Science")
+			group, err := CreateGroup(db, "WICS")
+			assert.NoError(t, err)
+
+			userGroup, err := AddUserGroup(db, user1.UserId, group.GroupId)
 			assert.NoError(t, err)
 
 			var userGroups []data.UserGroup
