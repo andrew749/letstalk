@@ -29,10 +29,10 @@ func apiMatchRoundMatchFromData(matchRound *data.MatchRoundMatch) api.MatchRound
 
 func ApiMatchRoundFromDataEntities(
 	matchRound *data.MatchRound,
-	matches []data.MatchRoundMatch,
+	state api.MatchRoundState,
 ) api.MatchRound {
-	apiMatches := make([]api.MatchRoundMatch, 0, len(matches))
-	for _, match := range matches {
+	apiMatches := make([]api.MatchRoundMatch, 0, len(matchRound.Matches))
+	for _, match := range matchRound.Matches {
 		apiMatches = append(apiMatches, apiMatchRoundMatchFromData(&match))
 	}
 
@@ -40,5 +40,6 @@ func ApiMatchRoundFromDataEntities(
 		MatchRoundId: matchRound.Id,
 		Name:         matchRound.Name,
 		Matches:      apiMatches,
+		State:        state,
 	}
 }

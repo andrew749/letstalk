@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
+	"letstalk/server/jobmine"
 	"letstalk/server/jobmine_jobs/match_round_commit_job"
 	"letstalk/server/recommendations"
 	"time"
@@ -139,6 +140,53 @@ func handleCommitMatchRound(
 	return nil
 }
 
+// Controller for GET match_rounds admin endpoint
+// Returns match rounds for a given group, including matches in that match round and its status
+func GetMatchRoundsController(c *ctx.Context) errs.Error {
+	// TODO(match-api): Figure out if this is the right ID after Andrew's changes, might require
+	// conversion checking.
+	groupId := data.TGroupID(c.GinContext.Param("groupId"))
+
+	matchRounds, err := handleGetMatchRounds(
+		c.Db,
+		c.SessionData.UserId,
+		groupId,
+	)
+	if err != nil {
+		return err
+	}
+
+	c.Result = matchRounds
+	return nil
+}
+
+func handleGetMatchRounds(
+	db *gorm.DB,
+	userId data.TUserID,
+	groupId data.TGroupID,
+) ([]api.MatchRound, errs.Error) {
+	var matchRounds []data.MatchRound
+	if err := db.Where(
+		&data.MatchRound{GroupId: groupId},
+	).Preload(
+		"CommitJob",
+	).Preload(
+		"Matches.MenteeUser.Cohort.Cohort",
+	).Preload(
+		"Matches.MentorUser.Cohort.Cohort",
+	).Find(matchRounds).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	apiMatchRounds := make([]api.MatchRound, 0, len(matchRounds))
+	for _, matchRound := range matchRounds {
+		state := getMatchRoundState(&matchRound)
+		apiMatchRounds = append(
+			apiMatchRounds, converters.ApiMatchRoundFromDataEntities(&matchRound, state))
+	}
+	return apiMatchRounds, nil
+}
+
 func createMatchParameters(
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
@@ -149,6 +197,20 @@ func createMatchParameters(
 		"maxUpperYearsPerLowerYear": interface{}(maxUpperYearsPerLowerYear),
 		"youngestUpperGradYear":     interface{}(youngestUpperGradYear),
 	})
+}
+
+func getMatchRoundState(matchRound *data.MatchRound) api.MatchRoundState {
+	if matchRound.CommitJob == nil {
+		return api.MATCH_ROUND_STATE_CREATED
+	} else if matchRound.CommitJob.Status == jobmine.STATUS_SUCCESS {
+		return api.MATCH_ROUND_STATE_COMMITTED
+	} else if matchRound.CommitJob.Status == jobmine.STATUS_FAILED {
+		return api.MATCH_ROUND_STATE_FAILED
+	} else {
+		// Created or running counts as committings since it happens after the admin has "committed"
+		// the matches. The only difference is whether the jobmine cron has picked it up yet or not.
+		return api.MATCH_ROUND_STATE_COMMITTING
+	}
 }
 
 // TODO(match-api): Use the correct group id/name
@@ -217,7 +279,9 @@ func createMatchRound(
 	if err != nil {
 		return nil, err
 	}
+	matchRound.Matches = matchRoundMatches
 
-	apiMatchRound := converters.ApiMatchRoundFromDataEntities(matchRound, matchRoundMatches)
+	apiMatchRound := converters.ApiMatchRoundFromDataEntities(
+		matchRound, api.MATCH_ROUND_STATE_CREATED)
 	return &apiMatchRound, nil
 }

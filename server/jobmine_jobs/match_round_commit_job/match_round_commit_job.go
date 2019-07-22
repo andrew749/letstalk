@@ -70,6 +70,7 @@ func execute(
 	if err != nil {
 		return nil, err
 	}
+	// TODO(match-api): Annotate connection with group that was used to create it.
 
 	mentor, err := query.GetUserById(db, userMatch.mentorId)
 	if err != nil {

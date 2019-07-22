@@ -53,7 +53,11 @@ type MatchRound struct {
 
 	// RunId for the CommitMatchRound job associated with this match round. If this is null, it means
 	// that the job has not yet been created (i.e. admin has not yet committed the match round).
-	RunId *string `gorm:"null"`
+	RunId     *string    `gorm:"null"`
+	CommitJob *JobRecord `gorm:"foreignkey:RunId;association_foreignkey:RunId"`
+
+	// So that we can pull matches for this round
+	Matches []MatchRoundMatch `gorm:"foreignkey:MatchRoundId;association_foreignkey:Id"`
 
 	Times
 

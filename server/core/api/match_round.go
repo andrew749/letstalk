@@ -2,6 +2,15 @@ package api
 
 import "letstalk/server/data"
 
+type MatchRoundState string
+
+const (
+	MATCH_ROUND_STATE_CREATED    MatchRoundState = "CREATED"
+	MATCH_ROUND_STATE_COMMITTING                 = "COMMITTING"
+	MATCH_ROUND_STATE_COMMITTED                  = "COMMITTED"
+	MATCH_ROUND_STATE_FAILED                     = "FAILED"
+)
+
 type MatchRoundParameters struct {
 	MaxLowerYearsPerUpperYear uint `json:"maxLowerYearsPerUpperYear" binding:"required"`
 	MaxUpperYearsPerLowerYear uint `json:"maxUpperYearsPerLowerYear" binding:"required"`
@@ -42,4 +51,5 @@ type MatchRound struct {
 	MatchRoundId data.TMatchRoundID `json:"matchRoundId" binding:"required"`
 	Name         string             `json:"name" binding:"required"`
 	Matches      []MatchRoundMatch  `json:"matches" binding:"required"`
+	State        MatchRoundState    `json:"status" binding:"required"`
 }
