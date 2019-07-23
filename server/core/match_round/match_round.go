@@ -214,12 +214,26 @@ func handleDeleteMatchRound(
 ) errs.Error {
 	// TODO(match-api): Check that user is authorized to delete this match round
 
-	if err := db.Where(&data.MatchRound{Id: matchRoundId}).Delete(
-		&data.MatchRound{},
-	).Error; err != nil {
-		return errs.NewDbError(err)
-	}
-	return nil
+	return ctx.WithinTxRequestErr(db, func(db *gorm.DB) errs.Error {
+		var matchRound data.MatchRound
+		if err := db.Where(
+			&data.MatchRound{Id: matchRoundId},
+		).Preload("CommitJob").Find(&matchRound).Error; err != nil {
+			return errs.NewDbError(err)
+		}
+
+		state := getMatchRoundState(&matchRound)
+		if state != api.MATCH_ROUND_STATE_CREATED {
+			return errs.NewRequestError(fmt.Sprintf("Cannot delete match round in %s state", state))
+		}
+
+		if err := db.Where(&data.MatchRound{Id: matchRoundId}).Delete(
+			&data.MatchRound{},
+		).Error; err != nil {
+			return errs.NewDbError(err)
+		}
+		return nil
+	})
 }
 
 func createMatchParameters(
