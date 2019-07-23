@@ -39,7 +39,6 @@ func AddMentorshipController(c *ctx.Context) errs.Error {
 	return nil
 }
 
-// TODO(wojtechnology): Give this a more explicit public interface.
 func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs.Error {
 	var mentor, mentee *data.User
 	var err errs.Error
@@ -57,7 +56,7 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
 	tx := db.Begin()
-	if err := AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType); err != nil {
+	if err := AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType, nil); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -72,6 +71,7 @@ func AddMentorship(
 	mentorUserId data.TUserID,
 	menteeUserId data.TUserID,
 	requestType api.CreateMentorshipType,
+	matchRoundId *data.TMatchRoundID,
 ) errs.Error {
 	if mentorUserId == menteeUserId {
 		return errs.NewRequestError("mentor and mentee user must be different")
@@ -88,6 +88,7 @@ func AddMentorship(
 	mentorship := data.Mentorship{
 		MentorUserId: mentorUserId,
 		CreatedAt:    createdAt,
+		MatchRoundId: matchRoundId,
 	}
 	conn := data.Connection{
 		UserOneId:  mentorUserId,

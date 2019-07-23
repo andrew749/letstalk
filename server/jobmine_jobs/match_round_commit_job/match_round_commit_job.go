@@ -61,16 +61,22 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
+	matchRoundId, err := getMatchRoundIdFromJobRecord(jobRecord)
+	if err != nil {
+		return nil, err
+	}
+
 	userMatch, err := parseUserInfo(taskRecord)
 	if err != nil {
 		return nil, err
 	}
+
 	err = connection.AddMentorship(
-		db, userMatch.mentorId, userMatch.menteeId, api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
+		db, userMatch.mentorId, userMatch.menteeId,
+		api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN, &matchRoundId)
 	if err != nil {
 		return nil, err
 	}
-	// TODO(match-api): Annotate connection with group that was used to create it.
 
 	mentor, err := query.GetUserById(db, userMatch.mentorId)
 	if err != nil {

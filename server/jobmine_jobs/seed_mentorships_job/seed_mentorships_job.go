@@ -113,7 +113,7 @@ func execute(
 		return nil, err
 	}
 	err = connection.AddMentorship(
-		db, userMatch.mentorId, userMatch.menteeId, api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
+		db, userMatch.mentorId, userMatch.menteeId, api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN, nil)
 	if err != nil {
 		return nil, err
 	}

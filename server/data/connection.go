@@ -48,4 +48,6 @@ type Mentorship struct {
 	CreatedAt    time.Time `gorm:"not null"`
 	UpdatedAt    time.Time
 	DeletedAt    *time.Time
+
+	MatchRoundId *TMatchRoundID `gorm:"null"`
 }

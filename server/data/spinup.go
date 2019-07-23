@@ -576,6 +576,15 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add match round id field to mentorships table",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(&Mentorship{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
