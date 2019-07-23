@@ -61,7 +61,7 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
-	matchRoundId, err := getMatchRoundIdFromJobRecord(jobRecord)
+	_, err := getMatchRoundIdFromJobRecord(jobRecord)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func execute(
 
 	err = connection.AddMentorship(
 		db, userMatch.mentorId, userMatch.menteeId,
-		api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN, &matchRoundId)
+		api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
 	if err != nil {
 		return nil, err
 	}
@@ -169,11 +169,11 @@ func createRunId(matchRoundId data.TMatchRoundID) string {
 //
 // NOTE: It is expected that this runs in a transaction to avoid race conditions.
 func CreateCommitJob(
-	db *gorm.DB,
+	tx *gorm.DB,
 	matchRoundId data.TMatchRoundID,
 ) (*string, error) {
 	runId := createRunId(matchRoundId)
-	err := db.Where(&jobmine.JobRecord{RunId: runId}).Find(&data.JobRecord{}).Error
+	err := tx.Where(&jobmine.JobRecord{RunId: runId}).Find(&data.JobRecord{}).Error
 	if err == nil {
 		return nil, errors.New(
 			fmt.Sprintf("Job record for match round %d already exists", matchRoundId),
@@ -185,7 +185,7 @@ func CreateCommitJob(
 	metadata := map[string]interface{}{
 		MATCH_ROUND_ID_METADATA_KEY: matchRoundId,
 	}
-	if err := db.Create(&jobmine.JobRecord{
+	if err := tx.Create(&jobmine.JobRecord{
 		JobType:  MATCH_ROUND_COMMIT_JOB,
 		RunId:    runId,
 		Metadata: metadata,

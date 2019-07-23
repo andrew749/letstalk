@@ -56,7 +56,7 @@ func HandleAddMentorship(db *gorm.DB, request *api.CreateMentorshipByEmail) errs
 		return errs.NewNotFoundError("%s %s", noSuchMentorErr, noSuchMenteeErr)
 	}
 	tx := db.Begin()
-	if err := AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType, nil); err != nil {
+	if err := AddMentorship(db, mentor.UserId, mentee.UserId, request.RequestType); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -71,7 +71,6 @@ func AddMentorship(
 	mentorUserId data.TUserID,
 	menteeUserId data.TUserID,
 	requestType api.CreateMentorshipType,
-	matchRoundId *data.TMatchRoundID,
 ) errs.Error {
 	if mentorUserId == menteeUserId {
 		return errs.NewRequestError("mentor and mentee user must be different")
@@ -88,7 +87,6 @@ func AddMentorship(
 	mentorship := data.Mentorship{
 		MentorUserId: mentorUserId,
 		CreatedAt:    createdAt,
-		MatchRoundId: matchRoundId,
 	}
 	conn := data.Connection{
 		UserOneId:  mentorUserId,
@@ -107,6 +105,75 @@ func AddMentorship(
 			return errs.NewDbError(err)
 		}
 	}
+	return nil
+}
+
+// More custom method for adding a mentorship used when creating a mentorship using a match round
+// If no connection exists, creates connection, mentorship, connection_match_round
+// If connection exists, but no mentorship, creates connection
+// If connection exists, but no connection_match_round exists for this round, adds
+// connection_match_round
+func AddMatchRoundMentorship(
+	tx *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+	matchRoundId data.TMatchRoundID,
+) error {
+	var conn data.Connection
+	err := tx.Where(
+		"user_one_id = ? AND user_two_id = ? OR user_one_id = ? AND user_two_id",
+		mentorUserId,
+		menteeUserId,
+		menteeUserId,
+		mentorUserId,
+	).Preload("Mentorship").Preload("MatchRounds").Find(&conn).Error
+
+	createdAt := time.Now()
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			conn = data.Connection{
+				UserOneId:  mentorUserId,
+				UserTwoId:  menteeUserId,
+				CreatedAt:  createdAt,
+				AcceptedAt: &createdAt, // Automatically accept.
+			}
+		} else {
+			return err
+		}
+	}
+
+	if conn.Mentorship == nil {
+		conn.Mentorship = &data.Mentorship{
+			MentorUserId: mentorUserId,
+			CreatedAt:    createdAt,
+		}
+	}
+
+	hasMatchRound := false
+	if conn.MatchRounds != nil {
+		for _, matchRound := range conn.MatchRounds {
+			if matchRound.MatchRoundId == matchRoundId {
+				hasMatchRound = true
+			}
+		}
+	}
+
+	err = tx.Save(&conn).Error
+	if err != nil {
+		return err
+	}
+
+	if !hasMatchRound {
+		connMatchRound := &data.ConnectionMatchRound{
+			ConnectionId: conn.ConnectionId,
+			MatchRoundId: matchRoundId,
+		}
+		err = tx.Save(&connMatchRound).Error
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

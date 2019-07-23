@@ -16,9 +16,10 @@ type Connection struct {
 	CreatedAt    time.Time `gorm:"not null"`
 	UpdatedAt    time.Time
 	DeletedAt    *time.Time
-	AcceptedAt   *time.Time        // Null until user two accepts.
-	Intent       *ConnectionIntent `gorm:"foreignkey:ConnectionId"`
-	Mentorship   *Mentorship       `gorm:"foreignkey:ConnectionId"`
+	AcceptedAt   *time.Time             // Null until user two accepts.
+	Intent       *ConnectionIntent      `gorm:"foreignkey:ConnectionId"`
+	Mentorship   *Mentorship            `gorm:"foreignkey:ConnectionId"`
+	MatchRounds  []ConnectionMatchRound `gorm:"foreignkey:ConnectionId"`
 }
 
 type IntentType string
@@ -48,6 +49,12 @@ type Mentorship struct {
 	CreatedAt    time.Time `gorm:"not null"`
 	UpdatedAt    time.Time
 	DeletedAt    *time.Time
+}
 
-	MatchRoundId *TMatchRoundID `gorm:"null"`
+type ConnectionMatchRoundID EntID
+
+type ConnectionMatchRound struct {
+	Id           ConnectionMatchRoundID `gorm:"not null;primary_key"`
+	ConnectionId TConnectionID          `gorm:"not null"`
+	MatchRoundId TMatchRoundID          `gorm:"not null"`
 }

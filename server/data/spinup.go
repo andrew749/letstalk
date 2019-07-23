@@ -577,9 +577,9 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
-			ID: "Add match round id field to mentorships table",
+			ID: "Add connection_match_round table",
 			Migrate: func(tx *gorm.DB) error {
-				return tx.AutoMigrate(&Mentorship{}).Error
+				return tx.AutoMigrate(&ConnectionMatchRound{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
