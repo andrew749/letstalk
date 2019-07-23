@@ -60,6 +60,9 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
+	// Idempotent add - any entities that already exist will not be recreated and we will not fail
+	// If a mentorship exists such that the new (mentor, mentee) pair was actually a (mentee, mentor)
+	// pair, then the direction will not be changed.
 	matchRoundId, err := getMatchRoundIdFromJobRecord(jobRecord)
 	if err != nil {
 		return nil, err

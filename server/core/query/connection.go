@@ -36,7 +36,11 @@ func GetMentorshipDetails(
 ) (*data.Connection, error) {
 	var connection data.Connection
 	q := db.
-		Where(&data.Connection{UserOneId: requestingUser, UserTwoId: connectedUser}).
+		Where(
+			"user_one_id = ? AND user_two_id = ? OR user_one_id = ? AND user_two_id = ?",
+			requestingUser, connectedUser,
+			connectedUser, requestingUser,
+		).
 		Preload("MatchRounds").
 		Preload("Mentorship").
 		First(&connection)

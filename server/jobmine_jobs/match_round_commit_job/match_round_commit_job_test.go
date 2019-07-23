@@ -38,6 +38,7 @@ func TestJobIntegration(t *testing.T) {
 					match{users[3].UserId, users[0].UserId},
 					match{users[4].UserId, users[1].UserId},
 					match{users[5].UserId, users[2].UserId},
+					match{users[6].UserId, users[7].UserId},
 				}
 				for _, match := range expectedMatches {
 					matchRoundMatch := data.MatchRoundMatch{
@@ -49,6 +50,13 @@ func TestJobIntegration(t *testing.T) {
 					err = db.Save(&matchRoundMatch).Error
 					assert.NoError(t, err)
 				}
+
+				// Create some existing connections to see if idempotency works
+				test_helpers.CreateTestConnection(t, db, users[4].UserId, users[1].UserId)
+				connId1 := test_helpers.CreateTestConnection(t, db, users[5].UserId, users[2].UserId)
+				connId2 := test_helpers.CreateTestConnection(t, db, users[6].UserId, users[7].UserId)
+				test_helpers.CreateTestMentorship(t, db, users[5].UserId, connId1)
+				test_helpers.CreateTestConnectionMatchRound(t, db, connId2, matchRound.Id)
 
 				runId, err := CreateCommitJob(db, matchRound.Id)
 				assert.NoError(t, err)
@@ -63,7 +71,7 @@ func TestJobIntegration(t *testing.T) {
 					&data.Connection{},
 				).Preload("Mentorship").Preload("MatchRounds").Find(&connections).Error
 				assert.NoError(t, err)
-				assert.Equal(t, 3, len(connections))
+				assert.Equal(t, len(expectedMatches), len(connections))
 
 				matches := make([]match, 0)
 				for _, connection := range connections {
@@ -71,6 +79,8 @@ func TestJobIntegration(t *testing.T) {
 					assert.NotNil(t, connection.AcceptedAt)
 					matches = append(matches, match{connection.UserOneId, connection.UserTwoId})
 					assert.Equal(t, connection.Mentorship.MentorUserId, connection.UserOneId)
+					assert.Equal(t, 1, len(connection.MatchRounds))
+					assert.Equal(t, matchRound.Id, connection.MatchRounds[0].MatchRoundId)
 				}
 				assert.ElementsMatch(t, expectedMatches, matches)
 			},

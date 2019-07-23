@@ -2,13 +2,13 @@ package connection
 
 import (
 	"testing"
-	"time"
 
 	"letstalk/server/core/api"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/query"
 	"letstalk/server/core/test"
 	"letstalk/server/data"
+	"letstalk/server/test_helpers"
 
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
@@ -96,49 +96,6 @@ func TestAddMentorship(t *testing.T) {
 	test.RunTestsWithDb(tests)
 }
 
-func addConnection(
-	t *testing.T,
-	db *gorm.DB,
-	mentorUserId data.TUserID,
-	menteeUserId data.TUserID,
-) data.TConnectionID {
-	createdAt := time.Now()
-	conn := data.Connection{
-		UserOneId:  mentorUserId,
-		UserTwoId:  menteeUserId,
-		CreatedAt:  createdAt,
-		AcceptedAt: &createdAt, // Automatically accept.
-	}
-	assert.NoError(t, db.Create(&conn).Error)
-	return conn.ConnectionId
-}
-
-func addMentorship(
-	t *testing.T,
-	db *gorm.DB,
-	mentorUserId data.TUserID,
-	connectionId data.TConnectionID,
-) {
-	mentorship := data.Mentorship{
-		ConnectionId: connectionId,
-		MentorUserId: mentorUserId,
-	}
-	assert.NoError(t, db.Create(&mentorship).Error)
-}
-
-func addConnectionMatchRound(
-	t *testing.T,
-	db *gorm.DB,
-	connectionId data.TConnectionID,
-	matchRoundId data.TMatchRoundID,
-) {
-	round := data.ConnectionMatchRound{
-		ConnectionId: connectionId,
-		MatchRoundId: matchRoundId,
-	}
-	assert.NoError(t, db.Create(&round).Error)
-}
-
 func checkAddMatchRoundMentorship(
 	t *testing.T,
 	db *gorm.DB,
@@ -178,7 +135,7 @@ func TestAddMatchRoundMentorship(t *testing.T) {
 				userTwo := user.CreateUserForTest(t, db)
 				matchRoundId := data.TMatchRoundID(10)
 
-				addConnection(t, db, userOne.UserId, userTwo.UserId)
+				test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
 				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
 				assert.NoError(t, err)
 
@@ -192,12 +149,28 @@ func TestAddMatchRoundMentorship(t *testing.T) {
 				userTwo := user.CreateUserForTest(t, db)
 				matchRoundId := data.TMatchRoundID(10)
 
-				connId := addConnection(t, db, userOne.UserId, userTwo.UserId)
-				addMentorship(t, db, userOne.UserId, connId)
+				connId := test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
+				test_helpers.CreateTestMentorship(t, db, userOne.UserId, connId)
 				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
 				assert.NoError(t, err)
 
 				checkAddMatchRoundMentorship(t, db, userOne.UserId, userTwo.UserId, matchRoundId)
+			},
+		},
+		{
+			TestName: "Test only write connection match round opposite dir",
+			Test: func(db *gorm.DB) {
+				// We don't switch the order of the connections when this happens
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				connId := test_helpers.CreateTestConnection(t, db, userTwo.UserId, userOne.UserId)
+				test_helpers.CreateTestMentorship(t, db, userTwo.UserId, connId)
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userTwo.UserId, userOne.UserId, matchRoundId)
 			},
 		},
 		{
@@ -207,8 +180,8 @@ func TestAddMatchRoundMentorship(t *testing.T) {
 				userTwo := user.CreateUserForTest(t, db)
 				matchRoundId := data.TMatchRoundID(10)
 
-				connId := addConnection(t, db, userOne.UserId, userTwo.UserId)
-				addConnectionMatchRound(t, db, connId, matchRoundId)
+				connId := test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
+				test_helpers.CreateTestConnectionMatchRound(t, db, connId, matchRoundId)
 				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
 				assert.NoError(t, err)
 

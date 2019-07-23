@@ -14,6 +14,49 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func CreateTestConnection(
+	t *testing.T,
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+) data.TConnectionID {
+	createdAt := time.Now()
+	conn := data.Connection{
+		UserOneId:  mentorUserId,
+		UserTwoId:  menteeUserId,
+		CreatedAt:  createdAt,
+		AcceptedAt: &createdAt, // Automatically accept.
+	}
+	assert.NoError(t, db.Create(&conn).Error)
+	return conn.ConnectionId
+}
+
+func CreateTestMentorship(
+	t *testing.T,
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	connectionId data.TConnectionID,
+) {
+	mentorship := data.Mentorship{
+		ConnectionId: connectionId,
+		MentorUserId: mentorUserId,
+	}
+	assert.NoError(t, db.Create(&mentorship).Error)
+}
+
+func CreateTestConnectionMatchRound(
+	t *testing.T,
+	db *gorm.DB,
+	connectionId data.TConnectionID,
+	matchRoundId data.TMatchRoundID,
+) {
+	round := data.ConnectionMatchRound{
+		ConnectionId: connectionId,
+		MatchRoundId: matchRoundId,
+	}
+	assert.NoError(t, db.Create(&round).Error)
+}
+
 func CreateTestMatchRound(db *gorm.DB) (*data.MatchRound, error) {
 	matchRound := data.MatchRound{
 		Name:    "Some match round",
