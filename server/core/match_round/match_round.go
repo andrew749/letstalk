@@ -26,6 +26,7 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 
 	matchRound, err := handleCreateMatchRound(
 		c.Db,
+		c.SessionData.UserId,
 		request.Parameters.MaxLowerYearsPerUpperYear,
 		request.Parameters.MaxUpperYearsPerLowerYear,
 		request.Parameters.YoungestUpperGradYear,
@@ -42,17 +43,24 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 
 func handleCreateMatchRound(
 	db *gorm.DB,
+	adminId data.TUserID,
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
 	youngestUpperGradYear uint,
 	groupId data.TGroupID,
 	userIds []data.TUserID,
 ) (*api.MatchRound, errs.Error) {
+	if err := checkIsAdmin(db, adminId, groupId); err != nil {
+		return nil, err
+	}
+
 	if userIds == nil {
 		return nil, errs.NewRequestError("Expected non-nil user ids")
 	}
 
-	// TODO(match-api): Check if users are in given group
+	if err := checkUsersInGroup(db, userIds, groupId); err != nil {
+		return nil, err
+	}
 
 	strat := recommendations.MentorMenteeStrat(
 		maxLowerYearsPerUpperYear,
@@ -112,10 +120,13 @@ func CommitMatchRoundController(c *ctx.Context) errs.Error {
 
 func handleCommitMatchRound(
 	db *gorm.DB,
-	userId data.TUserID,
+	adminId data.TUserID,
 	matchRoundId data.TMatchRoundID,
 ) errs.Error {
-	// TODO(match-api): Check that user is authorized to commit this round
+	if err := checkIsAdminMatchRound(db, adminId, matchRoundId); err != nil {
+		return err
+	}
+
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
 		runId, err := match_round_commit_job.CreateCommitJob(db, matchRoundId)
 		if err != nil {
@@ -144,9 +155,6 @@ func handleCommitMatchRound(
 // Controller for GET match_rounds admin endpoint
 // Returns match rounds for a given group, including matches in that match round and its status
 func GetMatchRoundsController(c *ctx.Context) errs.Error {
-	// TODO(match-api): Check that user is authorized to get match rounds for this group
-	// TODO(match-api): Figure out if this is the right ID after Andrew's changes, might require
-	// conversion checking.
 	groupId := data.TGroupID(c.GinContext.Param("groupId"))
 
 	matchRounds, err := handleGetMatchRounds(
@@ -164,9 +172,13 @@ func GetMatchRoundsController(c *ctx.Context) errs.Error {
 
 func handleGetMatchRounds(
 	db *gorm.DB,
-	userId data.TUserID,
+	adminId data.TUserID,
 	groupId data.TGroupID,
 ) ([]api.MatchRound, errs.Error) {
+	if err := checkIsAdmin(db, adminId, groupId); err != nil {
+		return nil, err
+	}
+
 	var matchRounds []data.MatchRound
 	if err := db.Where(
 		&data.MatchRound{GroupId: groupId},
@@ -209,10 +221,12 @@ func DeleteMatchRoundController(c *ctx.Context) errs.Error {
 
 func handleDeleteMatchRound(
 	db *gorm.DB,
-	userId data.TUserID,
+	adminId data.TUserID,
 	matchRoundId data.TMatchRoundID,
 ) errs.Error {
-	// TODO(match-api): Check that user is authorized to delete this match round
+	if err := checkIsAdminMatchRound(db, adminId, matchRoundId); err != nil {
+		return err
+	}
 
 	return ctx.WithinTxRequestErr(db, func(db *gorm.DB) errs.Error {
 		var matchRound data.MatchRound
@@ -262,9 +276,7 @@ func getMatchRoundState(matchRound *data.MatchRound) api.MatchRoundState {
 	}
 }
 
-// TODO(match-api): Use the correct group id/name
-func generateMatchRoundName(groupId data.TGroupID) string {
-	groupName := string(groupId)
+func generateMatchRoundName(groupName string) string {
 	now := time.Now()
 	return fmt.Sprintf("%s: %s", groupName, now.Format("2006-01-02 at 15:04:05"))
 }
@@ -279,9 +291,15 @@ func createMatchRound(
 	var matchRound *data.MatchRound
 	var roundMatches []data.MatchRoundMatch
 
-	err := ctx.WithinTx(db, func(db *gorm.DB) error {
+	var group data.Group
+	err := db.Where(&data.Group{GroupId: groupId}).Find(&group).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = ctx.WithinTx(db, func(db *gorm.DB) error {
 		matchRound = &data.MatchRound{
-			Name:            generateMatchRoundName(groupId),
+			Name:            generateMatchRoundName(group.GroupName),
 			GroupId:         groupId,
 			MatchParameters: parameters,
 			RunId:           nil,
@@ -333,4 +351,60 @@ func createMatchRound(
 	apiMatchRound := converters.ApiMatchRoundFromDataEntities(
 		matchRound, api.MATCH_ROUND_STATE_CREATED)
 	return &apiMatchRound, nil
+}
+
+func checkIsAdminMatchRound(
+	db *gorm.DB,
+	adminId data.TUserID,
+	matchRoundId data.TMatchRoundID,
+) errs.Error {
+	var matchRound data.MatchRound
+	if err := db.Where(
+		&data.MatchRound{Id: matchRoundId},
+	).Find(&matchRound).Error; err != nil {
+		return errs.NewDbError(err)
+	}
+	return checkIsAdmin(db, adminId, matchRound.GroupId)
+}
+
+func checkIsAdmin(db *gorm.DB, adminId data.TUserID, groupId data.TGroupID) errs.Error {
+	err := db.Where(
+		&data.ManagedGroup{AdministratorId: adminId, GroupId: groupId},
+	).Find(&data.ManagedGroup{}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return errs.NewUnauthorizedError("You do not have rights to do this operation")
+		} else {
+			return errs.NewDbError(err)
+		}
+	}
+	return nil
+}
+
+func checkUsersInGroup(db *gorm.DB, userIds []data.TUserID, groupId data.TGroupID) errs.Error {
+	notInGroup := make([]data.TUserID, 0)
+	var users []data.User
+	if err := db.Where(
+		"user_id IN (?)", userIds,
+	).Preload("UserGroups").Find(&users).Error; err != nil {
+		return errs.NewDbError(err)
+	}
+
+	for _, user := range users {
+		hasGroup := false
+		for _, group := range user.UserGroups {
+			if groupId == group.GroupId {
+				hasGroup = true
+			}
+		}
+
+		if !hasGroup {
+			notInGroup = append(notInGroup, user.UserId)
+		}
+	}
+
+	if len(notInGroup) > 0 {
+		return errs.NewRequestError(fmt.Sprintf("Users not in group: %v", notInGroup))
+	}
+	return nil
 }

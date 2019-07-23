@@ -45,8 +45,8 @@ type MatchRound struct {
 	// Human-understandable name used to reference this match round for admins
 	Name string `gorm:"not null"`
 
-	// TODO(match-api): Figure out if this is the right ID after Andrew's changes
 	GroupId TGroupID `gorm:"not null"`
+	Group   *Group   `gorm:"association_foreignkey:GroupId"`
 
 	// Data mainly for debugging purposes since the parameters of the run aren't passed to jobmine
 	MatchParameters MatchParameters `gorm:"type:text;not null"`
@@ -60,6 +60,4 @@ type MatchRound struct {
 	Matches []MatchRoundMatch `gorm:"foreignkey:MatchRoundId;association_foreignkey:Id"`
 
 	Times
-
-	// TODO(match-api): Add association for the associated group
 }
