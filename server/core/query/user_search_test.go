@@ -339,34 +339,26 @@ func TestSearchUsersByGroup(t *testing.T) {
 			myUser, err := test_helpers.CreateTestSetupUser(db, 3)
 			assert.NoError(t, err)
 
-			userTrait1 := data.UserGroup{
-				UserId:    user1.UserId,
-				GroupId:   data.TGroupID(69),
-				GroupName: "Some name",
-			}
-			err = db.Save(&userTrait1).Error
+			group1, err := CreateGroup(db, "Some name")
 			assert.NoError(t, err)
 
-			userTrait1.Id = 0
-			err = db.Save(&userTrait1).Error
+			ug, err := AddUserGroup(db, user1.UserId, group1.GroupId)
 			assert.NoError(t, err)
 
-			userTrait2 := data.UserGroup{
-				UserId:  user2.UserId,
-				GroupId: data.TGroupID(70),
-			}
-			err = db.Save(&userTrait2).Error
+			err = db.Model(&ug).Update("id", 0).Error
 			assert.NoError(t, err)
 
-			myUserTrait := data.UserGroup{
-				UserId:  myUser.UserId,
-				GroupId: data.TGroupID(69),
-			}
-			err = db.Save(&myUserTrait).Error
+			group2, err := CreateGroup(db, "Some name 2")
+			assert.NoError(t, err)
+
+			_, err = AddUserGroup(db, user2.UserId, group2.GroupId)
+			assert.NoError(t, err)
+
+			_, err = AddUserGroup(db, myUser.UserId, group1.GroupId)
 			assert.NoError(t, err)
 
 			req := api.GroupUserSearchRequest{
-				GroupId:                 data.TGroupID(69),
+				GroupId:                 group1.GroupId,
 				CommonUserSearchRequest: api.CommonUserSearchRequest{Size: 10},
 			}
 			res, err := SearchUsersByGroup(db, req, myUser.UserId)

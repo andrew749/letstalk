@@ -295,6 +295,8 @@ func Register(
 		"/user_group",
 		hw.wrapHandler(controller.RemoveUserGroupController, true),
 	)
+	v1.OPTIONS("/enroll_managed_group")
+	v1.POST("/enroll_managed_group", hw.wrapHandler(controller.EnrollUserManagedGroupController, true))
 
 	// User surveys
 	v1.OPTIONS("/survey")
@@ -381,6 +383,12 @@ func Register(
 
 	admin.OPTIONS("/match_round")
 	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, false))
+
+	admin.OPTIONS("/create_managed_group")
+	admin.POST("/create_managed_group", hw.wrapHandler(controller.CreateManagedGroupController, true))
+
+	admin.OPTIONS("/get_managed_groups")
+	admin.GET("/get_managed_groups", hw.wrapHandler(controller.GetAdminManagedGroupsController, true))
 
 	return router
 }

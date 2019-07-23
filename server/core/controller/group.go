@@ -2,8 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"letstalk/server/data"
 
 	"letstalk/server/core/api"
+	"letstalk/server/core/converters"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
 	"letstalk/server/core/query"
@@ -17,21 +19,20 @@ func AddUserGroupController(c *ctx.Context) errs.Error {
 	}
 	groupSurvey := survey.GetSurveyDefinitionByGroupId(req.GroupId)
 	if groupSurvey == nil {
-		return errs.NewRequestError(fmt.Sprintf("No survey for the %s group", req.GroupName))
+		return errs.NewRequestError(fmt.Sprintf("No survey for the %s group", req.GroupId))
 	}
 	survey, dbErr := query.GetSurvey(c.Db, c.SessionData.UserId, groupSurvey.Group)
 	if dbErr != nil {
 		return errs.NewDbError(dbErr)
 	}
-	userGroup, err := query.AddUserGroup(c.Db, c.SessionData.UserId, req.GroupId, req.GroupName)
+	userGroup, err := query.AddUserGroup(c.Db, c.SessionData.UserId, req.GroupId)
 	if err != nil {
 		return err
 	}
 	c.Result = &api.UserGroupSurvey{
 		UserGroup: api.UserGroup{
-			Id:        userGroup.Id,
-			GroupId:   userGroup.GroupId,
-			GroupName: userGroup.GroupName,
+			Id:      userGroup.Id,
+			GroupId: userGroup.GroupId,
 		},
 		Survey: *survey,
 	}
@@ -44,4 +45,45 @@ func RemoveUserGroupController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 	return query.RemoveUserGroup(c.Db, c.SessionData.UserId, req.UserGroupId)
+}
+
+// CreateManagedGroupController Create a new managed group, should require admin permission
+func CreateManagedGroupController(c *ctx.Context) errs.Error {
+	var req api.CreateGroupRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	_, err := query.CreateManagedGroup(c.Db, c.SessionData.UserId, req.GroupName)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetAdminManagedGroupsController Get all groups that this admin manages
+func GetAdminManagedGroupsController(c *ctx.Context) errs.Error {
+	groups, err := query.GetManagedGroups(c.Db, c.SessionData.UserId)
+	if err != nil {
+		return err
+	}
+	var res api.GetAdminMangedGroupsResponse
+	for _, group := range groups {
+		res.ManagedGroups = append(res.ManagedGroups, api.AdminManagedGroup{
+			GroupName:                 group.Group.GroupName,
+			ManagedGroupReferralEmail: converters.GetManagedGroupReferralLink(group.Group.GroupId),
+		})
+	}
+	c.Result = res
+	return nil
+}
+
+func EnrollUserManagedGroupController(c *ctx.Context) errs.Error {
+	var req api.EnrollManagedGroupRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	return query.EnrollUserInManagedGroup(c.Db, c.SessionData.UserId, data.TGroupID(req.GroupUUID))
 }

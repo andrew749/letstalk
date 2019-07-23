@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"fmt"
 	"letstalk/server/core/secrets"
 
 	"github.com/namsral/flag"
@@ -51,6 +52,17 @@ func checkBootstrapped() {
 func IsProductionEnvironment() bool {
 	checkBootstrapped()
 	return *isProd
+}
+
+func GetWebsiteUrl() string {
+	if IsProductionEnvironment() {
+		return "https://hiveapp.org"
+	}
+	return "http://localhost"
+}
+
+func GetWebappUrl() string {
+	return fmt.Sprintf("%s/web", GetWebsiteUrl())
 }
 
 func GetDeeplinkPrefix() string {

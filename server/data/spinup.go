@@ -577,9 +577,35 @@ func migrateDB(db *gorm.DB) {
 			},
 		},
 		{
+			ID: "Add richer groups",
+			Migrate: func(tx *gorm.DB) error {
+				if err := tx.AutoMigrate(Group{}).Error; err != nil {
+					return err
+				}
+				// Builds a unique index on (user,group)
+				if err := tx.AutoMigrate(UserGroup{}).Error; err != nil {
+					return err
+				}
+				return tx.AutoMigrate(ManagedGroup{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
 			ID: "Add connection_match_round table",
 			Migrate: func(tx *gorm.DB) error {
 				return tx.AutoMigrate(&ConnectionMatchRound{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
+		{
+			ID: "Update notification data model to have optional timestamp",
+			Migrate: func(tx *gorm.DB) error {
+				// Builds a unique index on (user,group)
+				return tx.AutoMigrate(Notification{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
 				return nil
