@@ -26,124 +26,6 @@ var specStore = jobmine.JobSpecStore{
 	},
 }
 
-func createUsers(db *gorm.DB) ([]data.User, error) {
-	sequenceId := "8_STREAM"
-	sequenceName := "8 Stream"
-	now := time.Now()
-
-	user1, err := test_helpers.CreateTestUser(db, 1)
-	if err != nil {
-		return nil, err
-	}
-	user1.CreatedAt = now.AddDate(0, 0, -2)
-	user1.Gender = data.GENDER_FEMALE
-	err = db.Save(user1).Error
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user1, "SOFTWARE_ENGINEERING", "Software Engineering", 2022, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user2, err := test_helpers.CreateTestUser(db, 2)
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user2, "SOFTWARE_ENGINEERING", "Software Engineering", 2022, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user3, err := test_helpers.CreateTestUser(db, 3)
-	if err != nil {
-		return nil, err
-	}
-	user3.CreatedAt = now.AddDate(0, 0, 2)
-	err = db.Save(user3).Error
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user3, "COMPUTER_ENGINEERING", "Computer Engineering", 2022, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user4, err := test_helpers.CreateTestUser(db, 4)
-	if err != nil {
-		return nil, err
-	}
-	user4.CreatedAt = now.AddDate(0, 0, -2)
-	user4.Gender = data.GENDER_FEMALE
-	err = db.Save(user4).Error
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user4, "SOFTWARE_ENGINEERING", "Software Engineering", 2021, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user5, err := test_helpers.CreateTestUser(db, 5)
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user5, "SOFTWARE_ENGINEERING", "Software Engineering", 2021, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user6, err := test_helpers.CreateTestUser(db, 6)
-	if err != nil {
-		return nil, err
-	}
-	user6.CreatedAt = now.AddDate(0, 0, 2)
-	err = db.Save(user6).Error
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user6, "COMPUTER_ENGINEERING", "Computer Engineering", 2021, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	// These users should be ignored
-	user7, err := test_helpers.CreateTestUser(db, 7)
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user7, "SOFTWARE_ENGINEERING", "Software Engineering", 2020, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-
-	user8, err := test_helpers.CreateTestUser(db, 8)
-	if err != nil {
-		return nil, err
-	}
-	err = test_helpers.CreateCohortForUser(
-		db, user8, "COMPUTER_ENGINEERING", "Computer Engineering", 2023, true,
-		&sequenceId, &sequenceName)
-	if err != nil {
-		return nil, err
-	}
-	return []data.User{*user1, *user2, *user3, *user4, *user5, *user6, *user7, *user8}, nil
-}
-
 func nukeConnections(db *gorm.DB) error {
 	err := db.Delete(&data.Connection{}).Error
 	if err != nil {
@@ -156,7 +38,7 @@ func TestJobIntegration(t *testing.T) {
 	theseTests := []test.Test{
 		test.Test{
 			Test: func(db *gorm.DB) {
-				users, err := createUsers(db)
+				users, err := test_helpers.CreateUsersForMatching(db)
 				assert.NoError(t, err)
 
 				runId := "seed_test_1"

@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/romana/rlog"
 
-	"letstalk/server/core/api"
 	"letstalk/server/core/connection"
 	"letstalk/server/core/query"
 	"letstalk/server/data"
@@ -61,7 +60,7 @@ func execute(
 	jobRecord jobmine.JobRecord,
 	taskRecord jobmine.TaskRecord,
 ) (interface{}, error) {
-	_, err := getMatchRoundIdFromJobRecord(jobRecord)
+	matchRoundId, err := getMatchRoundIdFromJobRecord(jobRecord)
 	if err != nil {
 		return nil, err
 	}
@@ -71,9 +70,8 @@ func execute(
 		return nil, err
 	}
 
-	err = connection.AddMentorship(
-		db, userMatch.mentorId, userMatch.menteeId,
-		api.CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN)
+	err = connection.AddMatchRoundMentorship(
+		db, userMatch.mentorId, userMatch.menteeId, matchRoundId)
 	if err != nil {
 		return nil, err
 	}
@@ -123,15 +121,12 @@ var seedTaskSpec = jobmine.TaskSpec{
 }
 
 func getMatchRoundIdFromJobRecord(jobRecord jobmine.JobRecord) (data.TMatchRoundID, error) {
-	if matchRoundIdIntf, ok := jobRecord.Metadata[MATCH_ROUND_ID_METADATA_KEY]; ok {
-		if matchRoundId, ok := matchRoundIdIntf.(data.TMatchRoundID); ok {
-			return matchRoundId, nil
-		} else {
-			return 0, errors.New("matchRoundId is not an int")
-		}
-	} else {
-		return 0, errors.New("matchRoundId not provided in job record")
+	matchRoundIdPtr, err := jobmine_utility.UIntFromJobRecord(
+		jobRecord, MATCH_ROUND_ID_METADATA_KEY)
+	if err != nil {
+		return data.TMatchRoundID(0), err
 	}
+	return data.TMatchRoundID(*matchRoundIdPtr), nil
 }
 
 func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metadata, error) {
@@ -141,7 +136,7 @@ func getTasksToCreate(db *gorm.DB, jobRecord jobmine.JobRecord) ([]jobmine.Metad
 	}
 
 	var matches []data.MatchRoundMatch
-	err = db.Where(&data.MatchRoundMatch{MatchRoundId: matchRoundId}).Find(matches).Error
+	err = db.Where(&data.MatchRoundMatch{MatchRoundId: matchRoundId}).Find(&matches).Error
 	if err != nil {
 		return nil, err
 	}
