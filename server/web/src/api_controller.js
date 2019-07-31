@@ -1,4 +1,4 @@
-import { loginUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from './config.js'
+import { loginUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from './config.js'
 import axios from 'axios';
 import { registerWithGroupPathWeb } from './routes.js';
 
@@ -56,6 +56,12 @@ export const HiveApiService = (() => {
                 email: email,
                 password: password
             });
+        },
+
+        me: (done, error) => {
+            return HiveApiService.hiveFetch(meUrl, 'GET', undefined)
+                .then((data) => done(data))
+                .catch((err) => error(err));
         },
 
         /** 

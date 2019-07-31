@@ -1,13 +1,14 @@
-export const serverUrl = 'https://api.hiveapp.org';
-//export const serverUrl = 'http://localhost'; // For dev
-export const hiveDeepLinkRoot = 'hive:/';
-//export const hiveDeepLinkRoot = 'exp://192.168.0.179:19000/--'; // For dev
+export const serverUrl = 'http://localhost'; // For dev
+// export const serverUrl = 'https://api.hiveapp.org';
+// export const hiveDeepLinkRoot = 'hive:/';
+export const hiveDeepLinkRoot = 'exp://192.168.0.179:19000/--'; // For dev
 
 export const apiUrl = `${serverUrl}/v1`;
 export const adminUrl = `${serverUrl}/admin`
 
 // api v1 endpoints
 export const loginUrl = `${apiUrl}/login`;
+export const meUrl = `${apiUrl}/me`;
 export const signupUrl = `${apiUrl}/signup`;
 
 
