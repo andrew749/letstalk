@@ -28,7 +28,16 @@ class HiveToolTemplate extends React.Component {
     populateMe() {
         if (!!this.props.isAuthenticated) {
             HiveApiService.me(
-                data => this.setState({me: data}),
+                ({ Result }) => {
+                    if (!this.state.me || this.state.me.userId != Result.userId ) {
+                        this.setState({ me: {
+                            userId: Result.userId,
+                            firstName: Result.firstName,
+                            lastName: Result.lastName,
+                            email: Result.email
+                        }});
+                    }
+                },
                 err => console.log
             );
         }
@@ -59,9 +68,9 @@ class HiveToolTemplate extends React.Component {
                         <div className="flex-column">
                             {'Hive Admin Console'}
                             <div>
-                            {!!this.props.isAuthenticated && this.state && this.state.me ?  
-                                !!this.state.me.Result ? 
-                                    this.state.me.Result.email : "Unknown Email" 
+                            {!!this.props.isAuthenticated && this.state.me ?
+                                !!this.state.me ? 
+                                    this.state.me.email : "Unknown Email" 
                                 : "Not authenticated"}
                             </div>
                         </div>

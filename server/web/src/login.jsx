@@ -4,7 +4,7 @@ import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } 
 import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPathWeb, signupPathWeb, signupPath} from './routes.js';
+import {landingPath, landingPathWeb, signupPathWeb, signupPath} from './routes.js';
 import {HiveApiService} from './api_controller.js';
 
 const LOGIN_ACTION = 'LOGIN';
@@ -79,7 +79,7 @@ export class LoginPage extends React.Component {
     render() {
 
         let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
+        let { from } = this.props.location.state || { from: { pathname: this.props.isAdminPage ? landingPath : landingPathWeb } };
 
         if (!!redirectToReferrer) {
             return <Redirect to={from} />;

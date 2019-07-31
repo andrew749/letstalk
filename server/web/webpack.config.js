@@ -20,11 +20,6 @@ module.exports = {
     path: path.resolve(__dirname, 'dist', 'assets'),
     filename: '[name].js'
   },
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  },
   resolve: {
     extensions: ['.js', '.jsx']
   },
