@@ -3,11 +3,12 @@ import {Redirect, Link} from 'react-router-dom';
 import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPathWeb, signupPathWeb, signupPath} from './routes.js';
+import {landingPath, landingPathWeb, signupPathWeb, signupPath} from './routes.js';
 
 import apiServiceConnect from './api/api_service_connect';
 
 const LOGIN_ACTION = 'LOGIN';
+const LOGOUT_ACTION = 'LOGOUT';
 
 const initialState = {
   isAuthenticated: false,
@@ -18,10 +19,16 @@ export function loginAction(sessionId) {
     return {type: LOGIN_ACTION, sessionId: sessionId};
 }
 
+export function logoutAction() {
+    return  {type: LOGOUT_ACTION};
+}
+
 export function loginReducer(state = initialState, action) {
     switch(action.type) {
         case LOGIN_ACTION:
             return Object.assign({}, state, {isAuthenticated: true, sessionId: action.sessionId});
+        case LOGOUT_ACTION:
+            return Object.assign({}, state, {isAuthenticated: false, sessionId: undefined});
         default:
             return state;
     }
@@ -76,7 +83,7 @@ export class LoginPage extends React.Component {
 
     render() {
         let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
+        let { from } = this.props.location.state || { from: { pathname: this.props.isAdminPage ? landingPath : landingPathWeb } };
 
         if (!!redirectToReferrer) {
             return <Redirect to={from} />;

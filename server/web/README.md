@@ -19,3 +19,9 @@ yarn dev
 ```
 yarn build
 ```
+
+## Using in conjunction with our Docker server
+After running the `./dev.sh` script in another terminal window with Docker on, run
+```
+yarn build --watch
+```

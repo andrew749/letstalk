@@ -1,7 +1,56 @@
+@import "variables";
+
 #hive-logo {
     display: inline-block;
 }
 
-.content-container {
-    margin: 20px 10px;
+.container {
+    padding-top: 50px;
+}
+
+.container.navbar {    
+    position: fixed;
+    padding: 0;
+    height: 100%;
+    width: fit-content;
+}
+
+.account-info {
+    padding: 30px;
+    display: flex;
+    flex-direction: row;
+    background: $secondary;
+    border-radius: 5px;
+}
+
+nav.navbar {
+    height: 100%;
+}
+
+.navbar-collapse {
+    margin: 20px auto;
+    width: 100%;
+}
+
+#hive-navbar-nav {
+    background: $primary;
+    height: 100%;
+    width: 100%;
+    padding: 30px;
+    color: white;
+    border-radius: 5px;
+}
+
+.navbar-light .navbar-nav a.nav-link {
+    color: white;
+
+    &.active {
+        color: white;
+        text-decoration: underline;
+    }
+}
+
+.navbar-light .account-info .navbar-nav a.nav-link {
+    margin: 0;
+    padding: 0;
 }

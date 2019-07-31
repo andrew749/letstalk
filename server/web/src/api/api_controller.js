@@ -1,4 +1,4 @@
-import { loginUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from '../config.js'
+import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from '../config.js'
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
@@ -99,6 +99,16 @@ export const HiveApiService = ((state, dispatch) => {
                 apiService().setSessionId(data.Result.sessionId);
                 return data;
             });
+        },
+
+        logout: () => {
+            return apiService().hiveFetch(logoutUrl, 'POST', undefined);
+        },
+
+        me: (done, error) => {
+            return apiService().hiveFetch(meUrl, 'GET', undefined)
+                .then((data) => done(data))
+                .catch((err) => error(err));
         },
 
         /** 
