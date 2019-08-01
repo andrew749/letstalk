@@ -8,6 +8,7 @@ import {landingPath, landingPathWeb, signupPathWeb, signupPath} from './routes.j
 import {HiveApiService} from './api_controller.js';
 
 const LOGIN_ACTION = 'LOGIN';
+const LOGOUT_ACTION = 'LOGOUT';
 
 const initialState = {
   isAuthenticated: false,
@@ -18,10 +19,16 @@ export function loginAction(sessionId) {
     return {type: LOGIN_ACTION, sessionId: sessionId};
 }
 
+export function logoutAction() {
+    return  {type: LOGOUT_ACTION};
+}
+
 export function loginReducer(state = initialState, action) {
     switch(action.type) {
         case LOGIN_ACTION:
             return Object.assign({}, state, {isAuthenticated: true, sessionId: action.sessionId});
+        case LOGOUT_ACTION:
+            return Object.assign({}, state, {isAuthenticated: false, sessionId: undefined});
         default:
             return state;
     }

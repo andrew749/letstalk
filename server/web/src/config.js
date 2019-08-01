@@ -8,6 +8,7 @@ export const adminUrl = `${serverUrl}/admin`
 
 // api v1 endpoints
 export const loginUrl = `${apiUrl}/login`;
+export const logoutUrl = `${apiUrl}/logout`;
 export const meUrl = `${apiUrl}/me`;
 export const signupUrl = `${apiUrl}/signup`;
 

@@ -32,7 +32,7 @@ nav.navbar {
     width: 100%;
 }
 
-.navbar-nav {
+#hive-navbar-nav {
     background: $primary;
     height: 100%;
     width: 100%;
@@ -48,4 +48,9 @@ nav.navbar {
         color: white;
         text-decoration: underline;
     }
+}
+
+.navbar-light .account-info .navbar-nav a.nav-link {
+    margin: 0;
+    padding: 0;
 }

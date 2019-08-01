@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom';
+import { Redirect } from 'react-router-dom';
 import React from 'react';
 import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
@@ -6,19 +7,16 @@ import {withCookies} from 'react-cookie';
 import {LinkContainer} from 'react-router-bootstrap'
 import {Container, Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
-import {adhocAddToolPath, deleteUserToolPath, membersPath, matchingPath} from './routes.js';
+import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath} from './routes.js';
+import {logoutAction} from './login';
 import {HiveApiService} from './api_controller.js';
-
-const CustomNavItem = (path, title) =>
-    <LinkContainer to={path}>
-        <Nav.Link>{title}</Nav.Link>
-    </LinkContainer>
 
 function isAuthenticated(state) {
     return state.loginReducer.isAuthenticated;
 }
 
 class HiveToolTemplate extends React.Component {
+
     constructor(props) {
         super(props);
 
@@ -51,7 +49,53 @@ class HiveToolTemplate extends React.Component {
         this.populateMe();
     }
 
+    onLogout = event => {
+        // console.log(this.props);
+        const {cookies} = this.props;
+        event.preventDefault();
+        // send to api server
+
+        HiveApiService.logout()
+            .then((data) => {
+                cookies.set('sessionId', null);
+                this.props.didLogout();
+                this.setState({
+                    submitState: 'SUCCESS',
+                    redirectToLogin: true
+                });
+            }).catch(err => {
+                this.setState({
+                    submitState: 'ERROR',
+                    err: err.body
+                });
+            });
+    };
+
     render() {
+        let { redirectToLogin } = this.state;
+        
+        if (!!redirectToLogin && this.props.isAuthenticated) {
+            return <Redirect to={loginPath} />;
+        }
+
+        let alert;
+        if (this.state.submitState) {
+            if (this.state.submitState === "ERROR") {
+                alert = (<Alert variant="danger">Failed to logout because {this.state.err}</Alert>)
+            }
+        }
+
+        const CustomNavItem = (path, title) => {
+            if (path === logoutPath) {
+                return <a className="nav-link" onClick={this.onLogout}>
+                    {title}
+                </a>
+            }
+            return <LinkContainer to={path}>
+                <Nav.Link>{title}</Nav.Link>
+            </LinkContainer>
+        }
+
         return (
             <Container className="navbar">
                 <Navbar className="flex-column">
@@ -73,6 +117,13 @@ class HiveToolTemplate extends React.Component {
                                     this.state.me.email : "Unknown Email" 
                                 : "Not authenticated"}
                             </div>
+                            <Nav>
+                                {!this.props.isAuthenticated && CustomNavItem(loginPath, "Login")}
+                                {!!this.props.isAuthenticated && CustomNavItem(logoutPath, "Logout")}
+                            </Nav>
+                        </div>
+                        <div className="message-container">
+                            {alert}
                         </div>
                     </div>
                     <Navbar.Toggle aria-controls="hive-navbar-nav" />
@@ -96,7 +147,11 @@ const HiveToolComponent = connect(
             isAuthenticated: isAuthenticated(state)
         };
     },
-    null
+    (dispatch) => {
+        return {
+            didLogout: (state) => {dispatch(logoutAction(state))}
+        };
+    }
 )(CookieAwareComponent(withCookies(HiveToolTemplate)));
 
 export default HiveToolComponent;
