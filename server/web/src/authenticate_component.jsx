@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import apiServiceConnect from './api/api_service_connect';
 
 /**
  * A specialized react-router Route that can redirect the user to a login page
@@ -23,10 +23,10 @@ const AuthenticatedRoute = ({ component: Component, ...rest }) =>
 />;
 
 function isAuthenticated(state) {
-    return state.loginReducer.isAuthenticated;
+    return state.apiServiceReducer.sessionId && state.apiServiceReducer.isValid;
 }
 
-const AuthenticatedComponent = connect(
+const AuthenticatedComponent = apiServiceConnect(
     (state) => {
         return {
             isAuthenticated: isAuthenticated(state)

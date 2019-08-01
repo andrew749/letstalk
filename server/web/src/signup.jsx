@@ -1,11 +1,10 @@
 import React from 'react';
 import { Button, Container, Alert, Form } from 'react-bootstrap';
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {landingPathWeb} from './routes.js';
 import RedirectPage from './redirect-flash.jsx';
-import { HiveApiService } from './api_controller.js';
+import apiServiceConnect from './api/api_service_connect';
 
 const SIGNUP_ACTION = 'SIGNUP';
 const SIGNUP_REDIRECT_DURATION_SECONDS = 10;
@@ -80,7 +79,7 @@ export class SignupPage extends React.Component {
         const {cookies} = this.props;
         event.preventDefault();
         // send to api server
-        HiveApiService.signup(
+        this.props.apiService.signup(
             this.state.firstName, 
             this.state.lastName,
             this.state.email,
@@ -210,7 +209,7 @@ export class SignupPage extends React.Component {
     }
 }
 
-const SignupPageComponent = connect(
+const SignupPageComponent = apiServiceConnect(
     null,
     (dispatch) => {
         return {

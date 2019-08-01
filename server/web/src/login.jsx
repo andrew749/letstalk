@@ -1,11 +1,11 @@
 import React from 'react';
 import {Redirect, Link} from 'react-router-dom';
 import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {landingPathWeb, signupPathWeb, signupPath} from './routes.js';
-import {HiveApiService} from './api_controller.js';
+
+import apiServiceConnect from './api/api_service_connect';
 
 const LOGIN_ACTION = 'LOGIN';
 
@@ -56,28 +56,25 @@ export class LoginPage extends React.Component {
     }
 
     onSubmit(event) {
-        const {cookies} = this.props;
         event.preventDefault();
         // send to api server
-
-        HiveApiService.login(this.state.email, this.state.password)
+        this.props.apiService.login(this.state.email, this.state.password)
             .then((data) => {
-                cookies.set('sessionId', data.Result.sessionId);
                 this.props.didAuthenticate(data.Result.sessionId);
                 this.setState({
                     submitState: 'SUCCESS',
                     redirectToReferrer: true
                 });
             }).catch(err => {
+                console.warn(err);
                 this.setState({
                     submitState: 'ERROR',
-                    err: err.body
+                    err: err
                 });
             });
     }
 
     render() {
-
         let { redirectToReferrer } = this.state;
         let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
 
@@ -90,7 +87,7 @@ export class LoginPage extends React.Component {
             if (this.state.submitState === "SUCCESS") {
                 alert = (<Alert variant="success">Succesfully logged in.</Alert>);
             } else if (this.state.submitState === "ERROR") {
-                alert = (<Alert variant="danger">Failed to login because {this.state.err}</Alert>)
+                alert = (<Alert variant="danger">Failed to login because {JSON.stringify(this.state.err)}</Alert>)
             }
         }
 
@@ -142,13 +139,12 @@ export class LoginPage extends React.Component {
     }
 }
 
-const LoginPageComponent = connect(
+const LoginPageComponent = apiServiceConnect(
     null,
-    (dispatch) => {
-        return {
-            didAuthenticate: (state) => {dispatch(loginAction(state))}
-        };
-    }
+    (dispatch) => ({
+        didAuthenticate: (state) => { dispatch(loginAction(state)) }
+    }),
+    undefined
 )(CookieAwareComponent(withCookies(LoginPage)));
 
 export default LoginPageComponent;

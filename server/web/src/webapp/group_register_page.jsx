@@ -1,8 +1,8 @@
 import React from 'react';
-import {HiveApiService} from '../api_controller.js';
-import {connect} from 'react-redux';
 import '../scss/group_register_page.scss';
 import {Alert, Spinner} from 'react-bootstrap';
+
+import apiServiceConnect from '../api/api_service_connect';
 
 
 const REGISTER_ACTION = "REGISTERING";
@@ -46,7 +46,12 @@ class GroupRegisterPage extends React.Component {
     }
 
     componentDidMount() {
-        HiveApiService.enrollInGroup(this.uuid(), this.props.beginRegisteringCallback, this.props.registeredSuccessfullyCallback, this.props.registerErrorCallback);
+        this.props.apiService.enrollInGroup(
+            this.uuid(), 
+            this.props.beginRegisteringCallback, 
+            this.props.registeredSuccessfullyCallback, 
+            this.props.registerErrorCallback
+        );
     }
 
     uuid() {
@@ -79,7 +84,7 @@ class GroupRegisterPage extends React.Component {
     }
 }
 
-const GroupRegisterPageComponent = connect(
+const GroupRegisterPageComponent = apiServiceConnect(
     (state) => {
         return {
             registering: state.groupRegisterReducer.registering,
