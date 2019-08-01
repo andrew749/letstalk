@@ -1,4 +1,4 @@
-import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from '../config.js'
+import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from './config.js'
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
@@ -154,6 +154,24 @@ export const HiveApiService = ((state, dispatch) => {
             started();
             console.log("Fetching groups");
             return apiService().hiveFetch(getManagedGroupsUrl, 'GET', undefined)
+                .then((data) => done(data))
+                .catch((err) => error(err));
+        },
+
+        /**
+         * fetchMembers Get members in a given group an administrator manages.
+         * @param {*} started Started fetching callback
+         * @param {*} done Done fetching callback
+         * @param {*} error Error fetching data
+         */
+        fetchMembers: (groupId, started, done, error) => {
+            if (!groupId) {
+                groupId = 0;
+            }
+            let membersUrl = getGroupMembersUrlBase + groupId.toString();
+            started();
+            console.log("Fetching members");
+            return apiService().hiveFetch(membersUrl, 'GET', undefined)
                 .then((data) => done(data))
                 .catch((err) => error(err));
         },

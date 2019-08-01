@@ -120,7 +120,7 @@ export class SignupPage extends React.Component {
             }
         }
         return (
-            <Container>
+            <Container className="panel-body">
                 <Form onSubmit={this.onSubmit}>
                     <Form.Group controlId="firstName">
                         <Form.Label>First Name</Form.Label>

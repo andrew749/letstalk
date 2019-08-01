@@ -25,8 +25,9 @@ type GetAdminMangedGroupsResponse struct {
 }
 
 type AdminManagedGroup struct {
-	GroupName                 string `json:"groupName"`
-	ManagedGroupReferralEmail string `json:"managedGroupReferralEmail"`
+	GroupId                   data.TGroupID `json:"groupId"`
+	GroupName                 string        `json:"groupName"`
+	ManagedGroupReferralEmail string        `json:"managedGroupReferralEmail"`
 }
 
 type EnrollManagedGroupRequest struct {

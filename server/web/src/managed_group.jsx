@@ -1,4 +1,5 @@
 import React from 'react';
+import { Container } from 'react-bootstrap';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
@@ -9,10 +10,10 @@ import apiServiceConnect from './api/api_service_connect';
 class ManagedGroupPage extends React.Component {
     render() {
         return (
-            <div>
+            <Container className="panel-body">
                 <CreateManagedGroupTool />
                 <GetManagedGroupsView />
-            </div>
+            </Container>
         );
     }
 }

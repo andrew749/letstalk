@@ -7,7 +7,7 @@ import {withCookies} from 'react-cookie';
 import {LinkContainer} from 'react-router-bootstrap'
 import {Container, Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
-import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath} from './routes.js';
+import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath, groupManagementToolPath} from './routes.js';
 import {logoutAction} from './login';
 import apiServiceConnect from './api/api_service_connect';
 
@@ -15,7 +15,7 @@ function isAuthenticated(state) {
     return state.loginReducer.isAuthenticated;
 }
 
-class HiveToolTemplate extends React.Component {
+class NavbarContainer extends React.Component {
 
     constructor(props) {
         super(props);
@@ -133,6 +133,7 @@ class HiveToolTemplate extends React.Component {
                             {CustomNavItem(matchingPath, "Matching")}
                             {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
                             {CustomNavItem(deleteUserToolPath, "Delete User")}
+                            {CustomNavItem(groupManagementToolPath, "Manage Groups")}
                         </Nav>
                     </Navbar.Collapse>
                 </Navbar>
@@ -141,7 +142,7 @@ class HiveToolTemplate extends React.Component {
     }
 }
 
-const HiveToolComponent = apiServiceConnect(
+const NavbarContainerComponent = apiServiceConnect(
     (state) => {
         return {
             isAuthenticated: isAuthenticated(state)
@@ -152,6 +153,6 @@ const HiveToolComponent = apiServiceConnect(
             didLogout: (state) => {dispatch(logoutAction(state))}
         };
     }
-)(CookieAwareComponent(withCookies(HiveToolTemplate)));
+)(CookieAwareComponent(withCookies(NavbarContainer)));
 
-export default HiveToolComponent;
+export default NavbarContainerComponent;

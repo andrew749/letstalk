@@ -71,6 +71,7 @@ func GetAdminManagedGroupsController(c *ctx.Context) errs.Error {
 	var res api.GetAdminMangedGroupsResponse
 	for _, group := range groups {
 		res.ManagedGroups = append(res.ManagedGroups, api.AdminManagedGroup{
+			GroupId:                   group.Group.GroupId,
 			GroupName:                 group.Group.GroupName,
 			ManagedGroupReferralEmail: converters.GetManagedGroupReferralLink(group.Group.GroupId),
 		})

@@ -17,5 +17,6 @@ export const signupUrl = `${apiUrl}/signup`;
 export const mentorshipUrl = `${adminUrl}/mentorship`;
 export const deleteUrl = `${adminUrl}/nuke_user`;
 export const getManagedGroupsUrl = `${adminUrl}/get_managed_groups`;
+export const getGroupMembersUrlBase = `${adminUrl}/group_members/`;
 export const createNewManagedGroupUrl = `${adminUrl}/create_managed_group`;
 export const registerWithManagedGroupUrl = `${apiUrl}/enroll_managed_group`;

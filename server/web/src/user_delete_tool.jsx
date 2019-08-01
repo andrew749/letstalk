@@ -59,7 +59,7 @@ class UserDeleteTool extends React.Component {
             ? <Alert key="deleteToolResponse" variant="success">Successfully deleted user.</Alert>
             : undefined;
         return (
-            <Container>
+            <Container className="panel-body">
                 <Row>
                 <h1>
                     {"User Deletion tool"}

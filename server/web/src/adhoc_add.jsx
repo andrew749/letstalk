@@ -63,7 +63,7 @@ class AdminPanel extends React.Component {
       ? <Alert key="adhocMatchingToolResponse" variant="success">Successfully created mentorship connection.</Alert>
       : undefined;
     return (
-        <Container>
+        <Container className="panel-body">
           <Row>
             <h1>
               {"Adhoc Matching Tool"}

@@ -3,6 +3,7 @@ const ADMIN_URL_PREFIX = "/admin_panel";
 export const loginPath =`${ADMIN_URL_PREFIX}/login`;
 export const logoutPath =`${ADMIN_URL_PREFIX}/logout`;
 export const signupPath =`${ADMIN_URL_PREFIX}/signup`;
+export const getManagedGroupsPath =`${ADMIN_URL_PREFIX}/get_managed_groups`;
 export const membersPath =`${ADMIN_URL_PREFIX}/members`;
 export const matchingPath =`${ADMIN_URL_PREFIX}/matching`;
 export const adhocAddToolPath =`${ADMIN_URL_PREFIX}/adhoc_add`;

@@ -15,12 +15,26 @@
     width: fit-content;
 }
 
+.account-info, .group-info {
+    padding: 30px;
+    display: flex;
+    flex-direction: row;
+    border-radius: 5px;
+    width: 100%;
+    align-items: center;
+}
+
 .account-info {
     padding: 30px;
     display: flex;
     flex-direction: row;
-    background: $secondary;
     border-radius: 5px;
+    width: 100%;
+    align-items: center;
+}
+
+.account-info {
+    background: $secondary;
 }
 
 nav.navbar {
@@ -53,4 +67,42 @@ nav.navbar {
 .navbar-light .account-info .navbar-nav a.nav-link {
     margin: 0;
     padding: 0;
+}
+
+#managed-groups-dropdown {
+    color: $secondary;
+    font-size: 1.7rem;
+    margin-bottom: 3px;
+}
+
+.group-info .btn-toolbar {
+    margin-left: 30px;
+}
+
+.panel-content {
+    padding-left: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-primary {
+    margin: 5px;
+}
+
+.members-stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.members-stat {
+    font-size: 1.3rem;
+    color: $secondary;
+}
+
+.members-table-container {
+    display: flex;
+    width: 100%;
+    overflow-y: scroll;
+    height: 400px;
 }

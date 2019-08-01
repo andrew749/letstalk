@@ -110,7 +110,7 @@ export class LoginPage extends React.Component {
             );
         }
         return (
-            <Container>
+            <Container className="panel-body">
                 <Form onSubmit={this.onSubmit}>
                     <Form.Group controlId="email">
                         <Form.Label>Email</Form.Label>
