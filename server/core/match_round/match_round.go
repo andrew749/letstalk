@@ -27,11 +27,7 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 	matchRound, err := handleCreateMatchRound(
 		c.Db,
 		c.SessionData.UserId,
-		request.Parameters.MaxLowerYearsPerUpperYear,
-		request.Parameters.MaxUpperYearsPerLowerYear,
-		request.Parameters.YoungestUpperGradYear,
-		request.GroupId,
-		request.UserIds,
+		request,
 	)
 	if err != nil {
 		return err
@@ -44,31 +40,27 @@ func CreateMatchRoundController(c *ctx.Context) errs.Error {
 func handleCreateMatchRound(
 	db *gorm.DB,
 	adminId data.TUserID,
-	maxLowerYearsPerUpperYear uint,
-	maxUpperYearsPerLowerYear uint,
-	youngestUpperGradYear uint,
-	groupId data.TGroupID,
-	userIds []data.TUserID,
+	req api.CreateMatchRoundRequest,
 ) (*api.MatchRound, errs.Error) {
-	if err := checkIsAdmin(db, adminId, groupId); err != nil {
+	if err := checkIsAdmin(db, adminId, req.GroupId); err != nil {
 		return nil, err
 	}
 
-	if userIds == nil {
+	if req.UserIds == nil {
 		return nil, errs.NewRequestError("Expected non-nil user ids")
 	}
 
-	if err := checkUsersInGroup(db, userIds, groupId); err != nil {
+	if err := checkUsersInGroup(db, req.UserIds, req.GroupId); err != nil {
 		return nil, err
 	}
 
 	strat := recommendations.MentorMenteeStrat(
-		maxLowerYearsPerUpperYear,
-		maxUpperYearsPerLowerYear,
-		youngestUpperGradYear,
+		req.Parameters.MaxLowerYearsPerUpperYear,
+		req.Parameters.MaxUpperYearsPerLowerYear,
+		req.Parameters.YoungestUpperGradYear,
 	)
 
-	fetcherOptions := recommendations.UserFetcherOptions{UserIds: userIds}
+	fetcherOptions := recommendations.UserFetcherOptions{UserIds: req.UserIds}
 	matches, err := recommendations.Recommend(db, fetcherOptions, strat)
 
 	if err != nil {
@@ -82,14 +74,14 @@ func handleCreateMatchRound(
 	}
 
 	parameters := createMatchParameters(
-		maxLowerYearsPerUpperYear,
-		maxUpperYearsPerLowerYear,
-		youngestUpperGradYear,
+		req.Parameters.MaxLowerYearsPerUpperYear,
+		req.Parameters.MaxUpperYearsPerLowerYear,
+		req.Parameters.YoungestUpperGradYear,
 	)
 
 	matchRound, err := createMatchRound(
 		db,
-		groupId,
+		req.GroupId,
 		matches,
 		parameters,
 	)
@@ -128,13 +120,13 @@ func handleCommitMatchRound(
 	}
 
 	err := ctx.WithinTx(db, func(db *gorm.DB) error {
-		runId, err := match_round_commit_job.CreateCommitJob(db, matchRoundId)
-		if err != nil {
+		var matchRound data.MatchRound
+		if err := db.Where(&data.MatchRound{Id: matchRoundId}).Find(&matchRound).Error; err != nil {
 			return err
 		}
 
-		var matchRound data.MatchRound
-		if err := db.Where(&data.MatchRound{Id: matchRoundId}).Find(&matchRound).Error; err != nil {
+		runId, err := match_round_commit_job.CreateCommitJob(db, matchRoundId)
+		if err != nil {
 			return err
 		}
 
@@ -289,7 +281,6 @@ func createMatchRound(
 	parameters data.MatchParameters,
 ) (*api.MatchRound, error) {
 	var matchRound *data.MatchRound
-	var roundMatches []data.MatchRoundMatch
 
 	var group data.Group
 	err := db.Where(&data.Group{GroupId: groupId}).Find(&group).Error
@@ -305,21 +296,16 @@ func createMatchRound(
 			RunId:           nil,
 		}
 
-		if err := db.Create(matchRound).Error; err != nil {
-			return err
-		}
-
-		roundMatches = make([]data.MatchRoundMatch, 0, len(matches))
+		matchRound.Matches = make([]data.MatchRoundMatch, 0, len(matches))
 		for _, match := range matches {
-			roundMatches = append(roundMatches, data.MatchRoundMatch{
-				MatchRoundId: matchRound.Id,
+			matchRound.Matches = append(matchRound.Matches, data.MatchRoundMatch{
 				MenteeUserId: match.UserOneId,
 				MentorUserId: match.UserTwoId,
 				Score:        float32(match.Score),
 			})
 		}
 
-		if err := db.Create(roundMatches).Error; err != nil {
+		if err := db.Create(&matchRound).Error; err != nil {
 			return err
 		}
 
