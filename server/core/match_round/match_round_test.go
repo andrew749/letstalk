@@ -453,6 +453,43 @@ func TestGetMatchRoundsControllerHappy(t *testing.T) {
 					checkMatchUser(t, &match.Mentor, userMap)
 				}
 			}
+
+			// Test that you can't delete committing, committed, failed match rounds
+			err = handleDeleteMatchRound(db, admin.UserId, matchRounds[2].MatchRoundId)
+			assert.EqualError(t, err, fmt.Sprintf("Cannot delete match round in %s state",
+				api.MATCH_ROUND_STATE_COMMITTING))
+			err = handleDeleteMatchRound(db, admin.UserId, matchRounds[3].MatchRoundId)
+			assert.EqualError(t, err, fmt.Sprintf("Cannot delete match round in %s state",
+				api.MATCH_ROUND_STATE_COMMITTED))
+			err = handleDeleteMatchRound(db, admin.UserId, matchRounds[4].MatchRoundId)
+			assert.EqualError(t, err, fmt.Sprintf("Cannot delete match round in %s state",
+				api.MATCH_ROUND_STATE_FAILED))
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestGetMatchRoundsControllerNotAdmin(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			groupName := "WICS"
+			managedGroup, users := createMatchRoundTestSetup(t, db, groupName, 6)
+
+			_, err := handleGetMatchRounds(db, users[7].UserId, managedGroup.GroupId)
+			assert.EqualError(t, err, "You do not have rights to do this operation")
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestDeleteMatchRoundControllerNotAdmin(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			groupName := "WICS"
+			_, users, matchRoundId := commitMatchRoundTestSetup(t, db, groupName, 6)
+
+			err := handleDeleteMatchRound(db, users[7].UserId, matchRoundId)
+			assert.EqualError(t, err, "You do not have rights to do this operation")
 		},
 	}
 	test.RunTestWithDb(thisTest)
