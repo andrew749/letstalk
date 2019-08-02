@@ -7,6 +7,7 @@ import (
 	"letstalk/server/core/test"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
+	"letstalk/server/jobmine_jobs/match_round_commit_job"
 	"letstalk/server/test_helpers"
 	"strings"
 	"testing"
@@ -147,12 +148,12 @@ func TestCreateMatchRoundControllerHappyBoundMaxLower(t *testing.T) {
 				youngestUpperGradYear:     2021,
 			}
 			expectedMatches := []matchIndex{
-				{3, 0},
-				{4, 1},
-				{5, 2},
-				{4, 0},
-				{3, 1},
-				{5, 1},
+				{mentorIdIndex: 3, menteeIdIndex: 0},
+				{mentorIdIndex: 4, menteeIdIndex: 1},
+				{mentorIdIndex: 5, menteeIdIndex: 2},
+				{mentorIdIndex: 4, menteeIdIndex: 0},
+				{mentorIdIndex: 3, menteeIdIndex: 1},
+				{mentorIdIndex: 5, menteeIdIndex: 1},
 			}
 			checkCreateMatchRound(t, db, params, expectedMatches)
 		},
@@ -169,12 +170,12 @@ func TestCreateMatchRoundControllerHappyBoundMaxUpper(t *testing.T) {
 				youngestUpperGradYear:     2021,
 			}
 			expectedMatches := []matchIndex{
-				{3, 0},
-				{4, 1},
-				{5, 2},
-				{4, 0},
-				{3, 1},
-				{4, 2},
+				{mentorIdIndex: 3, menteeIdIndex: 0},
+				{mentorIdIndex: 4, menteeIdIndex: 1},
+				{mentorIdIndex: 5, menteeIdIndex: 2},
+				{mentorIdIndex: 4, menteeIdIndex: 0},
+				{mentorIdIndex: 3, menteeIdIndex: 1},
+				{mentorIdIndex: 4, menteeIdIndex: 2},
 			}
 			checkCreateMatchRound(t, db, params, expectedMatches)
 		},
@@ -322,6 +323,136 @@ func TestCommitMatchRoundControllerNotAdmin(t *testing.T) {
 
 			err = handleCommitMatchRound(db, users[7].UserId, matchRoundId)
 			assert.EqualError(t, err, "You do not have rights to do this operation")
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+var specStore = jobmine.JobSpecStore{
+	JobSpecs: map[jobmine.JobType]jobmine.JobSpec{
+		match_round_commit_job.MATCH_ROUND_COMMIT_JOB: match_round_commit_job.CommitJobSpec,
+	},
+}
+
+func checkMatchUser(t *testing.T, user *api.MatchUser, userMap map[data.TUserID]data.User) {
+	eUser := userMap[user.User.UserId]
+	assert.Equal(t, eUser.FirstName, user.User.FirstName)
+	assert.Equal(t, eUser.LastName, user.User.LastName)
+	assert.Equal(t, eUser.Email, user.Email)
+	assert.Equal(t, eUser.Cohort.Cohort.ProgramName, user.Cohort.ProgramName)
+	assert.Equal(t, *eUser.Cohort.Cohort.SequenceName, *user.Cohort.SequenceName)
+	assert.Equal(t, eUser.Cohort.Cohort.GradYear, user.Cohort.GradYear)
+}
+
+// Pretty big integration test of pretty much all the functionality of the match rounds module.
+func TestGetMatchRoundsControllerHappy(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			var err error
+			groupName := "WICS"
+			adminIndex := 7
+			managedGroup, users := createMatchRoundTestSetup(t, db, groupName, adminIndex)
+			admin := users[adminIndex]
+
+			request := api.CreateMatchRoundRequest{
+				Parameters: api.MatchRoundParameters{
+					MaxLowerYearsPerUpperYear: 1,
+					MaxUpperYearsPerLowerYear: 1,
+					YoungestUpperGradYear:     2021,
+				},
+				GroupId: managedGroup.GroupId,
+				UserIds: []data.TUserID{
+					users[0].UserId,
+					users[1].UserId,
+					users[2].UserId,
+					users[3].UserId,
+					users[4].UserId,
+					users[5].UserId,
+				},
+			}
+
+			numRounds := 5
+			matchRounds := make([]api.MatchRound, numRounds)
+			// 0 - Created
+			// 1 - Deleted
+			// 2 - Committing
+			// 3 - Committed
+			// 4 - Failed
+
+			for i := 0; i < numRounds; i++ {
+				matchRound, err := handleCreateMatchRound(db, admin.UserId, request)
+				assert.NoError(t, err)
+				matchRounds[i] = *matchRound
+			}
+
+			err = handleDeleteMatchRound(db, admin.UserId, matchRounds[1].MatchRoundId)
+			assert.NoError(t, err)
+
+			for i := 2; i < numRounds; i++ {
+				err = handleCommitMatchRound(db, admin.UserId, matchRounds[i].MatchRoundId)
+				assert.NoError(t, err)
+			}
+
+			// Forcing the statuses for two of the jobs
+			// TODO(wojtek): I noticed when trying to actually run the job that there is a problem
+			// when running tests that rely on SendGrid offline. We should remove this depenedency during
+			// tests.
+			// Need to get run id for 3rd and 4th match rounds which should exist
+			var matchRound3 data.MatchRound
+			err = db.Where(
+				&data.MatchRound{Id: matchRounds[3].MatchRoundId},
+			).Preload("CommitJob").Find(&matchRound3).Error
+			assert.NoError(t, err)
+			assert.NotNil(t, matchRound3.CommitJob)
+			matchRound3.CommitJob.Status = jobmine.STATUS_SUCCESS
+			err = db.Save(matchRound3.CommitJob).Error
+			assert.NoError(t, err)
+
+			var matchRound4 data.MatchRound
+			err = db.Where(
+				&data.MatchRound{Id: matchRounds[4].MatchRoundId},
+			).Preload("CommitJob").Find(&matchRound4).Error
+			assert.NoError(t, err)
+			assert.NotNil(t, matchRound4.CommitJob)
+			matchRound4.CommitJob.Status = jobmine.STATUS_FAILED
+			err = db.Save(matchRound4.CommitJob).Error
+			assert.NoError(t, err)
+
+			response, err := handleGetMatchRounds(db, admin.UserId, managedGroup.GroupId)
+			assert.NoError(t, err)
+			assert.Len(t, response, 4)
+
+			resMap := make(map[data.TMatchRoundID]api.MatchRound)
+			for _, matchRound := range response {
+				resMap[matchRound.MatchRoundId] = matchRound
+			}
+
+			// Check states
+			assert.Equal(t, api.MATCH_ROUND_STATE_CREATED, resMap[matchRounds[0].MatchRoundId].State)
+			assert.Equal(t, api.MATCH_ROUND_STATE_COMMITTING, resMap[matchRounds[2].MatchRoundId].State)
+			assert.Equal(t, api.MATCH_ROUND_STATE_COMMITTED, resMap[matchRounds[3].MatchRoundId].State)
+			assert.Equal(t, api.MATCH_ROUND_STATE_FAILED, resMap[matchRounds[4].MatchRoundId].State)
+
+			// Check matches in rounds
+			expectedMatches := []match{
+				{mentorId: users[3].UserId, menteeId: users[0].UserId},
+				{mentorId: users[4].UserId, menteeId: users[1].UserId},
+				{mentorId: users[5].UserId, menteeId: users[2].UserId},
+			}
+			userMap := make(map[data.TUserID]data.User)
+			for _, user := range users {
+				userMap[user.UserId] = user
+			}
+
+			for _, matchRound := range response {
+				matches := matchesFromApiMatchRound(&matchRound)
+				assert.ElementsMatch(t, expectedMatches, matches)
+
+				for _, match := range matchRound.Matches {
+					checkMatchUser(t, &match.Mentee, userMap)
+					checkMatchUser(t, &match.Mentor, userMap)
+				}
+			}
 		},
 	}
 	test.RunTestWithDb(thisTest)

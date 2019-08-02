@@ -180,7 +180,7 @@ func handleGetMatchRounds(
 		"Matches.MenteeUser.Cohort.Cohort",
 	).Preload(
 		"Matches.MentorUser.Cohort.Cohort",
-	).Find(matchRounds).Error; err != nil {
+	).Find(&matchRounds).Error; err != nil {
 		return nil, errs.NewDbError(err)
 	}
 

@@ -13,6 +13,7 @@ func apiMatchUserFromDataUser(user *data.User) api.MatchUser {
 
 	return api.MatchUser{
 		User:   ApiUserPersonalInfoFromDataUser(user),
+		Email:  user.Email,
 		Cohort: cohort,
 	}
 }

@@ -6,9 +6,9 @@ type MatchRoundState string
 
 const (
 	MATCH_ROUND_STATE_CREATED    MatchRoundState = "CREATED"
-	MATCH_ROUND_STATE_COMMITTING                 = "COMMITTING"
-	MATCH_ROUND_STATE_COMMITTED                  = "COMMITTED"
-	MATCH_ROUND_STATE_FAILED                     = "FAILED"
+	MATCH_ROUND_STATE_COMMITTING MatchRoundState = "COMMITTING"
+	MATCH_ROUND_STATE_COMMITTED  MatchRoundState = "COMMITTED"
+	MATCH_ROUND_STATE_FAILED     MatchRoundState = "FAILED"
 )
 
 type MatchRoundParameters struct {
@@ -37,6 +37,7 @@ type CommitMatchRoundRequest struct {
 // accepted for a match.
 type MatchUser struct {
 	User   UserPersonalInfo `json:"user" binding:"required"`
+	Email  string           `json:"email" binding:"required"`
 	Cohort *CohortV2        `json:"cohort"`
 }
 
