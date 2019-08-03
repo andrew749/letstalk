@@ -12,6 +12,7 @@ import (
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/email_subscription"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/match_round"
 	"letstalk/server/core/matching"
 	"letstalk/server/core/meeting"
 	"letstalk/server/core/meetup_reminder"
@@ -370,6 +371,18 @@ func Register(
 
 	admin.OPTIONS("/nuke_user")
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
+
+	admin.OPTIONS("/create_match_round")
+	admin.POST("/create_match_round", hw.wrapHandler(match_round.CreateMatchRoundController, false))
+
+	admin.OPTIONS("/commit_match_round")
+	admin.POST("/commit_match_round", hw.wrapHandler(match_round.CommitMatchRoundController, false))
+
+	admin.OPTIONS("/match_rounds")
+	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, false))
+
+	admin.OPTIONS("/match_round")
+	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, false))
 
 	admin.OPTIONS("/create_managed_group")
 	admin.POST("/create_managed_group", hw.wrapHandler(controller.CreateManagedGroupController, true))

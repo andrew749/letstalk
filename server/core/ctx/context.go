@@ -1,6 +1,7 @@
 package ctx
 
 import (
+	"letstalk/server/core/errs"
 	"letstalk/server/core/search"
 	"letstalk/server/core/sessions"
 
@@ -41,6 +42,18 @@ func WithinTx(db *gorm.DB, f func(*gorm.DB) error) error {
 		return err
 	}
 	return tx.Commit().Error
+}
+
+func WithinTxRequestErr(db *gorm.DB, f func(*gorm.DB) errs.Error) errs.Error {
+	tx := db.Begin()
+	if err := f(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit().Error; err != nil {
+		return errs.NewDbError(err)
+	}
+	return nil
 }
 
 // WithinTx provides a transaction object to the given function and automatically performs rollback

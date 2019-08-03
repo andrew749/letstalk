@@ -29,6 +29,30 @@ func GetConnectionDetails(
 	return &connection, nil
 }
 
+func GetMentorshipDetails(
+	db *gorm.DB,
+	requestingUser data.TUserID,
+	connectedUser data.TUserID,
+) (*data.Connection, error) {
+	var connection data.Connection
+	q := db.
+		Where(
+			"user_one_id = ? AND user_two_id = ? OR user_one_id = ? AND user_two_id = ?",
+			requestingUser, connectedUser,
+			connectedUser, requestingUser,
+		).
+		Preload("MatchRounds").
+		Preload("Mentorship").
+		First(&connection)
+	if q.RecordNotFound() {
+		return nil, nil
+	}
+	if q.Error != nil {
+		return nil, q.Error
+	}
+	return &connection, nil
+}
+
 // GetConnectionDetailsUndirected returns details on an existing connection between two users in either direction.
 func GetConnectionDetailsUndirected(
 	db *gorm.DB,

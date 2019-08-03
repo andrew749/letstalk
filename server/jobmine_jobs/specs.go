@@ -3,6 +3,7 @@ package jobmine_jobs
 import (
 	"letstalk/server/jobmine"
 	"letstalk/server/jobmine_jobs/generic_notification_job"
+	"letstalk/server/jobmine_jobs/match_round_commit_job"
 	"letstalk/server/jobmine_jobs/notification_status_checker"
 	"letstalk/server/jobmine_jobs/remind_meetup_job"
 	"letstalk/server/jobmine_jobs/remind_onboard_job"
@@ -23,5 +24,6 @@ var Jobs = jobmine.JobSpecStore{
 		welcome_back_email_job.WELCOME_BACK_EMAIL_JOB:               welcome_back_email_job.ReminderJobSpec,
 		notification_status_checker.NOTIFICATION_STATUS_CHECKER_JOB: notification_status_checker.NotificationStatusChecker,
 		generic_notification_job.GENERIC_NOTIFICATION_JOB:           generic_notification_job.GenericNotificationJob,
+		match_round_commit_job.MATCH_ROUND_COMMIT_JOB:               match_round_commit_job.CommitJobSpec,
 	},
 }

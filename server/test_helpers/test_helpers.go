@@ -14,6 +14,64 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func CreateTestConnection(
+	t *testing.T,
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+) data.TConnectionID {
+	createdAt := time.Now()
+	conn := data.Connection{
+		UserOneId:  mentorUserId,
+		UserTwoId:  menteeUserId,
+		CreatedAt:  createdAt,
+		AcceptedAt: &createdAt, // Automatically accept.
+	}
+	assert.NoError(t, db.Create(&conn).Error)
+	return conn.ConnectionId
+}
+
+func CreateTestMentorship(
+	t *testing.T,
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	connectionId data.TConnectionID,
+) {
+	mentorship := data.Mentorship{
+		ConnectionId: connectionId,
+		MentorUserId: mentorUserId,
+	}
+	assert.NoError(t, db.Create(&mentorship).Error)
+}
+
+func CreateTestConnectionMatchRound(
+	t *testing.T,
+	db *gorm.DB,
+	connectionId data.TConnectionID,
+	matchRoundId data.TMatchRoundID,
+) {
+	round := data.ConnectionMatchRound{
+		ConnectionId: connectionId,
+		MatchRoundId: matchRoundId,
+	}
+	assert.NoError(t, db.Create(&round).Error)
+}
+
+func CreateTestMatchRound(db *gorm.DB) (*data.MatchRound, error) {
+	matchRound := data.MatchRound{
+		Name:    "Some match round",
+		GroupId: data.TGroupID("Hey friend"),
+		MatchParameters: data.MatchParameters(map[string]interface{}{
+			"param_a": interface{}(123),
+			"param_b": interface{}(234),
+		}),
+	}
+	if err := db.Create(&matchRound).Error; err != nil {
+		return nil, err
+	}
+	return &matchRound, nil
+}
+
 func CreateTestContext(t *testing.T, db *gorm.DB, userId data.TUserID) *ctx.Context {
 	expiry := time.Now()
 	expiry = expiry.AddDate(1, 0, 0)
@@ -144,4 +202,122 @@ func CreateTestSetupUser(db *gorm.DB, num int) (*data.User, error) {
 	}
 	user.AdditionalData = additionalData
 	return user, nil
+}
+
+func CreateUsersForMatching(db *gorm.DB) ([]data.User, error) {
+	sequenceId := "8_STREAM"
+	sequenceName := "8 Stream"
+	now := time.Now()
+
+	user1, err := CreateTestUser(db, 1)
+	if err != nil {
+		return nil, err
+	}
+	user1.CreatedAt = now.AddDate(0, 0, -2)
+	user1.Gender = data.GENDER_FEMALE
+	err = db.Save(user1).Error
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user1, "SOFTWARE_ENGINEERING", "Software Engineering", 2022, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user2, err := CreateTestUser(db, 2)
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user2, "SOFTWARE_ENGINEERING", "Software Engineering", 2022, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user3, err := CreateTestUser(db, 3)
+	if err != nil {
+		return nil, err
+	}
+	user3.CreatedAt = now.AddDate(0, 0, 2)
+	err = db.Save(user3).Error
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user3, "COMPUTER_ENGINEERING", "Computer Engineering", 2022, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user4, err := CreateTestUser(db, 4)
+	if err != nil {
+		return nil, err
+	}
+	user4.CreatedAt = now.AddDate(0, 0, -2)
+	user4.Gender = data.GENDER_FEMALE
+	err = db.Save(user4).Error
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user4, "SOFTWARE_ENGINEERING", "Software Engineering", 2021, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user5, err := CreateTestUser(db, 5)
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user5, "SOFTWARE_ENGINEERING", "Software Engineering", 2021, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user6, err := CreateTestUser(db, 6)
+	if err != nil {
+		return nil, err
+	}
+	user6.CreatedAt = now.AddDate(0, 0, 2)
+	err = db.Save(user6).Error
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user6, "COMPUTER_ENGINEERING", "Computer Engineering", 2021, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	// These users should be ignored
+	user7, err := CreateTestUser(db, 7)
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user7, "SOFTWARE_ENGINEERING", "Software Engineering", 2020, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+
+	user8, err := CreateTestUser(db, 8)
+	if err != nil {
+		return nil, err
+	}
+	err = CreateCohortForUser(
+		db, user8, "COMPUTER_ENGINEERING", "Computer Engineering", 2023, true,
+		&sequenceId, &sequenceName)
+	if err != nil {
+		return nil, err
+	}
+	return []data.User{*user1, *user2, *user3, *user4, *user5, *user6, *user7, *user8}, nil
 }

@@ -8,6 +8,7 @@ import (
 	"letstalk/server/core/query"
 	"letstalk/server/core/test"
 	"letstalk/server/data"
+	"letstalk/server/test_helpers"
 
 	"letstalk/server/core/sessions"
 	"letstalk/server/core/user"
@@ -89,6 +90,102 @@ func TestAddMentorship(t *testing.T) {
 				conn, err := query.GetConnectionDetails(db, userOne.UserId, userTwo.UserId)
 				assert.NoError(t, err)
 				assert.Nil(t, conn)
+			},
+		},
+	}
+	test.RunTestsWithDb(tests)
+}
+
+func checkAddMatchRoundMentorship(
+	t *testing.T,
+	db *gorm.DB,
+	mentorUserId data.TUserID,
+	menteeUserId data.TUserID,
+	matchRoundId data.TMatchRoundID,
+) {
+	conn, err := query.GetMentorshipDetails(db, mentorUserId, menteeUserId)
+	assert.NoError(t, err)
+	assert.Equal(t, mentorUserId, conn.UserOneId)
+	assert.Equal(t, menteeUserId, conn.UserTwoId)
+	assert.NotNil(t, conn.AcceptedAt)
+	assert.Equal(t, mentorUserId, conn.Mentorship.MentorUserId)
+	assert.Equal(t, 1, len(conn.MatchRounds))
+	assert.Equal(t, matchRoundId, conn.MatchRounds[0].MatchRoundId)
+}
+
+func TestAddMatchRoundMentorship(t *testing.T) {
+	tests := []test.Test{
+		{
+			TestName: "Test full flow",
+			Test: func(db *gorm.DB) {
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userOne.UserId, userTwo.UserId, matchRoundId)
+			},
+		},
+		{
+			TestName: "Test upgrade mentorship",
+			Test: func(db *gorm.DB) {
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userOne.UserId, userTwo.UserId, matchRoundId)
+			},
+		},
+		{
+			TestName: "Test only write connection match round",
+			Test: func(db *gorm.DB) {
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				connId := test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
+				test_helpers.CreateTestMentorship(t, db, userOne.UserId, connId)
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userOne.UserId, userTwo.UserId, matchRoundId)
+			},
+		},
+		{
+			TestName: "Test only write connection match round opposite dir",
+			Test: func(db *gorm.DB) {
+				// We don't switch the order of the connections when this happens
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				connId := test_helpers.CreateTestConnection(t, db, userTwo.UserId, userOne.UserId)
+				test_helpers.CreateTestMentorship(t, db, userTwo.UserId, connId)
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userTwo.UserId, userOne.UserId, matchRoundId)
+			},
+		},
+		{
+			TestName: "Test only write mentorship",
+			Test: func(db *gorm.DB) {
+				userOne := user.CreateUserForTest(t, db)
+				userTwo := user.CreateUserForTest(t, db)
+				matchRoundId := data.TMatchRoundID(10)
+
+				connId := test_helpers.CreateTestConnection(t, db, userOne.UserId, userTwo.UserId)
+				test_helpers.CreateTestConnectionMatchRound(t, db, connId, matchRoundId)
+				err := AddMatchRoundMentorship(db, userOne.UserId, userTwo.UserId, matchRoundId)
+				assert.NoError(t, err)
+
+				checkAddMatchRoundMentorship(t, db, userOne.UserId, userTwo.UserId, matchRoundId)
 			},
 		},
 	}
