@@ -8,8 +8,9 @@ import (
 	"letstalk/server/core/errs"
 	"letstalk/server/data"
 
-	"github.com/jinzhu/gorm"
 	"letstalk/server/core/utility/uw_email"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Returns missing users out of the given list
@@ -141,7 +142,9 @@ func GetUserAdditionalData(
 ) (*data.UserAdditionalData, errs.Error) {
 	var additionalData data.UserAdditionalData
 
-	if err := db.Where(&data.UserAdditionalData{UserId: userId}).Error; err != nil {
+	if err := db.Where(
+		&data.UserAdditionalData{UserId: userId},
+	).Find(&additionalData).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil
 		}

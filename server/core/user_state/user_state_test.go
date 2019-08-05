@@ -81,6 +81,13 @@ func TestGetUserStateAccountHasBasicInfo(t *testing.T) {
 			err = db.Save(userCohort).Error
 			assert.NoError(t, err)
 
+			bio := "Hello"
+			userAdditionalData := &data.UserAdditionalData{
+				Bio: &bio,
+			}
+			err = db.Save(userAdditionalData).Error
+			assert.NoError(t, err)
+
 			state, err := GetUserState(db, user.UserId)
 			assert.NoError(t, err)
 			assert.Equal(t, api.ACCOUNT_HAS_BASIC_INFO, *state)
