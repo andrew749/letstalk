@@ -70,7 +70,7 @@ const Rating: React.SFC<Props> = props => {
     },
   });
   const opacities = (new Array(numElems).fill(0)).map((_, index) => {
-    const style: Array<RegisteredStyle<ViewStyle | TextStyle | ImageStyle>> = [specificStyles.rect];
+    const style: Array<ViewStyle | TextStyle | ImageStyle> = [specificStyles.rect];
     if (index === 0)            style.push(styles.firstRect);
     if (index === numElems - 1) style.push(styles.lastRect);
     if (index < value)          style.push(styles.active);

@@ -1,8 +1,7 @@
 import Immutable from 'immutable';
-import fuzzysearch from 'fuzzysearch';
 import Fuse from 'fuse-js-latest';
 
-import React, { Component, ReactNode } from 'react';
+import React, { Component } from 'react';
 import {
   Dimensions,
   EmitterSubscription,
@@ -17,10 +16,6 @@ import {
   View,
 } from 'react-native';
 import Constants from 'expo-constants';
-
-import {
-  SearchBar,
-} from 'react-native-elements';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;

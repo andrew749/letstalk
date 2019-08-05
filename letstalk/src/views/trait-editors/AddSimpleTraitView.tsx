@@ -100,7 +100,7 @@ const AddSimpleTraitForm: SFC<FormProps<AddSimpleTraitFormData> & AddSimpleTrait
         label="Trait"
         name="simpleTrait"
         placeholder="Search for traits (e.g. cycling, climbing)"
-        component={AutocompleteInput}
+        component={AutocompleteInput as "input" & typeof AutocompleteInput}
         onQueryChange={onQueryChangeThrottled}
         validate={required}
       >
@@ -127,9 +127,9 @@ const selector = formValueSelector('add-simple-trait');
 const AddSimpleTraitFormWithRedux =
   reduxForm<AddSimpleTraitFormData, FormP<AddSimpleTraitFormData>>({
     form: 'add-simple-trait',
-  })(connect((state: RootState) => ({
+  })(connect<{}, {}, FormProps<AddSimpleTraitFormData> & AddSimpleTraitFormData>((state: RootState) => ({
     simpleTrait: selector(state, 'simpleTrait'),
-  }))(AddSimpleTraitForm));
+  }))(AddSimpleTraitForm as any));
 
 interface DispatchActions {
   addSimpleTraitById: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
@@ -205,8 +205,8 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(null, {
+export default connect<{}, {}, FormProps<AddSimpleTraitFormData> & AddSimpleTraitFormData>(null, {
   addSimpleTraitById,
   addSimpleTraitByName,
   infoToast,
-})(AddSimpleTraitView);
+})(AddSimpleTraitView as any);

@@ -282,4 +282,4 @@ class MatchProfileView extends Component<Props> {
 export default connect(
   ({ matchProfile }: RootState) => matchProfile,
   { infoToast, errorToast, fetchBootstrap, fetchMatchProfile },
-)(MatchProfileView);
+)(MatchProfileView as any);

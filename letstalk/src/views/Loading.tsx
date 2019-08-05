@@ -4,6 +4,7 @@ import {
   NavigationActions,
   NavigationScreenProp,
   NavigationStackAction,
+  StackActions,
 } from 'react-navigation';
 
 import auth from '../services/auth';
@@ -47,7 +48,7 @@ const Loading: SFC<Props> = props => {
         try {
           await auth.logout();
         } catch (error) { }
-        navigation.dispatch(NavigationActions.reset({
+        navigation.dispatch(StackActions.reset({
           index: 0,
           key: null,
           actions: [NavigationActions.navigate({ routeName: 'Login' })]

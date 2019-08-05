@@ -55,7 +55,7 @@ const RequestConnectionForm: React.SFC<RequestConnectionFormProps> = props => {
         label="Message (optional)"
         name="message"
         placeholder={'Tell ' + profile.firstName + ' why you want to connect'}
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         multiline={true}
         numberOfLines={10}
         inputStyle={{width: "100%"}}
@@ -76,7 +76,7 @@ const RequestConnectionFormWithRedux = reduxForm<
   RequestConnectionFormData, FormP<RequestConnectionFormData>
 >({
   form: 'requestConnection',
-})(RequestConnectionForm);
+})(RequestConnectionForm as any);
 
 export class RequestConnectionView extends Component<Props, State> {
   REQUEST_CONNECTION_VIEW_IDENTIFIER = "RequestConnectionView";
@@ -124,9 +124,9 @@ export class RequestConnectionView extends Component<Props, State> {
           <Text style={styles.boldText}>{profile.firstName} {profile.lastName}</Text>
           <Text>{'.'}</Text>
         </Text>
+        // @ts-ignore - Couldn't find a way to add this to the props
         <RequestConnectionFormWithRedux
           onSubmit={this.onSubmit}
-          // @ts-ignore - Couldn't find a way to add this to the props
           profile={profile}
         />
       </KeyboardAwareScrollView>
@@ -134,7 +134,7 @@ export class RequestConnectionView extends Component<Props, State> {
   }
 }
 
-export default connect(null, { infoToast, errorToast, fetchMatchProfile })(RequestConnectionView);
+export default connect(null, { infoToast, errorToast, fetchMatchProfile })(RequestConnectionView as any);
 
 const styles = StyleSheet.create({
   container: {

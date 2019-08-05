@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Alert } from 'react-native';
 
 import { RootState } from '../redux';
 import { MultiTrait, MultiTraitTypes } from '../models/multi-trait';
@@ -24,11 +23,8 @@ import {
 } from '../redux/search-bar/reducer';
 import {
   ActionTypes as SearchBarActionTypes,
-  SEARCH_LIST_TYPE_CREDENTIAL_REQUESTS,
-  SEARCH_LIST_TYPE_CREDENTIALS,
 } from '../redux/search-bar/actions';
 import { errorToast } from '../redux/toast';
-import Colors from '../services/colors';
 import { AnalyticsActions, logAnalyticsThenExecuteAsync } from '../services/analytics';
 import UserSearchAutocompleteModal from './user-search/UserSearchAutocompleteModal';
 
@@ -48,12 +44,17 @@ interface DispatchActions {
     ThunkAction<Promise<UserSearchActionTypes>, UserSearchState, void>>;
 }
 
-interface Props extends DispatchActions {
+interface StateProps {
   searchBar: SearchBarState;
+}
+
+interface ComponentProps {
   onSelectSuccess?(): void;
 }
 
-class AllFilterableModals extends Component<Props> {
+type Props = StateProps & ComponentProps & DispatchActions;
+
+class AllFilterableModals extends React.Component<Props> {
 
   constructor(props: Props) {
     super(props);
@@ -142,8 +143,18 @@ class AllFilterableModals extends Component<Props> {
   }
 }
 
+interface A{
+  errorToast: any
+  updateFocus: any
+  searchByCohort: any
+  searchByPosition: any
+  searchBySimpleTrait: any
+  searchByGroup: any
+  setQuery: any
+}
 
-export default connect(({ searchBar }: RootState) => {
+
+export default connect<StateProps, any, ComponentProps>(({ searchBar }: RootState) => {
   return {
     searchBar,
   };
@@ -155,4 +166,4 @@ export default connect(({ searchBar }: RootState) => {
   searchBySimpleTrait,
   searchByGroup,
   setQuery,
-})(AllFilterableModals);
+})(AllFilterableModals as any);

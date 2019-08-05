@@ -144,7 +144,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         label="Role"
         name="role"
         placeholder="Search for roles (e.g. Accountant, Software Engineer)"
-        component={AutocompleteInput}
+        component={AutocompleteInput as "input" & typeof AutocompleteInput}
         onQueryChange={onRoleQueryChangeThrottled}
         validate={required}
         containerStyle={[styles.textInputContainerStyle, styles.roleStyle]}
@@ -153,7 +153,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         label="Organization"
         name="organization"
         placeholder="Search for companies, clubs or sports teams"
-        component={AutocompleteInput}
+        component={AutocompleteInput as "input" & typeof AutocompleteInput}
         onQueryChange={onOrganizationQueryChangeThrottled}
         validate={required}
         containerStyle={styles.textInputContainerStyle}
@@ -163,7 +163,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         name="startDate"
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
-        component={ModalDatePicker}
+        component={ModalDatePicker as "input" & typeof ModalDatePicker}
         validate={required}
       />
       <Field
@@ -171,7 +171,7 @@ const AddPositionForm: SFC<FormProps<AddPositionFormData> & AddPositionFormData>
         name="endDate"
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
-        component={ModalDatePicker}
+        component={ModalDatePicker as "input" & typeof ModalDatePicker}
         maxDate={maxDate}
       />
       { selection }
@@ -203,12 +203,12 @@ const AddPositionFormWithRedux =
   reduxForm<AddPositionFormData, FormP<AddPositionFormData>>({
     form: 'add-position',
     validate: endDateAfterStartDate,
-  })(connect((state: RootState) => ({
+  })(connect<{}, {}, FormProps<AddPositionFormData> & AddPositionFormData>((state: RootState) => ({
     role: selector(state, 'role'),
     organization: selector(state, 'organization'),
     startDate: selector(state, 'startDate'),
     endDate: selector(state, 'endDate'),
-  }))(AddPositionForm));
+  }))(AddPositionForm as any));
 
 interface DispatchActions {
   addPosition: ActionCreator<ThunkAction<Promise<ActionTypes>, ProfileState, void>>;
@@ -287,4 +287,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(null, { addPosition, infoToast })(AddPositionView);
+export default connect(null, { addPosition, infoToast })(AddPositionView as any);

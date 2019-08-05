@@ -6,7 +6,7 @@
     "icon": "./src/img/logo.png",
     "version": "1.0.1",
     "slug": "hive-alpha",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "34.0.0",
     "ios": {
       "icon": "./src/img/logo.png",
       "bundleIdentifier": "org.hiveapp.hive",

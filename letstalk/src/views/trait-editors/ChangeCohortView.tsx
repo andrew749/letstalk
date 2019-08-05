@@ -86,7 +86,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
         label="Program"
         name="programId"
         containerStyle={styles.pickerContainer}
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {programItems}
@@ -95,7 +95,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
         label="Sequence"
         name="sequenceId"
         containerStyle={styles.pickerContainer}
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {sequenceItems}
@@ -104,7 +104,7 @@ const ChangeCohortForm: SFC<FormProps<ChangeCohortFormData> & ChangeCohortFormPr
         label="Grad Year"
         name="gradYear"
         containerStyle={styles.pickerContainer}
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {gradYearItems}
@@ -128,12 +128,12 @@ const ChangeCohortFormWithReduxBuilder = (initialValues: ChangeCohortFormData) =
   return reduxForm<ChangeCohortFormData, FormP<ChangeCohortFormData>>({
     form: 'profile-edit',
     initialValues,
-  })(connect((state: RootState) => ({
+  })(connect<{}, {}, FormProps<ChangeCohortFormData> & ChangeCohortFormProps>((state: RootState) => ({
     programId: cohortSelector(state, 'programId'),
     sequenceId: cohortSelector(state, 'sequenceId'),
     gradYear: cohortSelector(state, 'gradYear'),
     cohorts: state.cohorts.cohorts,
-  }))(ChangeCohortForm));
+  }))(ChangeCohortForm as any));
 }
 
 interface DispatchActions {
@@ -229,4 +229,4 @@ class ChangeCohortView extends Component<Props> {
 
 export default connect(({cohorts}: RootState) => {
   return { cohorts }
-}, { fetchProfile, fetchCohorts, infoToast })(ChangeCohortView);
+}, { fetchProfile, fetchCohorts, infoToast })(ChangeCohortView as any);

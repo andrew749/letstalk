@@ -5,7 +5,8 @@ import { Alert, AsyncStorage, Linking, Platform } from 'react-native';
 import requestor from './requests';
 import { SessionService, SessionToken, RemoteSessionService } from './session-service';
 import {FORGOT_PASSWORD_ROUTE, SEND_EMAIL_VERIFICATION_ROUTE} from './constants';
-import {Notifications, Permissions} from "expo";
+import {Notifications} from "expo";
+import * as Permissions from 'expo-permissions';
 import {SendAccountVerificationEmailRequest} from "../models/verify_email";
 
 function AsyncIOSNotificationAlert(): Promise<void> {

@@ -6,7 +6,7 @@ import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-
 import {
   NavigationScreenProp,
   NavigationStackAction,
-  StackNavigator,
+  StackActions,
   NavigationActions
 } from 'react-navigation';
 import { RootState } from '../redux';
@@ -108,7 +108,7 @@ class NestedSurveyViewComponent extends Component<NestedProps> {
           await this.props.fetchBootstrap();
           // Since this is accessed from HomeView by resetting the stack, you can't actually go
           // back to the HomeView. Need to place only the Tabbed view on the stack.
-          await this.props.navigation.dispatch(NavigationActions.reset({
+          await this.props.navigation.dispatch(StackActions.reset({
             index: 0,
             actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
           }));
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const SurveyView = connect(({ survey } : RootState) => survey,
-  { fetchBootstrap, fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent);
+const SurveyView = connect<{}, {}, NestedProps, {}>(({ survey } : RootState) => survey,
+  { fetchBootstrap, fetchSurvey, setSurveyResponsesAction, setSurvey })(NestedSurveyViewComponent as any);
 
 export default SurveyView;

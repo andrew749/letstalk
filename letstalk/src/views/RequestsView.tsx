@@ -2,10 +2,8 @@ import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
-  ActivityIndicator,
   Alert,
   Button as ReactNativeButton,
-  Linking,
   RefreshControl,
   RefreshControlProps,
   ScrollView,
@@ -18,7 +16,8 @@ import {
   NavigationScreenProp,
   NavigationScreenDetails,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  StackActions
 } from 'react-navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import Immutable from 'immutable';
@@ -46,15 +45,9 @@ import {
 import {
   IntentTypes,
 } from '../models/connection';
-import {
-  programById,
-  sequenceById,
-} from '../models/cohort';
 import Colors from '../services/colors';
 import { AnalyticsHelper, AnalyticsActions, logAnalyticsThenExecute } from '../services/analytics';
-import TutorialService from '../services/tutorial_service';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
-import AllFilterableModals from './AllFilterableModals';
 import { ConnectionRequestWithName } from '../models/bootstrap';
 import { FETCH_STATE_SUCCESS } from '../redux/actions';
 
@@ -107,13 +100,13 @@ class RequestsView extends Component<Props, State> {
   async componentWillReceiveProps(nextProps: Props) {
     if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_created') {
       // Email not yet verified, so take to email verification page
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
       }));
     } else if (nextProps.bootstrap && nextProps.bootstrap.state === 'account_email_verified') {
       // Account not yet setup, so take to onboarding page
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
       }));
@@ -313,7 +306,7 @@ class RequestsView extends Component<Props, State> {
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={this.onRefresh}
-            /> as React.ReactElement<RefreshControlProps>
+            />
           }
         >
           <View style={styles.scrollContainer}>
@@ -346,7 +339,7 @@ class RequestsView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap, fetchMatchProfile })(RequestsView);
+  { errorToast, infoToast, fetchBootstrap, fetchMatchProfile })(RequestsView as any);
 
 const styles = StyleSheet.create({
   container: {

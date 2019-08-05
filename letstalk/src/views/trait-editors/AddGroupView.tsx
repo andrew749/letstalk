@@ -72,7 +72,7 @@ const AddGroupForm: SFC<FormProps<{}>> = props => {
         label="Group"
         name="groupId"
         containerStyle={styles.pickerContainer}
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         { groupItems }
@@ -94,7 +94,7 @@ const selector = formValueSelector('add-position');
 const AddGroupFormWithRedux =
   reduxForm<AddGroupFormData, FormP<AddGroupFormData>>({
     form: 'add-position',
-  })(AddGroupForm);
+  })(AddGroupForm as any);
 
 interface DispatchActions {
   addGroup: ActionCreator<ThunkAction<Promise<ProfileActionTypes>, ProfileState, void>>;
@@ -163,4 +163,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect(null, { addGroup, infoToast })(AddGroupView);
+export default connect(null, { addGroup, infoToast })(AddGroupView as any);

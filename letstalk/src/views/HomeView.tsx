@@ -3,17 +3,14 @@ import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
   ActivityIndicator,
-  AsyncStorage,
   Alert,
   Button as ReactNativeButton,
   Image,
   ImageBackground,
   Linking,
   Modal as ReactNativeModal,
-  Picker,
   Platform,
   RefreshControl,
-  RefreshControlProps,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,9 +19,11 @@ import {
 } from 'react-native';
 import {
   NavigationScreenProp,
-  NavigationScreenDetails,
+  NavigationScreenProps,
+  NavigationStackScreenOptions,
   NavigationStackAction,
   NavigationActions,
+  StackActions,
   NavigationEventSubscription,
 } from 'react-navigation';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -251,8 +250,8 @@ function showModal(): boolean {
 class HomeView extends Component<Props, State> {
   HOME_VIEW_IDENTIFIER = "HomeView";
 
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
-    headerTitle: <TopHeader navigation={navigation} />,
+  static navigationOptions = ({ navigation }: NavigationScreenProps): NavigationStackScreenOptions => ({
+    headerTitle: <Text>Fuck</Text>,
     headerStyle,
     headerTitleStyle,
     headerTintColor
@@ -329,20 +328,20 @@ class HomeView extends Component<Props, State> {
     if (!!this.props.bootstrap && this.state.focused) {
       switch (this.props.bootstrap.state) {
         case USER_STATE_ACCOUNT_CREATED:
-          await this.props.navigation.dispatch(NavigationActions.reset({
+          await this.props.navigation.dispatch(StackActions.reset({
             index: 0,
             actions: [NavigationActions.navigate({ routeName: 'VerifyEmail' })]
           }));
           break;
         case USER_STATE_ACCOUNT_EMAIL_VERIFIED:
-          await this.props.navigation.dispatch(NavigationActions.reset({
+          await this.props.navigation.dispatch(StackActions.reset({
             index: 0,
             actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
           }));
           break;
         case USER_STATE_ACCOUNT_HAS_BASIC_INFO:
           await this.props.fetchSurvey(GROUP_GENERIC);
-          await this.props.navigation.dispatch(NavigationActions.reset({
+          await this.props.navigation.dispatch(StackActions.reset({
             index: 0,
             actions: [NavigationActions.navigate({ routeName: 'SurveyView' })]
           }));
@@ -631,7 +630,7 @@ class HomeView extends Component<Props, State> {
                 <RefreshControl
                   refreshing={this.state.refreshing}
                   onRefresh={this.onRefresh}
-                /> as React.ReactElement<RefreshControlProps>
+                />
               }
             >
               <View style={styles.scrollContainer}>
@@ -656,7 +655,7 @@ class HomeView extends Component<Props, State> {
                 <RefreshControl
                   refreshing={this.state.refreshing}
                   onRefresh={this.onRefresh}
-                /> as React.ReactElement<RefreshControlProps>
+                />
               }
             >
               <View style={styles.scrollContainer}>
@@ -729,7 +728,7 @@ class HomeView extends Component<Props, State> {
 }
 
 export default connect(({ bootstrap }: RootState) => bootstrap,
-  { errorToast, infoToast, fetchBootstrap, fetchSurvey })(HomeView);
+  { errorToast, infoToast, fetchBootstrap, fetchSurvey })(HomeView as any);
 
 const styles = StyleSheet.create({
   container: {
