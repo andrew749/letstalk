@@ -32,3 +32,18 @@ type AdminManagedGroup struct {
 type EnrollManagedGroupRequest struct {
 	GroupUUID string `json:"groupUUID"`
 }
+
+type GroupMemberStatus string
+
+const (
+	GROUP_MEMBER_STATUS_SIGNED_UP GroupMemberStatus = "SIGNED_UP"
+	GROUP_MEMBER_STATUS_ONBOARDED GroupMemberStatus = "ONBOARDED"
+	GROUP_MEMBER_STATUS_MATCHED   GroupMemberStatus = "MATCHED"
+)
+
+type GroupMember struct {
+	User   UserPersonalInfo  `json:"user" binding:"required"`
+	Email  string            `json:"email" binding:"required"`
+	Status GroupMemberStatus `json:"status" binding:"required"`
+	Cohort *CohortV2         `json:"cohort"`
+}

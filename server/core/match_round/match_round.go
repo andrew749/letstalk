@@ -17,6 +17,30 @@ import (
 	"github.com/romana/rlog"
 )
 
+func GetGroupMembersController(c *ctx.Context) errs.Error {
+	groupId := data.TGroupID(c.GinContext.Param("groupId"))
+
+	groupMembers, err := handleGetGroupMembers(
+		c.Db,
+		c.SessionData.UserId,
+		groupId,
+	)
+	if err != nil {
+		return err
+	}
+
+	c.Result = groupMembers
+	return nil
+}
+
+func handleGetGroupMembers(
+	db *gorm.DB,
+	adminId data.TUserID,
+	groupId data.TGroupID,
+) ([]api.GroupMember, errs.Error) {
+	return nil, nil
+}
+
 // Controller for the create_match_round admin endpoint
 func CreateMatchRoundController(c *ctx.Context) errs.Error {
 	var request api.CreateMatchRoundRequest
