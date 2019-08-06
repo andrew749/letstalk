@@ -14,7 +14,9 @@ import {
   NavigationScreenProp,
   NavigationScreenDetails,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  NavigationStackScreenOptions,
+  NavigationScreenProps
 } from 'react-navigation';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -78,15 +80,15 @@ interface State {
   refreshing: boolean;
 }
 
-class ExploreView extends Component<Props, State> {
-  EXPLORE_VIEW_IDENTIFIER = "ExploreView";
-
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
+export const exploreViewNavigationOptions = ({ navigation }: NavigationScreenProps): NavigationStackScreenOptions => ({
     headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
     headerTitleStyle,
     headerTintColor
-  })
+  });
+
+class ExploreView extends Component<Props, State> {
+  EXPLORE_VIEW_IDENTIFIER = "ExploreView";
 
   constructor(props: Props) {
     super(props);

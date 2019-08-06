@@ -20,6 +20,7 @@ import {
   createBottomTabNavigator,
   createStackNavigator,
   createAppContainer,
+  NavigationScreenProps,
 } from 'react-navigation';
 import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
@@ -28,14 +29,14 @@ import { YellowBox } from 'react-native'
 
 import appReducer from './redux';
 import auth from './services/auth';
-import HomeView from './views/HomeView';
+import HomeView, { homeViewNavigationOptions } from './views/HomeView';
 import LoginView from './views/LoginView';
 import MatchProfileView from './views/MatchProfileView';
-import ProfileView from './views/ProfileView';
+import ProfileView, { profileViewNavigationOptions } from './views/ProfileView';
 import ProfileEditView from './views/ProfileEditView';
 import SignupView from './views/SignupView';
 import OnboardingView from './views/OnboardingView';
-import ExploreView from './views/ExploreView';
+import ExploreView, { exploreViewNavigationOptions } from './views/ExploreView';
 import NotificationView from './views/NotificationView';
 import ForgotPasswordView from './views/ForgotPasswordView';
 import WalkthroughView from './views/WalkthroughView';
@@ -58,6 +59,7 @@ import navService from './services/navigation-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
 import { BASE_URL as server } from './services/constants';
+import { NavigationStackScreenOptions } from 'react-navigation';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -130,44 +132,63 @@ class TabBar extends React.Component<BottomTabBarProps, TabBarState> {
   }
 }
 
-const createTabView = () => createBottomTabNavigator({
-  'Home': {
-    screen: HomeView,
-  },
-  'Explore': {
-    screen: ExploreView,
-  },
-  'Profile': {
-    screen: ProfileView,
-  },
-}, {
-  tabBarPosition: 'bottom',
-  defaultNavigationOptions: ({ navigation }) => ({
-    tabBarIcon: ({ focused, tintColor }) => {
-      const { routeName } = navigation.state;
-      let iconName;
-      if (routeName === 'Home') {
-        iconName = 'home';
-      } else if (routeName === 'Profile') {
-        iconName = 'person';
-      } else if (routeName === 'Explore') {
-        iconName = 'search';
+const createTabView = () => {
+  const tabNavigator = createBottomTabNavigator({
+    'Home': {
+      screen: HomeView,
+    },
+    'Explore': {
+      screen: ExploreView,
+    },
+    'Profile': {
+      screen: ProfileView,
+    },
+  }, {
+      tabBarPosition: 'bottom',
+      defaultNavigationOptions: ({ navigation }) => ({
+        tabBarIcon: ({ focused, tintColor }) => {
+          const { routeName } = navigation.state;
+          let iconName;
+          if (routeName === 'Home') {
+            iconName = 'home';
+          } else if (routeName === 'Profile') {
+            iconName = 'person';
+          } else if (routeName === 'Explore') {
+            iconName = 'search';
+          }
+
+          return <MaterialIcons name={iconName} size={24} color={tintColor} />;
+        },
+      }),
+      tabBarOptions: {
+        showLabel: Platform.OS === 'ios',
+        showIcon: true,
+        activeTintColor: Colors.HIVE_PRIMARY,
+        inactiveTintColor: 'gray',
+        style: {
+          backgroundColor: 'white',
+        },
+      },
+      tabBarComponent: TabBar,
+    });
+    tabNavigator.navigationOptions = (props: NavigationScreenProps ): NavigationStackScreenOptions => {
+      const {navigation} = props;
+      const { routeName } = navigation.state.routes[navigation.state.index];
+
+      // You can do whatever you like here to pick the title based on the route name
+      switch (routeName) {
+        case 'Home':
+          return homeViewNavigationOptions(props);
+        case 'Explore':
+          return exploreViewNavigationOptions(props);
+        case 'Profile':
+          return profileViewNavigationOptions(props);
       }
 
-      return <MaterialIcons name={iconName} size={24} color={tintColor} />;
-    },
-  }),
-  tabBarOptions: {
-    showLabel: Platform.OS === 'ios',
-    showIcon: true,
-    activeTintColor: Colors.HIVE_PRIMARY,
-    inactiveTintColor: 'gray',
-    style: {
-      backgroundColor: 'white',
-    },
-  },
-  tabBarComponent: TabBar,
-});
+      return {title: routeName};
+    };
+    return tabNavigator;
+  };
 
 const emptyView = () => <View/>;
 

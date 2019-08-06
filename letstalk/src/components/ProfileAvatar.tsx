@@ -4,10 +4,7 @@ import { ImageURISource, StyleProp, StyleSheet, View, ViewStyle } from 'react-na
 import photoService, {PhotoResult} from '../services/photo_service';
 import {profileService, RemoteProfileService} from '../services/profile-service';
 import { WrappedFieldProps } from 'redux-form';
-import {
-    FormProps
-} from '../components'
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import Colors from '../services/colors';
 

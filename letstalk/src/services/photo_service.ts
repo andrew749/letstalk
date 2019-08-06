@@ -1,5 +1,5 @@
 import { Alert, Linking, Platform } from 'react-native';
-import { ImagePicker } from 'expo';
+import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
@@ -12,7 +12,6 @@ interface PhotoService {
 
 export type PhotoResult = {
   uri: string,
-  data: string, // base64 encoded
 }
 
 export class PhotoServiceImpl implements PhotoService {
@@ -55,7 +54,6 @@ export class PhotoServiceImpl implements PhotoService {
 
     return {
       uri: result.uri,
-      data: result.base64,
     };
   }
 
@@ -63,10 +61,10 @@ export class PhotoServiceImpl implements PhotoService {
     // Upload the image using the fetch and FormData APIs
     let formData = new FormData();
     const sessionToken = await auth.getSessionToken();
+    const data = await fetch(uri);
 
     // sends a base 64 encoded string
-    //@ts-ignore
-    formData.append('photo', {uri: uri, name: "new_pic", type: 'image/jpeg'});
+    formData.append('photo', await data.blob());
 
     return await this._requestor.postFormData(PROFILE_PIC_UPLOAD_ROUTE, formData, sessionToken);
   }

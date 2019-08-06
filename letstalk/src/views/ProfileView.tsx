@@ -56,6 +56,7 @@ import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { GROUP_GENERIC } from '../services/survey';
 import { NavigationStackScreenOptions } from 'react-navigation';
+import { NavigationScreenProps } from 'react-navigation';
 
 type EditFormComponentProps = FormProps<PhotoResult> & PhotoResult;
 
@@ -120,15 +121,15 @@ const initialState: State = {
   logoutRequest: false,
 };
 
-class ProfileView extends Component<Props, State> {
-  PROFILE_VIEW_IDENTIFIER = "ProfileView";
-
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>): NavigationStackScreenOptions => ({
+export const profileViewNavigationOptions = ({ navigation }: NavigationScreenProps): NavigationStackScreenOptions => ({
     headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
     headerTitleStyle,
     headerTintColor
   });
+
+class ProfileView extends Component<Props, State> {
+  PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
   constructor(props: Props) {
     super(props);
@@ -276,7 +277,6 @@ class ProfileView extends Component<Props, State> {
     }
     const EditFormWithRedux = EditFormWithReduxBuilder({
       uri: profilePic,
-      data: null,
     });
 
     const showGenericSurvey = () => {

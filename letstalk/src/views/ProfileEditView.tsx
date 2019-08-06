@@ -415,7 +415,7 @@ class ProfileEditView extends Component<Props> {
       mentorshipPreference,
       bio,
       hometown,
-      profilePic: {uri: profilePic, data: null},
+      profilePic: {uri: profilePic},
     });
     return (
       <EditFormWithRedux onSubmit={this.onSubmit} />

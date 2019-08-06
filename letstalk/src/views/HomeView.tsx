@@ -247,15 +247,17 @@ function showModal(): boolean {
   return Math.random() < PROBABILITY_SHOW_IOS_MODAL;
 }
 
-class HomeView extends Component<Props, State> {
-  HOME_VIEW_IDENTIFIER = "HomeView";
-
-  static navigationOptions = ({ navigation }: NavigationScreenProps): NavigationStackScreenOptions => ({
-    headerTitle: <Text>Fuck</Text>,
+export const homeViewNavigationOptions = ({ navigation }: NavigationScreenProps): NavigationStackScreenOptions => ({
+    headerTitle:  <TopHeader navigation={navigation} />,
     headerStyle,
     headerTitleStyle,
     headerTintColor
-  })
+  });
+
+class HomeView extends Component<Props, State> {
+  HOME_VIEW_IDENTIFIER = "HomeView";
+
+  
 
   private willFocusHandler: NavigationEventSubscription;
   private willBlurHandler: NavigationEventSubscription;
