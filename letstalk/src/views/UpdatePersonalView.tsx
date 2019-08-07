@@ -1,4 +1,4 @@
-import React, { Component, SFC } from 'react';
+import React, { Component, SFC, ComponentType } from 'react';
 import {
   Dimensions,
   EmitterSubscription,
@@ -135,7 +135,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
           <Field
             label="First name"
             name="firstName"
-            component={LabeledFormInput}
+            component={LabeledFormInput as "input" & typeof LabeledFormInput}
             ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
             onSubmitEditing={() => {
               // @ts-ignore
@@ -148,7 +148,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
           <Field
             label="Last name"
             name="lastName"
-            component={LabeledFormInput}
+            component={LabeledFormInput as "input" & typeof LabeledFormInput}
             ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
             withRef={true}
             autoCorrect={false}
@@ -157,7 +157,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
            <Field
             label="Phone number"
             name="phoneNumber"
-            component={LabeledFormInput}
+            component={LabeledFormInput as "input" & typeof LabeledFormInput}
             ref={(ref: Field<FormInputProps>) => fieldRefs.phoneNumberFieldRef = ref}
             withRef={true}
             keyboardType={'phone-pad' as 'phone-pad'}
@@ -166,7 +166,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
           <Field
             label="Gender (optional)"
             name="gender"
-            component={ButtonPicker}
+            component={ButtonPicker as "input" & typeof ButtonPicker}
           >
             <Picker.Item
               label="Male"
@@ -182,7 +182,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
             name="birthdate"
             mode={'date' as 'date'}
             androidMode={'spinner' as 'spinner'}
-            component={ModalDatePicker}
+            component={ModalDatePicker as "input" & typeof ModalDatePicker}
           />
           {(Platform.OS === 'android') && <Text style={[styles.hint, styles.mentorshipLabel]}>
             Mentorship Preference
@@ -190,7 +190,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
           <Field
             label="Your Preferred Role"
             name="mentorshipPreference"
-            component={ModalPicker}
+            component={ModalPicker as "input" & typeof ModalPicker}
             validate={required}
             containerStyle={styles.adjustMargin}
           >
@@ -203,14 +203,14 @@ class EditForm extends Component<EditFormComponentProps, State> {
           <Field
             label="Hometown"
             name="hometown"
-            component={LabeledFormInput}
+            component={LabeledFormInput as "input" & typeof LabeledFormInput}
             autoCorrect={false}
             placeholder="e.g. Waterloo, ON"
           />
           <Field
             label="Bio"
             name="bio"
-            component={LabeledFormInput}
+            component={LabeledFormInput as "input" & typeof LabeledFormInput}
             multiline={true}
             numberOfLines={10}
             inputStyle={{width: "100%"}}
@@ -234,7 +234,7 @@ const EditFormWithReduxBuilder = (initialValues: EditFormData) => {
   return reduxForm<EditFormData, FormP<EditFormData>>({
     form: 'profile-edit',
     initialValues,
-  })(connect()(EditForm));
+  })(connect<{}, {}, EditFormComponentProps, State>(null, null)(EditForm as any));
 }
 
 interface DispatchActions {
@@ -359,9 +359,9 @@ class ProfileEditView extends Component<Props> {
   }
 }
 
-export default connect(({ profile, cohorts }: RootState) => {
+export default connect<{}, {}, Props>(({ profile, cohorts }: RootState) => {
   return { ...profile, cohorts }
-}, { fetchProfile, fetchCohorts })(ProfileEditView);
+}, { fetchProfile, fetchCohorts })(ProfileEditView as any);
 
 const styles = StyleSheet.create({
   adjustMargin: {

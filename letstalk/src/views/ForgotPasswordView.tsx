@@ -1,14 +1,13 @@
 import React, {Component} from 'react';
-import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
-import { View, StyleSheet } from 'react-native';
-import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
-import { FormValidationMessage, Text } from 'react-native-elements';
+import { NavigationScreenProp, NavigationStackAction, StackActions, NavigationActions } from 'react-navigation';
+import { StyleSheet } from 'react-native';
+import { reduxForm, Field, SubmissionError } from 'redux-form';
+import { FormValidationMessage } from 'react-native-elements';
 import { ActionButton, FormP, FormProps, LabeledFormInput } from '../components';
 import { AnalyticsHelper } from '../services';
 import { infoToast, errorToast } from '../redux/toast';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import Colors from '../services/colors';
-import { ScrollView } from 'react-native';
 import auth from '../services/auth';
 import { connect, Dispatch } from 'react-redux';
 import { RootState } from '../redux';
@@ -37,7 +36,7 @@ const ForgotPasswordForm: React.SFC<FormProps<ForgotPasswordFormData>> = props =
         label="Email"
         name="email"
         keyboardType={'email-address' as 'email-address'}
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
         validate={[required, email]}
@@ -57,7 +56,7 @@ const ForgotPasswordForm: React.SFC<FormProps<ForgotPasswordFormData>> = props =
 
 const ForgotPasswordFormWithRedux = reduxForm<ForgotPasswordFormData, FormP<ForgotPasswordFormData>>({
   form: 'forgotPassword',
-})(ForgotPasswordForm);
+})(ForgotPasswordForm as any);
 
 export class ForgotPasswordView extends Component<Props> {
   FORGOT_PASSWORD_VIEW_IDENTIFIER = "ForgotPasswordView";
@@ -83,7 +82,7 @@ export class ForgotPasswordView extends Component<Props> {
     try {
       await auth.forgotPassword(values.email);
       await this.props.infoToast("Check your email for reset instructions!");
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         key: null,
         actions: [NavigationActions.navigate({ routeName: 'Login' })]
@@ -101,7 +100,7 @@ export class ForgotPasswordView extends Component<Props> {
   }
 }
 
-export default connect(null, {infoToast, errorToast})(ForgotPasswordView);
+export default connect(null, {infoToast, errorToast})(ForgotPasswordView as any);
 
 const styles = StyleSheet.create({
   container: {

@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { ThunkAction } from 'redux-thunk';
-import { connect, ActionCreator, Dispatch } from 'react-redux';
+import { connect, ActionCreator } from 'react-redux';
 import {
-  Dimensions,
   StyleSheet,
   View,
   Platform,
@@ -10,7 +9,7 @@ import {
   BackHandler,
 } from 'react-native';
 import { SearchBar } from 'react-native-elements';
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 import {
   NavigationScreenProp,
   NavigationRoute,
@@ -179,8 +178,10 @@ class TopHeader extends Component<Props> {
   }
 }
 
-export default connect(({ searchBar }: RootState) => searchBar,
-  { updateValue, updateFocus, updateSuggestions, updateError })(TopHeader);
+const mapStateToProps = ({ searchBar }: any, ownProps: any = {}) => searchBar;
+
+export default connect(mapStateToProps,
+  { updateValue, updateFocus, updateSuggestions, updateError })(TopHeader as any);
 
 const SEARCH_BAR_LEFT_MARGIN = 50;
 const SEARCH_BAR_RIGHT_MARGIN = 50;

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { NavigationScreenProp, NavigationStackAction, NavigationActions } from 'react-navigation';
+import { NavigationScreenProp, NavigationStackAction, NavigationActions, StackActions } from 'react-navigation';
 import { View, StyleSheet } from 'react-native';
 import { reduxForm, Field, SubmissionError } from 'redux-form';
 import { FormValidationMessage, Text } from 'react-native-elements';
@@ -46,7 +46,7 @@ const VerifyEmailForm: React.SFC<FormProps<VerifyEmailFormData>> = props => {
         label="UW Email"
         name="email"
         keyboardType={'email-address' as 'email-address'}
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
         validate={[required, uwEmail]}
@@ -66,7 +66,7 @@ const VerifyEmailForm: React.SFC<FormProps<VerifyEmailFormData>> = props => {
 
 const VerifyEmailFormWithRedux = reduxForm<VerifyEmailFormData, FormP<VerifyEmailFormData>>({
   form: 'sendVerificationEmail',
-})(VerifyEmailForm);
+})(VerifyEmailForm as any);
 
 export class VerifyEmailView extends Component<Props, State> {
   VERIFY_EMAIL_VIEW_IDENTIFIER = "VerifyEmailView";
@@ -97,7 +97,7 @@ export class VerifyEmailView extends Component<Props, State> {
   async componentWillReceiveProps(nextProps: Props) {
     if (nextProps.bootstrap && nextProps.bootstrap.state !== 'account_created') {
       // Email has been verified, move on to onboarding screen.
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Onboarding' })]
       }));
@@ -130,8 +130,8 @@ export class VerifyEmailView extends Component<Props, State> {
   }
 }
 
-export default connect(({ bootstrap }: RootState) => bootstrap,
-  { infoToast, errorToast, fetchBootstrap })(VerifyEmailView);
+export default connect<{}, {}, {}, {}>(({ bootstrap }: RootState) => bootstrap,
+  { infoToast, errorToast, fetchBootstrap })(VerifyEmailView as any);
 
 const styles = StyleSheet.create({
   container: {

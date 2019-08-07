@@ -1,11 +1,12 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component } from 'react';
 import { connect, ActionCreator } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { Picker, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Picker, StyleSheet, Text, View } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  StackActions
 } from 'react-navigation';
 import {
   reduxForm,
@@ -98,7 +99,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Field
         label="Program"
         name="programId"
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {programItems}
@@ -106,7 +107,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Field
         label="Sequence"
         name="sequenceId"
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {sequenceItems}
@@ -114,7 +115,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Field
         label="Grad Year"
         name="gradYear"
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         {gradYearItems}
@@ -122,7 +123,7 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Field
         label="Your Preferred Role"
         name="mentorshipPreference"
-        component={ModalPicker}
+        component={ModalPicker as "input" & typeof ModalPicker}
         validate={required}
       >
         <Picker.Item key="mentor" label="Mentor" value={MENTORSHIP_PREFERENCE_MENTEE} />
@@ -133,14 +134,14 @@ const CohortForm: React.SFC<FormProps<CohortFormData> & CohortFormProps>
       <Field
         label="Hometown"
         name="hometown"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         autoCorrect={false}
         placeholder="e.g. Waterloo, ON"
       />
       <Field
         label="Bio"
         name="bio"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         autoCorrect={false}
         placeholder="e.g. I enjoy Inuit throat singing. (Tell us what you're passionate about, your hobbies, or whatever describes you as a person!)"
         multiline={true}
@@ -163,12 +164,12 @@ const cohortSelector = formValueSelector('onboarding-cohort');
 
 const CohortFormWithRedux = reduxForm<CohortFormData, FormP<CohortFormData>>({
   form: 'onboarding-cohort',
-})(connect((state: RootState) => ({
+})(connect<{}, {}, FormProps<CohortFormData> & CohortFormProps>((state: RootState) => ({
   programId: cohortSelector(state, 'programId'),
   sequenceId: cohortSelector(state, 'sequenceId'),
   gradYear: cohortSelector(state, 'gradYear'),
   cohorts: state.cohorts.cohorts,
-}))(CohortForm));
+}))(CohortForm as any));
 
 interface DispatchActions {
   fetchBootstrap: ActionCreator<ThunkAction<Promise<BootstrapActionTypes>, BootstrapState, void>>;
@@ -218,7 +219,7 @@ class OnboardingView extends Component<Props> {
         hometown,
       });
       await this.props.fetchBootstrap();
-      await this.props.navigation.dispatch(NavigationActions.reset({
+      await this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));
@@ -278,4 +279,4 @@ const styles = StyleSheet.create({
 
 export default connect(({ cohorts }: RootState) => {
   return { cohorts }
-}, { fetchBootstrap, fetchCohorts })(OnboardingView);
+}, { fetchBootstrap, fetchCohorts })(OnboardingView as any);

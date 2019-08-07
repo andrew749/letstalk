@@ -1,5 +1,6 @@
 import { Alert, Linking, Platform } from 'react-native';
-import { ImagePicker, FileSystem, Permissions } from 'expo';
+import { ImagePicker } from 'expo';
+import * as Permissions from 'expo-permissions';
 import requestor, { Requestor } from './requests';
 import auth, { Auth } from './auth';
 import { PROFILE_PIC_UPLOAD_ROUTE } from './constants';
@@ -64,6 +65,7 @@ export class PhotoServiceImpl implements PhotoService {
     const sessionToken = await auth.getSessionToken();
 
     // sends a base 64 encoded string
+    //@ts-ignore
     formData.append('photo', {uri: uri, name: "new_pic", type: 'image/jpeg'});
 
     return await this._requestor.postFormData(PROFILE_PIC_UPLOAD_ROUTE, formData, sessionToken);

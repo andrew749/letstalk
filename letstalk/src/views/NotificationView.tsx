@@ -1,21 +1,19 @@
 import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import {
-  Dimensions,
   ListView,
   View,
   Text,
   Image,
   RefreshControl,
-  RefreshControlProps,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 import {
   NavigationScreenProp,
-  NavigationScreenDetails,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  StackActions
 } from 'react-navigation';
 import { ThunkAction } from 'redux-thunk';
 import Moment from 'moment';
@@ -107,7 +105,7 @@ class NotificationView extends Component<Props, State> {
   }
 
   private async navigateHome() {
-    await this.props.navigation.dispatch(NavigationActions.reset({
+    await this.props.navigation.dispatch(StackActions.reset({
       index: 0,
       actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
     }));
@@ -184,7 +182,7 @@ class NotificationView extends Component<Props, State> {
         break;
     }
 
-    const containerStyle = [styles.notifContainer];
+    const containerStyle: Array<any> = [styles.notifContainer];
     if (state === 'UNREAD') {
       containerStyle.push(styles.notifContainerUnread);
     }
@@ -272,7 +270,7 @@ class NotificationView extends Component<Props, State> {
           <RefreshControl
             refreshing={this.state.refreshing}
             onRefresh={this.onRefresh}
-          /> as React.ReactElement<RefreshControlProps>
+          />
         }
         dataSource={data}
         renderRow={this.renderRow}
@@ -309,7 +307,7 @@ export default connect(({ notifications }: RootState) => notifications,
     fetchNewestNotifications,
     updateNotificationState,
     errorToast,
-  })(NotificationView);
+  })(NotificationView as any);
 
 const styles = StyleSheet.create({
   ago: {

@@ -9,8 +9,8 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native';
-import { BarCodeScanner, Permissions } from 'expo';
-import { ToastActionsCreators } from 'react-native-redux-toast';
+import { BarCodeScanner } from 'expo';
+import * as Permissions from 'expo-permissions';
 import { errorToast, infoToast } from '../redux/toast';
 import { NavigationActions, NavigationScreenProp, NavigationStackAction } from "react-navigation";
 import { ActionCreator, connect, Dispatch } from "react-redux";
@@ -124,7 +124,7 @@ class QrScannerView extends Component<Props> {
   }
 }
 
-export default connect(null, { errorToast, infoToast, fetchBootstrap })(QrScannerView);
+export default connect(null, { errorToast, infoToast, fetchBootstrap })(QrScannerView as any);
 
 const styles = StyleSheet.create({
   container: {

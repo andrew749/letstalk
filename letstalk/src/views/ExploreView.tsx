@@ -2,18 +2,13 @@ import React, { Component, ReactNode } from 'react';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
 import {
-  ActivityIndicator,
   Button as ReactNativeButton,
-  Dimensions,
-  Linking,
   RefreshControl,
-  RefreshControlProps,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   ScrollView,
-  Platform,
 } from 'react-native';
 import {
   NavigationScreenProp,
@@ -69,9 +64,15 @@ interface DispatchActions {
   errorToast(message: string): (dispatch: Dispatch<RootState>) => Promise<void>;
 }
 
-interface Props extends DispatchActions, UserSearchState {
+interface StateProps {
+  userSearch: UserSearchState
+}
+
+interface ComponentProps {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
 }
+
+type Props = StateProps & DispatchActions & ComponentProps
 
 interface State {
   refreshing: boolean;
@@ -102,8 +103,8 @@ class ExploreView extends Component<Props, State> {
     this.props.navigation.addListener('willFocus', (route) => {
       AnalyticsHelper.getInstance().recordPage(this.EXPLORE_VIEW_IDENTIFIER);
     });
-    if (this.props.fetchState.state === FETCH_STATE_PREFETCH &&
-      this.props.currentQuery.type === QueryTypes.YOUR_COHORT) {
+    if (this.props.userSearch.fetchState.state === FETCH_STATE_PREFETCH &&
+      this.props.userSearch.currentQuery.type === QueryTypes.YOUR_COHORT) {
       this.props.searchByMyCohort(DEFAULT_SEARCH_SIZE);
     }
   }
@@ -111,7 +112,7 @@ class ExploreView extends Component<Props, State> {
   private async load() {
     const {
       currentQuery,
-    } = this.props;
+    } = this.props.userSearch;
 
     switch (currentQuery.type) {
       case QueryTypes.YOUR_COHORT:
@@ -144,7 +145,7 @@ class ExploreView extends Component<Props, State> {
   private renderQueryInfo() {
     const {
       currentQuery,
-    } = this.props;
+    } = this.props.userSearch;
 
     let header: ReactNode = null;
     switch (currentQuery.type) {
@@ -204,7 +205,7 @@ class ExploreView extends Component<Props, State> {
         const _: never = currentQuery;
     }
 
-    const { numResults } = this.props.response;
+    const { numResults } = this.props.userSearch.response;
     const numResText = 'Found ' +
       (numResults === DEFAULT_SEARCH_SIZE ? 'at least ' : '') + numResults + ' user' +
       (numResults === 1 ? '' : 's');
@@ -226,7 +227,7 @@ class ExploreView extends Component<Props, State> {
     }
 
     const onPress = () => {
-      const { currentQuery } = this.props;
+      const { currentQuery } = this.props.userSearch;
       let searchedTrait: string = null;
       let intentType: IntentTypes = IntentTypes.REC_COHORT;
       switch (currentQuery.type) {
@@ -282,7 +283,7 @@ class ExploreView extends Component<Props, State> {
   }
 
   private renderResults() {
-    const { results, numResults, isAnonymous } = this.props.response;
+    const { results, numResults, isAnonymous } = this.props.userSearch.response;
     if (isAnonymous) {
       return (
         <View style={styles.explanationContainer}>
@@ -329,7 +330,7 @@ class ExploreView extends Component<Props, State> {
           <RefreshControl
             refreshing={this.state.refreshing}
             onRefresh={this.onRefresh}
-          /> as React.ReactElement<RefreshControlProps>
+          />
         }
       >
         <View style={styles.headerContainer}>{ this.renderQueryInfo() }</View>
@@ -343,7 +344,7 @@ class ExploreView extends Component<Props, State> {
       errorMsg,
       errorType,
       state,
-    } = this.props.fetchState;
+    } = this.props.userSearch.fetchState;
 
     return (
       <View style={{flex: 1}}>
@@ -361,17 +362,18 @@ class ExploreView extends Component<Props, State> {
   }
 }
 
-export default connect(
-  ({ userSearch }: RootState) => {
-    return userSearch;
-  }, {
+
+export default connect<StateProps, DispatchActions, Props> (
+  ({ userSearch }: RootState) => ({
+    userSearch
+  }), {
     errorToast,
     searchByCohort,
     searchByMyCohort,
     searchByPosition,
     searchByGroup,
     searchBySimpleTrait,
-  })(ExploreView);
+  })(ExploreView as any);
 
 const styles = StyleSheet.create({
   container: {

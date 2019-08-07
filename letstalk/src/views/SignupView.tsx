@@ -1,10 +1,10 @@
-import {FileSystem} from 'expo';
 import React, { Component } from 'react';
-import { Dimensions, Picker, ScrollView, StyleSheet, View } from 'react-native';
+import { Picker, StyleSheet, View } from 'react-native';
 import {
   NavigationScreenProp,
   NavigationStackAction,
-  NavigationActions
+  NavigationActions,
+  StackActions,
 } from 'react-navigation';
 import { reduxForm, Field, InjectedFormProps, SubmissionError } from 'redux-form';
 import {FormValidationMessage, FormInputProps, FormInput, Text} from 'react-native-elements';
@@ -28,6 +28,7 @@ import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import auth from "../services/auth";
 import { required, email, phoneNumber, password } from '../validators';
+import { types } from '@babel/core';
 
 interface SignupFormData {
   firstName: string;
@@ -62,13 +63,13 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <View style={styles.profilePicContainer}>
         <Field
           name="profilePic"
-          component={ProfileAvatarEditableFormElement}
+          component={ProfileAvatarEditableFormElement as "input" & typeof ProfileAvatarEditableFormElement}
         />
       </View>
       <Field
         label="First name"
         name="firstName"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         ref={(ref: Field<FormInputProps>) => fieldRefs.firstNameFieldRef = ref}
         onSubmitEditing={() => {
           // @ts-ignore
@@ -81,7 +82,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <Field
         label="Last name"
         name="lastName"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput as "input" & typeof LabeledFormInput}
         ref={(ref: Field<FormInputProps>) => fieldRefs.lastNameFieldRef = ref}
         onSubmitEditing={() => {
           // @ts-ignore
@@ -94,7 +95,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <Field
         label="Email"
         name="email"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         ref={(ref: Field<FormInputProps>) => fieldRefs.emailFieldRef = ref}
         onSubmitEditing={() => {
           // @ts-ignore
@@ -115,7 +116,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
           fieldRefs.passwordFieldRef.getRenderedComponent().focus();
         }}
         withRef={true}
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         keyboardType={'phone-pad' as 'phone-pad'}
         validate={[required, phoneNumber]}
       />
@@ -123,7 +124,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <Field
         label="Password"
         name="password"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         ref={(ref: Field<FormInputProps>) => fieldRefs.passwordFieldRef = ref}
         withRef={true}
         secureTextEntry={true}
@@ -134,7 +135,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
       <Field
         label="Gender (optional)"
         name="gender"
-        component={ButtonPicker}
+        component={ButtonPicker as "input" & typeof ButtonPicker}
       >
         <Picker.Item
           label="Male"
@@ -150,7 +151,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
         name="birthdate"
         androidMode={'spinner' as 'spinner'}
         mode={'date' as 'date'}
-        component={ModalDatePicker}
+        component={ModalDatePicker as "input" & typeof ModalDatePicker}
       />
       {error && <FormValidationMessage>{error}</FormValidationMessage>}
       <ActionButton
@@ -167,7 +168,7 @@ const SignupForm: React.SFC<FormProps<SignupFormData>> = props => {
 
 const SignupFormWithRedux = reduxForm<SignupFormData, FormP<SignupFormData>>({
   form: 'signup',
-})(SignupForm);
+})(SignupForm as any);
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
@@ -221,7 +222,7 @@ export default class SignupView extends Component<Props> {
         console.log("Failed to register for notifications");
       }
       await auth.login(values.email, values.password, token);
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));

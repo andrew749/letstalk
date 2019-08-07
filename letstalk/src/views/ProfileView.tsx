@@ -1,18 +1,10 @@
 import React, { Component, ReactNode } from 'react';
 import {
-  ActivityIndicator,
-  AppRegistry,
   Alert,
   Button as ReactNativeButton,
-  Dimensions,
-  FlatList,
-  Image,
   Linking,
-  Platform,
   ScrollView,
-  StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,26 +15,19 @@ import {
   InjectedFormProps,
   SubmissionError,
 } from 'redux-form';
-import { Icon } from 'react-native-elements';
 import { connect, ActionCreator, Dispatch } from 'react-redux';
 import { ThunkAction } from 'redux-thunk';
-import { bindActionCreators } from 'redux'
 import {
   NavigationScreenDetails,
   NavigationScreenProp,
   NavigationStackAction,
   NavigationActions,
+  StackActions,
 } from 'react-navigation';
-import { MaterialIcons } from '@expo/vector-icons';
-import Immutable from 'immutable';
-import Moment from 'moment';
-
 import auth from '../services/auth';
 import { infoToast, errorToast } from '../redux/toast';
-import {fbLogin} from '../services/fb';
 import { ActionButton, Button} from '../components';
 import Loading from './Loading';
-import { genderIdToString } from '../models/user';
 import { RootState } from '../redux';
 import {
   State as ProfileState,
@@ -59,8 +44,6 @@ import photoService, {PhotoResult} from '../services/photo_service';
 import Colors from '../services/colors';
 import TopHeader, { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import AllFilterableModals from './AllFilterableModals';
-import { UserPosition } from '../models/position';
-import { UserSimpleTrait } from '../models/simple-trait';
 import {
   CohortInfo,
   PersonalInfo,
@@ -72,6 +55,7 @@ import {
 import { fetchSurvey, State as SurveyState } from '../redux/survey/reducer';
 import { ActionTypes as SurveyActionTypes } from '../redux/survey/actions';
 import { GROUP_GENERIC } from '../services/survey';
+import { NavigationStackScreenOptions } from 'react-navigation';
 
 type EditFormComponentProps = FormProps<PhotoResult> & PhotoResult;
 
@@ -82,12 +66,7 @@ class EditForm extends Component<EditFormComponentProps, State> {
 
   render() {
     const {
-      error,
-      handleSubmit,
       onSubmit,
-      reset,
-      submitting,
-      valid,
       initialValues: { uri }
     } = this.props;
 
@@ -95,8 +74,10 @@ class EditForm extends Component<EditFormComponentProps, State> {
       <View>
         <Field
           name="profilePic"
-          component={ProfileAvatarEditableFormElement}
-          onChange={onSubmit}
+          component={ProfileAvatarEditableFormElement as "input" & typeof ProfileAvatarEditableFormElement}
+          onChange={(event) => {
+            onSubmit(event.target.value);
+          }}
           uri={uri}
         />
       </View>
@@ -108,7 +89,7 @@ const EditFormWithReduxBuilder = (initialValues: PhotoResult) => {
   return reduxForm<PhotoResult, FormP<PhotoResult>>({
     form: 'profile-pic-edit',
     initialValues,
-  })(connect()(EditForm));
+  })(connect<{}, {}, EditFormComponentProps>(null)(EditForm as any));
 }
 
 interface DispatchActions {
@@ -142,7 +123,7 @@ const initialState: State = {
 class ProfileView extends Component<Props, State> {
   PROFILE_VIEW_IDENTIFIER = "ProfileView";
 
-  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>) => ({
+  static navigationOptions = ({ navigation }: NavigationScreenDetails<void>): NavigationStackScreenOptions => ({
     headerTitle: <TopHeader navigation={navigation} />,
     headerStyle,
     headerTitleStyle,
@@ -177,7 +158,7 @@ class ProfileView extends Component<Props, State> {
       try {
         await auth.logout();
       } catch (error) { }
-      await this.props.navigation.dispatch(NavigationActions.reset({
+      await this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         key: null,
         actions: [NavigationActions.navigate({ routeName: 'Login' })]
@@ -423,4 +404,4 @@ export default connect(
     infoToast,
     errorToast,
   },
-)(ProfileView);
+)(ProfileView as any);

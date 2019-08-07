@@ -1,22 +1,17 @@
 import React, { Component, ReactNode } from 'react';
 import Immutable from 'immutable';
-import fuzzysearch from 'fuzzysearch';
-import Fuse from 'fuse-js-latest';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
-  Dimensions,
   EmitterSubscription,
   Keyboard,
   ListView,
   ListViewDataSource,
-  Modal,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 
 import {
   MultiTrait,
@@ -24,7 +19,6 @@ import {
 } from '../../models/multi-trait';
 import Colors from '../../services/colors';
 import Window from '../../services/window';
-import { greedyMatch } from '../../components/AutocompleteInput';
 
 interface ItemElement {
   readonly type: 'ITEM';

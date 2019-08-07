@@ -8,7 +8,6 @@ import {
   NavigationActions,
   NavigationScreenDetails,
 } from 'react-navigation';
-import { Permissions, Notifications } from 'expo';
 
 import {
   ActionButton,
@@ -16,12 +15,12 @@ import {
   FormProps,
   LabeledFormInput
 } from '../components';
-import { InvalidCredentialsError } from '../services/session-service';
 import auth from '../services/auth';
 import Colors from '../services/colors';
 import {AnalyticsHelper} from '../services/analytics';
 import { headerStyle, headerTitleStyle, headerTintColor } from './TopHeader';
 import { required, email } from '../validators';
+import { StackActions } from 'react-navigation';
 
 const styles = StyleSheet.create({
   forgotPasswordButton: {
@@ -67,7 +66,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData, NavProps>> = props => {
         label="Email"
         name="email"
         keyboardType={'email-address' as 'email-address'}
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         autoCorrect={false}
         autoCapitalize={'none' as 'none'}
         validate={[required, email]}
@@ -75,7 +74,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData, NavProps>> = props => {
       <Field
         label="Password"
         name="password"
-        component={LabeledFormInput}
+        component={LabeledFormInput as "input" & typeof LabeledFormInput}
         secureTextEntry={true}
         validate={required}
         autoCapitalize={'none' as 'none'}
@@ -97,7 +96,7 @@ const LoginForm: React.SFC<FormProps<LoginFormData, NavProps>> = props => {
 const LoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData, NavProps>>({
   // TODO: Enum with these to make sure there are no conflicts
   form: 'login',
-})(LoginForm);
+})(LoginForm as any);
 
 interface FBLoginFormData {}
 
@@ -122,7 +121,7 @@ const FBLoginForm: React.SFC<FormProps<FBLoginFormData>> = props => {
 
 const FBLoginFormWithRedux = reduxForm<LoginFormData, FormP<LoginFormData>>({
   form: 'fblogin',
-})(FBLoginForm);
+})(FBLoginForm as any);
 
 interface Props {
   navigation: NavigationScreenProp<void, NavigationStackAction>;
@@ -161,7 +160,7 @@ export default class LoginView extends Component<Props> {
       }
       console.log("Logging in with Facebook")
       if (await auth.loginWithFb(token)) {
-        this.props.navigation.dispatch(NavigationActions.reset({
+        this.props.navigation.dispatch(StackActions.reset({
           index: 0,
           actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
         }));
@@ -187,7 +186,7 @@ export default class LoginView extends Component<Props> {
         console.log("Failed to register for notification " + e);
       }
       await auth.login(email, password, token);
-      this.props.navigation.dispatch(NavigationActions.reset({
+      this.props.navigation.dispatch(StackActions.reset({
         index: 0,
         actions: [NavigationActions.navigate({ routeName: 'Tabbed' })]
       }));

@@ -1,9 +1,7 @@
 import Immutable from 'immutable';
-import fuzzysearch from 'fuzzysearch';
 import Fuse from 'fuse-js-latest';
-import { MaterialIcons } from '@expo/vector-icons';
 
-import React, { Component, ReactNode } from 'react';
+import React, { Component } from 'react';
 import {
   Dimensions,
   EmitterSubscription,
@@ -17,11 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Constants } from 'expo';
-
-import {
-  SearchBar,
-} from 'react-native-elements';
+import Constants from 'expo-constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;

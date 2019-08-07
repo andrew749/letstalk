@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Button,
   Keyboard,
@@ -12,14 +12,14 @@ import { Provider } from 'react-redux';
 import { combineReducers, compose, createStore, applyMiddleware } from 'redux';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Notifications, Font, Linking } from 'expo';
-import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import {
   NavigationContainerComponent,
-  StackNavigator,
-  TabNavigator,
-  TabBarBottomProps,
-  TabBarBottom,
+  BottomTabBarProps,
+  BottomTabBar,
+  createBottomTabNavigator,
+  createStackNavigator,
+  createAppContainer,
 } from 'react-navigation';
 import NotificationComponent from 'react-native-in-app-notification';
 import Sentry from 'sentry-expo';
@@ -57,7 +57,7 @@ import NotificationService, { RawNotification } from './services/notification-se
 import navService from './services/navigation-service';
 import Colors from './services/colors';
 import { NotificationBody } from './components';
-import { AsyncStorage } from 'react-native';
+import { BASE_URL as server } from './services/constants';
 
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated']);
 
@@ -96,10 +96,10 @@ interface TabBarState {
 
 const prefix =  Platform.OS == 'android' ? 'hive://hive/' : 'hive://';
 
-class TabBar extends Component<TabBarBottomProps, TabBarState> {
+class TabBar extends React.Component<BottomTabBarProps, TabBarState> {
   private keyboardEventListeners: Array<EmitterSubscription>;
 
-  constructor(props: TabBarBottomProps) {
+  constructor(props: BottomTabBarProps) {
     super(props);
 
     this.state = { visible: true };
@@ -126,11 +126,11 @@ class TabBar extends Component<TabBarBottomProps, TabBarState> {
 
   render() {
     if (!this.state.visible) return null;
-    return <TabBarBottom {...this.props}/>;
+    return <BottomTabBar {...this.props}/>;
   }
 }
 
-const createTabView = () => TabNavigator({
+const createTabView = () => createBottomTabNavigator({
   'Home': {
     screen: HomeView,
   },
@@ -142,7 +142,7 @@ const createTabView = () => TabNavigator({
   },
 }, {
   tabBarPosition: 'bottom',
-  navigationOptions: ({ navigation }) => ({
+  defaultNavigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ focused, tintColor }) => {
       const { routeName } = navigation.state;
       let iconName;
@@ -169,7 +169,9 @@ const createTabView = () => TabNavigator({
   tabBarComponent: TabBar,
 });
 
-const createAppNavigation = (initialRouteName: string) => StackNavigator({
+const emptyView = () => <View/>;
+
+const createAppNavigation = (initialRouteName: string) => createStackNavigator({
   AddPosition: {
     screen: AddPositionView,
     path: 'AddPosition',
@@ -183,7 +185,7 @@ const createAppNavigation = (initialRouteName: string) => StackNavigator({
     path: 'AddSimpleTrait',
   },
   BlankDoNotUse: {
-    screen: View
+    screen: emptyView
   },
   ChangeCohort: {
     screen: ChangeCohortView
@@ -306,17 +308,23 @@ class App extends React.Component<Props, AppState> {
     if (loggedIn === false) initialRouteName = 'Login';
     else if (loggedIn === true) initialRouteName = 'Tabbed';
 
-    const AppNavigation = createAppNavigation(initialRouteName);
+    const AppNavigation = createAppContainer(createAppNavigation(initialRouteName));
 
     const addNavContainer = (navContainer: NavigationContainerComponent) => {
       navService.setTopLevelNavigator(navContainer);
       // TODO: refactor to use navigation service
       this.notificationService.setNavContainer(navContainer);
     }
+
+    let debugInfo;
+    if (__DEV__) {
+      debugInfo = <Text>{`Server: ${server}`}</Text>;
+    }
     return (
       <Provider store={store}>
         <View style={{ flex: 1, backgroundColor: Colors.HIVE_BG }}>
           <AppNavigation uriPrefix={prefix} ref={addNavContainer} />
+          {debugInfo}
           <NotificationComponent
             ref={(ref: any) => this.notificationService.setNotifContainer(ref)}
             notificationBodyComponent={ NotificationBody }
