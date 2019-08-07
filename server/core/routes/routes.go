@@ -384,6 +384,9 @@ func Register(
 	admin.OPTIONS("/match_round")
 	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, false))
 
+	admin.OPTIONS("/group_members")
+	admin.GET("/group_members", hw.wrapHandler(match_round.GetGroupMembersController, false))
+
 	admin.OPTIONS("/create_managed_group")
 	admin.POST("/create_managed_group", hw.wrapHandler(controller.CreateManagedGroupController, true))
 
