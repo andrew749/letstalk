@@ -94,10 +94,23 @@ func checkCreateMatchRound(
 			menteeId: users[matchIndex.menteeIdIndex].UserId,
 		})
 	}
+	userIds := []data.TUserID{
+		users[0].UserId,
+		users[1].UserId,
+		users[2].UserId,
+		users[3].UserId,
+		users[4].UserId,
+		users[5].UserId,
+	}
+	floatUserIds := make([]interface{}, 0, len(userIds))
+	for _, userId := range userIds {
+		floatUserIds = append(floatUserIds, float64(userId))
+	}
 	expectedParamMap := data.MatchParameters(map[string]interface{}{
 		"maxLowerYearsPerUpperYear": float64(params.maxLowerYearsPerUpperYear),
 		"maxUpperYearsPerLowerYear": float64(params.maxUpperYearsPerLowerYear),
 		"youngestUpperGradYear":     float64(params.youngestUpperGradYear),
+		"userIds":                   floatUserIds,
 	})
 
 	request := api.CreateMatchRoundRequest{
@@ -107,14 +120,7 @@ func checkCreateMatchRound(
 			YoungestUpperGradYear:     params.youngestUpperGradYear,
 		},
 		GroupId: managedGroup.GroupId,
-		UserIds: []data.TUserID{
-			users[0].UserId,
-			users[1].UserId,
-			users[2].UserId,
-			users[3].UserId,
-			users[4].UserId,
-			users[5].UserId,
-		},
+		UserIds: userIds,
 	}
 
 	apiMatchRound, err := handleCreateMatchRound(db, admin.UserId, request)

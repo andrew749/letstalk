@@ -153,6 +153,7 @@ func handleCreateMatchRound(
 		req.Parameters.MaxLowerYearsPerUpperYear,
 		req.Parameters.MaxUpperYearsPerLowerYear,
 		req.Parameters.YoungestUpperGradYear,
+		req.UserIds,
 	)
 
 	matchRound, err := createMatchRound(
@@ -322,11 +323,13 @@ func createMatchParameters(
 	maxLowerYearsPerUpperYear uint,
 	maxUpperYearsPerLowerYear uint,
 	youngestUpperGradYear uint,
+	userIds []data.TUserID,
 ) data.MatchParameters {
 	return data.MatchParameters(map[string]interface{}{
 		"maxLowerYearsPerUpperYear": interface{}(maxLowerYearsPerUpperYear),
 		"maxUpperYearsPerLowerYear": interface{}(maxUpperYearsPerLowerYear),
 		"youngestUpperGradYear":     interface{}(youngestUpperGradYear),
+		"userIds":                   interface{}(userIds),
 	})
 }
 
