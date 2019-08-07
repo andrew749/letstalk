@@ -8,18 +8,19 @@ import (
 type TConnectionID EntID
 
 type Connection struct {
-	ConnectionId TConnectionID `gorm:"not null;primary_key;auto_increment"`
-	UserOne      *User         `gorm:"foreignkey:UserOneId"`
-	UserOneId    TUserID
-	UserTwo      *User `gorm:"foreignkey:UserTwoId"`
-	UserTwoId    TUserID
-	CreatedAt    time.Time `gorm:"not null"`
-	UpdatedAt    time.Time
-	DeletedAt    *time.Time
-	AcceptedAt   *time.Time             // Null until user two accepts.
-	Intent       *ConnectionIntent      `gorm:"foreignkey:ConnectionId"`
-	Mentorship   *Mentorship            `gorm:"foreignkey:ConnectionId"`
-	MatchRounds  []ConnectionMatchRound `gorm:"foreignkey:ConnectionId"`
+	ConnectionId         TConnectionID `gorm:"not null;primary_key;auto_increment"`
+	UserOne              *User         `gorm:"foreignkey:UserOneId"`
+	UserOneId            TUserID
+	UserTwo              *User `gorm:"foreignkey:UserTwoId"`
+	UserTwoId            TUserID
+	CreatedAt            time.Time `gorm:"not null"`
+	UpdatedAt            time.Time
+	DeletedAt            *time.Time
+	AcceptedAt           *time.Time             // Null until user two accepts.
+	Intent               *ConnectionIntent      `gorm:"foreignkey:ConnectionId"`
+	Mentorship           *Mentorship            `gorm:"foreignkey:ConnectionId"`
+	ConnectionMatchRound *ConnectionMatchRound  `gorm:"foreignkey:ConnectionId"`
+	MatchRounds          []ConnectionMatchRound `gorm:"foreignkey:ConnectionId"`
 }
 
 type IntentType string

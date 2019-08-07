@@ -6,6 +6,7 @@ import (
 	"letstalk/server/core/converters"
 	"letstalk/server/core/ctx"
 	"letstalk/server/core/errs"
+	"letstalk/server/core/user_state"
 	"letstalk/server/data"
 	"letstalk/server/jobmine"
 	"letstalk/server/jobmine_jobs/match_round_commit_job"
@@ -38,7 +39,58 @@ func handleGetGroupMembers(
 	adminId data.TUserID,
 	groupId data.TGroupID,
 ) ([]api.GroupMember, errs.Error) {
-	return nil, nil
+	var err errs.Error
+	if err := checkIsAdmin(db, adminId, groupId); err != nil {
+		return nil, err
+	}
+
+	var userGroups []data.UserGroup
+	dbErr := db.Where(&data.UserGroup{GroupId: groupId}).Find(&userGroups).Error
+	if dbErr != nil {
+		return nil, errs.NewDbError(dbErr)
+	}
+
+	userIds := make([]data.TUserID, 0, len(userGroups))
+	for _, userGroup := range userGroups {
+		userIds = append(userIds, userGroup.UserId)
+	}
+
+	// NOTE: Users here already have cohort information
+	userWithStates, err := user_state.BulkGetUsersWithStates(db, userIds)
+	if err != nil {
+		return nil, err
+	}
+
+	groupMemberMap := make(map[data.TUserID]api.GroupMember)
+	for _, userWithState := range userWithStates {
+		matchUser := converters.ApiMatchUserFromDataUser(&userWithState.User)
+		memberStatus := groupMemberStatusFromUserState(userWithState.State)
+		groupMemberMap[userWithState.User.UserId] = api.GroupMember{
+			User:   matchUser.User,
+			Email:  matchUser.Email,
+			Status: memberStatus,
+			Cohort: matchUser.Cohort,
+		}
+	}
+
+	matchedUserIds, err := matchedUserIdsInGroup(db, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, userId := range matchedUserIds {
+		if groupMember, ok := groupMemberMap[userId]; ok {
+			groupMember.Status = api.GROUP_MEMBER_STATUS_MATCHED
+			groupMemberMap[userId] = groupMember
+		}
+	}
+
+	groupMembers := make([]api.GroupMember, 0, len(groupMemberMap))
+	for _, groupMember := range groupMemberMap {
+		groupMembers = append(groupMembers, groupMember)
+	}
+
+	return groupMembers, nil
 }
 
 // Controller for the create_match_round admin endpoint
@@ -417,4 +469,64 @@ func checkUsersInGroup(db *gorm.DB, userIds []data.TUserID, groupId data.TGroupI
 		return errs.NewRequestError(fmt.Sprintf("Users not in group: %v", notInGroup))
 	}
 	return nil
+}
+
+func groupMemberStatusFromUserState(userState api.UserState) api.GroupMemberStatus {
+	switch userState {
+	case api.ACCOUNT_CREATED:
+		return api.GROUP_MEMBER_STATUS_SIGNED_UP
+	case api.ACCOUNT_EMAIL_VERIFIED:
+		return api.GROUP_MEMBER_STATUS_SIGNED_UP
+	case api.ACCOUNT_HAS_BASIC_INFO:
+		return api.GROUP_MEMBER_STATUS_SIGNED_UP
+	case api.ACCOUNT_SETUP:
+		return api.GROUP_MEMBER_STATUS_ONBOARDED
+	case api.ACCOUNT_MATCHED:
+		// NOTE: While they may be matched, we're not sure if they're matched with someone in this
+		// group
+		return api.GROUP_MEMBER_STATUS_ONBOARDED
+	default:
+		// Should never happen
+		panic(fmt.Sprintf("Unknown userState %s", userState))
+	}
+}
+
+func matchedUserIdsInGroup(db *gorm.DB, groupId data.TGroupID) ([]data.TUserID, errs.Error) {
+	var matchRounds []data.MatchRound
+	err := db.Where(&data.MatchRound{GroupId: groupId}).Find(&matchRounds).Error
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	matchRoundIds := make([]data.TMatchRoundID, 0, len(matchRounds))
+	for _, matchRound := range matchRounds {
+		matchRoundIds = append(matchRoundIds, matchRound.Id)
+	}
+
+	rows, err := db.
+		Table("connection_match_rounds").
+		Select("connections.user_one_id, connections.user_two_id").
+		Joins("INNER JOIN connections ON connections.connection_id = connection_match_rounds.connection_id").
+		Where("connection_match_rounds.match_round_id IN (?)", matchRoundIds).
+		Rows()
+	if err != nil {
+		return nil, errs.NewDbError(err)
+	}
+
+	uniqueUserIds := make(map[data.TUserID]interface{})
+	for rows.Next() {
+		var (
+			userOneId data.TUserID
+			userTwoId data.TUserID
+		)
+		rows.Scan(&userOneId, &userTwoId)
+		uniqueUserIds[userOneId] = nil
+		uniqueUserIds[userTwoId] = nil
+	}
+
+	userIds := make([]data.TUserID, 0, len(uniqueUserIds))
+	for userId, _ := range uniqueUserIds {
+		userIds = append(userIds, userId)
+	}
+
+	return userIds, nil
 }

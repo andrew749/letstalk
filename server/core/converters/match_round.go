@@ -5,7 +5,7 @@ import (
 	"letstalk/server/data"
 )
 
-func apiMatchUserFromDataUser(user *data.User) api.MatchUser {
+func ApiMatchUserFromDataUser(user *data.User) api.MatchUser {
 	var cohort *api.CohortV2 = nil
 	if user.Cohort != nil && user.Cohort.Cohort != nil {
 		cohort = ApiCohortV2FromDataCohort(user.Cohort.Cohort)
@@ -22,8 +22,8 @@ func apiMatchUserFromDataUser(user *data.User) api.MatchUser {
 // Doesn't assume cohorts exist for the users.
 func apiMatchRoundMatchFromData(matchRound *data.MatchRoundMatch) api.MatchRoundMatch {
 	return api.MatchRoundMatch{
-		Mentee: apiMatchUserFromDataUser(matchRound.MenteeUser),
-		Mentor: apiMatchUserFromDataUser(matchRound.MentorUser),
+		Mentee: ApiMatchUserFromDataUser(matchRound.MenteeUser),
+		Mentor: ApiMatchUserFromDataUser(matchRound.MentorUser),
 		Score:  matchRound.Score,
 	}
 }

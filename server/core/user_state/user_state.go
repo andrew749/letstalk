@@ -54,9 +54,11 @@ func userStateFromAssociations(user *data.User) api.UserState {
 	}
 }
 
+// Users have backfilled cohorts, additional data and user surveys
 func BulkGetUsersWithStates(db *gorm.DB, userIds []data.TUserID) ([]UserWithState, errs.Error) {
 	var users []data.User
-	err := db.Where("user_id IN (?)", userIds).Preload("Cohort").
+	// TODO: Maybe pass in flag that only loads cohort for speed
+	err := db.Where("user_id IN (?)", userIds).Preload("Cohort.Cohort").
 		Preload("AdditionalData").Preload("UserSurveys").Find(&users).Error
 	if err != nil {
 		return nil, errs.NewDbError(err)

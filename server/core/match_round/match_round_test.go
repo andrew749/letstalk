@@ -494,3 +494,133 @@ func TestDeleteMatchRoundControllerNotAdmin(t *testing.T) {
 	}
 	test.RunTestWithDb(thisTest)
 }
+
+func TestGetGroupMembersControllerNotAdmin(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			groupName := "WICS"
+			managedGroup, users := createMatchRoundTestSetup(t, db, groupName, 6)
+
+			_, err := handleGetGroupMembers(db, users[7].UserId, managedGroup.GroupId)
+			assert.EqualError(t, err, "You do not have rights to do this operation")
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
+
+func TestGetGroupMembersControllerHappy(t *testing.T) {
+	thisTest := test.Test{
+		Test: func(db *gorm.DB) {
+			groupName := "WICS"
+
+			userAdmin, err := test_helpers.CreateTestUser(db, 1)
+			assert.NoError(t, err)
+
+			managedGroup, err := query.CreateManagedGroup(db, userAdmin.UserId, groupName)
+			assert.NoError(t, err)
+
+			userSignedUp, err := test_helpers.CreateTestUser(db, 2)
+			assert.NoError(t, err)
+
+			userEmailVerified, err := test_helpers.CreateTestUser(db, 3)
+			assert.NoError(t, err)
+			userEmailVerified.IsEmailVerified = true
+			err = db.Save(userEmailVerified).Error
+			assert.NoError(t, err)
+
+			userBasicInfo, err := test_helpers.CreateTestUser(db, 4)
+			assert.NoError(t, err)
+			userBasicInfo.IsEmailVerified = true
+			err = db.Save(userBasicInfo).Error
+			assert.NoError(t, err)
+			cohort := &data.Cohort{
+				ProgramId:   "ARTS",
+				ProgramName: "Arts",
+				GradYear:    2018,
+				IsCoop:      false,
+			}
+			err = db.Save(cohort).Error
+			assert.NoError(t, err)
+			userCohort := &data.UserCohort{
+				UserId:   userBasicInfo.UserId,
+				CohortId: cohort.CohortId,
+			}
+			err = db.Save(userCohort).Error
+			assert.NoError(t, err)
+
+			userSetup, err := test_helpers.CreateTestSetupUser(db, 5)
+			assert.NoError(t, err)
+
+			userConn1, err := test_helpers.CreateTestSetupUser(db, 6)
+			assert.NoError(t, err)
+			userConn2, err := test_helpers.CreateTestSetupUser(db, 7)
+			assert.NoError(t, err)
+
+			memberUsers := []data.User{
+				*userSignedUp,
+				*userEmailVerified,
+				*userBasicInfo,
+				*userSetup,
+				*userConn1,
+				*userConn2,
+			}
+
+			for _, user := range memberUsers {
+				err = query.EnrollUserInManagedGroup(db, user.UserId, managedGroup.GroupId)
+				assert.NoError(t, err)
+			}
+
+			matchRound := &data.MatchRound{GroupId: managedGroup.GroupId}
+			err = db.Save(matchRound).Error
+			assert.NoError(t, err)
+			connection := &data.Connection{
+				UserOneId: userConn1.UserId,
+				UserTwoId: userConn2.UserId,
+				ConnectionMatchRound: &data.ConnectionMatchRound{
+					MatchRoundId: matchRound.Id,
+				},
+			}
+			err = db.Save(connection).Error
+			assert.NoError(t, err)
+
+			groupMembers, err := handleGetGroupMembers(db, userAdmin.UserId, managedGroup.GroupId)
+			assert.NoError(t, err)
+			assert.Len(t, groupMembers, len(memberUsers))
+
+			memberMap := make(map[data.TUserID]api.GroupMember)
+			for _, groupMember := range groupMembers {
+				memberMap[groupMember.User.UserId] = groupMember
+			}
+
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_SIGNED_UP,
+				memberMap[userSignedUp.UserId].Status)
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_SIGNED_UP,
+				memberMap[userEmailVerified.UserId].Status)
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_SIGNED_UP,
+				memberMap[userBasicInfo.UserId].Status)
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_ONBOARDED,
+				memberMap[userSetup.UserId].Status)
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_MATCHED,
+				memberMap[userConn1.UserId].Status)
+			assert.Equal(t, api.GROUP_MEMBER_STATUS_MATCHED,
+				memberMap[userConn2.UserId].Status)
+
+			for _, user := range memberUsers {
+				groupMember := memberMap[user.UserId]
+				assert.Equal(t, user.FirstName, groupMember.User.FirstName)
+				assert.Equal(t, user.LastName, groupMember.User.LastName)
+				assert.Equal(t, user.Email, groupMember.Email)
+				if user.Cohort != nil && user.Cohort.Cohort != nil {
+					assert.Equal(t, user.Cohort.Cohort.ProgramName, groupMember.Cohort.ProgramName)
+					assert.Equal(t, user.Cohort.Cohort.GradYear, groupMember.Cohort.GradYear)
+					if user.Cohort.Cohort.SequenceName == nil {
+						assert.Nil(t, user.Cohort.Cohort.SequenceName)
+					} else {
+						assert.Equal(t, *user.Cohort.Cohort.SequenceName, *groupMember.Cohort.SequenceName)
+					}
+				}
+			}
+		},
+	}
+	test.RunTestWithDb(thisTest)
+}
