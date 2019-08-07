@@ -551,6 +551,14 @@ func TestGetGroupMembersControllerHappy(t *testing.T) {
 			userSetup, err := test_helpers.CreateTestSetupUser(db, 5)
 			assert.NoError(t, err)
 
+			// False connection not attached to group
+			connection := &data.Connection{
+				UserOneId: userSetup.UserId,
+				UserTwoId: userAdmin.UserId,
+			}
+			err = db.Save(connection).Error
+			assert.NoError(t, err)
+
 			userConn1, err := test_helpers.CreateTestSetupUser(db, 6)
 			assert.NoError(t, err)
 			userConn2, err := test_helpers.CreateTestSetupUser(db, 7)
@@ -573,7 +581,7 @@ func TestGetGroupMembersControllerHappy(t *testing.T) {
 			matchRound := &data.MatchRound{GroupId: managedGroup.GroupId}
 			err = db.Save(matchRound).Error
 			assert.NoError(t, err)
-			connection := &data.Connection{
+			connection = &data.Connection{
 				UserOneId: userConn1.UserId,
 				UserTwoId: userConn2.UserId,
 				ConnectionMatchRound: &data.ConnectionMatchRound{
