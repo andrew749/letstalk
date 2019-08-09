@@ -12,6 +12,7 @@ interface PhotoService {
 
 export type PhotoResult = {
   uri: string,
+  data: string,
 }
 
 export class PhotoServiceImpl implements PhotoService {
@@ -54,6 +55,8 @@ export class PhotoServiceImpl implements PhotoService {
 
     return {
       uri: result.uri,
+      //@ts-ignore this actually exists
+      data: result.base64,
     };
   }
 
@@ -61,10 +64,11 @@ export class PhotoServiceImpl implements PhotoService {
     // Upload the image using the fetch and FormData APIs
     let formData = new FormData();
     const sessionToken = await auth.getSessionToken();
-    const data = await fetch(uri);
+    let data = await (await fetch(uri)).blob();
 
     // sends a base 64 encoded string
-    formData.append('photo', await data.blob());
+    //@ts-ignore
+    formData.append('photo', {uri: uri, name: "new_pic", type: 'image/jpeg'});
 
     return await this._requestor.postFormData(PROFILE_PIC_UPLOAD_ROUTE, formData, sessionToken);
   }

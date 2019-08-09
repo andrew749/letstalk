@@ -9,7 +9,7 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native';
-import { BarCodeScanner } from 'expo';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 import { errorToast, infoToast } from '../redux/toast';
 import { NavigationActions, NavigationScreenProp, NavigationStackAction } from "react-navigation";
@@ -102,14 +102,11 @@ class QrScannerView extends Component<Props> {
 
         {!this.state.hasCameraPermission
           ? this.renderCameraPermissionMissing()
-          : React.createElement(BarCodeScanner, {
-            onBarCodeRead: this.handleBarCodeRead,
-            // @ts-ignore bug where style isn't detected in BarCodeScannerProps
-            style: {
+          : <BarCodeScanner onBarCodeScanned={this.handleBarCodeRead}
+            style={{
               height: Dimensions.get('window').height,
               width: Dimensions.get('window').width,
-            },
-          })
+            }}/>
         }
 
         <View style={styles.bottomBar}>

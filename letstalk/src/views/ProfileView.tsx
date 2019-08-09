@@ -277,6 +277,7 @@ class ProfileView extends Component<Props, State> {
     }
     const EditFormWithRedux = EditFormWithReduxBuilder({
       uri: profilePic,
+      data: null,
     });
 
     const showGenericSurvey = () => {
