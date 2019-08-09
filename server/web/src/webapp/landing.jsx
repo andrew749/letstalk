@@ -1,6 +1,6 @@
 import React from 'react';
 import { withCookies } from 'react-cookie';
-import { connect } from 'react-redux';
+import apiServiceConnect from '../api/api_service_connect';
 
 import CookieAwareComponent from '../cookie_aware_component.jsx';
 
@@ -13,7 +13,7 @@ export class LandingPage extends React.Component {
     }
 }
 
-const LandingPageComponent = connect(
+const LandingPageComponent = apiServiceConnect(
     null,
     (dispatch) => {
         return {};

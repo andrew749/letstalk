@@ -1,46 +1,86 @@
-import { loginUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from './config.js'
+import { loginUrl, signupUrl, mentorshipUrl, deleteUrl, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl } from '../config.js'
 import axios from 'axios';
-import { registerWithGroupPathWeb } from './routes.js';
+import Cookies from 'universal-cookie';
 
 const CREATE_MENTORSHIP_TYPE_DRY_RUN = "DRY_RUN";
 const CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN = "NOT_DRY_RUN";
 
-export function fetchMiddleware(fetchPromise) {
-    return new Promise((req, rej) => fetchPromise
-        .then(response => response.data)
-        .then((data) => {
-            if (data.Error) {
-                throw new Error(data.Error.message)
-            }
-            req(data);
-        }).catch(err => rej(err)));
+export const DID_AUTHENTICATE_ACTION = "DID_AUTHENTICATE";
+export const AUTH_EXPIRED = "AUTH_EXPIRED";
+
+// User did authenticate
+export function didAuthenticateAction(sessionId) {
+    return {type: DID_AUTHENTICATE_ACTION, sessionId: sessionId}
+}
+
+// Invalidate authentication
+export function authExpiredAction() {
+    return {type: AUTH_EXPIRED};
+}
+
+// base state
+const initialState = {
+    sessionId: undefined,
+    isValid: false,
+};
+
+export function apiServiceReducer(state = initialState, action) {
+    switch(action.type) {
+        case DID_AUTHENTICATE_ACTION:
+            return Object.assign({}, state, {isValid: true, sessionId: action.sessionId})
+        case AUTH_EXPIRED:
+            return Object.assign({}, state, {isValid: false, sessionId: undefined})
+        default:
+            return state;
+    }
+}
+
+function getLocalStateForComponent(state) {
+    return state.apiServiceReducer;
 }
 
 /**
  * A singleton that is used to make api calls to the hive webapp.
  */
-export const HiveApiService = (() => {
+export const HiveApiService = ((state, dispatch) => {
+    
+    const apiService = () => HiveApiService(state, dispatch);
     // holds internal state for the service.
-    let instance = new Object();
-
     return {
-        setSessionId: (sessionId) => {
-            instance.sessionId = sessionId;
+        isAuthenticated: () => {
+            return getLocalStateForComponent(state).isValid;
         },
+
+        setSessionId: (sessionId) => {
+            (new Cookies()).set('sessionId', sessionId);
+            dispatch(didAuthenticateAction(sessionId));
+        },
+
+        getSessionId: () => {
+            return getLocalStateForComponent(state).sessionId;
+        },
+
         /**
          * headers: {undefined || Headers} headers to send the request with.
          */
         hiveFetch: (url, method, body) => {
-            let headers = {"sessionId": instance.sessionId, "Content-Type": "application/json"};
-            return fetchMiddleware(axios({
+            let headers = {"sessionId": apiService().getSessionId(), "Content-Type": "application/json"};
+            return axios({
                 url:  url,
                 method: method,
                 headers: headers,
                 data: body
-        }))},
+            }).then(response => response.data)
+                .catch(err => {
+                    if (err.response && err.response.status === 401) {
+                        dispatch(authExpiredAction());
+                    }
+                    throw err;
+                });
+        },
 
         signup: (firstName, lastName, email, gender, birthdate, phoneNumber, password) => {
-            return HiveApiService.hiveFetch(signupUrl, 'POST', {
+            return apiService().hiveFetch(signupUrl, 'POST', {
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
@@ -52,9 +92,12 @@ export const HiveApiService = (() => {
         },
 
         login: (email, password) => {
-            return HiveApiService.hiveFetch(loginUrl, 'POST', {
+            return apiService().hiveFetch(loginUrl, 'POST', {
                 email: email,
                 password: password
+            }).then(data => {
+                apiService().setSessionId(data.Result.sessionId);
+                return data;
             });
         },
 
@@ -67,7 +110,7 @@ export const HiveApiService = (() => {
          *  Promise for request
         */
         createMentorshipFromEmails: (mentorEmail, menteeEmail) => {
-            return HiveApiService.hiveFetch(mentorshipUrl, 'POST', {
+            return apiService().hiveFetch(mentorshipUrl, 'POST', {
                 mentorEmail: mentorEmail,
                 menteeEmail: menteeEmail,
                 requestType: CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN
@@ -83,7 +126,7 @@ export const HiveApiService = (() => {
          * @param {*} email 
          */
         deleteUser: (userId, firstName, lastName, email) => {
-            return HiveApiService.hiveFetch(deleteUrl, 'POST', {
+            return apiService().hiveFetch(deleteUrl, 'POST', {
                 userId: parseInt(userId),
                 firstName: firstName,
                 lastName: lastName,
@@ -100,7 +143,7 @@ export const HiveApiService = (() => {
         fetchGroups: (started, done, error) => {
             started();
             console.log("Fetching groups");
-            return HiveApiService.hiveFetch(getManagedGroupsUrl, 'GET', undefined)
+            return apiService().hiveFetch(getManagedGroupsUrl, 'GET', undefined)
                 .then((data) => done(data))
                 .catch((err) => error(err));
         },
@@ -112,7 +155,7 @@ export const HiveApiService = (() => {
         createManagedGroup: (groupName, started, done, error) => {
             started();
             console.log("Creating group " + groupName);
-            return HiveApiService.hiveFetch(createNewManagedGroupUrl, 'POST', {
+            return apiService().hiveFetch(createNewManagedGroupUrl, 'POST', {
                 groupName: groupName,
             })
                 .then((data) => done(data))
@@ -124,12 +167,13 @@ export const HiveApiService = (() => {
          */
         enrollInGroup: (uuid, started, done, error) => {
             started();
-            return HiveApiService.hiveFetch(registerWithManagedGroupUrl, 'POST', {
+            return apiService().hiveFetch(registerWithManagedGroupUrl, 'POST', {
                 groupUUID: uuid,
             })
                 .then(done)
                 .catch(error);
         }
     }
-})();
+}
 
+);

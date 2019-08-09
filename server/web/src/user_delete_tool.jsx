@@ -1,10 +1,9 @@
 import React from 'react';
 import {Alert, Container, Form, Col, Row, Button} from 'react-bootstrap';
-import {HiveApiService} from './api_controller.js';
 import {onChange} from './util.js';
-import {connect} from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx'
 import { withCookies } from 'react-cookie';
+import apiServiceConnect from './api/api_service_connect';
 
 class UserDeleteTool extends React.Component {
     constructor(props) {
@@ -40,7 +39,7 @@ class UserDeleteTool extends React.Component {
             return;
         }
 
-        HiveApiService.deleteUser(model.userId, model.firstName, model.lastName, model.email)
+        this.props.apiService.deleteUser(model.userId, model.firstName, model.lastName, model.email)
             .then((data) => {
                 // handle success response
                 console.log(data);
@@ -92,5 +91,5 @@ class UserDeleteTool extends React.Component {
         );
     }
 }
-const UserDeleteToolComponent = connect(null, null)(CookieAwareComponent(withCookies(UserDeleteTool)));
+const UserDeleteToolComponent = apiServiceConnect(null, null)(CookieAwareComponent(withCookies(UserDeleteTool)));
 export default UserDeleteToolComponent;

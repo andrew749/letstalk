@@ -1,9 +1,9 @@
 import React from 'react';
-import {connect, dispatch} from 'react-redux';
 import {Accordion, Card, Button} from 'react-bootstrap';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
+import apiServiceConnect from './api/api_service_connect';
 
 const GOT_GROUPS = 'GOT_GROUPS';
 const FETCH_GROUPS = 'FETCH_GROUPS';
@@ -81,7 +81,7 @@ class GetManagedGroupsView extends React.Component {
     }
 }
 
-const GetManagedGroupsViewComponent = connect(
+const GetManagedGroupsViewComponent = apiServiceConnect(
     (state) => ({groups: state.getManagedGroupsReducer.groups || [], errorMessage: state.getManagedGroupsReducer.errorMessage}),
     (dispatch) => {
         return {

@@ -1,13 +1,12 @@
 import React from 'react';
-import {connect, dispatch} from 'react-redux';
 import {Form, Button} from 'react-bootstrap';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 
-import {HiveApiService} from './api_controller.js';
 import {onChange} from './util.js';
 import { fetchGroupsAction } from './get_managed_groups_view.jsx';
+import apiServiceConnect from './api/api_service_connect';
 
 const CREATE_GROUP = 'CREATE_GROUP';
 
@@ -45,7 +44,7 @@ class CreateManagedGroupTool extends React.Component {
         e.preventDefault();
         e.stopPropagation();
         const model = this.state.createManagedGroupToolModel;
-        HiveApiService.createManagedGroup(model.groupName, () => {/* When we start creating */}, () => {this.props.refreshPage()}, (err) => {console.warn(err);});
+        this.props.apiService.createManagedGroup(model.groupName, () => {/* When we start creating */}, () => {this.props.refreshPage()}, (err) => {console.warn(err);});
     }
 
     render() {
@@ -65,7 +64,7 @@ class CreateManagedGroupTool extends React.Component {
     }
 }
 
-const CreateManagedGroupToolComponent = connect(
+const CreateManagedGroupToolComponent = apiServiceConnect(
     null,
     (dispatch) => {
         return {
