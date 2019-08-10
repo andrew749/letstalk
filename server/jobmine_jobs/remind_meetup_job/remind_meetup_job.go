@@ -135,7 +135,7 @@ func execute(
 	if err := db.Model(&data.MeetupReminder{}).Create(&backup).Error; err != nil {
 		return nil, err
 	}
-	rlog.Info("Creating meetup notification with params: %v", templateParams)
+	rlog.Infof("Creating meetup notification with params: %v", templateParams)
 	if err := notifications.CreateAdHocNotificationNoTransaction(
 		db,
 		userId,
