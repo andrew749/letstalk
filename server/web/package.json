@@ -16,6 +16,7 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.4",
+    "babel-preset-expo": "^5.2.0",
     "css-loader": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
     "http-server": "^0.11.1",

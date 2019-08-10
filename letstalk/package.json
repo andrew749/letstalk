@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-transform-flow-strip-types": "^7.4.4",
     "exp": "^57.2.1",
     "flow-bin": "0.53.0",
-    "jest": "^22.4.1",
-    "jest-expo": "^33.0.2",
+    "jest": "^24.8.0",
+    "jest-expo": "^34.0.0",
     "react-native-typescript-transformer": "^1.1.4",
-    "react-test-renderer": "^16.3.2",
+    "react-test-renderer": "16.8.3",
     "redux-logger": "^3.0.6",
     "rimraf": "^2.6.2",
-    "ts-jest": "^22.4.1",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.8.0",
     "typescript": "^3.5.3"
   },
@@ -35,16 +37,16 @@
   "jest": {
     "preset": "jest-expo",
     "transform": {
-      "^.+\\.jsx?$": "babel-jest",
+      "^.+\\.[t|j]sx?$": "babel-jest",
       "^.+\\.tsx?$": "ts-jest"
     },
     "globals": {
       "ts-jest": {
-        "useBabelrc": true
+        "babelConfig": true
       }
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|react-clone-referenced-element|expo(nent)?|@expo(nent)?/.*|react-navigation|sentry-expo))"
+      "node_modules/(?!((jest-)?react-native|react-clone-referenced-element|expo(nent)?|@expo(nent)?/.*|@?react-navigation|sentry-expo|@?jest|expo-asset|@unimodules))"
     ],
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
@@ -58,7 +60,7 @@
     ]
   },
   "dependencies": {
-    "@types/jest": "^21.1.8",
+    "@types/jest": "^24.0.17",
     "@types/react": "16.8.3",
     "@types/react-dom": "^16",
     "@types/react-native": "^0.57.1",
@@ -70,6 +72,7 @@
     "@types/redux-form": "^7.0.13",
     "@types/redux-logger": "^3.0.5",
     "@types/underscore": "^1.8.9",
+    "babel-jest": "^24.8.0",
     "babel-preset-expo": "^5.2.0",
     "expo": "^34.0.3",
     "expo-analytics": "^1.0.11",
