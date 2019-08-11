@@ -438,7 +438,7 @@ func checkIsAdmin(db *gorm.DB, adminId data.TUserID, groupId data.TGroupID) errs
 	).Find(&data.ManagedGroup{}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return errs.NewUnauthorizedError("You do not have rights to do this operation")
+			return errs.NewForbiddenError("You do not have rights to do this operation")
 		} else {
 			return errs.NewDbError(err)
 		}

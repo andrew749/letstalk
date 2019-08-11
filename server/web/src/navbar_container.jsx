@@ -1,7 +1,5 @@
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import React from 'react';
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {LinkContainer} from 'react-router-bootstrap'

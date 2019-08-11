@@ -16,9 +16,8 @@ import MatchingPage from './matching';
 import MembersPage from './members';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
-import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
-import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction} from './members';
-import {HiveApiService} from './api_controller.js';
+import {getManagedGroupsReducer, getCurrentGroup, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
+import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
 import {apiServiceReducer, HiveApiService} from './api/api_controller';
 
 import AuthenticatedRoute from './authenticate_component.jsx';
@@ -45,11 +44,10 @@ function onLoad() {
     }
 
     store.subscribe(() => {
-        console.log(store.getState())
         // if somebody posted a fetch event, then get the api
         let shouldFetchGroups = getShouldFetchGroups(store.getState());
         if (!!shouldFetchGroups) {
-            HiveApiService.fetchGroups(
+            HiveApiService(store.getState(), store.dispatch).fetchGroups(
                 () => {store.dispatch(fetchingGroupsAction())},
                 (data) => {store.dispatch(gotGroupsAction(data.Result.managedGroups))},
                 (err) => {store.dispatch(errorFetchingGroupsAction(err))}
@@ -58,13 +56,13 @@ function onLoad() {
 
         // TODO: Finish this part, write the routes, view results???
         let shouldFetchMembers = getShouldFetchMembers(store.getState());
-        let groupId = getCurrentGroup(store.getState());
-        console.log(groupId);
-        if (!!shouldFetchMembers) {
-            HiveApiService.fetchMembers(
-                groupId,
+        let groupToFetch = getGroupToFetch(store.getState());
+        console.log("Fetching group " + groupToFetch);
+        if (!!shouldFetchMembers && !!groupToFetch) {
+            HiveApiService(store.getState(), store.dispatch).fetchMembers(
+                groupToFetch,
                 () => {store.dispatch(fetchingMembersAction())},
-                (data) => {store.dispatch(gotMembersAction(data.Result.managedGroups))},
+                (data) => {store.dispatch(gotMembersAction(data.Result))},
                 (err) => {store.dispatch(errorFetchingMembersAction(err))}
             );
         }
