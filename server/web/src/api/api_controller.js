@@ -1,4 +1,4 @@
-import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl } from '../config.js'
+import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl } from '../config.js'
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
@@ -248,6 +248,21 @@ export const HiveApiService = ((state, dispatch) => {
         getMatchingRounds: (groupId, started, done, error) => {
             started();
             return apiService().hiveFetch(getMatchRoundsUrl + groupId, 'GET')
+                .then(done)
+                .catch(error);
+        },
+
+        createNewMatchingRound: (maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperYearGrad, groupId, userIds, started, done, error) => {
+            started();
+            return apiService().hiveFetch(createMatchRoundsUrl, 'POST', {
+                parameters: {
+                    maxLowerYearsPerUpperYear,
+                    maxUpperYearsPerLowerYear,
+                    youngestUpperYearGrad, 
+                },
+                groupId: groupId,
+                userIds: userIds,
+            })
                 .then(done)
                 .catch(error);
         }
