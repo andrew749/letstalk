@@ -16,6 +16,8 @@ import MatchingPage, {matchingReducer, getShouldFetchMatchingRoundsForGroup, get
 import MembersPage from './members';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
+import {API_NAME as MATCH_ROUND_API, matchRoundApi} from './api/match_round_api_module';
+import {API_NAME as DELETE_USER_GROUP_API, userGroupDeleteApi} from './api/user_group_delete_api_module';
 import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
 import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
 import {apiServiceReducer, HiveApiService, getShouldFetchProfile, didFetchProfileAction, fetchingProfileAction, fetchProfileErrorAction} from './api/api_controller';
@@ -23,6 +25,17 @@ import {apiServiceReducer, HiveApiService, getShouldFetchProfile, didFetchProfil
 import AuthenticatedRoute from './authenticate_component.jsx';
 import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath, matchingPath, membersPath } from './routes.js';
 import NavbarContainer from './navbar_container.jsx';
+
+const apiModules = {
+    [MATCH_ROUND_API]: matchRoundApi,
+    [DELETE_USER_GROUP_API]: userGroupDeleteApi,
+}
+
+// build reducer dict
+let apiModuleReducers = {};
+console.log(apiModules)
+Object.keys(apiModules).forEach((key) => apiModuleReducers[key] = apiModules[key].reducer);
+console.log(apiModuleReducers);
 
 const reducers = combineReducers({
     apiServiceReducer,
@@ -32,6 +45,7 @@ const reducers = combineReducers({
     membersReducer,
     modalReducer,
     matchingReducer,
+    ...apiModuleReducers,
 });
 
 const store = createStore(reducers);
@@ -76,7 +90,17 @@ function onLoad() {
                 (err) => {store.dispatch(errorFetchingMatchingRoundsForGroupAction(err))}
             );
         }
+        let state = store.getState();
 
+        Object.keys(apiModules).forEach( (key) => {
+            console.log(`Evaluting api module ${key}`);
+            let mod = apiModules[key];
+            if (!!mod.module.shouldExecuteApiCall(state)) {
+                console.log(`Executing api call for  api module ${key}`);
+                let params = mod.module.getParams(state);
+                mod.call(params, state, store.dispatch);
+            }
+        });
 
         // TODO: Finish this part, write the routes, view results???
         let shouldFetchMembers = getShouldFetchMembers(store.getState());
