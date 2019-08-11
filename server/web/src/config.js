@@ -20,3 +20,4 @@ export const getManagedGroupsUrl = `${adminUrl}/get_managed_groups`;
 export const getGroupMembersUrlBase = `${adminUrl}/group_members/`;
 export const createNewManagedGroupUrl = `${adminUrl}/create_managed_group`;
 export const registerWithManagedGroupUrl = `${apiUrl}/enroll_managed_group`;
+export const getMatchRoundsUrl = `${apiUrl}/match_rounds/`;

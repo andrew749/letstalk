@@ -12,7 +12,7 @@ import SignupPage, {signupReducer} from './signup.jsx';
 import ModalContainer, {modalReducer} from './modal_container.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
 import LandingPage from './landing.jsx';
-import MatchingPage from './matching';
+import MatchingPage, {matchingReducer, getShouldFetchMatchingRoundsForGroup, getMatchingRoundsGroupToFetch, fetchingMatchingRoundsForGroupAction, fetchedMatchingRoundsForGroupAction, errorFetchingMatchingRoundsForGroupAction} from './matching';
 import MembersPage from './members';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
@@ -30,7 +30,8 @@ const reducers = combineReducers({
     signupReducer,
     getManagedGroupsReducer,
     membersReducer,
-    modalReducer
+    modalReducer,
+    matchingReducer,
 });
 
 const store = createStore(reducers);
@@ -63,6 +64,19 @@ function onLoad() {
                 (err) => {store.dispatch(fetchProfileErrorAction(err))}
             );
         }
+
+        let shouldFetchMatchingRounds = getShouldFetchMatchingRoundsForGroup(store.getState());
+        if (!!shouldFetchMatchingRounds) {
+            let matchingRoundsGroupToFetch = getMatchingRoundsGroupToFetch(store.getState());
+            console.log("Fetching matching rounds for " + matchingRoundsGroupToFetch);
+            HiveApiService(store.getState(), store.dispatch).getMatchingRounds(
+                matchingRoundsGroupToFetch.groupId,
+                () => {store.dispatch(fetchingMatchingRoundsForGroupAction())},
+                (data) => {store.dispatch(fetchedMatchingRoundsForGroupAction(data.Result))},
+                (err) => {store.dispatch(errorFetchingMatchingRoundsForGroupAction(err))}
+            );
+        }
+
 
         // TODO: Finish this part, write the routes, view results???
         let shouldFetchMembers = getShouldFetchMembers(store.getState());

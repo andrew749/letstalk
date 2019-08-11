@@ -30,6 +30,10 @@ export function getCurrentGroup(state) {
     return state.getManagedGroupsReducer.groups ? state.getManagedGroupsReducer.groups[0] : undefined;
 }
 
+export function getGroupsForAdmin(state) {
+    return state.getManagedGroupsReducer.groups;
+}
+
 export function gotGroupsAction(groups) {
     return {type: GOT_GROUPS, groups: groups};
 }

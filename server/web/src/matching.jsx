@@ -1,13 +1,64 @@
 import React from 'react';
-import { Redirect, Link} from 'react-router-dom';
 import { Button, ButtonToolbar, Dropdown, DropdownButton, Container, Table} from "react-bootstrap";
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
+import {fetchGroupsAction, getGroupsForAdmin} from './get_managed_groups_view';
 
-const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
+const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
+const FETCHING_MATCHING_ROUNDS_FOR_GROUP = "FETCHING_MATCHING_ROUNDS_FOR_GROUP";
+const FETCHED_MATCHING_ROUNDS_FOR_GROUP = "FETCHED_MATCHING_ROUNDS_FOR_GROUP";
+const ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP = "ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP";
 
+const initialState = {
+    shouldFetchMatchingRounds: false,
+    groupToFetch: undefined,
+    fetchingMatchingRoundsForGroupError: undefined,
+    matchingRounds: undefined,
+}
+
+export function shouldFetchMatchingRoundsForGroupAction(group) {
+    return {type: FETCH_MATCHING_ROUNDS_FOR_GROUP, groupToFetch: group};
+}
+
+export function fetchingMatchingRoundsForGroupAction() {
+    return {type: FETCHING_MATCHING_ROUNDS_FOR_GROUP};
+}
+
+export function fetchedMatchingRoundsForGroupAction(matchingRounds) {
+    return {type: FETCHED_MATCHING_ROUNDS_FOR_GROUP, matchingRounds: matchingRounds};
+}
+
+export function errorFetchingMatchingRoundsForGroupAction(error) {
+    return {type: ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP, fetchingMatchingRoundsForGroupError: error};
+}
+
+export function getShouldFetchMatchingRoundsForGroup(state) {
+    return state.matchingReducer.shouldFetchMatchingRounds
+}
+
+export function getMatchingRoundsGroupToFetch(state) {
+    return state.matchingReducer.groupToFetch;
+}
+
+export function getMatchingRounds(state) {
+    return state.matchingReducer.matchingRounds;  
+}
+
+export function matchingReducer(state = initialState, action) {
+    switch (action.type) {
+        case FETCH_MATCHING_ROUNDS_FOR_GROUP:
+            return Object.assign({}, state, {shouldFetchMatchingRounds: true, groupToFetch: action.groupToFetch});
+        case FETCHING_MATCHING_ROUNDS_FOR_GROUP:
+            return Object.assign({}, state, {shouldFetchMatchingRounds: false});
+        case FETCHED_MATCHING_ROUNDS_FOR_GROUP:
+            return Object.assign({}, state, {shouldFetchMatchingRounds: false, matchingRounds: action.matchingRounds});
+        case ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP:
+            return Object.assign({}, state, {shouldFetchMatchingRounds: false, matchingRoundFetchError: action.fetchingMatchingRoundsForGroupError});
+        default:
+            return state;
+    };
+}
 /**
  * Props:
  *  - isAdminPage: determine whether this is the admin page
@@ -17,17 +68,28 @@ export class MatchingPage extends React.Component {
         super(props);
 
         this.state = {};
+        this.onDropdownChanged = this.onDropdownChanged.bind(this);
+    }
+
+    componentDidMount() {
+        this.props.fetchGroups();
+    }
+
+    onDropdownChanged(group) {
+        console.log("[onDropdownChanged] Change to group " + group.groupId)
+        this.props.fetchMatchingRoundsForGroup(group);
     }
 
     render() {
-        const dropdownItems = GROUPS.map((groupName, i) => <Dropdown.Item key={i} eventKey={i.toString()}> {groupName} </Dropdown.Item>)
+        const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
+        console.log(this.props.matchingRounds)
         return (
             <Container className="panel-body">
                 <div className="group-info">
                     <h2>You are currently managing: </h2>
                     <ButtonToolbar>
                         <DropdownButton
-                            title='Your Groups'
+                            title={this.props.groupToFetch ? this.props.groupToFetch.groupName : 'Your Groups'}
                             variant='Primary'
                             id='managed-groups-dropdown'
                         >
@@ -53,48 +115,15 @@ export class MatchingPage extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
+                                {this.props.matchingRounds.map((matchingRound => {
+                                    <tr>
+                                        <td>{matchingRound.matchRoundId}</td>
+                                        <td>{matchingRound.name}</td>
+                                        <td>{matchingRound.status}</td>
+                                        <td>@mdo</td>
+                                    </tr>
+                                }))}
+                                
                             </tbody>
                         </Table>
                     </div>
@@ -104,6 +133,16 @@ export class MatchingPage extends React.Component {
     }
 }
 
-const MatchingPageComponent = apiServiceConnect()(CookieAwareComponent(withCookies(MatchingPage)));
+const MatchingPageComponent = apiServiceConnect(
+    (state) => ({
+        groupToFetch: getMatchingRoundsGroupToFetch(state),
+        groups: getGroupsForAdmin(state),
+        matchingRounds: getMatchingRounds(state) || [],
+    }),
+    (dispatch) => ({
+        fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
+        fetchGroups: () => dispatch(fetchGroupsAction()),
+    })
+)(CookieAwareComponent(withCookies(MatchingPage)));
 
 export default MatchingPageComponent;

@@ -4,7 +4,7 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import { showAction } from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
-import { gotGroupsAction, fetchGroupsAction } from './get_managed_groups_view';
+import { gotGroupsAction, fetchGroupsAction, getGroupsForAdmin } from './get_managed_groups_view';
 
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
 const STATS = ['200 members', '20 unregistered', '180 registered', '180 matched'];
@@ -23,6 +23,10 @@ const initialState = {
 
 export function getShouldFetchMembers(state) {
     return state.membersReducer.shouldFetchMembers;
+}
+
+export function getMembersFromState(state) {
+    return state.membersReducer.members;
 }
 
 export function gotMembersAction(members) {
@@ -142,8 +146,8 @@ export class MembersPage extends React.Component {
 const MembersPageComponent = apiServiceConnect(
     (state) => ({
         groupToFetch: getGroupToFetch(state),
-        groups: state.getManagedGroupsReducer.groups || [], 
-        members: state.membersReducer.members || [],
+        groups: getGroupsForAdmin(state) || [], 
+        members: getMembersFromState(state) || [],
         errorMessage: state.getManagedGroupsReducer.errorMessage,
         // TODO: rename
         membersErrorMessage: state.membersReducer.errorMessage
