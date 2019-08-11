@@ -37,8 +37,8 @@ export function fetchingMembersAction() {
     return {type: FETCHING_MEMBERS};
 }
 
-export function fetchMembersAction(groupId) {
-    return {type: FETCH_MEMBERS, groupId: groupId};
+export function fetchMembersAction(group) {
+    return {type: FETCH_MEMBERS, group: group};
 }
 
 export function errorFetchingMembersAction(errorMessage) {
@@ -48,9 +48,9 @@ export function errorFetchingMembersAction(errorMessage) {
 export function membersReducer(state = initialState, action) {
     switch(action.type) {
         case FETCH_MEMBERS:
-            return Object.assign({}, state, {shouldFetchMembers: true, groupToFetch: action.groupId}); 
+            return Object.assign({}, state, {shouldFetchMembers: true, groupToFetch: action.group}); 
         case FETCHING_MEMBERS:
-            return Object.assign({}, state, {shouldFetchMembers: false, fetchingMembers: true, shouldFetchMembers: false}); 
+            return Object.assign({}, state, {shouldFetchMembers: false, fetchingMembers: true}); 
         case GOT_MEMBERS:
             return Object.assign({}, state, {shouldFetchMembers: false, fetchingMembers: false, members: action.members});
         default:
@@ -76,14 +76,13 @@ export class MembersPage extends React.Component {
         this.props.fetchMembers();
     }
 
-    onDropdownChanged(groupId) {
-        console.log("[onDropdownChanged] Change to group " + groupId)
-        this.props.fetchMembers(groupId);
+    onDropdownChanged(group) {
+        console.log("[onDropdownChanged] Change to group " + group.groupId)
+        this.props.fetchMembers(group);
     }
 
     render() {
-        console.log(this.props.members);
-        const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group.groupId)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
+        const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
         return (
             <Container className="panel-body">
@@ -91,7 +90,7 @@ export class MembersPage extends React.Component {
                     <h2>You are currently managing: </h2>
                     <ButtonToolbar>
                         <DropdownButton
-                            title='Your Groups'
+                            title={ this.props.groupToFetch ? this.props.groupToFetch.groupName : undefined || 'Your Groups'}
                             variant='Primary'
                             id='managed-groups-dropdown'
                         >
@@ -142,6 +141,7 @@ export class MembersPage extends React.Component {
 
 const MembersPageComponent = apiServiceConnect(
     (state) => ({
+        groupToFetch: getGroupToFetch(state),
         groups: state.getManagedGroupsReducer.groups || [], 
         members: state.membersReducer.members || [],
         errorMessage: state.getManagedGroupsReducer.errorMessage,

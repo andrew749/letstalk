@@ -7,10 +7,30 @@ const CREATE_MENTORSHIP_TYPE_NOT_DRY_RUN = "NOT_DRY_RUN";
 
 export const DID_AUTHENTICATE_ACTION = "DID_AUTHENTICATE";
 export const AUTH_EXPIRED = "AUTH_EXPIRED";
+export const FETCH_PROFILE = "FETCH_PROFILE";
+export const FETCHING_PROFILE = "FETCHING_PROFILE";
+export const DID_FETCH_PROFILE = "DID_FETCH_PROFILE";
+export const FETCH_PROFILE_ERROR = "FETCH_PROFILE_ERROR";
 
 // User did authenticate
 export function didAuthenticateAction(sessionId) {
     return {type: DID_AUTHENTICATE_ACTION, sessionId: sessionId}
+}
+
+export function shouldFetchProfileAction() {
+    return {type: FETCH_PROFILE};
+}
+
+export function fetchingProfileAction() {
+    return {type: FETCHING_PROFILE};
+}
+
+export function didFetchProfileAction(profile) {
+    return {type: DID_FETCH_PROFILE, profile: profile};
+}
+
+export function fetchProfileErrorAction(error) {
+    return {type: FETCH_PROFILE_ERROR, error: error};
 }
 
 // Invalidate authentication
@@ -18,14 +38,35 @@ export function authExpiredAction() {
     return {type: AUTH_EXPIRED};
 }
 
+export function getShouldFetchProfile(state) {
+    return state.apiServiceReducer.shouldFetchProfile;
+}
+
+export function isAuthenticated(state) {
+    return state.apiServiceReducer.isValid;
+}
+
+export function getProfile(state) {
+    return state.apiServiceReducer.profile;
+}
+
 // base state
 const initialState = {
     sessionId: undefined,
     isValid: false,
+    shouldFetchProfile: false,
 };
 
 export function apiServiceReducer(state = initialState, action) {
     switch(action.type) {
+        case FETCH_PROFILE:
+            return Object.assign({}, state, {shouldFetchProfile: true});
+        case FETCHING_PROFILE:
+            return Object.assign({}, state, {shouldFetchProfile: false});
+        case DID_FETCH_PROFILE:
+            return Object.assign({}, state, {shouldFetchProfile: false, profile: action.profile});
+        case FETCH_PROFILE_ERROR:
+            return Object.assign({}, state, {shouldFetchProfile: false, fetchProfileError: action.error});
         case DID_AUTHENTICATE_ACTION:
             return Object.assign({}, state, {isValid: true, sessionId: action.sessionId})
         case AUTH_EXPIRED:
@@ -53,6 +94,7 @@ export const HiveApiService = ((state, dispatch) => {
 
         setSessionId: (sessionId) => {
             (new Cookies()).set('sessionId', sessionId);
+            dispatch(shouldFetchProfileAction());
             dispatch(didAuthenticateAction(sessionId));
         },
 
@@ -105,7 +147,8 @@ export const HiveApiService = ((state, dispatch) => {
             return apiService().hiveFetch(logoutUrl, 'POST', undefined);
         },
 
-        me: (done, error) => {
+        me: (started, done, error) => {
+            started();
             return apiService().hiveFetch(meUrl, 'GET', undefined)
                 .then((data) => done(data))
                 .catch((err) => error(err));

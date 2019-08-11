@@ -7,11 +7,8 @@ import {Container, Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
 import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath, groupManagementToolPath} from './routes.js';
 import {logoutAction} from './login';
+import {shouldFetchProfileAction, isAuthenticated, getProfile} from './api/api_controller'
 import apiServiceConnect from './api/api_service_connect';
-
-function isAuthenticated(state) {
-    return state.loginReducer.isAuthenticated;
-}
 
 class NavbarContainer extends React.Component {
 
@@ -21,30 +18,9 @@ class NavbarContainer extends React.Component {
         this.state = {};
     }
 
-    populateMe() {
-        if (!!this.props.isAuthenticated) {
-            this.props.apiService.me(
-                ({ Result }) => {
-                    if (!this.state.me || this.state.me.userId != Result.userId ) {
-                        this.setState({ me: {
-                            userId: Result.userId,
-                            firstName: Result.firstName,
-                            lastName: Result.lastName,
-                            email: Result.email
-                        }});
-                    }
-                },
-                err => console.log
-            );
-        }
-    }
 
     componentDidMount() {
-        this.populateMe();
-    }
-
-    componentDidUpdate() {
-        this.populateMe();
+        this.props.fetchProfile();
     }
 
     onLogout = event => {
@@ -110,9 +86,9 @@ class NavbarContainer extends React.Component {
                         <div className="flex-column">
                             {'Hive Admin Console'}
                             <div>
-                            {!!this.props.isAuthenticated && this.state.me ?
-                                !!this.state.me ? 
-                                    this.state.me.email : "Unknown Email" 
+                            {!!this.props.isAuthenticated && this.props.profile ?
+                                !!this.props.profile ? 
+                                    this.props.profile.email : "Unknown Email" 
                                 : "Not authenticated"}
                             </div>
                             <Nav>
@@ -143,12 +119,14 @@ class NavbarContainer extends React.Component {
 const NavbarContainerComponent = apiServiceConnect(
     (state) => {
         return {
+            profile: getProfile(state),
             isAuthenticated: isAuthenticated(state)
         };
     },
     (dispatch) => {
         return {
-            didLogout: (state) => {dispatch(logoutAction(state))}
+            didLogout: (state) => {dispatch(logoutAction(state))},
+            fetchProfile: () => {dispatch(shouldFetchProfileAction())}
         };
     }
 )(CookieAwareComponent(withCookies(NavbarContainer)));
