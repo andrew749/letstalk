@@ -3,6 +3,7 @@ import { Button, ButtonToolbar, Dropdown, DropdownButton, Container, Table} from
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
+import {matchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsAction, getGroupsForAdmin} from './get_managed_groups_view';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
@@ -140,6 +141,7 @@ const MatchingPageComponent = apiServiceConnect(
         matchingRounds: getMatchingRounds(state) || [],
     }),
     (dispatch) => ({
+        createNewMatchingRoundForGroup: () => dispatch(matchRoundApiModule.getApiExecuteAction()),
         fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
         fetchGroups: () => dispatch(fetchGroupsAction()),
     })

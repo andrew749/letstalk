@@ -1,8 +1,8 @@
 
-const EXECUTE_API_CALL = "EXECUTE_API_CALL";
-const EXECUTING_API_CALL = "EXECUTING_API_CALL";
-const EXECUTED_API_CALL_SUCCESSFULLY = "EXECUTED_API_CALL_SUCCESSFULLY";
-const ERROR_EXECUTING_API_CALL = "ERROR_EXECUTING_API_CALL";
+const EXECUTE_API_CALL = (apiName) => `${apiName}_EXECUTE_API_CALL`;
+const EXECUTING_API_CALL = (apiName) => `${apiName}_EXECUTING_API_CALL`;
+const EXECUTED_API_CALL_SUCCESSFULLY = (apiName) => `${apiName}_EXECUTED_API_CALL_SUCCESSFULLY`;
+const ERROR_EXECUTING_API_CALL = (apiName) => `${apiName}_ERROR_EXECUTING_API_CALL`;
 
 const initialApiState = (initialDataState) => ({
     shouldFetch: false,
@@ -12,29 +12,29 @@ const initialApiState = (initialDataState) => ({
     apiError: undefined,
 });
 
-export function executeApiCallAction(params) {
-    return {type: EXECUTE_API_CALL, params: params};
+export function executeApiCallAction(apiName, params) {
+    return {type: EXECUTE_API_CALL(apiName), params: params};
 }
 
-export function executingApiCallAction() {
-    return {type: EXECUTING_API_CALL};
+export function executingApiCallAction(apiName) {
+    return {type: EXECUTING_API_CALL(apiName)};
 }
 
-export function executeApiCallSuccessfullyAction(result) {
-    return {type: EXECUTED_API_CALL_SUCCESSFULLY, data: result};
+export function executeApiCallSuccessfullyAction(apiName, result) {
+    return {type: EXECUTED_API_CALL_SUCCESSFULLY(apiName), data: result};
 }
 
-export function errorExecutingApiCallAction(err) {
-    return {type: ERROR_EXECUTING_API_CALL, apiError: err};
+export function errorExecutingApiCallAction(apiName, err) {
+    return {type: ERROR_EXECUTING_API_CALL(apiName), apiError: err};
 }
 
 export const apiModule = (apiName) => ({
     bindApi: (apiFunction) => (state, dispatch) => (params) => 
         HiveApiService(state, dispatch)[apiFunction]({
             ...params, 
-            started: () => dispatch(executingApiCallAction()),
-            done: (data) => dispatch(executeApiCallSuccessfullyAction(data.Result)),
-            error: (err) => dispatch(errorExecutingApiCallAction(err))
+            started: () => dispatch(executingApiCallAction(apiName)),
+            done: (data) => dispatch(executeApiCallSuccessfullyAction(apiName, data.Result)),
+            error: (err) => dispatch(errorExecutingApiCallAction(apiName, err))
         }),
     shouldExecuteApiCall: (state) => {
         console.log(state);
@@ -68,6 +68,9 @@ export const apiModule = (apiName) => ({
     },
     getErrorMessage: (state) => {
         return state[apiName].apiError;
+    },
+    getApiExecuteAction: () => {
+        return executeApiCallAction(apiName);
     },
 });
 
