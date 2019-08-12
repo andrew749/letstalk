@@ -94,8 +94,8 @@ export const HiveApiService = ((state, dispatch) => {
 
         setSessionId: (sessionId) => {
             (new Cookies()).set('sessionId', sessionId);
-            dispatch(shouldFetchProfileAction());
             dispatch(didAuthenticateAction(sessionId));
+            dispatch(shouldFetchProfileAction());
         },
 
         getSessionId: () => {
