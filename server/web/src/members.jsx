@@ -79,6 +79,8 @@ export class MembersPage extends React.Component {
         // kickoff initial fetch
         this.props.fetchGroups();
         this.props.fetchMembers();
+        // TODO(skong, acod): use this as a template
+        this.props.deleteMemberFromGroup(1, "9ba4177a-a6b8-11e9-81f1-0242ac130002");
     }
 
     onDropdownChanged(group) {
@@ -161,7 +163,7 @@ const MembersPageComponent = apiServiceConnect(
             gotMembers: (members) => dispatch(gotMembersAction(members)),
             fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
             // TODO(skong): use this
-            deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction()),
+            deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction({userId, groupId})),
         }
     }
 )(CookieAwareComponent(withCookies(MembersPage)));

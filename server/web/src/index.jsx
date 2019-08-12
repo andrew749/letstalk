@@ -17,6 +17,7 @@ import MembersPage from './members';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
 import {API_NAME as MATCH_ROUND_API, matchRoundApi} from './api/match_round_api_module';
+import {API_NAME as DELETE_USER_GROUP_API, userGroupDeleteApi} from './api/user_group_delete_api_module';
 import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
 import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
 import {apiServiceReducer, HiveApiService, getShouldFetchProfile, didFetchProfileAction, fetchingProfileAction, fetchProfileErrorAction} from './api/api_controller';
@@ -27,6 +28,7 @@ import NavbarContainer from './navbar_container.jsx';
 
 const apiModules = {
     [MATCH_ROUND_API]: matchRoundApi,
+    [DELETE_USER_GROUP_API]: userGroupDeleteApi,
 }
 
 // build reducer dict
