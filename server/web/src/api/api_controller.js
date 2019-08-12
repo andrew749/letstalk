@@ -1,4 +1,4 @@
-import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl } from '../config.js'
+import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl, userGroupUrl } from '../config.js'
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
@@ -262,6 +262,15 @@ export const HiveApiService = ((state, dispatch) => {
                 },
                 groupId: groupId,
                 userIds: userIds,
+            })
+                .then(done)
+                .catch(error);
+        },
+        deleteMemberFromGroup: (groupId, userId, started, done, error) => {
+            started();
+            return apiService().hiveFetch(userGroupUrl, 'DELETE', {
+                groupId: groupId,
+                userId: userId,
             })
                 .then(done)
                 .catch(error);

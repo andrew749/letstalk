@@ -126,6 +126,25 @@ func RemoveUserGroup(db *gorm.DB, userId data.TUserID, userGroupId data.TUserGro
 	return nil
 }
 
+// RemoveUserFromGroup Removes a user from a given group.
+func RemoveUserFromGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) errs.Error {
+	userGroup, err := GetUserGroupForUserIdGroupId(db, userId, groupId)
+	if err != nil {
+		return err
+	}
+
+	return RemoveUserGroup(db, userId, userGroup.Id)
+}
+
+// GetUserGroupForUserIdGroupId get a UserGroup object given user id and group id
+func GetUserGroupForUserIdGroupId(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) (*data.UserGroup, errs.Error) {
+	var res data.UserGroup
+	if err := db.Where(&data.UserGroup{UserId: userId, GroupId: groupId}).First(&res).Error; err != nil {
+		return nil, errs.NewDbError(err)
+	}
+	return &res, nil
+}
+
 // EnrollUserInManagedGroup Enroll the user into an administrator managed group.
 func EnrollUserInManagedGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) errs.Error {
 	var managedGroup data.ManagedGroup
@@ -165,6 +184,21 @@ func CreateManagedGroup(
 	}
 
 	return &managedGroup, nil
+}
+
+func CheckAdminManagesGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) (bool, errs.Error) {
+	var res data.ManagedGroup
+	if err := db.Where(&data.ManagedGroup{
+		AdministratorId: userId,
+		GroupId:         groupId,
+	}).First(&res).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return false, nil
+		} else {
+			return false, errs.NewDbError(err)
+		}
+	}
+	return true, nil
 }
 
 // GetManagedGroups Get all the groups that the admin manages.

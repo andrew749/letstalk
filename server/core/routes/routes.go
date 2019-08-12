@@ -394,6 +394,9 @@ func Register(
 	admin.OPTIONS("/get_managed_groups")
 	admin.GET("/get_managed_groups", hw.wrapHandler(controller.GetAdminManagedGroupsController, true))
 
+	admin.OPTIONS("/user_group")
+	admin.DELETE("/user_group", hw.wrapHandler(controller.RemoveUserManagedGroupController, true))
+
 	return router
 }
 
