@@ -5,6 +5,7 @@ import { showAction } from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import { gotGroupsAction, fetchGroupsAction, getGroupsForAdmin } from './get_managed_groups_view';
+import {userGroupDeleteApiModule} from './api/user_group_delete_api_module'
 
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
 const STATS = ['200 members', '20 unregistered', '180 registered', '180 matched'];
@@ -158,7 +159,9 @@ const MembersPageComponent = apiServiceConnect(
             fetchGroups: () => dispatch(fetchGroupsAction()),
             showModal: (state) => dispatch(showAction(state)),
             gotMembers: (members) => dispatch(gotMembersAction(members)),
-            fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId))
+            fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
+            // TODO(skong): use this
+            deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction()),
         }
     }
 )(CookieAwareComponent(withCookies(MembersPage)));

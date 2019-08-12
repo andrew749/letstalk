@@ -373,16 +373,16 @@ func Register(
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
 	admin.OPTIONS("/create_match_round")
-	admin.POST("/create_match_round", hw.wrapHandler(match_round.CreateMatchRoundController, false))
+	admin.POST("/create_match_round", hw.wrapHandler(match_round.CreateMatchRoundController, true))
 
 	admin.OPTIONS("/commit_match_round")
-	admin.POST("/commit_match_round", hw.wrapHandler(match_round.CommitMatchRoundController, false))
+	admin.POST("/commit_match_round", hw.wrapHandler(match_round.CommitMatchRoundController, true))
 
 	admin.OPTIONS("/match_rounds")
-	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, false))
+	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, true))
 
 	admin.OPTIONS("/match_round")
-	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, false))
+	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, true))
 
 	// gets group members from a group for signed in user
 	admin.OPTIONS("/group_members")

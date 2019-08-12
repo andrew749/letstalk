@@ -9,7 +9,7 @@ const initialDataState = {
     userIds: undefined,
     maxLowerYearsPerUpperYear: undefined, 
     maxUpperYearsPerLowerYear: undefined, 
-    youngestUpperYearGrad: undefined,
+    youngestUpperGradYear: undefined,
 }
 
 export const matchRoundApiModule = apiModule(API_NAME);

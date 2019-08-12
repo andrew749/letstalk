@@ -247,18 +247,18 @@ export const HiveApiService = ((state, dispatch) => {
 
         getMatchingRounds: (groupId, started, done, error) => {
             started();
-            return apiService().hiveFetch(getMatchRoundsUrl + groupId, 'GET')
+            return apiService().hiveFetch(getMatchRoundsUrl + "?groupId=" + groupId, 'GET')
                 .then(done)
                 .catch(error);
         },
 
-        createNewMatchingRound: (maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperYearGrad, groupId, userIds, started, done, error) => {
+        createNewMatchingRound: ({maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear, groupId, userIds, started, done, error}) => {
             started();
             return apiService().hiveFetch(createMatchRoundsUrl, 'POST', {
                 parameters: {
                     maxLowerYearsPerUpperYear,
                     maxUpperYearsPerLowerYear,
-                    youngestUpperYearGrad, 
+                    youngestUpperGradYear, 
                 },
                 groupId: groupId,
                 userIds: userIds,
@@ -266,7 +266,7 @@ export const HiveApiService = ((state, dispatch) => {
                 .then(done)
                 .catch(error);
         },
-        deleteMemberFromGroup: (groupId, userId, started, done, error) => {
+        deleteMemberFromGroup: ({groupId, userId, started, done, error}) => {
             started();
             return apiService().hiveFetch(userGroupUrl, 'DELETE', {
                 groupId: groupId,
