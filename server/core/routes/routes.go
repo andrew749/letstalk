@@ -382,7 +382,7 @@ func Register(
 	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, true))
 
 	admin.OPTIONS("/match_round")
-	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, true))
+	admin.DELETE("/match_round/:matchRoundId", hw.wrapHandler(match_round.DeleteMatchRoundController, true))
 
 	// gets group members from a group for signed in user
 	admin.OPTIONS("/group_members")
