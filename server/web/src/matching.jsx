@@ -75,7 +75,7 @@ export class MatchingPage extends React.Component {
     componentDidMount() {
         this.props.fetchGroups();
         // TODO(skong, acod): use this as template
-        this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1], 1, 1, 2019);
+        this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
     }
 
     onDropdownChanged(group) {
@@ -114,17 +114,17 @@ export class MatchingPage extends React.Component {
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Stage</th>
-                                    <th>Progress</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {this.props.matchingRounds.map((matchingRound => {
-                                    <tr>
-                                        <td>{matchingRound.matchRoundId}</td>
-                                        <td>{matchingRound.name}</td>
-                                        <td>{matchingRound.status}</td>
-                                        <td>@mdo</td>
-                                    </tr>
+                                    return (
+                                        <tr>
+                                            <td>{matchingRound.matchRoundId}</td>
+                                            <td>{matchingRound.name}</td>
+                                            <td>{matchingRound.status}</td>
+                                        </tr>
+                                    );
                                 }))}
                                 
                             </tbody>
