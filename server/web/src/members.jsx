@@ -132,7 +132,7 @@ export class MembersPage extends React.Component {
                                             <td>{groupMember.user.userId}</td>
                                             <td>{groupMember.user.firstName + " " + groupMember.user.lastName}</td>
                                             <td>{groupMember.status}</td>
-                                            <td>{groupMember.cohort.programName + " " + groupMember.cohort.gradYear}</td>
+                                            <td>{groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"}</td>
                                         </tr>
                                     );
                                 })}
