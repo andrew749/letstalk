@@ -1,9 +1,10 @@
 import React from 'react';
-import {Redirect, Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import { Button, Container, FormGroup, FormControl, ControlLabel, Alert, Form } from "react-bootstrap";
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPath, landingPathWeb, signupPathWeb, signupPath} from './routes.js';
+import {getLandingPath, signupPathWeb, signupPath} from './routes.js';
+import PostAuthRedirect from './post-auth-redirect.jsx';
 
 import apiServiceConnect from './api/api_service_connect';
 
@@ -36,7 +37,7 @@ export function loginReducer(state = initialState, action) {
 
 /**
  * Props:
- *  - isAdminPage: determine whether this is the admin page
+ *  - isAdminApp: determine whether this is the admin app
  */
 export class LoginPage extends React.Component {
     constructor(props) {
@@ -73,7 +74,6 @@ export class LoginPage extends React.Component {
                     redirectToReferrer: true
                 });
             }).catch(err => {
-                console.warn(err);
                 this.setState({
                     submitState: 'ERROR',
                     err: err
@@ -82,11 +82,11 @@ export class LoginPage extends React.Component {
     }
 
     render() {
-        let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: this.props.isAdminPage ? landingPath : landingPathWeb } };
+        const { redirectToReferrer } = this.state;
+        const defaultPath = getLandingPath(this.props.isAdminApp);
 
-        if (!!redirectToReferrer) {
-            return <Redirect to={from} />;
+        if (!!this.state.redirectToReferrer) {
+            return <PostAuthRedirect defaultPath={defaultPath} />;
         }
 
         let alert;
@@ -99,11 +99,11 @@ export class LoginPage extends React.Component {
         }
 
         let signupLink = null;
-        if (!this.props.isAdminPage) {
+        if (!this.props.isAdminApp) {
             signupLink=(
                 <div>
                     <h4>Don't have an account?</h4>
-                    <Link to={(this.props.isAdminPage) ? signupPath : signupPathWeb}>
+                    <Link to={(this.props.isAdminApp) ? signupPath : signupPathWeb}>
                         <Button>Signup</Button>
                     </Link>
                 </div>

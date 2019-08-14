@@ -6,7 +6,7 @@ import { Switch, Route, BrowserRouter} from 'react-router-dom';
 import {withCookies} from 'react-cookie';
 
 import CookieAwareComponent from '../cookie_aware_component.jsx';
-import SignupPage, {signupReducer} from '../signup.jsx';
+import SignupPage from '../signup.jsx';
 import LoginPage, {loginReducer} from '../login.jsx';
 import LandingPage from './landing.jsx';
 import GroupRegisterPage, {groupRegisterReducer} from './group_register_page.jsx';
@@ -17,6 +17,7 @@ import { loginPathWeb, signupPathWeb, landingPathWeb, registerWithGroupPathWeb }
 import HiveHeader from './components/hive_header.jsx';
 import {apiServiceReducer, HiveApiService} from '../api/api_controller';
 import {API_NAME as ME_API, meApi} from '../api/me_api_module';
+import {postAuthReducer} from '../authenticate_component';
 
 const apiModules = {
     [ME_API]: meApi,
@@ -30,9 +31,9 @@ console.log(apiModuleReducers);
 
 const reducers = combineReducers({
     apiServiceReducer,
-    signupReducer,
     loginReducer,
     groupRegisterReducer,
+    postAuthReducer,
     ...apiModuleReducers,
 });
 
@@ -78,8 +79,8 @@ class App extends React.Component {
                 <BrowserRouter>
                     <HiveHeader />
                     <Switch>
-                        <Route path={loginPathWeb} component={LoginPage} />
-                        <Route path={signupPathWeb} component={SignupPage} isAdminPage={false} />
+                        <Route path={loginPathWeb} component={LoginPage} isAdminApp={false} />
+                        <Route path={signupPathWeb} component={SignupPage} isAdminApp={false} />
                         <AuthenticatedRouteWebapp path={registerWithGroupPathWeb} component={GroupRegisterPage} />
                         <AuthenticatedRouteWebapp exact path={landingPathWeb} component={LandingPage} />
                     </Switch>
