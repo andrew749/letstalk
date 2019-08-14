@@ -76,7 +76,7 @@ export class MembersPage extends React.Component {
 
     componentDidMount() {
         // kickoff initial fetch
-        this.props.fetchGroups();
+        // this.props.fetchGroups();
         this.props.fetchMembers();
     }
 
