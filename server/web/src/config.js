@@ -21,5 +21,6 @@ export const getGroupMembersUrlBase = `${adminUrl}/group_members/`;
 export const createNewManagedGroupUrl = `${adminUrl}/create_managed_group`;
 export const registerWithManagedGroupUrl = `${apiUrl}/enroll_managed_group`;
 export const getMatchRoundsUrl = `${adminUrl}/match_rounds`;
+export const matchRoundUrl = `${adminUrl}/match_round`;
 export const createMatchRoundsUrl = `${adminUrl}/create_match_round`;
 export const userGroupUrl = `${adminUrl}/user_group`;

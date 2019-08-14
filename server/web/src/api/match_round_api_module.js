@@ -18,3 +18,17 @@ export const matchRoundApi = pluggableApiModule(
     API_FUNC, 
     initialDataState,
 );
+
+const deleteMatchRoundInitialDataState = {
+    matchRoundId: undefined,
+}
+
+export const DELETE_API_NAME = "deleteMatchRoundApi";
+export const DELETE_API_FUNC = "deleteMatchingRound";
+
+export const deleteMatchRoundApiModule = apiModule(DELETE_API_NAME);
+export const deleteMatchRoundApi = pluggableApiModule(
+    deleteMatchRoundApiModule,
+    DELETE_API_FUNC,
+    deleteMatchRoundInitialDataState,
+);
