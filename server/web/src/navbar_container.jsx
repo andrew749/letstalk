@@ -9,6 +9,7 @@ import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath
 import {logoutAction} from './login';
 import {shouldFetchProfileAction, isAuthenticated, getProfile} from './api/api_controller'
 import apiServiceConnect from './api/api_service_connect';
+import {meApiModule} from './api/me_api_module';
 
 class NavbarContainer extends React.Component {
 
@@ -119,14 +120,14 @@ class NavbarContainer extends React.Component {
 const NavbarContainerComponent = apiServiceConnect(
     (state) => {
         return {
-            profile: getProfile(state),
+            profile: meApiModule.getData(state),
             isAuthenticated: isAuthenticated(state)
         };
     },
     (dispatch) => {
         return {
             didLogout: (state) => {dispatch(logoutAction(state))},
-            fetchProfile: () => {dispatch(shouldFetchProfileAction())}
+            fetchProfile: () => {dispatch(meApiModule.getApiExecuteAction())}
         };
     }
 )(CookieAwareComponent(withCookies(NavbarContainer)));

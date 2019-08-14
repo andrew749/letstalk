@@ -1,4 +1,5 @@
 import { loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl, userGroupUrl, matchRoundUrl } from '../config.js'
+import {meApiModule} from './me_api_module';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 
@@ -17,38 +18,15 @@ export function didAuthenticateAction(sessionId) {
     return {type: DID_AUTHENTICATE_ACTION, sessionId: sessionId}
 }
 
-export function shouldFetchProfileAction() {
-    return {type: FETCH_PROFILE};
-}
-
-export function fetchingProfileAction() {
-    return {type: FETCHING_PROFILE};
-}
-
-export function didFetchProfileAction(profile) {
-    return {type: DID_FETCH_PROFILE, profile: profile};
-}
-
-export function fetchProfileErrorAction(error) {
-    return {type: FETCH_PROFILE_ERROR, error: error};
-}
-
 // Invalidate authentication
 export function authExpiredAction() {
     return {type: AUTH_EXPIRED};
-}
-
-export function getShouldFetchProfile(state) {
-    return state.apiServiceReducer.shouldFetchProfile;
 }
 
 export function isAuthenticated(state) {
     return state.apiServiceReducer.isValid;
 }
 
-export function getProfile(state) {
-    return state.apiServiceReducer.profile;
-}
 
 // base state
 const initialState = {
@@ -59,14 +37,6 @@ const initialState = {
 
 export function apiServiceReducer(state = initialState, action) {
     switch(action.type) {
-        case FETCH_PROFILE:
-            return Object.assign({}, state, {shouldFetchProfile: true});
-        case FETCHING_PROFILE:
-            return Object.assign({}, state, {shouldFetchProfile: false});
-        case DID_FETCH_PROFILE:
-            return Object.assign({}, state, {shouldFetchProfile: false, profile: action.profile});
-        case FETCH_PROFILE_ERROR:
-            return Object.assign({}, state, {shouldFetchProfile: false, fetchProfileError: action.error});
         case DID_AUTHENTICATE_ACTION:
             return Object.assign({}, state, {isValid: true, sessionId: action.sessionId})
         case AUTH_EXPIRED:
@@ -94,7 +64,7 @@ export const HiveApiService = ((state, dispatch) => {
 
         setSessionId: (sessionId) => {
             (new Cookies()).set('sessionId', sessionId);
-            dispatch(shouldFetchProfileAction());
+            dispatch(meApiModule.getApiExecuteAction());
             dispatch(didAuthenticateAction(sessionId));
         },
 
@@ -147,7 +117,7 @@ export const HiveApiService = ((state, dispatch) => {
             return apiService().hiveFetch(logoutUrl, 'POST', undefined);
         },
 
-        me: (started, done, error) => {
+        me: ({started, done, error}) => {
             started();
             return apiService().hiveFetch(meUrl, 'GET', undefined)
                 .then((data) => done(data))

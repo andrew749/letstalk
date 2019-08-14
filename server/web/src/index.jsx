@@ -18,9 +18,10 @@ import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
 import {API_NAME as MATCH_ROUND_API, matchRoundApi, DELETE_API_NAME as DELETE_MATCH_ROUND_API_NAME, deleteMatchRoundApi} from './api/match_round_api_module';
 import {API_NAME as DELETE_USER_GROUP_API, userGroupDeleteApi} from './api/user_group_delete_api_module';
+import {API_NAME as ME_API, meApi} from './api/me_api_module';
 import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
 import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
-import {apiServiceReducer, HiveApiService, getShouldFetchProfile, didFetchProfileAction, fetchingProfileAction, fetchProfileErrorAction} from './api/api_controller';
+import {apiServiceReducer, HiveApiService} from './api/api_controller';
 
 import AuthenticatedRoute from './authenticate_component.jsx';
 import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath, matchingPath, membersPath } from './routes.js';
@@ -30,6 +31,7 @@ const apiModules = {
     [MATCH_ROUND_API]: matchRoundApi,
     [DELETE_USER_GROUP_API]: userGroupDeleteApi,
     [DELETE_MATCH_ROUND_API_NAME]: deleteMatchRoundApi,
+    [ME_API]: meApi,
 }
 
 // build reducer dict
@@ -67,16 +69,6 @@ function onLoad() {
                 () => {store.dispatch(fetchingGroupsAction())},
                 (data) => {store.dispatch(gotGroupsAction(data.Result.managedGroups))},
                 (err) => {store.dispatch(errorFetchingGroupsAction(err))}
-            );
-        }
-
-        let shouldFetchProfile = getShouldFetchProfile(store.getState());
-        if (!!shouldFetchProfile) {
-            console.log("Fetching profile");
-            HiveApiService(store.getState(), store.dispatch).me(
-                () => {store.dispatch(fetchingProfileAction())},
-                (data) => {store.dispatch(didFetchProfileAction(data.Result))},
-                (err) => {store.dispatch(fetchProfileErrorAction(err))}
             );
         }
 
