@@ -16,12 +16,24 @@ import AuthenticatedRoute from '../authenticate_component.jsx';
 import { loginPathWeb, signupPathWeb, landingPathWeb, registerWithGroupPathWeb } from '../routes.js';
 import HiveHeader from './components/hive_header.jsx';
 import {apiServiceReducer, HiveApiService} from '../api/api_controller';
+import {API_NAME as ME_API, meApi} from '../api/me_api_module';
+
+const apiModules = {
+    [ME_API]: meApi,
+}
+
+// build reducer dict
+let apiModuleReducers = {};
+console.log(apiModules)
+Object.keys(apiModules).forEach((key) => apiModuleReducers[key] = apiModules[key].reducer);
+console.log(apiModuleReducers);
 
 const reducers = combineReducers({
     apiServiceReducer,
     signupReducer,
     loginReducer,
     groupRegisterReducer,
+    ...apiModuleReducers,
 });
 
 const store = createStore(reducers);
@@ -33,9 +45,23 @@ function onLoad() {
         console.log("Loaded cookie: " + sessionId);
         HiveApiService(store.getState(), store.dispatch).setSessionId(sessionId);
     }
+
+    store.subscribe(() => {
+        let state = store.getState();
+        Object.keys(apiModules).forEach( (key) => {
+            console.log(`Evaluting api module ${key}`);
+            let mod = apiModules[key];
+            if (!!mod.module.shouldExecuteApiCall(state)) {
+                console.log(`Executing api call for  api module ${key}`);
+                let params = mod.module.getParams(state);
+                mod.call(params, state, store.dispatch);
+            }
+        });
+    });
 }
 
 onLoad();
+store.dispatch(meApi.module.getApiExecuteAction());
 
 // Specialized AuthenticatedRoute component for the normal login page.
 const AuthenticatedRouteWebapp = (props) => {
