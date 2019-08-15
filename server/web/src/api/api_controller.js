@@ -125,7 +125,6 @@ export const HiveApiService = ((state, dispatch) => {
 
         me: ({started, done, error}) => {
             started();
-            console.log('CALLING MEEEEEEE');
             return apiService().hiveFetch(meUrl, 'GET', undefined)
                 .then((data) => done(data))
                 .catch((err) => error(err));
