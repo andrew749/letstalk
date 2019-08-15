@@ -8,7 +8,7 @@ import Cookies from 'universal-cookie';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import LoginPage, {loginReducer} from './login.jsx';
-import SignupPage, {signupReducer} from './signup.jsx';
+import SignupPage from './signup.jsx';
 import ModalContainer, {modalReducer} from './modal_container.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
 import LandingPage from './landing.jsx';
@@ -23,7 +23,7 @@ import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, got
 import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
 import {apiServiceReducer, HiveApiService} from './api/api_controller';
 
-import AuthenticatedRoute from './authenticate_component.jsx';
+import AuthenticatedRoute, {postAuthReducer} from './authenticate_component.jsx';
 import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath, matchingPath, membersPath } from './routes.js';
 import NavbarContainer from './navbar_container.jsx';
 
@@ -43,11 +43,11 @@ console.log(apiModuleReducers);
 const reducers = combineReducers({
     apiServiceReducer,
     loginReducer,
-    signupReducer,
     getManagedGroupsReducer,
     membersReducer,
     modalReducer,
     matchingReducer,
+    postAuthReducer,
     ...apiModuleReducers,
 });
 
@@ -120,7 +120,7 @@ const AuthenticatedRouteAdmin = (props) =>
         />;
 
 class App extends React.Component {
-    
+
     render() {
         return (
             <CookiesProvider>
@@ -129,8 +129,8 @@ class App extends React.Component {
                     <BrowserRouter>
                         <NavbarContainer />
                         <Switch>
-                            <Route path={loginPath} render={(props) => <LoginPage {...props} isAdminPage={true} />} />
-                            <Route path={signupPath} render={(props) => <SignupPage {...props} isAdminPage={true} />}  />
+                            <Route path={loginPath} render={(props) => <LoginPage {...props} isAdminApp={true} />} />
+                            <Route path={signupPath} render={(props) => <SignupPage {...props} isAdminApp={true} />}  />
                             <AuthenticatedRouteAdmin exact path={landingPath} component={LandingPage} />
                             <AuthenticatedRouteAdmin path={membersPath} component={MembersPage} />
                             <AuthenticatedRouteAdmin path={matchingPath} component={MatchingPage} />

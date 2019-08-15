@@ -54,7 +54,7 @@ function getLocalStateForComponent(state) {
  * A singleton that is used to make api calls to the hive webapp.
  */
 export const HiveApiService = ((state, dispatch) => {
-    
+
     const apiService = () => HiveApiService(state, dispatch);
     // holds internal state for the service.
     return {
@@ -64,8 +64,8 @@ export const HiveApiService = ((state, dispatch) => {
 
         setSessionId: (sessionId) => {
             (new Cookies()).set('sessionId', sessionId);
-            dispatch(meApiModule.getApiExecuteAction());
             dispatch(didAuthenticateAction(sessionId));
+            dispatch(meApiModule.getApiExecuteAction());
         },
 
         getSessionId: () => {
@@ -84,8 +84,14 @@ export const HiveApiService = ((state, dispatch) => {
                 data: body
             }).then(response => response.data)
                 .catch(err => {
-                    if (err.response && err.response.status === 401) {
-                        dispatch(authExpiredAction());
+                    if (err.response) {
+                        if (err.response.status === 401) {
+                            dispatch(authExpiredAction());
+                        }
+                        const data = err.response.data;
+                        if (data && data.Error) {
+                            err.serverMessage = err.response.data.Error.message;
+                        }
                     }
                     throw err;
                 });
@@ -124,11 +130,11 @@ export const HiveApiService = ((state, dispatch) => {
                 .catch((err) => error(err));
         },
 
-        /** 
+        /**
          * createMentorshipFromEmails
-         * 
+         *
          * Creates a new mentorship for the two specific users
-         * 
+         *
          * Return:
          *  Promise for request
         */
@@ -143,10 +149,10 @@ export const HiveApiService = ((state, dispatch) => {
         /**
          * deleteUser
          * Delete the user with the specified parameters.
-         * @param {*} userId 
-         * @param {*} firstName 
-         * @param {*} lastName 
-         * @param {*} email 
+         * @param {*} userId
+         * @param {*} firstName
+         * @param {*} lastName
+         * @param {*} email
          */
         deleteUser: (userId, firstName, lastName, email) => {
             return apiService().hiveFetch(deleteUrl, 'POST', {
@@ -228,7 +234,7 @@ export const HiveApiService = ((state, dispatch) => {
                 parameters: {
                     maxLowerYearsPerUpperYear,
                     maxUpperYearsPerLowerYear,
-                    youngestUpperGradYear, 
+                    youngestUpperGradYear,
                 },
                 groupId: groupId,
                 userIds: userIds,
