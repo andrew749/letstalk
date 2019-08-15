@@ -86,13 +86,13 @@ export class SignupPage extends React.Component {
             }).catch(err => {
                 this.setState({
                     submitState: 'ERROR',
-                    err: err
+                    err: err.serverMessage
                 });
             });
         }).catch(err => {
             this.setState({
                 submitState: 'ERROR',
-                err: err
+                err: err.serverMessage
             });
         });
     }

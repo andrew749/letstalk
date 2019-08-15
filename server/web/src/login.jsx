@@ -76,7 +76,7 @@ export class LoginPage extends React.Component {
             }).catch(err => {
                 this.setState({
                     submitState: 'ERROR',
-                    err: err
+                    err: err.serverMessage
                 });
             });
     }

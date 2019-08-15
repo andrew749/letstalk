@@ -84,8 +84,14 @@ export const HiveApiService = ((state, dispatch) => {
                 data: body
             }).then(response => response.data)
                 .catch(err => {
-                    if (err.response && err.response.status === 401) {
-                        dispatch(authExpiredAction());
+                    if (err.response) {
+                        if (err.response.status === 401) {
+                            dispatch(authExpiredAction());
+                        }
+                        const data = err.response.data;
+                        if (data && data.Error) {
+                            err.serverMessage = err.response.data.Error.message;
+                        }
                     }
                     throw err;
                 });
@@ -119,6 +125,7 @@ export const HiveApiService = ((state, dispatch) => {
 
         me: ({started, done, error}) => {
             started();
+            console.log('CALLING MEEEEEEE');
             return apiService().hiveFetch(meUrl, 'GET', undefined)
                 .then((data) => done(data))
                 .catch((err) => error(err));

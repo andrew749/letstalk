@@ -25,9 +25,7 @@ const apiModules = {
 
 // build reducer dict
 let apiModuleReducers = {};
-console.log(apiModules)
 Object.keys(apiModules).forEach((key) => apiModuleReducers[key] = apiModules[key].reducer);
-console.log(apiModuleReducers);
 
 const reducers = combineReducers({
     apiServiceReducer,
@@ -62,7 +60,6 @@ function onLoad() {
 }
 
 onLoad();
-store.dispatch(meApi.module.getApiExecuteAction());
 
 // Specialized AuthenticatedRoute component for the normal login page.
 const AuthenticatedRouteWebapp = (props) => {
