@@ -7,15 +7,15 @@ export const API_FUNC = "createNewMatchingRound";
 const initialDataState = {
     groupId: undefined,
     userIds: undefined,
-    maxLowerYearsPerUpperYear: undefined, 
-    maxUpperYearsPerLowerYear: undefined, 
+    maxLowerYearsPerUpperYear: undefined,
+    maxUpperYearsPerLowerYear: undefined,
     youngestUpperGradYear: undefined,
 }
 
 export const matchRoundApiModule = apiModule(API_NAME);
 export const matchRoundApi = pluggableApiModule(
     matchRoundApiModule,
-    API_FUNC, 
+    API_FUNC,
     initialDataState,
 );
 

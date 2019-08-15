@@ -11,7 +11,7 @@ export const loginUrl = `${apiUrl}/login`;
 export const logoutUrl = `${apiUrl}/logout`;
 export const meUrl = `${apiUrl}/me`;
 export const signupUrl = `${apiUrl}/signup`;
-
+export const bootstrapUrl = `${apiUrl}/bootstrap`;
 
 // admin endpoints
 export const mentorshipUrl = `${adminUrl}/mentorship`;

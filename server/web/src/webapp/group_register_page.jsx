@@ -1,6 +1,7 @@
 import React from 'react';
 import '../scss/group_register_page.scss';
-import {Alert, Spinner} from 'react-bootstrap';
+import {Alert, Container} from 'react-bootstrap';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 import apiServiceConnect from '../api/api_service_connect';
 
@@ -34,7 +35,8 @@ export function groupRegisterReducer(state = initialState, action) {
         case REGISTER_SUCCESSFULLY:
             return Object.assign({}, state, {registering: false, registeredSuccessfully: true});
         case REGISTER_ERROR:
-            return Object.assign({}, state, {registering: false, registeredSuccessfully: false, registerError: action.registerError});
+            return Object.assign({}, state, {registering: false, registeredSuccessfully: false,
+                                             registerError: action.registerError.serverMessage});
         default:
             return state;
     }
@@ -47,9 +49,9 @@ class GroupRegisterPage extends React.Component {
 
     componentDidMount() {
         this.props.apiService.enrollInGroup(
-            this.uuid(), 
-            this.props.beginRegisteringCallback, 
-            this.props.registeredSuccessfullyCallback, 
+            this.uuid(),
+            this.props.beginRegisteringCallback,
+            this.props.registeredSuccessfullyCallback,
             this.props.registerErrorCallback
         );
     }
@@ -62,24 +64,27 @@ class GroupRegisterPage extends React.Component {
         let body;
         if (!!this.props.registering) {
             body = (
-                <Spinner width={30} height={30} animation="border"/>
+                <div>
+                    <ClipLoader />
+                </div>
             );
         } else if (!!this.props.registeredSuccessfully) {
             body = (
-                <Alert variant="success">Successfully registered with group</Alert>
+                <Alert variant="success">Successfully joined group with id "{this.uuid()}"</Alert>
             );
         } else if (!!this.props.registerError) {
             body = (
-                <Alert variant="danger">Failed to register with group {JSON.stringify(this.props.registerError.message)}</Alert>
+                <Alert variant="danger">
+                    Failed to join group with id "{this.uuid()}" with error: {this.props.registerError}
+                </Alert>
             );
         }
 
         return (
-            <div>
-                <h3>Registering with group {this.uuid()}</h3>
-                <Spinner animation="border"/>
+            <Container>
+                <h3>Registering with group "{this.uuid()}"</h3>
                 {body}
-            </div>
+            </Container>
         );
     }
 }

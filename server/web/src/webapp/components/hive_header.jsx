@@ -14,7 +14,7 @@ export default class HiveHeader extends React.Component {
     render() {
         return (
             <Navbar bg="dark" variant="dark">
-                <Navbar.Brand href="#home">
+                <Navbar.Brand>
                     <img
                         id="hive-logo"
                         alt="Hive"
@@ -22,7 +22,6 @@ export default class HiveHeader extends React.Component {
                         width="30"
                         height="30"
                     />
-                    {' Hive'}
                 </Navbar.Brand>
                 <Nav>
                     {CustomNavItem(landingPathWeb, "Home")}

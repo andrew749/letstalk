@@ -17,10 +17,12 @@ import { loginPathWeb, signupPathWeb, landingPathWeb, registerWithGroupPathWeb }
 import HiveHeader from './components/hive_header.jsx';
 import {apiServiceReducer, HiveApiService} from '../api/api_controller';
 import {API_NAME as ME_API, meApi} from '../api/me_api_module';
+import {API_NAME as BOOTSTRAP_API, bootstrapApi} from '../api/bootstrap_api_module';
 import {postAuthReducer} from '../authenticate_component';
 
 const apiModules = {
     [ME_API]: meApi,
+    [BOOTSTRAP_API]: bootstrapApi,
 }
 
 // build reducer dict

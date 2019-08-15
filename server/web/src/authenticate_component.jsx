@@ -27,22 +27,26 @@ export function postAuthReducer(state = initialState, action) {
  *
  *  loginPath: the path to redirect a user to if they are unauthenticated
  */
-const AuthenticatedRoute = ({ component: Component, ...rest }) =>
-<Route
-  {...rest}
-  render={(props) => {
-      if (!!rest.isAuthenticated) {
-          return <Component {...props} />;
-      } else {
-          rest.setRedirectRoute(props.location.pathname);
-          return <Redirect to={{
-              pathname: rest.loginPath,
-              state: { from: props.location }
-          }}/>;
+const AuthenticatedRoute = ({ component: Component, ...rest }) => {
+      if (!rest.isAuthenticated) {
+          rest.setRedirectRoute(rest.location.pathname);
       }
-  }
-  }
-/>;
+      return (
+          <Route
+              render={(props) => {
+                  if (!!rest.isAuthenticated) {
+                      return <Component {...props} />;
+                  } else {
+                      return <Redirect to={{
+                          pathname: rest.loginPath,
+                          state: { from: props.location }
+                      }}/>;
+                  }
+              }}
+              {...rest}
+          />
+      );
+}
 
 function isAuthenticated(state) {
     return state.apiServiceReducer.sessionId && state.apiServiceReducer.isValid;

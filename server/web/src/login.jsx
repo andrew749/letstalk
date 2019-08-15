@@ -94,7 +94,7 @@ export class LoginPage extends React.Component {
             if (this.state.submitState === "SUCCESS") {
                 alert = (<Alert variant="success">Succesfully logged in.</Alert>);
             } else if (this.state.submitState === "ERROR") {
-                alert = (<Alert variant="danger">Failed to login because {JSON.stringify(this.state.err)}</Alert>)
+                alert = (<Alert variant="danger">{this.state.err}</Alert>)
             }
         }
 
