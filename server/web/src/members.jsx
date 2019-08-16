@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, ButtonToolbar, Dropdown, DropdownButton, Button, Table } from "react-bootstrap";
-import {BootstrapTable} from 'react-bootstrap-table';
+import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
