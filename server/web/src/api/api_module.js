@@ -29,12 +29,12 @@ export function errorExecutingApiCallAction(apiName, err) {
 }
 
 export const apiModule = (apiName) => ({
-    bindApi: (apiFunction) => (state, dispatch) => (params) => 
+    bindApi: (apiFunction) => (state, dispatch) => (params) =>
         HiveApiService(state, dispatch)[apiFunction]({
             started: () => dispatch(executingApiCallAction(apiName)),
             done: (data) => dispatch(executeApiCallSuccessfullyAction(apiName, data.Result)),
             error: (err) => dispatch(errorExecutingApiCallAction(apiName, err)),
-            ...params, 
+            ...params,
         }),
     shouldExecuteApiCall: (state) => {
         return !!state[apiName].shouldFetch;
@@ -42,13 +42,22 @@ export const apiModule = (apiName) => ({
     bindReducer: (initialDataState) => (state = initialApiState(initialDataState), action) => {
         switch (action.type) {
             case EXECUTE_API_CALL(apiName):
-                return Object.assign({}, state, { shouldFetch: true, doneFetching: false, params: action.params });
+                return Object.assign({}, initialApiState, {
+                    shouldFetch: true,
+                    params: action.params
+                });
             case EXECUTING_API_CALL(apiName):
-                return Object.assign({}, state, { shouldFetch: false });
+                return initialApiState;
             case EXECUTED_API_CALL_SUCCESSFULLY(apiName):
-                return Object.assign({}, state, { shouldFetch: false, doneFetching: true, hasError: false, data: action.data });
+                return Object.assign({}, initialApiState, {
+                    doneFetching: true,
+                    data: action.data,
+                });
             case ERROR_EXECUTING_API_CALL(apiName):
-                return Object.assign({}, state, { shouldFetch: false, doneFetching: true, hasError: true, apiError: action.apiError });
+                return Object.assign({}, initialApiState, {
+                    hasError: true,
+                    apiError: action.apiError,
+                });
             default:
                 return state;
         }
@@ -72,6 +81,22 @@ export const apiModule = (apiName) => ({
         return executeApiCallAction(apiName, params);
     },
 });
+
+export function getFetchInfo(apiModule, state) {
+    let fetchState = 'prefetch';
+    if (apiModule.isFinished(state)) {
+        fetchState = 'success';
+    } else if (apiModule.hasError(state)) {
+        fetchState = 'error';
+    } else if (apiModule.shouldExecuteApiCall(state)) {
+        fetchState = 'fetching';
+    }
+    const err = apiModule.getErrorMessage(state)
+    return {
+        fetchState,
+        errorMessage: err ? err.serverMessage : null,
+    };
+}
 
 export const pluggableApiModule = (module, apiFunc, initialDataState) => ({
     call: (params, state, dispatch) => module.bindApi(apiFunc)(state, dispatch)(params),

@@ -21,9 +21,7 @@ class PostAuthRedirect extends React.Component {
     }
 
     render() {
-        const pathname = this.redirectPath();
-        const redirect = { pathname };
-        return <Redirect to={redirect} />;
+        return <Redirect to={this.redirectPath()} />;
     }
 }
 

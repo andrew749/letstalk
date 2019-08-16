@@ -149,6 +149,10 @@ func GetUserGroupForUserIdGroupId(db *gorm.DB, userId data.TUserID, groupId data
 func EnrollUserInManagedGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) errs.Error {
 	var managedGroup data.ManagedGroup
 
+	if groupId == "" {
+		return errs.NewRequestError("Group not provided")
+	}
+
 	// find the group by uuid
 	if err := db.Where(&data.ManagedGroup{GroupId: groupId}).Preload("Group").First(&managedGroup).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {

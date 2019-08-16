@@ -1,7 +1,7 @@
 import {apiModule, pluggableApiModule} from './api_module';
 import {HiveApiService} from './api_controller';
 
-export const API_NAME = "bootstrap";
+export const API_NAME = "bootstrapApi";
 export const API_FUNC = "getBootstrap";
 
 const initialDataState = {

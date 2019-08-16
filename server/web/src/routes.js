@@ -12,9 +12,14 @@ export const groupManagementToolPath =`${ADMIN_URL_PREFIX}/manage_groups`;
 export const landingPath = `${ADMIN_URL_PREFIX}/`;
 
 const WEBAPP_URL_PREFIX = "/web";
+export const landingPathWeb = `${WEBAPP_URL_PREFIX}/`;
 export const signupPathWeb = `${WEBAPP_URL_PREFIX}/signup`;
 export const loginPathWeb = `${WEBAPP_URL_PREFIX}/login`;
-export const landingPathWeb = `${WEBAPP_URL_PREFIX}/`;
+export const verifyEmailPathWeb = `${WEBAPP_URL_PREFIX}/verify_email`;
+export const setCohortPathWeb = `${WEBAPP_URL_PREFIX}/set_cohort`;
+// TODO(wojtek): Should take type of survey as sub-route
+export const surveyPathWeb = `${WEBAPP_URL_PREFIX}/`;
+// TODO(wojtek): Why camel here?
 export const registerWithGroupPathWeb = `${WEBAPP_URL_PREFIX}/registerWithGroup/*`;
 
 export function getLandingPath(isAdminApp) {
