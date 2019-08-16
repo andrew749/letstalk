@@ -85,7 +85,9 @@ export class ModalContainer extends React.Component {
           modalHeaderText = "Delete Members"; 
           // TODO: When group selector is it's own component with reducer, we need to change the link
           // to whichever group is currently selected
-          modalBody = "Let's delete these fools";
+          modalBody = (
+            <p>Are you sure you want to delete the selected users?</p>
+          );
           modalFooter = "";
           break;
       case MODAL_TYPES.CREATE_MATCHING_ROUND:
