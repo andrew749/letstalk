@@ -373,25 +373,29 @@ func Register(
 	admin.POST("/nuke_user", hw.wrapHandler(controller.NukeUser, false))
 
 	admin.OPTIONS("/create_match_round")
-	admin.POST("/create_match_round", hw.wrapHandler(match_round.CreateMatchRoundController, false))
+	admin.POST("/create_match_round", hw.wrapHandler(match_round.CreateMatchRoundController, true))
 
 	admin.OPTIONS("/commit_match_round")
-	admin.POST("/commit_match_round", hw.wrapHandler(match_round.CommitMatchRoundController, false))
+	admin.POST("/commit_match_round", hw.wrapHandler(match_round.CommitMatchRoundController, true))
 
 	admin.OPTIONS("/match_rounds")
-	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, false))
+	admin.GET("/match_rounds", hw.wrapHandler(match_round.GetMatchRoundsController, true))
 
 	admin.OPTIONS("/match_round")
-	admin.DELETE("/match_round", hw.wrapHandler(match_round.DeleteMatchRoundController, false))
+	admin.DELETE("/match_round/:matchRoundId", hw.wrapHandler(match_round.DeleteMatchRoundController, true))
 
+	// gets group members from a group for signed in user
 	admin.OPTIONS("/group_members")
-	admin.GET("/group_members", hw.wrapHandler(match_round.GetGroupMembersController, false))
+	admin.GET("/group_members/:groupId", hw.wrapHandler(match_round.GetGroupMembersController, true))
 
 	admin.OPTIONS("/create_managed_group")
 	admin.POST("/create_managed_group", hw.wrapHandler(controller.CreateManagedGroupController, true))
 
 	admin.OPTIONS("/get_managed_groups")
 	admin.GET("/get_managed_groups", hw.wrapHandler(controller.GetAdminManagedGroupsController, true))
+
+	admin.OPTIONS("/user_group")
+	admin.DELETE("/user_group", hw.wrapHandler(controller.RemoveUserManagedGroupController, true))
 
 	return router
 }

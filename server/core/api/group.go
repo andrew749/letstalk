@@ -16,6 +16,12 @@ type RemoveUserGroupRequest struct {
 	UserGroupId data.TUserGroupID `json:"userGroupId"`
 }
 
+// Another way to remove a user from the group
+type RemoveUserGroupRequest2 struct {
+	UserId  data.TUserID  `json:"userId"`
+	GroupId data.TGroupID `json:"groupId"`
+}
+
 type CreateGroupRequest struct {
 	GroupName string `json:"groupName"`
 }
@@ -25,8 +31,9 @@ type GetAdminMangedGroupsResponse struct {
 }
 
 type AdminManagedGroup struct {
-	GroupName                 string `json:"groupName"`
-	ManagedGroupReferralEmail string `json:"managedGroupReferralEmail"`
+	GroupId                   data.TGroupID `json:"groupId"`
+	GroupName                 string        `json:"groupName"`
+	ManagedGroupReferralEmail string        `json:"managedGroupReferralEmail"`
 }
 
 type EnrollManagedGroupRequest struct {

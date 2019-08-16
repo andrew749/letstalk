@@ -15,10 +15,23 @@ const initialState = {
     fetchingGroups: false,
     errorMessage: undefined,
     groups: []
+    // TODO: Add selected group index
+    // selectedGroupIndex: undefined
 }
 
 export function getShouldFetchGroups(state) {
     return state.getManagedGroupsReducer.shouldFetchGroups;
+}
+
+export function getCurrentGroup(state) {
+    // TODO: Implement this
+    // let groupsState = state.getManagedGroupsReducer;
+    // return groupsState.groups[groupsState.selectedGroupIndex];
+    return state.getManagedGroupsReducer.groups ? state.getManagedGroupsReducer.groups[0] : undefined;
+}
+
+export function getGroupsForAdmin(state) {
+    return state.getManagedGroupsReducer.groups;
 }
 
 export function gotGroupsAction(groups) {
@@ -75,14 +88,17 @@ class GetManagedGroupsView extends React.Component {
                         </Accordion>
                         )
                     })}
-            <p>{this.props.errorMessage}</p>
+                <p>{this.props.errorMessage}</p>
             </div >
         );
     }
 }
 
 const GetManagedGroupsViewComponent = apiServiceConnect(
-    (state) => ({groups: state.getManagedGroupsReducer.groups || [], errorMessage: state.getManagedGroupsReducer.errorMessage}),
+    (state) => ({
+        groups: state.getManagedGroupsReducer.groups || [{groupName: "Cannot fetch groups"}], 
+        errorMessage: state.getManagedGroupsReducer.errorMessage
+    }),
     (dispatch) => {
         return {
             gotGroups: (groups) => dispatch(gotGroupsAction(groups)),

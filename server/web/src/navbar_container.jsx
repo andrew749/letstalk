@@ -1,21 +1,17 @@
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import React from 'react';
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import {LinkContainer} from 'react-router-bootstrap'
 import {Container, Navbar, Nav} from 'react-bootstrap';
 import './scss/hive_tool_template.scss';
-import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath} from './routes.js';
+import {adhocAddToolPath, deleteUserToolPath, loginPath, logoutPath, membersPath, matchingPath, groupManagementToolPath} from './routes.js';
 import {logoutAction} from './login';
+import {shouldFetchProfileAction, isAuthenticated, getProfile} from './api/api_controller'
 import apiServiceConnect from './api/api_service_connect';
+import {meApiModule} from './api/me_api_module';
 
-function isAuthenticated(state) {
-    return state.loginReducer.isAuthenticated;
-}
-
-class HiveToolTemplate extends React.Component {
+class NavbarContainer extends React.Component {
 
     constructor(props) {
         super(props);
@@ -23,30 +19,9 @@ class HiveToolTemplate extends React.Component {
         this.state = {};
     }
 
-    populateMe() {
-        if (!!this.props.isAuthenticated) {
-            this.props.apiService.me(
-                ({ Result }) => {
-                    if (!this.state.me || this.state.me.userId != Result.userId ) {
-                        this.setState({ me: {
-                            userId: Result.userId,
-                            firstName: Result.firstName,
-                            lastName: Result.lastName,
-                            email: Result.email
-                        }});
-                    }
-                },
-                err => console.log
-            );
-        }
-    }
 
     componentDidMount() {
-        this.populateMe();
-    }
-
-    componentDidUpdate() {
-        this.populateMe();
+        this.props.fetchProfile();
     }
 
     onLogout = event => {
@@ -112,9 +87,9 @@ class HiveToolTemplate extends React.Component {
                         <div className="flex-column">
                             {'Hive Admin Console'}
                             <div>
-                            {!!this.props.isAuthenticated && this.state.me ?
-                                !!this.state.me ? 
-                                    this.state.me.email : "Unknown Email" 
+                            {!!this.props.isAuthenticated && this.props.profile ?
+                                !!this.props.profile ? 
+                                    this.props.profile.email : "Unknown Email" 
                                 : "Not authenticated"}
                             </div>
                             <Nav>
@@ -133,6 +108,7 @@ class HiveToolTemplate extends React.Component {
                             {CustomNavItem(matchingPath, "Matching")}
                             {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
                             {CustomNavItem(deleteUserToolPath, "Delete User")}
+                            {CustomNavItem(groupManagementToolPath, "Manage Groups")}
                         </Nav>
                     </Navbar.Collapse>
                 </Navbar>
@@ -141,17 +117,19 @@ class HiveToolTemplate extends React.Component {
     }
 }
 
-const HiveToolComponent = apiServiceConnect(
+const NavbarContainerComponent = apiServiceConnect(
     (state) => {
         return {
+            profile: meApiModule.getData(state),
             isAuthenticated: isAuthenticated(state)
         };
     },
     (dispatch) => {
         return {
-            didLogout: (state) => {dispatch(logoutAction(state))}
+            didLogout: (state) => {dispatch(logoutAction(state))},
+            fetchProfile: () => {dispatch(meApiModule.getApiExecuteAction())}
         };
     }
-)(CookieAwareComponent(withCookies(HiveToolTemplate)));
+)(CookieAwareComponent(withCookies(NavbarContainer)));
 
-export default HiveToolComponent;
+export default NavbarContainerComponent;
