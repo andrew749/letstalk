@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, ButtonToolbar, Dropdown, DropdownButton, Button, Table } from "react-bootstrap";
+import {BootstrapTable} from 'react-bootstrap-table';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
@@ -72,7 +73,15 @@ export class MembersPage extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state =  {
+            selected: [],
+        };
         this.onDropdownChanged = this.onDropdownChanged.bind(this);
+        this.onRowSelect = this.onRowSelect.bind(this);
+        this.selectRowProp = {
+            mode: 'checkbox',
+            onSelect: this.onRowSelect,
+        }
     }
 
     componentDidMount() {
@@ -80,12 +89,25 @@ export class MembersPage extends React.Component {
         // this.props.fetchGroups();
         this.props.fetchMembers();
         // TODO(skong, acod): use this as a template
-        this.props.deleteMemberFromGroup(1, "9ba4177a-a6b8-11e9-81f1-0242ac130002");
+        // this.props.deleteMemberFromGroup(1, "9ba4177a-a6b8-11e9-81f1-0242ac130002");
     }
 
     onDropdownChanged(group) {
         console.log("[onDropdownChanged] Change to group " + group.groupId)
         this.props.fetchMembers(group);
+    }
+
+    onRowSelect({ id }, isSelected) {
+        if (isSelected) {
+          this.setState({
+            selected: [ ...this.state.selected, id ],
+          });
+        } else {
+           this.setState({
+               selected: [ ...this.state.selected.filter(idToCompare => idToCompare != id)],
+           }); 
+        }
+        return ;
     }
 
     render() {
@@ -116,29 +138,21 @@ export class MembersPage extends React.Component {
                         {statItems}
                     </div>
                     <div className="members-table-container">
-                        <Table striped bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Program</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.props.members.map(groupMember => {
-                                    return (
-                                        <tr>
-                                            <td>{groupMember.user.userId}</td>
-                                            <td>{groupMember.user.firstName + " " + groupMember.user.lastName}</td>
-                                            <td>{groupMember.status}</td>
-                                            <td>{groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"}</td>
-                                        </tr>
-                                    );
-                                })}
-                                
-                            </tbody>
-                        </Table>
+                        <BootstrapTable data={this.props.members.map(groupMember => {
+                                    return ({
+                                        id: groupMember.user.userId,
+                                        name: groupMember.user.firstName + " " + groupMember.user.lastName,
+                                        status: groupMember.status,
+                                        email: groupMember.email,
+                                        programName: groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"
+                                    });
+                                })} selectRow={this.selectRowProp}>
+                            <TableHeaderColumn dataField='id' isKey>User Id</TableHeaderColumn>
+                            <TableHeaderColumn dataField='name'>User Name</TableHeaderColumn>
+                            <TableHeaderColumn dataField='email'>User Email</TableHeaderColumn>
+                            <TableHeaderColumn dataField='status'>Status</TableHeaderColumn>
+                            <TableHeaderColumn dataField='programName'>Program</TableHeaderColumn>
+                        </BootstrapTable>
                     </div>
                 </div>
             </Container>

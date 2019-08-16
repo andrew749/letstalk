@@ -77,7 +77,7 @@ export class MatchingPage extends React.Component {
         this.props.fetchGroups();
         // TODO(skong, acod): use this as template
         this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
-        this.props.deleteMatchingRound(1);
+        // this.props.deleteMatchingRound(1);
     }
 
     onDropdownChanged(group) {
