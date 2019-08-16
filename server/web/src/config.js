@@ -13,6 +13,7 @@ export const meUrl = `${apiUrl}/me`;
 export const signupUrl = `${apiUrl}/signup`;
 export const bootstrapUrl = `${apiUrl}/bootstrap`;
 export const sendVerificationEmailUrl = `${apiUrl}/send_email_verification`;
+export const cohortsUrl = `${apiUrl}/cohorts`;
 
 // admin endpoints
 export const mentorshipUrl = `${adminUrl}/mentorship`;

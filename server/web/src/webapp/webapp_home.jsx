@@ -11,6 +11,7 @@ import LoginPage, {loginReducer} from '../login.jsx';
 import LandingPage from './landing.jsx';
 import GroupRegisterPage, {groupRegisterReducer} from './group_register_page.jsx';
 import VerifyEmailPage from './verify_email';
+import SetCohortPage from './set_cohort';
 import Cookies from 'universal-cookie';
 
 import AuthenticatedRoute from '../authenticate_component.jsx';
@@ -27,6 +28,7 @@ import HiveHeader from './components/hive_header.jsx';
 import {apiServiceReducer, HiveApiService} from '../api/api_controller';
 import {API_NAME as ME_API, meApi} from '../api/me_api_module';
 import {API_NAME as BOOTSTRAP_API, bootstrapApi} from '../api/bootstrap_api_module';
+import {API_NAME as GET_COHORTS_API, getCohortsApi} from '../api/get_cohorts_module';
 import {
     API_NAME as SEND_VERIFICATION_EMAIL,
     sendVerificationEmailApi,
@@ -37,6 +39,7 @@ const apiModules = {
     [ME_API]: meApi,
     [BOOTSTRAP_API]: bootstrapApi,
     [SEND_VERIFICATION_EMAIL]: sendVerificationEmailApi,
+    [GET_COHORTS_API]: getCohortsApi,
 }
 
 // build reducer dict
@@ -107,7 +110,7 @@ class App extends React.Component {
                         <AuthenticatedRouteWebapp exact path={landingPathWeb} component={LandingPage} />
                         <AuthenticatedRouteWebapp path={registerWithGroupPathWeb} component={GroupRegisterPage} />
                         <AuthenticatedRouteWebapp path={verifyEmailPathWeb} component={VerifyEmailPage} />
-                        <AuthenticatedRouteWebapp path={setCohortPathWeb} component={GroupRegisterPage} />
+                        <AuthenticatedRouteWebapp path={setCohortPathWeb} component={SetCohortPage} />
                         <AuthenticatedRouteWebapp path={surveyPathWeb} component={GroupRegisterPage} />
                     </Switch>
                 </BrowserRouter>

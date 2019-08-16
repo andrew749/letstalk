@@ -53,7 +53,7 @@ class VerifyEmailPage extends React.Component {
                     <Form.Label>Waterloo Email</Form.Label>
                     <Form.Control
                         autoFocus
-                        type="text"
+                        type="email"
                         value={this.state.email}
                         onChange={this.handleChange}
                     />
