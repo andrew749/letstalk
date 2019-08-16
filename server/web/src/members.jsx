@@ -75,6 +75,7 @@ export class MembersPage extends React.Component {
         super(props);
         this.state =  {
             selected: [],
+            shouldRefresh: true,
         };
         this.onDropdownChanged = this.onDropdownChanged.bind(this);
         this.onRowSelect = this.onRowSelect.bind(this);
@@ -82,14 +83,12 @@ export class MembersPage extends React.Component {
             mode: 'checkbox',
             onSelect: this.onRowSelect,
         }
+        this.deleteSelectedUsers = this.deleteSelectedUsers.bind(this);
     }
 
     componentDidMount() {
         // kickoff initial fetch
-        // this.props.fetchGroups();
-        this.props.fetchMembers();
-        // TODO(skong, acod): use this as a template
-        // this.props.deleteMemberFromGroup(1, "9ba4177a-a6b8-11e9-81f1-0242ac130002");
+        this.props.fetchGroups();
     }
 
     onDropdownChanged(group) {
@@ -110,7 +109,18 @@ export class MembersPage extends React.Component {
         return ;
     }
 
+    deleteSelectedUsers() {
+        this.state.selected.forEach(userId => this.props.deleteMemberFromGroup(userId, this.props.groupToFetch.groupId));
+        this.setState({
+            shouldRefresh: true,
+        });
+    }
+
     render() {
+        if (this.state.shouldRefresh) {
+            this.props.fetchMembers();
+            this.setState({shouldRefresh: false});
+        }
         const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
         return (
@@ -130,8 +140,7 @@ export class MembersPage extends React.Component {
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.ADD_MEMBER)}>Add members</Button>
-                        <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.DELETE_MEMBER)}>Delete members</Button>
-                        {/* <Button variant="primary" size="lg" onClick={this.props.showModal}>Notify members</Button> */}
+                        <Button variant="primary" size="lg" onClick={this.deleteSelectedUsers}>Delete members</Button>
                     </ButtonToolbar>
                     <h2 className="mt-3">Members</h2>
                     <div className="members-stats-container">
@@ -166,6 +175,7 @@ const MembersPageComponent = apiServiceConnect(
         groups: getGroupsForAdmin(state) || [], 
         members: getMembersFromState(state) || [],
         errorMessage: state.getManagedGroupsReducer.errorMessage,
+        didCompleteDelete: userGroupDeleteApiModule.isFinished(state),
         // TODO: rename
         membersErrorMessage: state.membersReducer.errorMessage
     }),
@@ -176,7 +186,6 @@ const MembersPageComponent = apiServiceConnect(
             showModal: (modalType) => dispatch(showAction(modalType)),
             gotMembers: (members) => dispatch(gotMembersAction(members)),
             fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
-            // TODO(skong): use this
             deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction({userId, groupId})),
         }
     }
