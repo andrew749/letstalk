@@ -32,3 +32,17 @@ export const deleteMatchRoundApi = pluggableApiModule(
     DELETE_API_FUNC,
     deleteMatchRoundInitialDataState,
 );
+
+const commitMatchRoundInitialDataState = {
+    matchRoundId: undefined
+};
+
+export const COMMIT_MATCH_ROUND_API_NAME = "commitMatchRoundApi";
+export const COMMIT_MATCH_ROUND_API_FUNC = "commitMatchingRound";
+
+export const commitMatchRoundApiModule = apiModule(COMMIT_MATCH_ROUND_API_NAME);
+export const commitMatchRoundApi = pluggableApiModule(
+    commitMatchRoundApiModule,
+    COMMIT_MATCH_ROUND_API_FUNC,
+    commitMatchRoundInitialDataState,
+);
