@@ -5,6 +5,7 @@ import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsAction, getGroupsForAdmin} from './get_managed_groups_view';
+import { MODAL_TYPES, showAction} from './modal_container';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
 const FETCHING_MATCHING_ROUNDS_FOR_GROUP = "FETCHING_MATCHING_ROUNDS_FOR_GROUP";
@@ -103,7 +104,7 @@ export class MatchingPage extends React.Component {
                 </div>
                 <div className="panel-content">
                     <ButtonToolbar>
-                        <Button variant="primary" size="lg">New Matching Round</Button>
+                        <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.CREATE_MATCHING_ROUND)}>New Matching Round</Button>
                         {/* <Button variant="primary" size="lg">Delete members</Button>
                         <Button variant="primary" size="lg">Notify members</Button> */}
                     </ButtonToolbar>
@@ -149,6 +150,7 @@ const MatchingPageComponent = apiServiceConnect(
         // TODO(skong): use this
         createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
         deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),
+        showModal: (modalType) => dispatch(showAction(modalType))
     })
 )(CookieAwareComponent(withCookies(MatchingPage)));
 

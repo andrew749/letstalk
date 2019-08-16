@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, ButtonToolbar, Dropdown, DropdownButton, Button, Table } from "react-bootstrap";
 import CookieAwareComponent from './cookie_aware_component.jsx';
-import { showAction } from './modal_container';
+import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import { gotGroupsAction, fetchGroupsAction, getGroupsForAdmin } from './get_managed_groups_view';
@@ -77,7 +77,7 @@ export class MembersPage extends React.Component {
 
     componentDidMount() {
         // kickoff initial fetch
-        this.props.fetchGroups();
+        // this.props.fetchGroups();
         this.props.fetchMembers();
         // TODO(skong, acod): use this as a template
         this.props.deleteMemberFromGroup(1, "9ba4177a-a6b8-11e9-81f1-0242ac130002");
@@ -107,9 +107,9 @@ export class MembersPage extends React.Component {
                 </div>
                 <div className="panel-content">
                     <ButtonToolbar>
-                        <Button variant="primary" size="lg" onClick={this.props.showModal}>Add members</Button>
-                        <Button variant="primary" size="lg" onClick={this.props.showModal}>Delete members</Button>
-                        <Button variant="primary" size="lg" onClick={this.props.showModal}>Notify members</Button>
+                        <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.ADD_MEMBER)}>Add members</Button>
+                        <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.DELETE_MEMBER)}>Delete members</Button>
+                        {/* <Button variant="primary" size="lg" onClick={this.props.showModal}>Notify members</Button> */}
                     </ButtonToolbar>
                     <h2 className="mt-3">Members</h2>
                     <div className="members-stats-container">
@@ -159,7 +159,7 @@ const MembersPageComponent = apiServiceConnect(
         return {
             gotGroups: (groups) => dispatch(gotGroupsAction(groups)),
             fetchGroups: () => dispatch(fetchGroupsAction()),
-            showModal: (state) => dispatch(showAction(state)),
+            showModal: (modalType) => dispatch(showAction(modalType)),
             gotMembers: (members) => dispatch(gotMembersAction(members)),
             fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
             // TODO(skong): use this
