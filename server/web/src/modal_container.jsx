@@ -1,9 +1,10 @@
 import React from 'react';
 import { Form, Button, Modal, Row, Col } from 'react-bootstrap';
-import { connect } from 'react-redux';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import { withCookies } from 'react-cookie';
 import { onChange } from './util.js';
+import apiServiceConnect from './api/api_service_connect';
+
 
 const SHOW_ACTION = 'SHOW';
 const HIDE_ACTION = 'HIDE';
@@ -158,7 +159,7 @@ export class ModalContainer extends React.Component {
   }
 }
 
-const ModalContainerComponent = connect(
+const ModalContainerComponent = apiServiceConnect(
   (state) => {
     return {
       groups: state.getManagedGroupsReducer.groups || [{groupName: "Cannot fetch groups"}], 
