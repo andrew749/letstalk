@@ -72,7 +72,6 @@ export class MatchingPage extends React.Component {
         if (!!this.props.groupToFetch) {
             this.props.fetchMatchingRoundsForGroup(this.props.groupToFetch);
         }
-        this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
         // this.props.deleteMatchingRound(1);
     }
 
@@ -87,8 +86,8 @@ export class MatchingPage extends React.Component {
                         <Button variant="primary" size="lg">Notify members</Button> */}
                     </ButtonToolbar>
                     <h2 className="mt-3">Matching Rounds</h2>
-                    <div className="members-table-container">
-                    <Table striped bordered hover>
+                    <div className="main-table-container">
+                        <Table striped bordered hover>
                             <thead>
                                 <tr>
                                     <th>#</th>
