@@ -16,6 +16,12 @@ type RemoveUserGroupRequest struct {
 	UserGroupId data.TUserGroupID `json:"userGroupId"`
 }
 
+// Another way to remove a user from the group
+type RemoveUserGroupRequest2 struct {
+	UserId  data.TUserID  `json:"userId"`
+	GroupId data.TGroupID `json:"groupId"`
+}
+
 type CreateGroupRequest struct {
 	GroupName string `json:"groupName"`
 }

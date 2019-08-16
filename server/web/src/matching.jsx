@@ -3,7 +3,9 @@ import { Button, ButtonToolbar, Dropdown, DropdownButton, Container, Table} from
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
+import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsAction, getGroupsForAdmin} from './get_managed_groups_view';
+import { MODAL_TYPES, showAction} from './modal_container';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
 const FETCHING_MATCHING_ROUNDS_FOR_GROUP = "FETCHING_MATCHING_ROUNDS_FOR_GROUP";
@@ -73,6 +75,9 @@ export class MatchingPage extends React.Component {
 
     componentDidMount() {
         this.props.fetchGroups();
+        // TODO(skong, acod): use this as template
+        this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
+        this.props.deleteMatchingRound(1);
     }
 
     onDropdownChanged(group) {
@@ -99,7 +104,7 @@ export class MatchingPage extends React.Component {
                 </div>
                 <div className="panel-content">
                     <ButtonToolbar>
-                        <Button variant="primary" size="lg">New Matching Round</Button>
+                        <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.CREATE_MATCHING_ROUND)}>New Matching Round</Button>
                         {/* <Button variant="primary" size="lg">Delete members</Button>
                         <Button variant="primary" size="lg">Notify members</Button> */}
                     </ButtonToolbar>
@@ -111,17 +116,17 @@ export class MatchingPage extends React.Component {
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Stage</th>
-                                    <th>Progress</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {this.props.matchingRounds.map((matchingRound => {
-                                    <tr>
-                                        <td>{matchingRound.matchRoundId}</td>
-                                        <td>{matchingRound.name}</td>
-                                        <td>{matchingRound.status}</td>
-                                        <td>@mdo</td>
-                                    </tr>
+                                    return (
+                                        <tr>
+                                            <td>{matchingRound.matchRoundId}</td>
+                                            <td>{matchingRound.name}</td>
+                                            <td>{matchingRound.status}</td>
+                                        </tr>
+                                    );
                                 }))}
                                 
                             </tbody>
@@ -142,6 +147,10 @@ const MatchingPageComponent = apiServiceConnect(
     (dispatch) => ({
         fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
         fetchGroups: () => dispatch(fetchGroupsAction()),
+        // TODO(skong): use this
+        createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
+        deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),
+        showModal: (modalType) => dispatch(showAction(modalType))
     })
 )(CookieAwareComponent(withCookies(MatchingPage)));
 

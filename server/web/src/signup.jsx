@@ -2,35 +2,21 @@ import React from 'react';
 import { Button, Container, Alert, Form } from 'react-bootstrap';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
-import {landingPathWeb} from './routes.js';
-import RedirectPage from './redirect-flash.jsx';
+import {getLandingPath} from './routes.js';
 import apiServiceConnect from './api/api_service_connect';
-
-const SIGNUP_ACTION = 'SIGNUP';
-const SIGNUP_REDIRECT_DURATION_SECONDS = 10;
-const SIGNUP_REDIRECT_MESSAGE = "Thank you for signing up. Please login using your newly created account.";
+import PostAuthRedirect from './post-auth-redirect';
+import {loginAction} from './login';
 
 // Unspecified gender is default 3 on server side.
 // TODO: need a better way to keep these in sync.
 const DEFAULT_GENDER = 3;
 
-const initialState = {
-  didSignup: false
-}
-
-export function signupAction() {
-    return {type: SIGNUP_ACTION};
-}
-
-export function signupReducer(state = initialState, action) {
-    switch(action.type) {
-        case SIGNUP_ACTION:
-            return Object.assign({}, state, {didSignup: true});
-        default:
-            return state;
-    }
-}
-
+/**
+ * Page used by users to sign up
+ *
+ * Props:
+ *   - isAdminApp: is this page a part of the admin web app
+ */
 export class SignupPage extends React.Component {
     constructor(props) {
         super(props);
@@ -53,13 +39,13 @@ export class SignupPage extends React.Component {
     }
 
     validateForm() {
-        return this.state.firstName.length > 0 
-            && this.state.lastName.length > 0 
-            && this.state.email.length > 0 
-            && this.state.birthdate.length > 0 
-            && this.state.phoneNumber.length > 0 
+        return this.state.firstName.length > 0
+            && this.state.lastName.length > 0
+            && this.state.email.length > 0
+            && this.state.birthdate.length > 0
+            && this.state.phoneNumber.length > 0
             && this.state.password.length > 0
-            && this.state.password == this.state.confirmPassword 
+            && this.state.password == this.state.confirmPassword
             ;
     }
 
@@ -80,7 +66,7 @@ export class SignupPage extends React.Component {
         event.preventDefault();
         // send to api server
         this.props.apiService.signup(
-            this.state.firstName, 
+            this.state.firstName,
             this.state.lastName,
             this.state.email,
             this.state.gender,
@@ -88,8 +74,11 @@ export class SignupPage extends React.Component {
             this.state.phoneNumber,
             this.state.password
         )
+        .then((data) => {
+            // Immediately login with same credentials (this shouldn't fail)
+            this.props.apiService.login(this.state.email, this.state.password)
             .then((data) => {
-                this.props.didSignup();
+                this.props.didAuthenticate(data.Result.sessionId);
                 this.setState({
                     submitState: 'SUCCESS',
                     redirectToReferrer: true
@@ -97,18 +86,23 @@ export class SignupPage extends React.Component {
             }).catch(err => {
                 this.setState({
                     submitState: 'ERROR',
-                    err: err.body
+                    err: err.serverMessage
                 });
             });
+        }).catch(err => {
+            this.setState({
+                submitState: 'ERROR',
+                err: err.serverMessage
+            });
+        });
     }
 
     render() {
+        const { redirectToReferrer } = this.state;
+        const defaultPath = getLandingPath(this.props.isAdminApp);
 
-        let { redirectToReferrer } = this.state;
-        let { from } = this.props.location.state || { from: { pathname: landingPathWeb } };
-
-        if (!!redirectToReferrer) {
-            return <RedirectPage to={from} duration={SIGNUP_REDIRECT_DURATION_SECONDS} message={SIGNUP_REDIRECT_MESSAGE}/>;
+        if (!!this.state.redirectToReferrer) {
+            return <PostAuthRedirect defaultPath={defaultPath} />;
         }
 
         let alert;
@@ -169,7 +163,7 @@ export class SignupPage extends React.Component {
                     </Form.Group>
                     <Form.Group controlId="gender">
                         <Form.Label>Gender</Form.Label>
-                        <Form.Control 
+                        <Form.Control
                             onChange={this.handleChangeInt}
                             as="select">
                             <option value={3}>Gender</option>
@@ -211,11 +205,9 @@ export class SignupPage extends React.Component {
 
 const SignupPageComponent = apiServiceConnect(
     null,
-    (dispatch) => {
-        return {
-            didSignup: () => {dispatch(signupAction())}
-        };
-    }
+    (dispatch) => ({
+        didAuthenticate: (state) => { dispatch(loginAction(state)) }
+    }),
 )(CookieAwareComponent(withCookies(SignupPage)));
 
 export default SignupPageComponent;

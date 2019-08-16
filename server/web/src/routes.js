@@ -16,3 +16,7 @@ export const signupPathWeb = `${WEBAPP_URL_PREFIX}/signup`;
 export const loginPathWeb = `${WEBAPP_URL_PREFIX}/login`;
 export const landingPathWeb = `${WEBAPP_URL_PREFIX}/`;
 export const registerWithGroupPathWeb = `${WEBAPP_URL_PREFIX}/registerWithGroup/*`;
+
+export function getLandingPath(isAdminApp) {
+  return isAdminApp ? landingPath : landingPathWeb;
+}

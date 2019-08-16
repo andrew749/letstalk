@@ -80,6 +80,19 @@ func GetAdminManagedGroupsController(c *ctx.Context) errs.Error {
 	return nil
 }
 
+func RemoveUserManagedGroupController(c *ctx.Context) errs.Error {
+	// make sure admin can touch this group
+	var req api.RemoveUserGroupRequest2
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+	adminManagesGroup, _ := query.CheckAdminManagesGroup(c.Db, c.SessionData.UserId, req.GroupId)
+	if !adminManagesGroup {
+		return errs.NewForbiddenError("You are not allowed to make modifications to that group")
+	}
+	return query.RemoveUserFromGroup(c.Db, req.UserId, req.GroupId)
+}
+
 func EnrollUserManagedGroupController(c *ctx.Context) errs.Error {
 	var req api.EnrollManagedGroupRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {
