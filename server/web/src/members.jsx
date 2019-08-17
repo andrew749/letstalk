@@ -33,13 +33,12 @@ export class MembersPage extends React.Component {
             onSelect: this.onRowSelect,
             onSelectAll: this.onSelectAll,
         }
-        this.onGroupChanged = this.onGroupChanged.bind(this);
         this.deleteSelectedUsers = this.deleteSelectedUsers.bind(this);
     }
 
     componentDidMount() {
         if (!!this.props.groupToFetch) {
-            this.onGroupChanged(this.props.groupToFetch)
+            this.props.fetchMembers(this.props.groupToFetch.groupId);
         }
     }
 
@@ -75,19 +74,15 @@ export class MembersPage extends React.Component {
         });
     }
 
-    onGroupChanged(group) {
-        this.props.fetchMembers(group.groupId);
-    }
-
     render() {
         if (this.state.shouldRefresh) {
-            this.props.fetchMembers();
+            this.props.fetchMembers(this.props.groupToFetch.groupId);
             this.setState({shouldRefresh: false});
         }
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
         return (
             <Container className="panel-body">
-                <GroupSelector listeners={[this.onGroupChanged]}/> 
+                <GroupSelector /> 
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.ADD_MEMBER)}>Add members</Button>

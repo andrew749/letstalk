@@ -68,26 +68,21 @@ export class MatchingPage extends React.Component {
         super(props);
 
         this.state = {};
-        this.onGroupChanged = this.onGroupChanged.bind(this);
     }
 
     componentDidMount() {
         // TODO(skong, acod): use this as template
         if (!!this.props.groupToFetch) {
-            this.onGroupChanged(this.props.groupToFetch);
+            this.props.fetchMatchingRoundsForGroup(this.props.groupToFetch);
         }
         this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
         // this.props.deleteMatchingRound(1);
     }
 
-    onGroupChanged(group) {
-        this.props.fetchMatchingRoundsForGroup(group);
-    }
-
     render() {
         return (
             <Container className="panel-body">
-                <GroupSelector listeners={[this.onGroupChanged]}/> 
+                <GroupSelector /> 
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.CREATE_MATCHING_ROUND)}>New Matching Round</Button>
