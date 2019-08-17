@@ -57,78 +57,7 @@ export class ModalContainer extends React.Component {
         youngestUpperGradYear: 0,
       },
       userIds: [],
-      // matches: [
-      //   {
-      //     mentor: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     },
-      //     mentee: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     }
-      //   },
-      //   {
-      //     mentor: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     },
-      //     mentee: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     }
-      //   },
-      //   {
-      //     mentor: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     },
-      //     mentee: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     }
-      //   },
-      //   {
-      //     mentor: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     },
-      //     mentee: {
-      //       user: {
-      //         firstName: "Andrew",
-      //         lastName: "Codi",
-      //       },
-      //       email: "asdf@gmail.com"
-      //     }
-      //   },
-      // ],
-      // matchRoundId: 5,
-      // matchingRound: {
-      //   matchRoundId: 5,
-      //   name: "Round 1",
-      //   status: "COMMITTED"
-      // }
+      matches: [],
     };
 
     this.selectRowProp = {
@@ -301,10 +230,6 @@ export class ModalContainer extends React.Component {
             });
           }): [];
           const columns = [
-            {
-              dataField: 'id',
-              text: 'User ID'
-            },
             {
               dataField: 'name',
               text: 'Name'
