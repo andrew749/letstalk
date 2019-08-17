@@ -224,7 +224,7 @@ func handleCommitMatchRound(
 // Controller for GET match_rounds admin endpoint
 // Returns match rounds for a given group, including matches in that match round and its status
 func GetMatchRoundsController(c *ctx.Context) errs.Error {
-	groupId := data.TGroupID(c.GinContext.Param("groupId"))
+	groupId := data.TGroupID(c.GinContext.Query("groupId"))
 
 	matchRounds, err := handleGetMatchRounds(
 		c.Db,
