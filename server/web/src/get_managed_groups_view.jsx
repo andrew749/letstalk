@@ -96,7 +96,7 @@ class GetManagedGroupsView extends React.Component {
 
 const GetManagedGroupsViewComponent = apiServiceConnect(
     (state) => ({
-        groups: state.getManagedGroupsReducer.groups || [{groupName: "Cannot fetch groups"}], 
+        groups: state.getManagedGroupsReducer.groups || [], 
         errorMessage: state.getManagedGroupsReducer.errorMessage
     }),
     (dispatch) => {

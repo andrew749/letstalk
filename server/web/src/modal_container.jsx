@@ -4,6 +4,7 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import { withCookies } from 'react-cookie';
 import { onChange } from './util.js';
 import apiServiceConnect from './api/api_service_connect';
+import {getGroupToFetch} from './members';
 
 
 const SHOW_ACTION = 'SHOW';
@@ -78,8 +79,14 @@ export class ModalContainer extends React.Component {
         modalHeaderText = "Add Members"; 
         // TODO: When group selector is it's own component with reducer, we need to change the link
         // to whichever group is currently selected
-        modalBody = (<div>{"Copy the following link into your email communications to allow your members to\
-        be added to your group: " + this.props.groups[0].managedGroupReferralEmail}</div>);
+        if (this.props.groups.length() == 0) {
+          modalBody = (<div>{"Please create a group first!"}</div>);
+        } else if (!this.props.selectedGroup) {
+          modalBody = (<div>{"Please select a group first!"}</div>);
+        } else {
+          modalBody = (<div>{"Copy the following link into your email communications to allow your members to be added to your group: " + this.props.selectedGroup.managedGroupReferralEmail}</div>);
+        }
+        
         modalFooter = "";
         break;
       case MODAL_TYPES.DELETE_MEMBER:
@@ -162,7 +169,8 @@ export class ModalContainer extends React.Component {
 const ModalContainerComponent = apiServiceConnect(
   (state) => {
     return {
-      groups: state.getManagedGroupsReducer.groups || [{groupName: "Cannot fetch groups"}], 
+      selectedGroup: getGroupToFetch(state),
+      groups: state.getManagedGroupsReducer.groups || [], 
       ...state.modalReducer
     };
   },

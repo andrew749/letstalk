@@ -86,7 +86,7 @@ export class MatchingPage extends React.Component {
     }
 
     render() {
-        const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
+        const dropdownItems = this.props.groups ? this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>) : [];
         console.log(this.props.matchingRounds)
         return (
             <Container className="panel-body">
