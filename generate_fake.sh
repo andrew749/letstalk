@@ -1,5 +1,6 @@
 #!/bin/sh
 
+group=$1
 first=(
   Alton
   Brett
@@ -131,8 +132,25 @@ curl -X POST \
   -H "sessionId: $sessionId" \
   -d "{\"cohortId\": $cohort,    \"mentorshipPreference\": 0,    \"bio\": \"\",    \"hometown\": \"\"}"
   echo "Done creating"
-}
 
+echo "enrolling in group "
+curl -X POST \
+  http://localhost/v1/enroll_managed_group \
+  -H 'Accept: */*' \
+  -H 'Accept-Encoding: gzip, deflate' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Length: 54' \
+  -H 'Content-Type: application/json' \
+  -H 'Host: localhost' \
+  -H 'Postman-Token: 4f51cf32-e3c1-4c91-941c-baaa1af4610b,f546b4f3-722f-4e92-afd2-e08bdb155a0b' \
+  -H 'User-Agent: PostmanRuntime/7.15.2' \
+  -H 'cache-control: no-cache' \
+  -H "sessionId: $sessionId" \
+  -d "{
+\"groupUUID\":\"$group\"
+}"
+}
 for i in `seq 12`;
 do
     firstnamementor=${first[$i]}
@@ -141,6 +159,6 @@ do
     lastnamementee=${last[$i + 12]}
     emailmentor=${emails[$i]}
     emailmentee=${emails[$i + 12]}
-    createUser $firstnamementor $lastnamementor $emailmentor 25
-    createUser $firstnamementee $lastnamementee $emailmentee 44
+    createUser $firstnamementor $lastnamementor $emailmentor 25 
+    createUser $firstnamementee $lastnamementee $emailmentee 44 
 done
