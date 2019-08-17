@@ -4,8 +4,8 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import { withCookies } from 'react-cookie';
 import { onChange } from './util.js';
 import apiServiceConnect from './api/api_service_connect';
-import {getGroupToFetch} from './members';
 import {fetchGroupsApiModule} from './api/fetch_groups'
+import {getCurrentGroup} from './group_context_reducer';
 
 
 const SHOW_ACTION = 'SHOW';
@@ -177,7 +177,7 @@ export class ModalContainer extends React.Component {
 const ModalContainerComponent = apiServiceConnect(
   (state) => {
     return {
-      selectedGroup: getGroupToFetch(state),
+      selectedGroup: getCurrentGroup(state),
       groups: fetchGroupsApiModule.getData(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
       ...state.modalReducer
     };

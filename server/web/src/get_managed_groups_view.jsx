@@ -6,13 +6,6 @@ import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import {fetchGroupsApiModule} from './api/fetch_groups';
 
-export function getCurrentGroup(state) {
-    // TODO: Implement this
-    // let groupsState = state.getManagedGroupsReducer;
-    // return groupsState.groups[groupsState.selectedGroupIndex];
-    return state.getManagedGroupsReducer.groups ? state.getManagedGroupsReducer.groups[0] : undefined;
-}
-
 class GetManagedGroupsView extends React.Component {
     componentDidMount() {
         this.props.fetchGroups();

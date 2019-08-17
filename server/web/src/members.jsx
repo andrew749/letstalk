@@ -5,8 +5,11 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
-import { fetchGroupsApiModule } from './api/fetch_groups';
+import {fetchGroupsApiModule} from './api/fetch_groups';
+import {fetchMembersApiModule} from './api/fetch_members';
 import {userGroupDeleteApiModule} from './api/user_group_delete_api_module'
+import {getCurrentGroup} from './group_context_reducer';
+import GroupSelector from './group_selector';
 
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
 const STATS = ['200 members', '20 unregistered', '180 registered', '180 matched'];
@@ -15,54 +18,6 @@ const GOT_MEMBERS = 'GOT_MEMBERS';
 const FETCH_MEMBERS = 'FETCH_MEMBERS';
 const FETCHING_MEMBERS = 'FETCHING_MEMBERS';
 const ERROR_FETCHING_MEMBERS= 'ERROR_FETCHING_MEMBERS';
-
-const initialState = {
-    shouldFetchMembers: false,
-    fetchingMembers: false,
-    errorMessage: undefined,
-    members: []
-}
-
-export function getShouldFetchMembers(state) {
-    return state.membersReducer.shouldFetchMembers;
-}
-
-export function getMembersFromState(state) {
-    return state.membersReducer.members;
-}
-
-export function gotMembersAction(members) {
-    return {type: GOT_MEMBERS, members: members};
-}
-
-export function getGroupToFetch(state) {
-    return state.membersReducer.groupToFetch;
-}
-
-export function fetchingMembersAction() {
-    return {type: FETCHING_MEMBERS};
-}
-
-export function fetchMembersAction(group) {
-    return {type: FETCH_MEMBERS, group: group};
-}
-
-export function errorFetchingMembersAction(errorMessage) {
-    return {type: ERROR_FETCHING_MEMBERS, errorMessage: errorMessage};
-}
-
-export function membersReducer(state = initialState, action) {
-    switch(action.type) {
-        case FETCH_MEMBERS:
-            return Object.assign({}, state, {shouldFetchMembers: true, groupToFetch: action.group}); 
-        case FETCHING_MEMBERS:
-            return Object.assign({}, state, {shouldFetchMembers: false, fetchingMembers: true}); 
-        case GOT_MEMBERS:
-            return Object.assign({}, state, {shouldFetchMembers: false, fetchingMembers: false, members: action.members});
-        default:
-            return state;
-    }
-}
 
 /**
  * Props:
@@ -75,9 +30,8 @@ export class MembersPage extends React.Component {
         super(props);
         this.state =  {
             selected: [],
-            shouldRefresh: true,
+            shouldRefresh: false,
         };
-        this.onDropdownChanged = this.onDropdownChanged.bind(this);
         this.onRowSelect = this.onRowSelect.bind(this);
         this.onSelectAll = this.onSelectAll.bind(this);
         this.selectRowProp = {
@@ -85,17 +39,13 @@ export class MembersPage extends React.Component {
             onSelect: this.onRowSelect,
             onSelectAll: this.onSelectAll,
         }
+        this.onGroupChanged = this.onGroupChanged.bind(this);
         this.deleteSelectedUsers = this.deleteSelectedUsers.bind(this);
     }
 
     componentDidMount() {
         // kickoff initial fetch
         this.props.fetchGroups();
-    }
-
-    onDropdownChanged(group) {
-        console.log("[onDropdownChanged] Change to group " + group.groupId)
-        this.props.fetchMembers(group);
     }
 
     onRowSelect({ id }, isSelected) {
@@ -130,27 +80,19 @@ export class MembersPage extends React.Component {
         });
     }
 
+    onGroupChanged(group) {
+        this.props.fetchMembers(group.groupId);
+    }
+
     render() {
         if (this.state.shouldRefresh) {
             this.props.fetchMembers();
             this.setState({shouldRefresh: false});
         }
-        const dropdownItems = this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>)
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
         return (
             <Container className="panel-body">
-                <div className="group-info">
-                    <h2>You are currently managing: </h2>
-                    <ButtonToolbar>
-                        <DropdownButton
-                            title={ this.props.groupToFetch ? this.props.groupToFetch.groupName : undefined || 'Your Groups'}
-                            variant='Primary'
-                            id='managed-groups-dropdown'
-                        >
-                            {dropdownItems}
-                        </DropdownButton>
-                    </ButtonToolbar>
-                </div>
+                <GroupSelector listeners={[this.onGroupChanged]}/> 
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.ADD_MEMBER)}>Add members</Button>
@@ -161,7 +103,7 @@ export class MembersPage extends React.Component {
                         {statItems}
                     </div>
                     <div className="members-table-container">
-                        <BootstrapTable data={this.props.members.map(groupMember => {
+                        <BootstrapTable data={this.props.members ?  this.props.members.map(groupMember => {
                                     return ({
                                         id: groupMember.user.userId,
                                         name: groupMember.user.firstName + " " + groupMember.user.lastName,
@@ -169,7 +111,7 @@ export class MembersPage extends React.Component {
                                         email: groupMember.email,
                                         programName: groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"
                                     });
-                                })} selectRow={this.selectRowProp}>
+                                }): []} selectRow={this.selectRowProp}>
                             <TableHeaderColumn dataField='id' isKey>User Id</TableHeaderColumn>
                             <TableHeaderColumn dataField='name'>User Name</TableHeaderColumn>
                             <TableHeaderColumn dataField='email'>User Email</TableHeaderColumn>
@@ -185,20 +127,19 @@ export class MembersPage extends React.Component {
 
 const MembersPageComponent = apiServiceConnect(
     (state) => ({
-        groupToFetch: getGroupToFetch(state),
+        groupToFetch: getCurrentGroup(state),
         groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
-        members: getMembersFromState(state) || [],
+        members: fetchMembersApiModule.isFinished(state) ? fetchMembersApiModule.getData(state): undefined || [],
         errorMessage: fetchGroupsApiModule.getErrorMessage(state),
         didCompleteDelete: userGroupDeleteApiModule.isFinished(state),
         // TODO: rename
-        membersErrorMessage: state.membersReducer.errorMessage
+        membersErrorMessage: fetchMembersApiModule.getErrorMessage(state),
     }),
     (dispatch) => {
         return {
             fetchGroups: () => dispatch(fetchGroupsApiModule.getApiExecuteAction()),
             showModal: (modalType) => dispatch(showAction(modalType)),
-            gotMembers: (members) => dispatch(gotMembersAction(members)),
-            fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
+            fetchMembers: (groupId) => dispatch(fetchMembersApiModule.getApiExecuteAction({groupId})),
             deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction({userId, groupId})),
         }
     }
