@@ -183,10 +183,7 @@ export const HiveApiService = ((state, dispatch) => {
          * @param {*} done Done fetching callback
          * @param {*} error Error fetching data
          */
-        fetchMembers: (groupId, started, done, error) => {
-            if (!groupId) {
-                groupId = 0;
-            }
+        fetchMembers: ({groupId, started, done, error}) => {
             let membersUrl = getGroupMembersUrlBase + groupId.toString();
             started();
             console.log("Fetching members");

@@ -6,6 +6,8 @@ import apiServiceConnect from './api/api_service_connect';
 import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsApiModule} from './api/fetch_groups';
 import { MODAL_TYPES, showAction} from './modal_container';
+import {getCurrentGroup} from './group_context_reducer';
+import GroupSelector from './group_selector';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
 const FETCHING_MATCHING_ROUNDS_FOR_GROUP = "FETCHING_MATCHING_ROUNDS_FOR_GROUP";
@@ -39,10 +41,6 @@ export function getShouldFetchMatchingRoundsForGroup(state) {
     return state.matchingReducer.shouldFetchMatchingRounds
 }
 
-export function getMatchingRoundsGroupToFetch(state) {
-    return state.matchingReducer.groupToFetch;
-}
-
 export function getMatchingRounds(state) {
     return state.matchingReducer.matchingRounds;  
 }
@@ -70,7 +68,7 @@ export class MatchingPage extends React.Component {
         super(props);
 
         this.state = {};
-        this.onDropdownChanged = this.onDropdownChanged.bind(this);
+        this.onGroupChanged = this.onGroupChanged.bind(this);
     }
 
     componentDidMount() {
@@ -80,28 +78,14 @@ export class MatchingPage extends React.Component {
         // this.props.deleteMatchingRound(1);
     }
 
-    onDropdownChanged(group) {
-        console.log("[onDropdownChanged] Change to group " + group.groupId)
+    onGroupChanged(group) {
         this.props.fetchMatchingRoundsForGroup(group);
     }
 
     render() {
-        const dropdownItems = this.props.groups ? this.props.groups.map(group => <Dropdown.Item onClick={() => this.onDropdownChanged(group)} key={group.groupId} eventKey={group.groupId}> {group.groupName} </Dropdown.Item>) : [];
-        console.log(this.props.matchingRounds)
         return (
             <Container className="panel-body">
-                <div className="group-info">
-                    <h2>You are currently managing: </h2>
-                    <ButtonToolbar>
-                        <DropdownButton
-                            title={this.props.groupToFetch ? this.props.groupToFetch.groupName : 'Your Groups'}
-                            variant='Primary'
-                            id='managed-groups-dropdown'
-                        >
-                            {dropdownItems}
-                        </DropdownButton>
-                    </ButtonToolbar>
-                </div>
+                <GroupSelector listeners={[this.onGroupChanged]}/> 
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.CREATE_MATCHING_ROUND)}>New Matching Round</Button>
@@ -140,7 +124,7 @@ export class MatchingPage extends React.Component {
 
 const MatchingPageComponent = apiServiceConnect(
     (state) => ({
-        groupToFetch: getMatchingRoundsGroupToFetch(state),
+        groupToFetch: getCurrentGroup(state),
         groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [],
         matchingRounds: getMatchingRounds(state) || [],
     }),
