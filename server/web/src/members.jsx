@@ -125,7 +125,7 @@ export class MembersPage extends React.Component {
                     <div className="members-stats-container">
                         {statItems}
                     </div>
-                    <div className="members-table-container">
+                    <div className="main-table-container">
                         <BootstrapTable keyField='id' data={membersData} columns={columns} selectRow={this.selectRowProp}>
                         </BootstrapTable>
                     </div>
