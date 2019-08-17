@@ -5,8 +5,8 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 
 import {onChange} from './util.js';
-import { fetchGroupsAction } from './get_managed_groups_view.jsx';
 import apiServiceConnect from './api/api_service_connect';
+import {fetchGroupsApiModule} from './api/fetch_groups';
 
 const CREATE_GROUP = 'CREATE_GROUP';
 
@@ -69,7 +69,7 @@ const CreateManagedGroupToolComponent = apiServiceConnect(
     (dispatch) => {
         return {
             createGroup: () => dispatch(createGroupAction()),
-            refreshPage: () => dispatch(fetchGroupsAction())
+            refreshPage: () => dispatch(fetchGroupsApiModule.getApiExecuteAction())
         }
     }
 )(CookieAwareComponent(withCookies(CreateManagedGroupTool)));

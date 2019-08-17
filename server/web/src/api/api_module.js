@@ -57,7 +57,7 @@ export const apiModule = (apiName) => ({
         return state[apiName].params;
     },
     isFinished: (state) => {
-        return state[apiName].doneFetching;
+        return state && state[apiName] && state[apiName].doneFetching;
     },
     getData: (state) => {
         return state[apiName].data;

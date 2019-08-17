@@ -19,7 +19,7 @@ import ManagedGroupPage from './managed_group.jsx';
 import {API_NAME as MATCH_ROUND_API, matchRoundApi, DELETE_API_NAME as DELETE_MATCH_ROUND_API_NAME, deleteMatchRoundApi, COMMIT_MATCH_ROUND_API_NAME, commitMatchRoundApi} from './api/match_round_api_module';
 import {API_NAME as DELETE_USER_GROUP_API, userGroupDeleteApi} from './api/user_group_delete_api_module';
 import {API_NAME as ME_API, meApi} from './api/me_api_module';
-import {getManagedGroupsReducer, getShouldFetchGroups, fetchingGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './get_managed_groups_view'
+import {API_NAME as FETCH_GROUPS_API, fetchGroupsApi} from './api/fetch_groups';
 import {membersReducer, getShouldFetchMembers, fetchingMembersAction, gotMembersAction, errorFetchingMembersAction, getGroupToFetch} from './members';
 import {apiServiceReducer, HiveApiService} from './api/api_controller';
 
@@ -33,6 +33,7 @@ const apiModules = {
     [DELETE_MATCH_ROUND_API_NAME]: deleteMatchRoundApi,
     [ME_API]: meApi,
     [COMMIT_MATCH_ROUND_API_NAME]: commitMatchRoundApi,
+    [FETCH_GROUPS_API]: fetchGroupsApi,
 }
 
 // build reducer dict
@@ -44,7 +45,6 @@ console.log(apiModuleReducers);
 const reducers = combineReducers({
     apiServiceReducer,
     loginReducer,
-    getManagedGroupsReducer,
     membersReducer,
     modalReducer,
     matchingReducer,
@@ -63,16 +63,6 @@ function onLoad() {
     }
 
     store.subscribe(() => {
-        // if somebody posted a fetch event, then get the api
-        let shouldFetchGroups = getShouldFetchGroups(store.getState());
-        if (!!shouldFetchGroups) {
-            HiveApiService(store.getState(), store.dispatch).fetchGroups(
-                () => {store.dispatch(fetchingGroupsAction())},
-                (data) => {store.dispatch(gotGroupsAction(data.Result.managedGroups))},
-                (err) => {store.dispatch(errorFetchingGroupsAction(err))}
-            );
-        }
-
         let shouldFetchMatchingRounds = getShouldFetchMatchingRoundsForGroup(store.getState());
         if (!!shouldFetchMatchingRounds) {
             let matchingRoundsGroupToFetch = getMatchingRoundsGroupToFetch(store.getState());

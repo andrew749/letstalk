@@ -169,7 +169,7 @@ export const HiveApiService = ((state, dispatch) => {
          * @param {*} done Done fetching callback
          * @param {*} error Error fetching data
          */
-        fetchGroups: (started, done, error) => {
+        fetchGroups: ({started, done, error}) => {
             started();
             console.log("Fetching groups");
             return apiService().hiveFetch(getManagedGroupsUrl, 'GET', undefined)

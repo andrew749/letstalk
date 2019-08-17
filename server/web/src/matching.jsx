@@ -4,7 +4,7 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
-import {fetchGroupsAction, getGroupsForAdmin} from './get_managed_groups_view';
+import {fetchGroupsApiModule} from './api/fetch_groups';
 import { MODAL_TYPES, showAction} from './modal_container';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
@@ -141,12 +141,12 @@ export class MatchingPage extends React.Component {
 const MatchingPageComponent = apiServiceConnect(
     (state) => ({
         groupToFetch: getMatchingRoundsGroupToFetch(state),
-        groups: getGroupsForAdmin(state),
+        groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [],
         matchingRounds: getMatchingRounds(state) || [],
     }),
     (dispatch) => ({
         fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
-        fetchGroups: () => dispatch(fetchGroupsAction()),
+        fetchGroups: () => dispatch(fetchGroupsApiModule.getApiExecuteAction()),
         // TODO(skong): use this
         createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
         deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),

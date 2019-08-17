@@ -5,7 +5,7 @@ import CookieAwareComponent from './cookie_aware_component.jsx';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
-import { gotGroupsAction, fetchGroupsAction, getGroupsForAdmin } from './get_managed_groups_view';
+import { fetchGroupsApiModule } from './api/fetch_groups';
 import {userGroupDeleteApiModule} from './api/user_group_delete_api_module'
 
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
@@ -172,17 +172,16 @@ export class MembersPage extends React.Component {
 const MembersPageComponent = apiServiceConnect(
     (state) => ({
         groupToFetch: getGroupToFetch(state),
-        groups: getGroupsForAdmin(state) || [], 
+        groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
         members: getMembersFromState(state) || [],
-        errorMessage: state.getManagedGroupsReducer.errorMessage,
+        errorMessage: fetchGroupsApiModule.getErrorMessage(state),
         didCompleteDelete: userGroupDeleteApiModule.isFinished(state),
         // TODO: rename
         membersErrorMessage: state.membersReducer.errorMessage
     }),
     (dispatch) => {
         return {
-            gotGroups: (groups) => dispatch(gotGroupsAction(groups)),
-            fetchGroups: () => dispatch(fetchGroupsAction()),
+            fetchGroups: () => dispatch(fetchGroupsApiModule.getApiExecuteAction()),
             showModal: (modalType) => dispatch(showAction(modalType)),
             gotMembers: (members) => dispatch(gotMembersAction(members)),
             fetchMembers: (groupId) => dispatch(fetchMembersAction(groupId)),
