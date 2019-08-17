@@ -79,9 +79,11 @@ export class MembersPage extends React.Component {
         };
         this.onDropdownChanged = this.onDropdownChanged.bind(this);
         this.onRowSelect = this.onRowSelect.bind(this);
+        this.onSelectAll = this.onSelectAll.bind(this);
         this.selectRowProp = {
             mode: 'checkbox',
             onSelect: this.onRowSelect,
+            onSelectAll: this.onSelectAll,
         }
         this.deleteSelectedUsers = this.deleteSelectedUsers.bind(this);
     }
@@ -107,6 +109,18 @@ export class MembersPage extends React.Component {
            }); 
         }
         return ;
+    }
+
+    onSelectAll(isSelected, rows) {
+        if (isSelected) {
+            this.setState({
+                selected: [...this.state.selected, rows],
+            });
+        } else {
+            this.setState({
+                selected: [],
+            });
+        }
     }
 
     deleteSelectedUsers() {
