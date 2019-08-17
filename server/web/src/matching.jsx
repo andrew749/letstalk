@@ -72,8 +72,10 @@ export class MatchingPage extends React.Component {
     }
 
     componentDidMount() {
-        this.props.fetchGroups();
         // TODO(skong, acod): use this as template
+        if (!!this.props.groupToFetch) {
+            this.onGroupChanged(this.props.groupToFetch);
+        }
         this.props.createNewMatchingRoundForGroup("749625d4-a6b9-11e9-9737-0242ac130002", [1, 3], 1, 1, 2019);
         // this.props.deleteMatchingRound(1);
     }
@@ -130,7 +132,6 @@ const MatchingPageComponent = apiServiceConnect(
     }),
     (dispatch) => ({
         fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
-        fetchGroups: () => dispatch(fetchGroupsApiModule.getApiExecuteAction()),
         // TODO(skong): use this
         createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
         deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),

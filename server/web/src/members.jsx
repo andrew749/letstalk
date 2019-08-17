@@ -14,16 +14,10 @@ import GroupSelector from './group_selector';
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
 const STATS = ['200 members', '20 unregistered', '180 registered', '180 matched'];
 
-const GOT_MEMBERS = 'GOT_MEMBERS';
-const FETCH_MEMBERS = 'FETCH_MEMBERS';
-const FETCHING_MEMBERS = 'FETCHING_MEMBERS';
-const ERROR_FETCHING_MEMBERS= 'ERROR_FETCHING_MEMBERS';
-
 /**
  * Props:
  *  - isAdminPage: determine whether this is the admin page
  */
-
 export class MembersPage extends React.Component {
 
     constructor(props) {
@@ -44,8 +38,9 @@ export class MembersPage extends React.Component {
     }
 
     componentDidMount() {
-        // kickoff initial fetch
-        this.props.fetchGroups();
+        if (!!this.props.groupToFetch) {
+            this.onGroupChanged(this.props.groupToFetch)
+        }
     }
 
     onRowSelect({ id }, isSelected) {
@@ -137,7 +132,6 @@ const MembersPageComponent = apiServiceConnect(
     }),
     (dispatch) => {
         return {
-            fetchGroups: () => dispatch(fetchGroupsApiModule.getApiExecuteAction()),
             showModal: (modalType) => dispatch(showAction(modalType)),
             fetchMembers: (groupId) => dispatch(fetchMembersApiModule.getApiExecuteAction({groupId})),
             deleteMemberFromGroup: (userId, groupId) => dispatch(userGroupDeleteApiModule.getApiExecuteAction({userId, groupId})),
