@@ -178,7 +178,7 @@ const ModalContainerComponent = apiServiceConnect(
   (state) => {
     return {
       selectedGroup: getCurrentGroup(state),
-      groups: fetchGroupsApiModule.getData(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
+      groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
       ...state.modalReducer
     };
   },

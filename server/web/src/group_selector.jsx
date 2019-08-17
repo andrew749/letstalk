@@ -21,7 +21,6 @@ class GroupSelector extends React.Component {
     onDropdownChanged(group) {
         console.log("[onDropdownChanged] Change to group " + group.groupId)
         this.props.updateCurrentGroup(group);
-        this.props.listeners.forEach(listener => listener(group));
     }
 
     render() {

@@ -52,7 +52,7 @@ class GetManagedGroupsView extends React.Component {
 
 const GetManagedGroupsViewComponent = apiServiceConnect(
     (state) => ({
-        groups: fetchGroupsApiModule.getData(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
+        groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [], 
         errorMessage: fetchGroupsApiModule.getErrorMessage(state),
     }),
     (dispatch) => {
