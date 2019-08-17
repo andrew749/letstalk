@@ -5,6 +5,7 @@ import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsApiModule} from './api/fetch_groups';
+import {fetchMatchingRoundsApiModule} from './api/fetch_matching_rounds';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {getCurrentGroup} from './group_context_reducer';
 import GroupSelector from './group_selector';
@@ -15,10 +16,6 @@ const FETCHED_MATCHING_ROUNDS_FOR_GROUP = "FETCHED_MATCHING_ROUNDS_FOR_GROUP";
 const ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP = "ERROR_FETCHING_MATCHING_ROUNDS_FOR_GROUP";
 
 const initialState = {
-    shouldFetchMatchingRounds: false,
-    groupToFetch: undefined,
-    fetchingMatchingRoundsForGroupError: undefined,
-    matchingRounds: undefined,
 }
 
 export function shouldFetchMatchingRoundsForGroupAction(group) {
@@ -123,10 +120,10 @@ const MatchingPageComponent = apiServiceConnect(
     (state) => ({
         groupToFetch: getCurrentGroup(state),
         groups: fetchGroupsApiModule.isFinished(state) ? fetchGroupsApiModule.getData(state).managedGroups: undefined || [],
-        matchingRounds: getMatchingRounds(state) || [],
+        matchingRounds:  fetchMatchingRoundsApiModule.isFinished(state) ? fetchMatchingRoundsApiModule.getData(state): undefined || [],
     }),
     (dispatch) => ({
-        fetchMatchingRoundsForGroup: (group) => dispatch(shouldFetchMatchingRoundsForGroupAction(group)),
+        fetchMatchingRoundsForGroup: (group) => dispatch(fetchMatchingRoundsApiModule.getApiExecuteAction({groupId: group.groupId})),
         // TODO(skong): use this
         createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
         deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),
