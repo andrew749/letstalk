@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, ButtonToolbar, Dropdown, DropdownButton, Button, Table } from "react-bootstrap";
-import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
+import BootstrapTable from 'react-bootstrap-table-next';
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
@@ -30,6 +30,7 @@ export class MembersPage extends React.Component {
         this.onSelectAll = this.onSelectAll.bind(this);
         this.selectRowProp = {
             mode: 'checkbox',
+            clickToSelect: true,
             onSelect: this.onRowSelect,
             onSelectAll: this.onSelectAll,
         }
@@ -85,6 +86,38 @@ export class MembersPage extends React.Component {
             this.setState({shouldRefresh: false});
         }
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
+
+        const membersData = this.props.members ?  this.props.members.map(groupMember => {
+            return ({
+                id: groupMember.user.userId,
+                name: groupMember.user.firstName + " " + groupMember.user.lastName,
+                status: groupMember.status,
+                email: groupMember.email,
+                programName: groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"
+            });
+        }): [];
+        const columns = [
+            {
+                dataField: 'id',
+                text: 'User ID'
+            },
+            {
+                dataField: 'name',
+                text: 'Name'
+            },
+            {
+                dataField: 'email',
+                text: 'Email'
+            },
+            {
+                dataField: 'status',
+                text: 'Status'
+            },
+            {
+                dataField: 'programName',
+                text: 'Program'
+            }
+        ];
         return (
             <Container className="panel-body">
                 <GroupSelector listeners={[this.onGroupChanged]}/> 
@@ -98,20 +131,7 @@ export class MembersPage extends React.Component {
                         {statItems}
                     </div>
                     <div className="members-table-container">
-                        <BootstrapTable data={this.props.members ?  this.props.members.map(groupMember => {
-                                    return ({
-                                        id: groupMember.user.userId,
-                                        name: groupMember.user.firstName + " " + groupMember.user.lastName,
-                                        status: groupMember.status,
-                                        email: groupMember.email,
-                                        programName: groupMember.cohort ? (groupMember.cohort.programName + " " + groupMember.cohort.gradYear) : "No cohort"
-                                    });
-                                }): []} selectRow={this.selectRowProp}>
-                            <TableHeaderColumn dataField='id' isKey>User Id</TableHeaderColumn>
-                            <TableHeaderColumn dataField='name'>User Name</TableHeaderColumn>
-                            <TableHeaderColumn dataField='email'>User Email</TableHeaderColumn>
-                            <TableHeaderColumn dataField='status'>Status</TableHeaderColumn>
-                            <TableHeaderColumn dataField='programName'>Program</TableHeaderColumn>
+                        <BootstrapTable keyField='id' data={membersData} columns={columns} selectRow={this.selectRowProp}>
                         </BootstrapTable>
                     </div>
                 </div>

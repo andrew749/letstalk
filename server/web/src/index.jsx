@@ -28,6 +28,8 @@ import AuthenticatedRoute, {postAuthReducer} from './authenticate_component.jsx'
 import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath, matchingPath, membersPath } from './routes.js';
 import NavbarContainer from './navbar_container.jsx';
 
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+
 const apiModules = {
     [MATCH_ROUND_API]: matchRoundApi,
     [DELETE_USER_GROUP_API]: userGroupDeleteApi,
