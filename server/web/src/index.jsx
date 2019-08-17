@@ -8,6 +8,7 @@ import Cookies from 'universal-cookie';
 
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import LoginPage, {loginReducer} from './login.jsx';
+import GroupSelector, {groupsReducer, fetchingGroupsAction, fetchGroupsAction, gotGroupsAction, errorFetchingGroupsAction} from './group_selector';
 import SignupPage from './signup.jsx';
 import ModalContainer, {modalReducer} from './modal_container.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
@@ -45,6 +46,7 @@ console.log(apiModuleReducers);
 const reducers = combineReducers({
     apiServiceReducer,
     loginReducer,
+    groupsReducer,
     membersReducer,
     modalReducer,
     matchingReducer,
@@ -86,6 +88,15 @@ function onLoad() {
             }
         });
 
+        let shouldFetchGroups = store.getState().groupsReducer.shouldFetchGroups;
+        if (!!shouldFetchGroups) {
+            HiveApiService(store.getState(), store.dispatch).fetchGroups(
+                () => {store.dispatch(fetchingGroupsAction())},
+                (data) => {store.dispatch(gotGroupsAction(data.Result))},
+                (err) => {store.dispatch(errorFetchingGroupsAction(err))}
+            )
+        }
+
         // TODO: Finish this part, write the routes, view results???
         let shouldFetchMembers = getShouldFetchMembers(store.getState());
         let groupToFetch = getGroupToFetch(store.getState());
@@ -98,6 +109,7 @@ function onLoad() {
                 (err) => {store.dispatch(errorFetchingMembersAction(err))}
             );
         }
+
     });
 }
 

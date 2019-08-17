@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button, ButtonToolbar, Dropdown, DropdownButton, Container, Table} from "react-bootstrap";
+import { Button, ButtonToolbar, Dropdown, Container, Table} from "react-bootstrap";
 import CookieAwareComponent from './cookie_aware_component.jsx';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import {matchRoundApiModule, deleteMatchRoundApiModule} from './api/match_round_api_module';
 import {fetchGroupsApiModule} from './api/fetch_groups';
 import { MODAL_TYPES, showAction} from './modal_container';
+import GroupSelector from './group_selector';
 
 const FETCH_MATCHING_ROUNDS_FOR_GROUP = "FETCH_MATCHING_ROUNDS_FOR_GROUP";
 const FETCHING_MATCHING_ROUNDS_FOR_GROUP = "FETCHING_MATCHING_ROUNDS_FOR_GROUP";
@@ -90,18 +91,7 @@ export class MatchingPage extends React.Component {
         console.log(this.props.matchingRounds)
         return (
             <Container className="panel-body">
-                <div className="group-info">
-                    <h2>You are currently managing: </h2>
-                    <ButtonToolbar>
-                        <DropdownButton
-                            title={this.props.groupToFetch ? this.props.groupToFetch.groupName : 'Your Groups'}
-                            variant='Primary'
-                            id='managed-groups-dropdown'
-                        >
-                            {dropdownItems}
-                        </DropdownButton>
-                    </ButtonToolbar>
-                </div>
+                <GroupSelector/>
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.CREATE_MATCHING_ROUND)}>New Matching Round</Button>

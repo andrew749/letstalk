@@ -6,7 +6,8 @@ import { MODAL_TYPES, showAction} from './modal_container';
 import {withCookies} from 'react-cookie';
 import apiServiceConnect from './api/api_service_connect';
 import { fetchGroupsApiModule } from './api/fetch_groups';
-import {userGroupDeleteApiModule} from './api/user_group_delete_api_module'
+import {userGroupDeleteApiModule} from './api/user_group_delete_api_module';
+import GroupSelector from './group_selector';
 
 // const GROUPS = ['Hello Kitty', 'My Little Unicorn', 'Black Mamba'];
 const STATS = ['200 members', '20 unregistered', '180 registered', '180 matched'];
@@ -139,18 +140,7 @@ export class MembersPage extends React.Component {
         const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
         return (
             <Container className="panel-body">
-                <div className="group-info">
-                    <h2>You are currently managing: </h2>
-                    <ButtonToolbar>
-                        <DropdownButton
-                            title={ this.props.groupToFetch ? this.props.groupToFetch.groupName : undefined || 'Your Groups'}
-                            variant='Primary'
-                            id='managed-groups-dropdown'
-                        >
-                            {dropdownItems}
-                        </DropdownButton>
-                    </ButtonToolbar>
-                </div>
+                <GroupSelector/>
                 <div className="panel-content">
                     <ButtonToolbar>
                         <Button variant="primary" size="lg" onClick={() => this.props.showModal(MODAL_TYPES.ADD_MEMBER)}>Add members</Button>
