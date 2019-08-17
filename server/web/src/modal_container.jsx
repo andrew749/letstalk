@@ -251,8 +251,8 @@ export class ModalContainer extends React.Component {
           modalBody = (
             <div>
               {this.state.userIds.length === 0 && <p style={{color: "red"}}>You must select some members!</p>}
-              <div className="main-table-container">
-                <BootstrapTable keyField='id' data={membersData} columns={columns} selectRow={this.selectRowProp}/>
+              <div className="main-table-container modal-table">
+                <BootstrapTable keyField='email' data={membersData} columns={columns} selectRow={this.selectRowProp}/>
               </div>
               <div className="text-right">
                 <Button variant="primary" onClick={this.selectMembers}>
