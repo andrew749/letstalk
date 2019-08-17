@@ -218,7 +218,7 @@ export const HiveApiService = ((state, dispatch) => {
                 .catch(error);
         },
 
-        getMatchingRounds: (groupId, started, done, error) => {
+        getMatchingRounds: ({groupId, started, done, error}) => {
             started();
             return apiService().hiveFetch(getMatchRoundsUrl + "?groupId=" + groupId, 'GET')
                 .then(done)

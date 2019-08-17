@@ -12,7 +12,7 @@ import SignupPage from './signup.jsx';
 import ModalContainer, {modalReducer} from './modal_container.jsx';
 import AdhocAddPage from './adhoc_add.jsx';
 import LandingPage from './landing.jsx';
-import MatchingPage, {matchingReducer, shouldFetchMatchingRoundsForGroupAction, getShouldFetchMatchingRoundsForGroup, fetchingMatchingRoundsForGroupAction, fetchedMatchingRoundsForGroupAction, errorFetchingMatchingRoundsForGroupAction} from './matching';
+import MatchingPage, {matchingReducer} from './matching';
 import MembersPage from './members';
 import DeleteUserToolPage from './user_delete_tool.jsx';
 import ManagedGroupPage from './managed_group.jsx';
@@ -21,8 +21,9 @@ import {API_NAME as DELETE_USER_GROUP_API, userGroupDeleteApi} from './api/user_
 import {API_NAME as ME_API, meApi} from './api/me_api_module';
 import {API_NAME as FETCH_GROUPS_API, fetchGroupsApi} from './api/fetch_groups';
 import {API_NAME as FETCH_MEMBERS_API, fetchMembersApi, fetchMembersApiModule} from './api/fetch_members';
+import {API_NAME as FETCH_MATCHING_ROUNDS, fetchMatchingRoundsApi, fetchMatchingRoundsApiModule} from './api/fetch_matching_rounds';
 import {apiServiceReducer, HiveApiService} from './api/api_controller';
-import {GroupContextManager, groupContextReducer, getCurrentGroup} from './group_context_reducer';
+import {GroupContextManager, groupContextReducer} from './group_context_reducer';
 
 import AuthenticatedRoute, {postAuthReducer} from './authenticate_component.jsx';
 import { loginPath, signupPath, adhocAddToolPath, landingPath, deleteUserToolPath, groupManagementToolPath, matchingPath, membersPath } from './routes.js';
@@ -38,6 +39,7 @@ const apiModules = {
     [COMMIT_MATCH_ROUND_API_NAME]: commitMatchRoundApi,
     [FETCH_GROUPS_API]: fetchGroupsApi,
     [FETCH_MEMBERS_API]: fetchMembersApi,
+    [FETCH_MATCHING_ROUNDS]: fetchMatchingRoundsApi,
 }
 
 // build reducer dict
@@ -59,7 +61,7 @@ const reducers = combineReducers({
 const store = createStore(reducers);
 let groupContextManager = new GroupContextManager();
 groupContextManager.subscribeListenerToNewGroupAction((state, group) => group && store.dispatch(fetchMembersApiModule.getApiExecuteAction({groupId: group.groupId})));
-groupContextManager.subscribeListenerToNewGroupAction((state, group) => group && store.dispatch(shouldFetchMatchingRoundsForGroupAction(group)));
+groupContextManager.subscribeListenerToNewGroupAction((state, group) => group && store.dispatch(fetchMatchingRoundsApiModule.getApiExecuteAction({groupId: group.groupId})));
 
 function onLoad() {
     let sessionId = (new Cookies()).get("sessionId");
@@ -70,17 +72,6 @@ function onLoad() {
     }
 
     store.subscribe(() => {
-        let shouldFetchMatchingRounds = getShouldFetchMatchingRoundsForGroup(store.getState());
-        if (!!shouldFetchMatchingRounds) {
-            let matchingRoundsGroupToFetch = getCurrentGroup(store.getState());
-            console.log("Fetching matching rounds for " + matchingRoundsGroupToFetch);
-            HiveApiService(store.getState(), store.dispatch).getMatchingRounds(
-                matchingRoundsGroupToFetch.groupId,
-                () => {store.dispatch(fetchingMatchingRoundsForGroupAction())},
-                (data) => {store.dispatch(fetchedMatchingRoundsForGroupAction(data.Result))},
-                (err) => {store.dispatch(errorFetchingMatchingRoundsForGroupAction(err))}
-            );
-        }
         let state = store.getState();
    
         Object.keys(apiModules).forEach( (key) => {
