@@ -147,18 +147,41 @@ func GetUserGroupForUserIdGroupId(db *gorm.DB, userId data.TUserID, groupId data
 
 // EnrollUserInManagedGroup Enroll the user into an administrator managed group.
 func EnrollUserInManagedGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) errs.Error {
+	managedGroup, err := findManagedGroupById(db, groupId)
+	if err != nil {
+		return err
+	}
+
+	// The group exists for the mapping
+	_, err = AddUserGroup(db, userId, managedGroup.Group.GroupId)
+	return err
+}
+
+func findManagedGroupById(db *gorm.DB, groupId data.TGroupID) (*data.ManagedGroup, errs.Error) {
 	var managedGroup data.ManagedGroup
 
 	// find the group by uuid
 	if err := db.Where(&data.ManagedGroup{GroupId: groupId}).Preload("Group").First(&managedGroup).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return errs.NewRequestError("Group does not exist")
+			return nil, errs.NewRequestError("Group does not exist")
 		}
 
-		return errs.NewInternalError(err.Error())
+		return nil, errs.NewInternalError(err.Error())
 	}
-	// The group exists for the mapping
-	_, err := AddUserGroup(db, userId, managedGroup.Group.GroupId)
+	return &managedGroup, nil
+}
+
+// EnrollUserInManagedGroup Enroll the user into an administrator managed group using their email
+func EnrollUserInManagedGroupByEmail(db *gorm.DB, email string, groupId data.TGroupID) errs.Error {
+	managedGroup, err := findManagedGroupById(db, groupId)
+	if err != nil {
+		return err
+	}
+	user, err := GetUserByEmail(db, email)
+	if err != nil {
+		return err
+	}
+	_, err = AddUserGroup(db, user.UserId, managedGroup.Group.GroupId)
 	return err
 }
 

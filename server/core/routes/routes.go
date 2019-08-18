@@ -403,6 +403,8 @@ func Register(
 	admin.OPTIONS("/enroll_user_in_group")
 	admin.POST("/enroll_user_in_group", hw.wrapHandler(controller.EnrollUserInManagedGroupController, false))
 
+	admin.OPTIONS("/enroll_user_in_group_by_email")
+	admin.POST("/enroll_user_in_group_by_email", hw.wrapHandler(controller.EnrollUserInManagedGroupByEmailController, false))
 	return router
 }
 

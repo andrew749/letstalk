@@ -113,3 +113,14 @@ func EnrollUserInManagedGroupController(c *ctx.Context) errs.Error {
 
 	return query.EnrollUserInManagedGroup(c.Db, req.UserId, req.GroupUUID)
 }
+
+// EnrollUserInManagedGroupByEmailController Lets an admin enroll a user in another group
+// TODO: do an access control check
+func EnrollUserInManagedGroupByEmailController(c *ctx.Context) errs.Error {
+	var req api.EnrollUserInManagedGroupByEmailRequest
+	if err := c.GinContext.Bind(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	return query.EnrollUserInManagedGroupByEmail(c.Db, req.Email, req.GroupUUID)
+}
