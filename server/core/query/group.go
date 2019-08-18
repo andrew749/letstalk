@@ -163,7 +163,7 @@ func findManagedGroupById(db *gorm.DB, groupId data.TGroupID) (*data.ManagedGrou
 	// find the group by uuid
 	if err := db.Where(&data.ManagedGroup{GroupId: groupId}).Preload("Group").First(&managedGroup).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, errs.NewRequestError("Group does not exist")
+			return nil, errs.NewNotFoundError("Group does not exist")
 		}
 
 		return nil, errs.NewInternalError(err.Error())

@@ -76,7 +76,7 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, errs.Error) {
 	if result.RecordNotFound() {
 		// Fallback to looking for uwaterloo email
 		if !uw_email.Validate(email) {
-			return nil, nil
+			return nil, errs.NewNotFoundError("Unable to find user with that email.")
 		}
 		var (
 			verifyEmailId *data.VerifyEmailId
@@ -86,7 +86,7 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, errs.Error) {
 		if verifyEmailId, dbErr = GetVerifyEmailIdByUwEmail(db, uwEmail); dbErr != nil {
 			return nil, errs.NewDbError(dbErr)
 		} else if verifyEmailId == nil {
-			return nil, nil
+			return nil, errs.NewNotFoundError("Unable to find user with that email.")
 		}
 		if user, err := GetUserById(db, verifyEmailId.UserId); err != nil {
 			return nil, err
