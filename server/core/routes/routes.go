@@ -397,6 +397,9 @@ func Register(
 	admin.OPTIONS("/user_group")
 	admin.DELETE("/user_group", hw.wrapHandler(controller.RemoveUserManagedGroupController, true))
 
+	admin.OPTIONS("/user_exists")
+	admin.GET("/user_exists", hw.wrapHandler(controller.UserExistsController, false))
+
 	return router
 }
 

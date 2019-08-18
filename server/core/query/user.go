@@ -89,13 +89,13 @@ func GetUserByEmail(db *gorm.DB, email string) (*data.User, errs.Error) {
 			return nil, nil
 		}
 		if user, err := GetUserById(db, verifyEmailId.UserId); err != nil {
-			return nil, errs.NewInternalError("Failed to get user: %v", err)
+			return nil, err
 		} else {
 			return user, nil
 		}
 	}
 	if result.Error != nil {
-		return nil, errs.NewDbError(result.Error)
+		return nil, errs.NewInternalError(result.Error.Error())
 	}
 	return &user, nil
 }
