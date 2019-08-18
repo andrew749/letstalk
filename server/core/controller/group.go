@@ -93,6 +93,7 @@ func RemoveUserManagedGroupController(c *ctx.Context) errs.Error {
 	return query.RemoveUserFromGroup(c.Db, req.UserId, req.GroupId)
 }
 
+// EnrollUserManagedGroupController Lets a user enroll themselves in a group
 func EnrollUserManagedGroupController(c *ctx.Context) errs.Error {
 	var req api.EnrollManagedGroupRequest
 	if err := c.GinContext.BindJSON(&req); err != nil {
@@ -100,4 +101,15 @@ func EnrollUserManagedGroupController(c *ctx.Context) errs.Error {
 	}
 
 	return query.EnrollUserInManagedGroup(c.Db, c.SessionData.UserId, data.TGroupID(req.GroupUUID))
+}
+
+// EnrollUserInManagedGroupController Lets an admin enroll a user in another group
+// TODO: do an access control check
+func EnrollUserInManagedGroupController(c *ctx.Context) errs.Error {
+	var req api.EnrollUserInManagedGroupRequest
+	if err := c.GinContext.Bind(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+
+	return query.EnrollUserInManagedGroup(c.Db, req.UserId, req.GroupUUID)
 }

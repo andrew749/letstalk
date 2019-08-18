@@ -400,6 +400,9 @@ func Register(
 	admin.OPTIONS("/user_exists")
 	admin.GET("/user_exists", hw.wrapHandler(controller.UserExistsController, false))
 
+	admin.OPTIONS("/enroll_user_in_group")
+	admin.POST("/enroll_user_in_group", hw.wrapHandler(controller.EnrollUserInManagedGroupController, false))
+
 	return router
 }
 

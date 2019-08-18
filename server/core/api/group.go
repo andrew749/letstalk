@@ -39,6 +39,10 @@ type AdminManagedGroup struct {
 type EnrollManagedGroupRequest struct {
 	GroupUUID string `json:"groupUUID"`
 }
+type EnrollUserInManagedGroupRequest struct {
+	GroupUUID data.TGroupID `json:"groupUUID"`
+	UserId    data.TUserID  `json:"userId"`
+}
 
 type GroupMemberStatus string
 
