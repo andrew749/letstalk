@@ -20,3 +20,18 @@ func NukeUser(c *ctx.Context) errs.Error {
 	}
 	return nil
 }
+
+// UserExistsController Lets an admin query by user id to see if that user exists somewhere in Hive
+func UserExistsController(c *ctx.Context) errs.Error {
+	userEmail := c.GinContext.Query("email")
+	c.Result = false
+	if userEmail == "" {
+		return errs.NewRequestError("You must provide an email")
+	}
+
+	user, err := query.GetUserByEmail(c.Db, userEmail)
+	if err == nil && user != nil {
+		c.Result = true
+	}
+	return nil
+}
