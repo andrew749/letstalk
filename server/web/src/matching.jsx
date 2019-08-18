@@ -68,11 +68,9 @@ export class MatchingPage extends React.Component {
     }
 
     componentDidMount() {
-        // TODO(skong, acod): use this as template
         if (!!this.props.groupToFetch) {
             this.props.fetchMatchingRoundsForGroup(this.props.groupToFetch);
         }
-        // this.props.deleteMatchingRound(1);
     }
 
     render() {
@@ -123,8 +121,6 @@ const MatchingPageComponent = apiServiceConnect(
     }),
     (dispatch) => ({
         fetchMatchingRoundsForGroup: (group) => dispatch(fetchMatchingRoundsApiModule.getApiExecuteAction({groupId: group.groupId})),
-        // TODO(skong): use this
-        createNewMatchingRoundForGroup: (groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear) => dispatch(matchRoundApiModule.getApiExecuteAction({groupId, userIds, maxLowerYearsPerUpperYear, maxUpperYearsPerLowerYear, youngestUpperGradYear})),
         deleteMatchingRound: (matchRoundId) => dispatch(deleteMatchRoundApiModule.getApiExecuteAction({matchRoundId})),
         showModal: (modalType) => dispatch(showAction(modalType))
     })
