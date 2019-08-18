@@ -16,7 +16,7 @@ func (u TGroupID) Value() (driver.Value, error)  { return string(u), nil }
 type UserGroup struct {
 	Id        TUserGroupID `gorm:"primary_key;not null;auto_increment:true"`
 	UserId    TUserID      `gorm:"not null;unique_index:group_unique;"`
-	GroupId   TGroupID     `gorm:"not null;unique_index:group_unique;"`
+	GroupId   TGroupID     `gorm:"not null;unique_index:group_unique;size:190"`
 	GroupName string       `gorm:"not null"`
 	Times
 
