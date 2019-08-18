@@ -13,6 +13,6 @@ type ManagedGroup struct {
 
 type Group struct {
 	Times
-	GroupId   TGroupID `gorm:"primary_key;"`
+	GroupId   TGroupID `gorm:"primary_key;size:190"`
 	GroupName string   `gorm:"not null;size:100"`
 }
