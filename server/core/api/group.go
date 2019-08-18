@@ -26,6 +26,11 @@ type CreateGroupRequest struct {
 	GroupName string `json:"groupName"`
 }
 
+type AddAdminToManagedGroupRequest struct {
+	GroupUUID data.TGroupID `json:"groupUUID"`
+	AdminId   data.TUserID  `json:"adminId"`
+}
+
 type GetAdminMangedGroupsResponse struct {
 	ManagedGroups []AdminManagedGroup `json:"managedGroups"`
 }

@@ -62,6 +62,24 @@ func CreateManagedGroupController(c *ctx.Context) errs.Error {
 	return nil
 }
 
+func AddAdminToManagedGroupController(c *ctx.Context) errs.Error {
+	var req api.AddAdminToManagedGroupRequest
+	if err := c.GinContext.BindJSON(&req); err != nil {
+		return errs.NewRequestError(err.Error())
+	}
+	managesGroup, err := query.CheckAdminManagesGroup(c.Db, c.SessionData.UserId, req.GroupUUID)
+
+	if err != nil {
+		return err
+	}
+
+	if !managesGroup {
+		return errs.NewForbiddenError("You are not allowed to make modifications to this group")
+	}
+
+	return query.AddAdminToManagedGroup(c.Db, req.AdminId, req.GroupUUID)
+}
+
 // GetAdminManagedGroupsController Get all groups that this admin manages
 func GetAdminManagedGroupsController(c *ctx.Context) errs.Error {
 	groups, err := query.GetManagedGroups(c.Db, c.SessionData.UserId)
@@ -111,6 +129,16 @@ func EnrollUserInManagedGroupController(c *ctx.Context) errs.Error {
 		return errs.NewRequestError(err.Error())
 	}
 
+	managesGroup, err := query.CheckAdminManagesGroup(c.Db, c.SessionData.UserId, req.GroupUUID)
+
+	if err != nil {
+		return err
+	}
+
+	if !managesGroup {
+		return errs.NewForbiddenError("You are not allowed to make modifications to this group")
+	}
+
 	return query.EnrollUserInManagedGroup(c.Db, req.UserId, req.GroupUUID)
 }
 
@@ -120,6 +148,16 @@ func EnrollUserInManagedGroupByEmailController(c *ctx.Context) errs.Error {
 	var req api.EnrollUserInManagedGroupByEmailRequest
 	if err := c.GinContext.Bind(&req); err != nil {
 		return errs.NewRequestError(err.Error())
+	}
+
+	managesGroup, err := query.CheckAdminManagesGroup(c.Db, c.SessionData.UserId, req.GroupUUID)
+
+	if err != nil {
+		return err
+	}
+
+	if !managesGroup {
+		return errs.NewForbiddenError("You are not allowed to make modifications to this group")
 	}
 
 	return query.EnrollUserInManagedGroupByEmail(c.Db, req.Email, req.GroupUUID)

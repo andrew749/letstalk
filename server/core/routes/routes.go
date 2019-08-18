@@ -401,10 +401,13 @@ func Register(
 	admin.GET("/user_exists", hw.wrapHandler(controller.UserExistsController, false))
 
 	admin.OPTIONS("/enroll_user_in_group")
-	admin.POST("/enroll_user_in_group", hw.wrapHandler(controller.EnrollUserInManagedGroupController, false))
+	admin.POST("/enroll_user_in_group", hw.wrapHandler(controller.EnrollUserInManagedGroupController, true))
 
 	admin.OPTIONS("/enroll_user_in_group_by_email")
-	admin.POST("/enroll_user_in_group_by_email", hw.wrapHandler(controller.EnrollUserInManagedGroupByEmailController, false))
+	admin.POST("/enroll_user_in_group_by_email", hw.wrapHandler(controller.EnrollUserInManagedGroupByEmailController, true))
+
+	admin.OPTIONS("add_admin_to_group")
+	admin.POST("add_admin_to_group", hw.wrapHandler(controller.AddAdminToManagedGroupController, true))
 	return router
 }
 

@@ -209,6 +209,18 @@ func CreateManagedGroup(
 	return &managedGroup, nil
 }
 
+// AddAdminToManagedGroup Adds another administrator to the specified group.
+func AddAdminToManagedGroup(db *gorm.DB, adminId data.TUserID, groupUUID data.TGroupID) errs.Error {
+	var group data.ManagedGroup
+	if err := db.FirstOrCreate(&group, &data.ManagedGroup{
+		AdministratorId: adminId,
+		GroupId:         groupUUID,
+	}).Error; err != nil {
+		return errs.NewInternalError(err.Error())
+	}
+	return nil
+}
+
 func CheckAdminManagesGroup(db *gorm.DB, userId data.TUserID, groupId data.TGroupID) (bool, errs.Error) {
 	var res data.ManagedGroup
 	if err := db.Where(&data.ManagedGroup{
