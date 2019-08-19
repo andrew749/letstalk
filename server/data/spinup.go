@@ -611,6 +611,47 @@ func migrateDB(db *gorm.DB) {
 				return nil
 			},
 		},
+		{
+			ID: "Add 2024 cohorts based on existing cohorts",
+			Migrate: func(tx *gorm.DB) error {
+				// Builds a unique index on (user,group)
+				var gradYear uint = 2024
+				rows, err := tx.Model(&Cohort{}).Select(
+					"DISTINCT program_id, program_name, is_coop, sequence_id, sequence_name",
+				).Rows()
+				if err != nil {
+					return err
+				}
+				for rows.Next() {
+					var (
+						programId    string
+						programName  string
+						isCoop       bool
+						sequenceId   *string
+						sequenceName *string
+					)
+
+					rows.Scan(&programId, &programName, &isCoop, &sequenceId, &sequenceName)
+
+					newCohort := Cohort{
+						ProgramId:    programId,
+						ProgramName:  programName,
+						GradYear:     gradYear,
+						IsCoop:       isCoop,
+						SequenceId:   sequenceId,
+						SequenceName: sequenceName,
+					}
+					err := db.Create(&newCohort).Error
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return nil
+			},
+		},
 	})
 
 	if err := m.Migrate(); err != nil {
