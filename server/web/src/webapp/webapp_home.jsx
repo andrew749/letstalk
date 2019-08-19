@@ -29,6 +29,7 @@ import {apiServiceReducer, HiveApiService} from '../api/api_controller';
 import {API_NAME as ME_API, meApi} from '../api/me_api_module';
 import {API_NAME as BOOTSTRAP_API, bootstrapApi} from '../api/bootstrap_api_module';
 import {API_NAME as GET_COHORTS_API, getCohortsApi} from '../api/get_cohorts_module';
+import {API_NAME as SET_COHORT_API, setCohortApi} from '../api/set_cohort_api_module';
 import {
     API_NAME as SEND_VERIFICATION_EMAIL,
     sendVerificationEmailApi,
@@ -40,6 +41,7 @@ const apiModules = {
     [BOOTSTRAP_API]: bootstrapApi,
     [SEND_VERIFICATION_EMAIL]: sendVerificationEmailApi,
     [GET_COHORTS_API]: getCohortsApi,
+    [SET_COHORT_API]: setCohortApi,
 }
 
 // build reducer dict

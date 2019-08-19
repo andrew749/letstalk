@@ -14,6 +14,7 @@ export const signupUrl = `${apiUrl}/signup`;
 export const bootstrapUrl = `${apiUrl}/bootstrap`;
 export const sendVerificationEmailUrl = `${apiUrl}/send_email_verification`;
 export const cohortsUrl = `${apiUrl}/cohorts`;
+export const cohortUrl = `${apiUrl}/cohort`;
 
 // admin endpoints
 export const mentorshipUrl = `${adminUrl}/mentorship`;

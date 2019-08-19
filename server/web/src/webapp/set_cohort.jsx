@@ -1,11 +1,14 @@
 import React from 'react';
 import '../scss/group_register_page.scss';
 import {Alert, Container, Form, Button} from 'react-bootstrap';
+import {Redirect} from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import apiServiceConnect from '../api/api_service_connect';
 import {getFetchInfo} from '../api/api_module';
 import {getCohortsApiModule} from '../api/get_cohorts_module';
+import {setCohortApiModule} from '../api/set_cohort_api_module';
+import {landingPathWeb} from '../routes';
 
 const MENTORSHIP_PREFERENCE_MENTOR = 1;
 const MENTORSHIP_PREFERENCE_MENTEE = 2;
@@ -23,6 +26,7 @@ class SetCohortPage extends React.Component {
             mentorshipPreference: -1,
             bio: "",
             hometown: "",
+            validationError: null,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -56,7 +60,32 @@ class SetCohortPage extends React.Component {
 
     onSubmit(event) {
         event.preventDefault();
-        console.log(this.state)
+        this.setState({validationError: null});
+        const {
+            programId,
+            sequenceId,
+            gradYear,
+            mentorshipPreference,
+            bio,
+            hometown,
+        } = this.state;
+        const cohort = this.props.cohorts.find(cohort => {
+            return cohort.programId === programId &&
+                cohort.sequenceId === sequenceId &&
+                cohort.gradYear === gradYear
+        });
+
+        if (!cohort) {
+            this.setState({validationError: `No cohort ${programId} ${sequenceId} ${gradYear}`});
+            return;
+        }
+
+        this.props.setCohort({
+            cohortId: cohort.cohortId,
+            mentorshipPreference,
+            bio,
+            hometown,
+        });
     }
 
     renderProgramOptions() {
@@ -96,7 +125,30 @@ class SetCohortPage extends React.Component {
         });
     }
 
+    renderBottomMessage() {
+        const { fetchState, errorMessage } = this.props.setCohortFetchInfo;
+        const { validationError } = this.state;
+        if (fetchState === "error") {
+            return (
+                <Alert variant="danger">
+                    Failed to set cohorts with error: {errorMessage}
+                </Alert>
+            );
+        } else if (!!validationError) {
+            return (
+                <Alert variant="danger">
+                    Validation error: {validationError}
+                </Alert>
+            );
+        }
+        return;
+    }
+
     render() {
+        if (this.props.setCohortFetchInfo.state === 'success') {
+            return <Redirect to={landingPathWeb} />
+        }
+
         const { fetchState, errorMessage } = this.props.getCohortsFetchInfo;
         let body = null;
         if (fetchState === "error") {
@@ -180,7 +232,9 @@ class SetCohortPage extends React.Component {
 
         return (
             <Container className="panel-body">
+                <h3>Program and Profile Info</h3>
                 {body}
+                {this.renderBottomMessage()}
             </Container>
         );
     }
@@ -191,12 +245,16 @@ const SetCohortPageComponent = apiServiceConnect(
         return {
             cohorts: getCohortsApiModule.getData(state),
             getCohortsFetchInfo: getFetchInfo(getCohortsApiModule, state),
+            setCohortFetchInfo: getFetchInfo(setCohortApiModule, state),
         }
     },
     (dispatch) => {
         return {
             getCohorts: () => {
-                return dispatch(getCohortsApiModule.getApiExecuteAction({}))
+                return dispatch(getCohortsApiModule.getApiExecuteAction({}));
+            },
+            setCohort: (data) => {
+                return dispatch(setCohortApiModule.getApiExecuteAction(data));
             },
         }
     }

@@ -1,4 +1,4 @@
-import { bootstrapUrl, loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl, userGroupUrl, matchRoundUrl, sendVerificationEmailUrl, cohortsUrl } from '../config.js'
+import { bootstrapUrl, loginUrl, logoutUrl, meUrl, signupUrl, mentorshipUrl, deleteUrl, getGroupMembersUrlBase, getManagedGroupsUrl, createNewManagedGroupUrl, registerWithManagedGroupUrl, getMatchRoundsUrl, createMatchRoundsUrl, userGroupUrl, matchRoundUrl, sendVerificationEmailUrl, cohortsUrl, cohortUrl } from '../config.js'
 import {meApiModule} from './me_api_module';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
@@ -273,6 +273,14 @@ export const HiveApiService = ((state, dispatch) => {
         getCohorts: ({started, done, error}) => {
             started();
             return apiService().hiveFetch(cohortsUrl, 'GET', {})
+                .then(done)
+                .catch(error);
+        },
+        setCohort: ({cohortId, mentorshipPreference, bio, hometown, started, done, error}) => {
+            started();
+            return apiService().hiveFetch(cohortUrl, 'POST', {
+                cohortId, mentorshipPreference, bio, hometown,
+            })
                 .then(done)
                 .catch(error);
         },
