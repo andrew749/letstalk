@@ -80,7 +80,7 @@ export class MembersPage extends React.Component {
             this.props.fetchMembers(this.props.groupToFetch.groupId);
             this.setState({shouldRefresh: false});
         }
-        const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
+        // const statItems = STATS.map((stat, i) => <div key={i} className="members-stat"> {stat} </div>)
 
         const membersData = this.props.members ?  this.props.members.map(groupMember => {
             return ({
@@ -122,9 +122,9 @@ export class MembersPage extends React.Component {
                         <Button variant="primary" size="lg" onClick={this.deleteSelectedUsers}>Delete members</Button>
                     </ButtonToolbar>
                     <h2 className="mt-3">Members</h2>
-                    <div className="members-stats-container">
+                    {/* <div className="members-stats-container">
                         {statItems}
-                    </div>
+                    </div> */}
                     <div className="main-table-container">
                         <BootstrapTable keyField='id' data={membersData} columns={columns} selectRow={this.selectRowProp}>
                         </BootstrapTable>
