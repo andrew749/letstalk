@@ -106,8 +106,8 @@ class NavbarContainer extends React.Component {
                         <Nav defaultActiveKey="/" className="flex-column">
                             {CustomNavItem(membersPath, "Members")}
                             {CustomNavItem(matchingPath, "Matching")}
-                            {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")}
-                            {CustomNavItem(deleteUserToolPath, "Delete User")}
+                            {/* {CustomNavItem(adhocAddToolPath, "Adhoc Matching Tool")} */}
+                            {/* {CustomNavItem(deleteUserToolPath, "Delete User")} */}
                             {CustomNavItem(groupManagementToolPath, "Manage Groups")}
                         </Nav>
                     </Navbar.Collapse>
