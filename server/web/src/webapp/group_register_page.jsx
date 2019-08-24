@@ -1,9 +1,11 @@
 import React from 'react';
-import '../scss/group_register_page.scss';
+import { Container } from "react-bootstrap";
 import {Alert, Spinner} from 'react-bootstrap';
 
 import apiServiceConnect from '../api/api_service_connect';
 
+import { landingPathWeb } from '../routes';
+import TimedRedirect from '../redirect-flash';
 
 const REGISTER_ACTION = "REGISTERING";
 const REGISTER_SUCCESSFULLY = "REGISTER_SUCCESS";
@@ -66,20 +68,26 @@ class GroupRegisterPage extends React.Component {
             );
         } else if (!!this.props.registeredSuccessfully) {
             body = (
-                <Alert variant="success">Successfully registered with group</Alert>
+                <div>
+                    <Alert variant="success">Successfully registered with group</Alert>
+                    <TimedRedirect to={landingPathWeb} duration={3} message={"Redirecting you soon..."}></TimedRedirect>
+                </div>
             );
         } else if (!!this.props.registerError) {
             body = (
-                <Alert variant="danger">Failed to register with group {JSON.stringify(this.props.registerError.message)}</Alert>
+                <div>
+                    <Alert variant="danger">Failed to register with group {JSON.stringify(this.props.registerError.message)}</Alert>
+                    <p> Please try the link again or email <a href={`mailto:uw.hive@gmail.com`}>uw.hive@gmail.com</a></p>
+                </div>
             );
         }
 
         return (
-            <div>
+            <Container className="panel-body">
                 <h3>Registering with group {this.uuid()}</h3>
                 <Spinner animation="border"/>
                 {body}
-            </div>
+            </Container>
         );
     }
 }

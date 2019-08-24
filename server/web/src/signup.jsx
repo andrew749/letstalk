@@ -115,7 +115,7 @@ export class SignupPage extends React.Component {
         }
         return (
             <Container className="panel-body">
-                <Form onSubmit={this.onSubmit}>
+                <Form className="signup-form" onSubmit={this.onSubmit}>
                     <Form.Group controlId="firstName">
                         <Form.Label>First Name</Form.Label>
                         <Form.Control
@@ -135,7 +135,7 @@ export class SignupPage extends React.Component {
                         />
                     </Form.Group>
                     <Form.Group controlId="email">
-                        <Form.Label>Email</Form.Label>
+                        <Form.Label>Email (use your UW email)</Form.Label>
                         <Form.Control
                             autoFocus
                             type="email"

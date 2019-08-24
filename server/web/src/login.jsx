@@ -7,6 +7,7 @@ import {getLandingPath, signupPathWeb, signupPath} from './routes.js';
 import PostAuthRedirect from './post-auth-redirect.jsx';
 
 import apiServiceConnect from './api/api_service_connect';
+import HiveLogoWithTitle from './img/logo_with_title.png';
 
 const LOGIN_ACTION = 'LOGIN';
 const LOGOUT_ACTION = 'LOGOUT';
@@ -102,16 +103,16 @@ export class LoginPage extends React.Component {
         if (!this.props.isAdminApp) {
             signupLink=(
                 <div>
-                    <h4>Don't have an account?</h4>
                     <Link to={(this.props.isAdminApp) ? signupPath : signupPathWeb}>
-                        <Button>Signup</Button>
+                        Don't have an account? Click to signup!
                     </Link>
                 </div>
             );
         }
         return (
             <Container className="panel-body">
-                <Form onSubmit={this.onSubmit}>
+                <img id="hive-logo" src={HiveLogoWithTitle}/>
+                <Form className="login-form" onSubmit={this.onSubmit}>
                     <Form.Group controlId="email">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
