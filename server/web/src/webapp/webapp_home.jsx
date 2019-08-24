@@ -19,6 +19,8 @@ import {apiServiceReducer, HiveApiService} from '../api/api_controller';
 import {API_NAME as ME_API, meApi} from '../api/me_api_module';
 import {postAuthReducer} from '../authenticate_component';
 
+import '../scss/client_webapp.scss';
+
 const apiModules = {
     [ME_API]: meApi,
 }
@@ -74,7 +76,6 @@ class App extends React.Component {
         return (
             <Provider store={store}>
                 <BrowserRouter>
-                    <HiveHeader />
                     <Switch>
                         <Route path={loginPathWeb} component={LoginPage} isAdminApp={false} />
                         <Route path={signupPathWeb} component={SignupPage} isAdminApp={false} />
