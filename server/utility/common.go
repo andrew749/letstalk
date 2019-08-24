@@ -56,7 +56,7 @@ func IsProductionEnvironment() bool {
 
 func GetWebsiteUrl() string {
 	if IsProductionEnvironment() {
-		return "https://hiveapp.org"
+		return "https://api.hiveapp.org"
 	}
 	return "http://localhost"
 }
