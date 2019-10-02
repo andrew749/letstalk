@@ -121,7 +121,7 @@ func AddMatchRoundMentorship(
 ) error {
 	var conn data.Connection
 	err := tx.Where(
-		"user_one_id = ? AND user_two_id = ? OR user_one_id = ? AND user_two_id",
+		"user_one_id = ? AND user_two_id = ? OR user_one_id = ? AND user_two_id = ?",
 		mentorUserId,
 		menteeUserId,
 		menteeUserId,
