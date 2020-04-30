@@ -18,7 +18,7 @@
         "bootstrap": "4.1.1",
         "font-awesome": "4.7.0",
         "ionicons": "^4.4.3",
-        "jquery": "3.3.1",
+        "jquery": "3.5.0",
         "jquery-migrate": "^3.0.1",
         "jquery.easing": "^1.4.1",
         "magnific-popup": "^1.1.0",
