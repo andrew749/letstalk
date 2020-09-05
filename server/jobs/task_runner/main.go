@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"letstalk/server/constants"
 	"letstalk/server/jobmine"
 	"letstalk/server/jobmine_jobs"
@@ -11,12 +12,33 @@ import (
 	"github.com/romana/rlog"
 )
 
+// NOTE: flags are conjunctive as in the conditions are ANDed together
+var (
+	jobTypeFilter = flag.String("jobTypeFilter", "", "Job Types to run")
+	runIdFilter   = flag.String("runIdFilter", "", "Run Id to run")
+)
+
 func main() {
 	utility.Bootstrap()
 	db, err := utility.GetDB()
 	if err != nil {
 		rlog.Errorf("Unable to get database: %+v", err)
 		panic(err)
+	}
+
+	var jobTypes []jobmine.JobType
+	var runIds []string
+
+	if jobTypeFilter != nil && *jobTypeFilter != "" {
+		rawTypes := utility.ParseListCommandLineFlags(*jobTypeFilter)
+		jobTypes = make([]jobmine.JobType, 0)
+		for _, t := range rawTypes {
+			jobTypes = append(jobTypes, jobmine.JobType(t))
+		}
+	}
+
+	if runIdFilter != nil && *runIdFilter != "" {
+		runIds = utility.ParseListCommandLineFlags(*runIdFilter)
 	}
 
 	rlog.Debugf("Queue processing")
@@ -33,7 +55,7 @@ func main() {
 
 		// create new task runner
 		rlog.Debug("Running tasks")
-		err = jobmine.TaskRunner(jobmine_jobs.Jobs, db)
+		err = jobmine.TaskRunner(jobmine_jobs.Jobs, db, jobTypes, runIds)
 		if err != nil {
 			rlog.Errorf("Task runner ran into exception: %+v", err)
 			panic(err)

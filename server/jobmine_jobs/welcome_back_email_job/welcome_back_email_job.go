@@ -200,12 +200,8 @@ func CreateEmailJob(
 		metadata[TEST_USER_ID_METADATA_KEY] = strconv.Itoa(int(*testUserId))
 	}
 
-	if err := db.Create(&jobmine.JobRecord{
-		JobType:  WELCOME_BACK_EMAIL_JOB,
-		RunId:    runId,
-		Metadata: metadata,
-		Status:   jobmine.STATUS_CREATED,
-	}).Error; err != nil {
+	_, err := jobmine.CreateJobRecord(db, runId, WELCOME_BACK_EMAIL_JOB, metadata, nil)
+	if err != nil {
 		return err
 	}
 	return nil

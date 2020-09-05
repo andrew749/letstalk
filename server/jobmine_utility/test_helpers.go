@@ -24,11 +24,11 @@ func RunAndTestRunners(t *testing.T, db *gorm.DB, runId string, specStore jobmin
 	assert.NoError(t, err)
 
 	// schedule tasks
-	err = jobmine.JobRunner(specStore, db)
+	err = jobmine.JobRunner(specStore, db, nil, nil)
 	assert.NoError(t, err)
 
 	// run tasks
-	err = jobmine.TaskRunner(specStore, db)
+	err = jobmine.TaskRunner(specStore, db, nil, nil)
 	assert.NoError(t, err)
 
 	// update the state of all tasks

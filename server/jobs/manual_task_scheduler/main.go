@@ -51,27 +51,16 @@ func main() {
 	}
 	tx := db.Begin()
 
-	var jobRecord = jobmine.JobRecord{
-		JobType:  jobType,
-		RunId:    *runId,
-		Metadata: parsedJobMetadata,
-		Status:   jobmine.STATUS_SUCCESS,
-	}
+	jobRecord, err := jobmine.CreateJobRecord(tx, *runId, jobType, parsedJobMetadata, nil)
 	// actually create the job.
-	if err := tx.Create(&jobRecord).Error; err != nil {
+	if err != nil {
 		tx.Rollback()
 		rlog.Errorf("Failed to create job")
 		panic(err)
 	}
 	rlog.Infof("Successfully created job.")
 
-	var taskRecord = &jobmine.TaskRecord{
-		JobId:    jobRecord.ID,
-		RunId:    *runId,
-		JobType:  jobType,
-		Metadata: parsedTaskMetadata,
-		Status:   jobmine.STATUS_CREATED,
-	}
+	taskRecord, err := jobmine.CreateTaskRecord(tx, jobRecord.ID, *runId, jobType, parsedTaskMetadata)
 	if err := db.Create(&taskRecord).Error; err != nil {
 		tx.Rollback()
 		rlog.Errorf("Failed to create task")

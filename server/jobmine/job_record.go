@@ -40,3 +40,24 @@ func (jr *JobRecord) SetJobStatus(db *gorm.DB, status Status) error {
 	jr.Status = status
 	return db.Save(jr).Error
 }
+
+func CreateJobRecord(db *gorm.DB, runId string, jobType JobType, metadata Metadata, startTime *time.Time) (*JobRecord, error) {
+
+	// by default start now
+	if startTime == nil {
+		var now = time.Now()
+		startTime = &now
+	}
+
+	jobRecord := JobRecord{
+		RunId:     runId,
+		JobType:   jobType,
+		Metadata:  metadata,
+		Status:    STATUS_CREATED,
+		StartTime: *startTime,
+	}
+	if err := db.Save(&jobRecord).Error; err != nil {
+		return nil, err
+	}
+	return &jobRecord, nil
+}

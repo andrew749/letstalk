@@ -3,6 +3,7 @@ package utility
 import (
 	"fmt"
 	"letstalk/server/core/secrets"
+	"strings"
 
 	"github.com/namsral/flag"
 )
@@ -68,4 +69,11 @@ func GetWebappUrl() string {
 func GetDeeplinkPrefix() string {
 	checkBootstrapped()
 	return secrets.GetSecrets().DeeplinkPrefix
+}
+
+const listDelimeter = ","
+
+// ParseListCommandLineFlags Breaks up a list in command line flags
+func ParseListCommandLineFlags(argument string) []string {
+	return strings.Split(argument, listDelimeter)
 }

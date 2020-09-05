@@ -331,12 +331,8 @@ func usersWithoutGroup(db *gorm.DB) ([]data.TUserID, error) {
 
 // CreateReminderJob Creates a reminder job record to get run at some point.
 func CreateReminderJob(db *gorm.DB, runId string) error {
-	if err := db.Create(&jobmine.JobRecord{
-		JobType:  REMIND_ONBOARD_JOB,
-		RunId:    runId,
-		Metadata: map[string]interface{}{},
-		Status:   jobmine.STATUS_CREATED,
-	}).Error; err != nil {
+	_, err := jobmine.CreateJobRecord(db, runId, REMIND_ONBOARD_JOB, map[string]interface{}{}, nil)
+	if err != nil {
 		return err
 	}
 	return nil
