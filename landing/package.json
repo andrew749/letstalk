@@ -15,7 +15,7 @@
     "author": "Let's Talk",
     "dependencies": {
         "animate.css": "^3.7.0",
-        "bootstrap": "4.1.1",
+        "bootstrap": "4.3.1",
         "font-awesome": "4.7.0",
         "ionicons": "^4.4.3",
         "jquery": "3.3.1",
